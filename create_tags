@@ -1,0 +1,7 @@
+#!/bin/bash
+
+sudo apt-get install ctags cscope -qy
+
+files=$(find -name '*.[chx]*')
+ctags $files
+cscope $files

@@ -1,0 +1,7 @@
+TRF_GEN_IP_ADDR        172.0.0.0   
+AUTH_TYPE              XOR
+NAS_CYPH_CFG           eea0
+NAS_INT_PROT_CFG       eia1
+NAS_PROC_GUARD_TIMER   10
+NUM_OF_UE              1
+CFGEND

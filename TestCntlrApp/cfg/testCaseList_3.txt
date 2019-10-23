@@ -1,0 +1,10 @@
+ServiceRequest    1
+ServiceReject     1
+EndToEndAttach    1 
+StepAttachWithImsi 1
+StepAttachWithImsi 1
+StepAttachWithGuti 1
+StepAttachWithImsi 1
+StepAttachWithImsi 1
+StepAttachWithImsi 1
+StepAttachWithGuti 2

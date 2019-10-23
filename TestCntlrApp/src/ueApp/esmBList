@@ -1,0 +1,364 @@
+ue_app.c:      if (ueCb->drbs[idx] == UE_APP_DRB_AVAILABLE)
+ue_app.c:         ueCb->drbs[idx] = UE_APP_DRB_INUSE;
+ue_app.c:   if (UE_APP_SEC_CTXT_CRNT == ueCb->secCtxt.status)
+ue_app.c:                  (U8 *)&ueCb->ueCtxt.ueImsi, identRsp->msId.len);
+ue_app.c:                  (U8 *)&ueCb->ueCtxt.ueImei, identRsp->msId.len);
+ue_app.c:                ueCb->ueId, idType);
+ue_app.c:      ret = ueAppCmpUplnkSec(&ueCb->secCtxt, identRspEvnt->secHT, &srcMsg,
+ue_app.c:   pUlNbMsg->ueId = ueCb->ueId;
+ue_app.c:   ret = ueUsimGenAuthRsp(&ueCb->ueInfo, 
+ue_app.c:         &ueCb->ueAuthKeys,
+ue_app.c:         ueCb->srvPlmn,
+ue_app.c:         ueCb->res.val,
+ue_app.c:         ueCb->secCtxt.kasme,
+ue_app.c:         &ueCb->authFlr.cause.cause,
+ue_app.c:         ueCb->authFlr.failrPrm.authFailPrm,
+ue_app.c:            ueCb->authFlr.cause.cause);
+ue_app.c:            ueCb->authFlr.cause.cause);
+ue_app.c:      ueCb->authFlr.cause.pres = TRUE;
+ue_app.c:      if(UE_APP_USIM_SYNC_FAILURE == ueCb->authFlr.cause.cause)
+ue_app.c:         ueCb->authFlr.failrPrm.pres = TRUE;
+ue_app.c:         ueCb->authFlr.failrPrm.len = UE_AUTS_SIZE;
+ue_app.c:   cmMemcpy(authParmRes.val, ueCb->res.val, 16);
+ue_app.c:      ret = ueAppCmpUplnkSec(&ueCb->secCtxt, authRspEvnt->secHT, &srcMsg,
+ue_app.c:   pUlNbMsg->ueId = ueCb->ueId;
+ue_app.c:      ueCb->authFlr.cause.cause = UE_APP_USIM_NON_EPS_AUTH_FAIL;
+ue_app.c:	   ueCb->authFlr.cause.cause);
+ue_app.c:      ueCb->authFlr.cause.pres = TRUE;
+ue_app.c:      ueCb->authFlr.failrPrm.pres = TRUE;
+ue_app.c:      ueCb->authFlr.failrPrm.len = UE_AUTS_SIZE;
+ue_app.c:      cmMemcpy(sqnRcvd.sqn, ueCb->ueAuthKeys.sqnRcvd, 6);
+ue_app.c:   UE_LOG_DEBUG(ueAppCb, "Building a Attach Request for ueId(%d)", ueCb->ueId);
+ue_app.c:   if (UE_APP_SEC_CTXT_CRNT == ueCb->secCtxt.status)
+ue_app.c:               (U8 *)&ueCb->ueCtxt.ueImsi, attachReq->epsMi.len);
+ue_app.c:            attachReq->nasKsi.id = ueCb->secCtxt.ksi; 
+ue_app.c:            attachReq->nasKsi.tsc = ueCb->secCtxt.tsc;
+ue_app.c:         cmMemcpy((U8 *)&attachReq->epsMi.u.guti, (U8 *)&ueCb->ueCtxt.ueGuti, 
+ue_app.c:            attachReq->nasKsi.id = ueCb->secCtxt.ksi; 
+ue_app.c:            attachReq->nasKsi.tsc = ueCb->secCtxt.tsc;
+ue_app.c:               (U8 *)&ueCb->ueCtxt.ueImei, attachReq->epsMi.len);
+ue_app.c:   cmMemcpy((U8 *) &attachReq->ueNwCap, (U8 *)&ueCb->ueCtxt.ueNwCap,
+ue_app.c:      mTmsi = ueCb->ueCtxt.ueGuti.mTMSI;
+ue_app.c:   tauReq->nasKsi.id = ueCb->secCtxt.ksi;
+ue_app.c:   tauReq->nasKsi.tsc = ueCb->secCtxt.tsc;
+ue_app.c:   cmMemcpy((U8 *)&tauReq->epsMi.u.guti, (U8 *)&ueCb->ueCtxt.ueGuti, 
+ue_app.c:   if (UE_APP_SEC_CTXT_CRNT == ueCb->secCtxt.status)
+ue_app.c:      if (ueCb->esmTList[i] == NULLP)
+ue_app.c:         ueCb->esmTList[i] = newEsmCb;
+ue_app.c:      *esmCb = ueCb->esmTList[key];
+ue_app.c:      *esmCb = ueCb->esmBList[key];
+ue_app.c:      if ((ueCb->drbs[idx] == UE_APP_DRB_INUSE) &&\
+ue_app.c:            (ueCb->ueRabCb[idx-1].epsBearerId == bearerId))
+ue_app.c:   ueCb->emmCb.state = UE_EMM_UE_REG_INIT;
+ue_app.c:   ueCb->emmCb.esmPiggyBacked = TRUE;
+ue_app.c:      ret = ueAppCmpUplnkSec(&ueCb->secCtxt, attachReqEvnt->secHT, &srcMsg,
+ue_app.c:   if(ueCb->ecmCb.state == UE_ECM_CONNECTED)
+ue_app.c:      pUlNbMsg->ueId = ueCb->ueId;
+ue_app.c:         nbuInitialUeMsg->stmsi.mmec  = ueCb->ueCtxt.ueGuti.mmeCode;
+ue_app.c:         nbuInitialUeMsg->stmsi.mTMSI = ueCb->ueCtxt.ueGuti.mTMSI;
+ue_app.c:      ret = ueAppCmpUplnkSec(&ueCb->secCtxt, tauReqEvnt->secHT, &srcMsg,
+ue_app.c:   nbUeTauReq->stmsi.mmec  = ueCb->ueCtxt.ueGuti.mmeCode;
+ue_app.c:      nbUeTauReq->stmsi.mTMSI = ueCb->ueCtxt.ueGuti.mTMSI;
+ue_app.c:      ret = ueAppCmpUplnkSec(&ueCb->secCtxt, tauCompEvnt->secHT, &srcMsg,
+ue_app.c:   ueCb->ueId = pCfgReq->msg.ueCfgReq.ueId;
+ue_app.c:   cmMemcpy((U8*)ueCb->ueCtxt.ueImsi, (U8*)pCfgReq->msg.ueCfgReq.imsi,
+ue_app.c:   cmMemcpy((U8*)ueCb->ueCtxt.ueImei, (U8*)pCfgReq->msg.ueCfgReq.imei,
+ue_app.c:   ueCb->secCtxt.encAlg = pCfgReq->msg.ueCfgReq.NASCyphCfg;
+ue_app.c:   ueCb->secCtxt.intAlg = pCfgReq->msg.ueCfgReq.NASIntProtCfg;
+ue_app.c:   ueCb->ueInfo.authAlg = pCfgReq->msg.ueCfgReq.authType;
+ue_app.c:   cmMemset((U8 *)&ueCb->ueCtxt.ueNwCap, 0, sizeof(CmEmmUeNwCap));
+ue_app.c:   ueCb->ueCtxt.ueNwCap.pres     = TRUE;
+ue_app.c:   ueCb->ueCtxt.ueNwCap.len      = 2;
+ue_app.c:   ueCb->ueCtxt.ueNwCap.eia0     = pCfgReq->msg.ueCfgReq.ueNwCap.eia0;
+ue_app.c:   ueCb->ueCtxt.ueNwCap.eia1_128 = pCfgReq->msg.ueCfgReq.ueNwCap.eia1_128;
+ue_app.c:   ueCb->ueCtxt.ueNwCap.eia2_128 = pCfgReq->msg.ueCfgReq.ueNwCap.eia2_128;
+ue_app.c:   ueCb->ueCtxt.ueNwCap.eea0     = pCfgReq->msg.ueCfgReq.ueNwCap.eea0;
+ue_app.c:   ueCb->ueCtxt.ueNwCap.eea1_128 = pCfgReq->msg.ueCfgReq.ueNwCap.eea1_128;
+ue_app.c:   ueCb->ueCtxt.ueNwCap.eea2_128 = pCfgReq->msg.ueCfgReq.ueNwCap.eea2_128;
+ue_app.c:   ueCb->ueCtxt.ueSecCap.pres = TRUE;
+ue_app.c:   ueCb->ueCtxt.ueSecCap.len = 2;
+ue_app.c:   ueCb->ueCtxt.ueSecCap.eea0 = 1;
+ue_app.c:   ueCb->ueCtxt.ueSecCap.eia1_128 = 1;
+ue_app.c:   ueCb->ueCtxt.ueSecCap.uea0 = 1;
+ue_app.c:   ueCb->ueCtxt.ueSecCap.uea1 = 1;
+ue_app.c:   ueCb->ueCtxt.ueSecCap.uea1 = 1;
+ue_app.c:   ueCb->ueInfo.sharedKey[0]  = pCfgReq->msg.ueCfgReq.sharedKey[0];     
+ue_app.c:   ueCb->ueInfo.sharedKey[1]  = pCfgReq->msg.ueCfgReq.sharedKey[1];
+ue_app.c:   ueCb->ueInfo.sharedKey[2]  = pCfgReq->msg.ueCfgReq.sharedKey[2];
+ue_app.c:   ueCb->ueInfo.sharedKey[3]  = pCfgReq->msg.ueCfgReq.sharedKey[3];
+ue_app.c:   ueCb->ueInfo.sharedKey[4]  = pCfgReq->msg.ueCfgReq.sharedKey[4];
+ue_app.c:   ueCb->ueInfo.sharedKey[5]  = pCfgReq->msg.ueCfgReq.sharedKey[5];
+ue_app.c:   ueCb->ueInfo.sharedKey[6]  = pCfgReq->msg.ueCfgReq.sharedKey[6];
+ue_app.c:   ueCb->ueInfo.sharedKey[7]  = pCfgReq->msg.ueCfgReq.sharedKey[7];
+ue_app.c:   ueCb->ueInfo.sharedKey[8]  = pCfgReq->msg.ueCfgReq.sharedKey[8];
+ue_app.c:   ueCb->ueInfo.sharedKey[9]  = pCfgReq->msg.ueCfgReq.sharedKey[9];
+ue_app.c:   ueCb->ueInfo.sharedKey[10] = pCfgReq->msg.ueCfgReq.sharedKey[10];
+ue_app.c:   ueCb->ueInfo.sharedKey[11] = pCfgReq->msg.ueCfgReq.sharedKey[11];
+ue_app.c:   ueCb->ueInfo.sharedKey[12] = pCfgReq->msg.ueCfgReq.sharedKey[12];
+ue_app.c:   ueCb->ueInfo.sharedKey[13] = pCfgReq->msg.ueCfgReq.sharedKey[13];
+ue_app.c:   ueCb->ueInfo.sharedKey[14] = pCfgReq->msg.ueCfgReq.sharedKey[14];
+ue_app.c:   ueCb->ueInfo.sharedKey[15] = pCfgReq->msg.ueCfgReq.sharedKey[15];
+ue_app.c:   ueCb->ueInfo.opKey[0]  = pCfgReq->msg.ueCfgReq.opKey[0];
+ue_app.c:   ueCb->ueInfo.opKey[1]  = pCfgReq->msg.ueCfgReq.opKey[1];
+ue_app.c:   ueCb->ueInfo.opKey[2]  = pCfgReq->msg.ueCfgReq.opKey[2];
+ue_app.c:   ueCb->ueInfo.opKey[3]  = pCfgReq->msg.ueCfgReq.opKey[3];
+ue_app.c:   ueCb->ueInfo.opKey[4]  = pCfgReq->msg.ueCfgReq.opKey[4];
+ue_app.c:   ueCb->ueInfo.opKey[5]  = pCfgReq->msg.ueCfgReq.opKey[5];
+ue_app.c:   ueCb->ueInfo.opKey[6]  = pCfgReq->msg.ueCfgReq.opKey[6];
+ue_app.c:   ueCb->ueInfo.opKey[7]  = pCfgReq->msg.ueCfgReq.opKey[7];
+ue_app.c:   ueCb->ueInfo.opKey[8]  = pCfgReq->msg.ueCfgReq.opKey[8];
+ue_app.c:   ueCb->ueInfo.opKey[9]  = pCfgReq->msg.ueCfgReq.opKey[9];
+ue_app.c:   ueCb->ueInfo.opKey[10] = pCfgReq->msg.ueCfgReq.opKey[10];
+ue_app.c:   ueCb->ueInfo.opKey[11] = pCfgReq->msg.ueCfgReq.opKey[11];
+ue_app.c:   ueCb->ueInfo.opKey[12] = pCfgReq->msg.ueCfgReq.opKey[12];
+ue_app.c:   ueCb->ueInfo.opKey[13] = pCfgReq->msg.ueCfgReq.opKey[13];
+ue_app.c:   ueCb->ueInfo.opKey[14] = pCfgReq->msg.ueCfgReq.opKey[14];
+ue_app.c:   ueCb->ueInfo.opKey[15] = pCfgReq->msg.ueCfgReq.opKey[15];
+ue_app.c:   ueCb->srvPlmn[0] = pCfgReq->msg.ueCfgReq.srvPlmn[0];
+ue_app.c:   ueCb->srvPlmn[1] = pCfgReq->msg.ueCfgReq.srvPlmn[1];
+ue_app.c:   ueCb->srvPlmn[2] = pCfgReq->msg.ueCfgReq.srvPlmn[2];
+ue_app.c:   ueCb->ueCtxt.ueRadCap.pres = TRUE;
+ue_app.c:   ueCb->ueCtxt.ueRadCap.len = pCfgReq->msg.ueCfgReq.radCapIndRrcPdulen;
+ue_app.c:   ueCb->ueCtxt.ueRadCap.rrcPDU = (U8 *)ueAlloc(ueCb->ueCtxt.ueRadCap.len);
+ue_app.c:   cmMemcpy(ueCb->ueCtxt.ueRadCap.rrcPDU,
+ue_app.c:   tfwMsg->msg.ueUetAttachRej.ueId = ueCb->ueId;
+ue_app.c:   tfwMsg->msg.ueUetTauReject.ueId  = ueCb->ueId;
+ue_app.c:   tfwMsg->msg.ueUetDetachAcceptInd.ueId = ueCb->ueId;
+ue_app.c:   tfwMsg->msg.ueUetServiceRej.ueId = ueCb->ueId;
+ue_app.c:   tfwMsg->msg.ueUetNwInitDetachReq.ueId = ueCb->ueId;
+ue_app.c:   /* TODO:   msg->prTxnId  = ueCb->esmBList[UE_APP_EPS_DFLT_BEARER_INDX]->tId;*/
+ue_app.c:               ueCb->ueRabCb[0].epsBearerId)) != ROK)
+ue_app.c:      ret = ueAppCmpUplnkSec(&ueCb->secCtxt, attachCompEvnt->secHT, &srcMsg,
+ue_app.c:   pUlNbMsg->ueId        = ueCb->ueId;
+ue_app.c:   ueCb->ecmCb.state = UE_ECM_CONNECTED;
+ue_app.c:      ret = ueAppCmpUplnkSec(&ueCb->secCtxt, secModeCompEvnt->secHT, &srcMsg, &dstMsg);
+ue_app.c:   pUlNbMsg->ueId        = ueCb->ueId;
+ue_app.c:      ret = ueAppCmpUplnkSec(&ueCb->secCtxt, secModeCompEvnt->secHT, &srcMsg,
+ue_app.c:   pUlNbMsg->ueId        = ueCb->ueId;
+ue_app.c:   if(ueCb->ecmCb.state == UE_ECM_IDLE)
+ue_app.c:   detachReq->nasKsi.id = ueCb->secCtxt.ksi; 
+ue_app.c:   detachReq->nasKsi.tsc = ueCb->secCtxt.tsc; 
+ue_app.c:         detachReq->epsMi.len = 15; /*cmStrlen(ueCb->ueCtxt.ueImsi);*/
+ue_app.c:         cmMemcpy((U8 *)&detachReq->epsMi.u.imsi.id, (U8 *)&ueCb->ueCtxt.\
+ue_app.c:         cmMemcpy((U8 *)&detachReq->epsMi.u.guti, (U8 *)&ueCb->ueCtxt.ueGuti,
+ue_app.c:      printf("dlSeqNmb = %d\n",ueCb->secCtxt.dlSeqNmb.seqNmb);
+ue_app.c:      printf("ulSeqNmb = %d\n",ueCb->secCtxt.ulSeqNmb.seqNmb);
+ue_app.c:      printf("lstUsdCnt = %d\n",ueCb->secCtxt.lstUsdCnt);
+ue_app.c:      printf("%x " ,ueCb->secCtxt.intKey[count]);
+ue_app.c:      printf("%x " ,ueCb->secCtxt.encKey[count]);
+ue_app.c:      ret = ueAppCmpUplnkSec(&ueCb->secCtxt, detachReq->secHT, &srcMsg,
+ue_app.c:   if(ueCb->ecmCb.state == UE_ECM_IDLE)
+ue_app.c:      nbuInitialUeMsg->ueId = ueCb->ueId;
+ue_app.c:      nbuInitialUeMsg->stmsi.mmec  = ueCb->ueCtxt.ueGuti.mmeCode;
+ue_app.c:      nbuInitialUeMsg->stmsi.mTMSI = ueCb->ueCtxt.ueGuti.mTMSI;
+ue_app.c:      pUlNbMsg->ueId        = ueCb->ueId;
+ue_app.c:      printf("dlSeqNmb = %d\n",ueCb->secCtxt.dlSeqNmb.seqNmb);
+ue_app.c:      printf("ulSeqNmb = %d\n",ueCb->secCtxt.ulSeqNmb.seqNmb);
+ue_app.c:      printf("lstUsdCnt = %d\n",ueCb->secCtxt.lstUsdCnt);
+ue_app.c:      printf("%x " ,ueCb->secCtxt.intKey[count]);
+ue_app.c:      printf("%x " ,ueCb->secCtxt.encKey[count]);
+ue_app.c:      ret = ueAppCmpUplnkSec(&ueCb->secCtxt, detachAcc->secHT, &srcMsg,
+ue_app.c:   if(ueCb->ecmCb.state == UE_ECM_IDLE)
+ue_app.c:      nbuInitialUeMsg->ueId = ueCb->ueId;
+ue_app.c:      nbuInitialUeMsg->stmsi.mmec  = ueCb->ueCtxt.ueGuti.mmeCode;
+ue_app.c:      nbuInitialUeMsg->stmsi.mTMSI = ueCb->ueCtxt.ueGuti.mTMSI;
+ue_app.c:      pUlNbMsg->ueId        = ueCb->ueId;
+ue_app.c:                  nbuErabRelInd->erabIdLst[brCount]) == ROK) && (ueCb->\
+ue_app.c:            if(nbuErabRelInd->erabIdLst[brCount] == ueCb->ueRabCb[ctxtCount].\
+ue_app.c:               tempErabIdLst[tempCount] = ueCb->ueRabCb[ctxtCount].epsBearerId; 
+ue_app.c:               cmMemset((U8 *)&(ueCb->ueRabCb[ctxtCount]), 0,
+ue_app.c:                     sizeof(ueCb->ueRabCb[ctxtCount]));
+ue_app.c:               ueCb->drbs[ctxtCount] = UE_APP_DRB_AVAILABLE;
+ue_app.c:      else if (ueCb->ueRabCb[rbIdx].bearerType == DEDICATED_BEARER)
+ue_app.c:         cmMemset((U8 *)&(ueCb->ueRabCb[rbIdx]), 0,
+ue_app.c:               sizeof(ueCb->ueRabCb[rbIdx]));
+ue_app.c:         ueCb->drbs[rbIdx + 1] = UE_APP_DRB_AVAILABLE;
+ue_app.c:   ueCb->ecmCb.state = UE_ECM_CONNECTED;
+ue_app.c:      ret = ueAppCmpUplnkSec(&ueCb->secCtxt, serviceReqEvnt->secHT, &srcMsg,
+ue_app.c:   nbuInitialUeMsg->ueId        = ueCb->ueId;
+ue_app.c:   nbuInitialUeMsg->stmsi.mmec  = ueCb->ueCtxt.ueGuti.mmeCode;
+ue_app.c:      ret = ueAppCmpUplnkSec(&ueCb->secCtxt, pdnConReqEvnt->secHT, &srcMsg,
+ue_app.c:      ret = ueAppCmpUplnkSec(&ueCb->secCtxt, BearerAccEvnt->secHT, &srcMsg,
+ue_app.c:   nbUeBearerAccReq->ueId = ueCb->ueId;
+ue_app.c:      ret = ueAppCmpUplnkSec(&ueCb->secCtxt, BearerAccEvnt->secHT, &srcMsg,
+ue_app.c:   nbUeBearerAccReq->ueId = ueCb->ueId;
+ue_app.c:      ret = ueAppCmpUplnkSec(&ueCb->secCtxt, BearerRejEvnt->secHT, &srcMsg,
+ue_app.c:   nbUeBearerAccReq->ueId = ueCb->ueId;
+ue_app.c:      mTmsi = ueCb->ueCtxt.ueGuti.mTMSI;
+ue_app.c:   pUlNbRrcMsg->ueId = ueCb->ueId;
+ue_app.c:   pUlNbRrcMsg->rrcPdu.val = (U8*) ueAlloc(ueCb->ueCtxt.ueRadCap.len);
+ue_app.c:   cmMemcpy((U8 *)pUlNbRrcMsg->rrcPdu.val, (U8 *)ueCb->ueCtxt.ueRadCap.rrcPDU,
+ue_app.c:         ueCb->ueCtxt.ueRadCap.len);
+ue_app.c:   pUlNbRrcMsg->rrcPdu.len = ueCb->ueCtxt.ueRadCap.len;
+ue_app.c:      if (ueCb->ueCtxt.ueRadCap.pres==TRUE)
+ue_app.c:         ueFree(ueCb->ueCtxt.ueRadCap.rrcPDU,
+ue_app.c:               ueCb->ueCtxt.ueRadCap.len * sizeof(U8));
+ue_app.c:      ueCb->ueCtxt.ueRadCap.rrcPDU = (U8 *)ueAlloc(p_ueMsg->msg.\
+ue_app.c:      cmMemcpy(ueCb->ueCtxt.ueRadCap.rrcPDU,p_ueMsg->msg.ueUetRadCapUpdReq.\
+ue_app.c:      ueCb->ueCtxt.ueRadCap.len = p_ueMsg->msg.ueUetRadCapUpdReq.len;
+ue_app.c:      ueCb->ueCtxt.ueRadCap.pres = TRUE;
+ue_app.c:   tfwMsg->msg.ueUetIdentReqInd.ueId = ueCb->ueId;
+ue_app.c:   tfwMsg->msg.ueUetAuthReqInd.ueId = ueCb->ueId;
+ue_app.c:   cmMemcpy(tfwMsg->msg.ueUetAuthReqInd.rand, ueCb->ueCtxt.rnd, 16);
+ue_app.c:   cmMemcpy(tfwMsg->msg.ueUetAuthReqInd.autn, ueCb->secCtxt.autn, 16);
+ue_app.c:   cmMemcpy(tfwMsg->msg.ueUetAuthReqInd.sqn, ueCb->ueAuthKeys.sqnRcvd, 6);
+ue_app.c:   cmMemcpy((U8 *)authFail, (U8*)&ueCb->authFlr, sizeof(CmEmmAuthFailure));
+ue_app.c:   pNbUlNasMsg->ueId        = ueCb->ueId;
+ue_app.c:   tfwMsg->msg.ueUetSecModeCmdInd.ueId          = ueCb->ueId;
+ue_app.c:   tfwMsg->msg.ueUetSecModeCmdInd.NasCyphCfg    = ueCb->secCtxt.encAlg;
+ue_app.c:   tfwMsg->msg.ueUetSecModeCmdInd.NasIntProtCfg = ueCb->secCtxt.intAlg;
+ue_app.c:         (U8 *)&ueCb->secCtxt.kasme, UE_APP_SZ_KASME_KEY);
+ue_app.c:         (U8 *)&ueCb->secCtxt.encKey, UE_APP_SZ_NAS_ENC_KEY);
+ue_app.c:         (U8 *)&ueCb->secCtxt.intKey, UE_APP_SZ_NAS_INT_KEY);
+ue_app.c:         ueCb->ueId);
+ue_app.c:   tfwMsg->msg.ueUetTauAccept.ueId = ueCb->ueId;
+ue_app.c:   tfwMsg->msg.ueUetTauAccept.gutiChanged = ueCb->gutiChanged;
+ue_app.c:               (U8 *)&ueCb->ueCtxt.ueGuti.mcc, 3);
+ue_app.c:               (U8 *)&ueCb->ueCtxt.ueGuti.mnc, 3);
+ue_app.c:      tfwMsg->msg.ueUetTauAccept.guti.mmeGrpId = ueCb->ueCtxt.ueGuti.mmeGrpId;
+ue_app.c:      tfwMsg->msg.ueUetTauAccept.guti.mmeCode = ueCb->ueCtxt.ueGuti.mmeCode;
+ue_app.c:      tfwMsg->msg.ueUetTauAccept.guti.mTMSI = ueCb->ueCtxt.ueGuti.mTMSI;
+ue_app.c:   tfwMsg->msg.ueUetAttachAcceptInd.ueId = ueCb->ueId;
+ue_app.c:   tfwMsg->msg.ueUetAttachAcceptInd.epsAtchRes = ueCb->epsAtchRes; 
+ue_app.c:   tfwMsg->msg.ueUetAttachAcceptInd.t3412 = ueCb->t3412;
+ue_app.c:   cmMemcpy(tfwMsg->msg.ueUetAttachAcceptInd.msId, ueCb->ueCtxt.msId,
+ue_app.c:         (U8 *)&ueCb->ueCtxt.ueGuti.mcc, 3);
+ue_app.c:         (U8 *)&ueCb->ueCtxt.ueGuti.mnc,3);
+ue_app.c:   tfwMsg->msg.ueUetAttachAcceptInd.guti.mmeGrpId = ueCb->ueCtxt.ueGuti.\
+ue_app.c:   tfwMsg->msg.ueUetAttachAcceptInd.guti.mmeCode = ueCb->ueCtxt.ueGuti.mmeCode;
+ue_app.c:   tfwMsg->msg.ueUetAttachAcceptInd.guti.mTMSI = ueCb->ueCtxt.ueGuti.mTMSI;
+ue_app.c:   tfwMsg->msg.ueUetAttachAcceptInd.cause = ueCb->emmCause;
+ue_app.c:   tfwMsg->msg.ueUetAttachAcceptInd.t3402 = ueCb->t3402;
+ue_app.c:   tfwMsg->msg.ueUetAttachAcceptInd.t3423 = ueCb->t3423;
+ue_app.c:         (U8 *)&ueCb->plmnLst, sizeof(CmEmmPlmnId));
+ue_app.c:   if(ueCb->ueRabCb[0].qos.pres)
+ue_app.c:      tfwMsg->msg.ueUetAttachAcceptInd.esmInfo.qos.qci = ueCb->ueRabCb[0].\
+ue_app.c:         maxBitRateUL = ueCb->ueRabCb[0].qos.maxBitRateUL;
+ue_app.c:         maxBitRateDL = ueCb->ueRabCb[0].qos.maxBitRateDL;
+ue_app.c:         guaraBitRateUL = ueCb->ueRabCb[0].qos.guaraBitRateUL;
+ue_app.c:         guaraBitRateDL = ueCb->ueRabCb[0].qos.guaraBitRateDL;
+ue_app.c:   if(ueCb->ueRabCb[0].apn.pres)
+ue_app.c:      tfwMsg->msg.ueUetAttachAcceptInd.esmInfo.apn.len = ueCb->ueRabCb[0].\
+ue_app.c:            ueCb->ueRabCb[0].apn.apn, ueCb->ueRabCb[0].apn.len);
+ue_app.c:   if(ueCb->ueRabCb[0].pAddr.pres)
+ue_app.c:         pdnType = ueCb->ueRabCb[0].pAddr.pdnType;
+ue_app.c:            ueCb->ueRabCb[0].pAddr.addrInfo, CM_ESM_MAX_LEN_PDN_ADDRESS);
+ue_app.c:   if(ueCb->ueRabCb[0].apnAmbr.pres)
+ue_app.c:         len = ueCb->ueRabCb[0].apnAmbr.len; 
+ue_app.c:         dl  = ueCb->ueRabCb[0].apnAmbr.dl;
+ue_app.c:         apnAmbr.ul = ueCb->ueRabCb[0].apnAmbr.ul;
+ue_app.c:   if(ueCb->ueRabCb[0].protCfgOpt.pres)
+ue_app.c:	 	ueCb->ueRabCb[0].protCfgOpt.len;
+ue_app.c:	 	ueCb->ueRabCb[0].protCfgOpt.numProtId;
+ue_app.c:	 	ueCb->ueRabCb[0].protCfgOpt.numContId;
+ue_app.c:     for (count=0;count<ueCb->ueRabCb[0].protCfgOpt.numProtId;count++)
+ue_app.c:	  	ueCb->ueRabCb[0].protCfgOpt.p[count].pid;
+ue_app.c:	  	ueCb->ueRabCb[0].protCfgOpt.p[count].len;
+ue_app.c:	  	ueCb->ueRabCb[0].protCfgOpt.p[count].val,\
+ue_app.c:	  	ueCb->ueRabCb[0].protCfgOpt.p[count].len);
+ue_app.c:     for (count=0;count<ueCb->ueRabCb[0].protCfgOpt.numContId;count++)
+ue_app.c:	  	ueCb->ueRabCb[0].protCfgOpt.c[count].cid;
+ue_app.c:	  	ueCb->ueRabCb[0].protCfgOpt.c[count].len;
+ue_app.c:	  	ueCb->ueRabCb[0].protCfgOpt.c[count].val,\
+ue_app.c:	  	ueCb->ueRabCb[0].protCfgOpt.c[count].len);
+ue_app.c:   cmMemcpy(ueCb->ueCtxt.ueGuti.mcc, epsMi->u.guti.mcc, 3);
+ue_app.c:   cmMemcpy(ueCb->ueCtxt.ueGuti.mnc, epsMi->u.guti.mnc, 3);
+ue_app.c:   ueCb->ueCtxt.ueGuti.mmeCode = epsMi->u.guti.mmeCode;
+ue_app.c:   ueCb->ueCtxt.ueGuti.mmeGrpId = epsMi->u.guti.mmeGrpId;
+ue_app.c:   ueCb->ueCtxt.ueGuti.mTMSI = epsMi->u.guti.mTMSI;
+ue_app.c:   cmMemcpy(ueCb->ueCtxt.ueGuti.mcc, epsMi->u.guti.mcc, 3);
+ue_app.c:   cmMemcpy(ueCb->ueCtxt.ueGuti.mnc, epsMi->u.guti.mnc, 3);
+ue_app.c:   ueCb->ueCtxt.ueGuti.mmeCode = epsMi->u.guti.mmeCode;
+ue_app.c:   ueCb->ueCtxt.ueGuti.mmeGrpId = epsMi->u.guti.mmeGrpId;
+ue_app.c:   ueCb->ueCtxt.ueGuti.mTMSI = epsMi->u.guti.mTMSI;
+ue_app.c:   if ((cmMemcpy(ueCb->ueCtxt.ueGuti.mcc, epsMi->u.guti.mcc, 3)) &&
+ue_app.c:       (cmMemcpy(ueCb->ueCtxt.ueGuti.mnc, epsMi->u.guti.mnc, 3)) && 
+ue_app.c:       (ueCb->ueCtxt.ueGuti.mmeCode = epsMi->u.guti.mmeCode) &&
+ue_app.c:       (ueCb->ueCtxt.ueGuti.mmeGrpId = epsMi->u.guti.mmeGrpId) &&
+ue_app.c:       (ueCb->ueCtxt.ueGuti.mTMSI = epsMi->u.guti.mTMSI))
+ue_app.c:      if (ueCb->drbs[idx] == UE_APP_DRB_INUSE)
+ue_app.c:        if(ueCb->ueRabCb[idx-1].epsBearerId == bearerId)
+ue_app.c:           pdn_addr = &ueCb->ueRabCb[idx-1].pAddr;
+ue_app.c:           *bearerType = ueCb->ueRabCb[idx-1].bearerType; 
+ue_app.c:         ueCb->res.pres = TRUE;
+ue_app.c:         ueCb->res.len = UE_USIM_RES_SIZE;
+ue_app.c:         ueCb->ueCtxt.rnd[0] = 1;
+ue_app.c:         if (0 == cmMemcmp(ueCb->ueCtxt.rnd,\
+ue_app.c:         cmMemset((U8*)&ueCb->secCtxt, 0, sizeof(ueCb->secCtxt));
+ue_app.c:         cmMemcpy(ueCb->ueCtxt.rnd, evnt->m.emmEvnt->u.authReq.RAND.val, 16);
+ue_app.c:         cmMemcpy(ueCb->secCtxt.autn, evnt->m.emmEvnt->u.authReq.AUTN.val, 16);
+ue_app.c:         ueCb->secCtxt.tsc = evnt->m.emmEvnt->u.authReq.nasKsi.tsc;
+ue_app.c:         ueCb->secCtxt.ksi = evnt->m.emmEvnt->u.authReq.nasKsi.id;
+ue_app.c:         ueUsimCalcAndStoreAuthKeys(&ueCb->ueInfo, &ueCb->ueAuthKeys,
+ue_app.c:               ueCb->res.val, evnt->m.emmEvnt->u.authReq.AUTN.val,
+ue_app.c:         ueCb->res.pres = TRUE;
+ue_app.c:         ueCb->res.len = UE_USIM_RES_SIZE;
+ue_app.c:         ueCb->secCtxt.ksi    = evnt->m.emmEvnt->u.secModCmd.nasKsi.id;
+ue_app.c:         ueCb->secCtxt.tsc    = evnt->m.emmEvnt->u.secModCmd.nasKsi.tsc;
+ue_app.c:         ueCb->secCtxt.status = UE_APP_SEC_CTXT_CRNT;
+ue_app.c:         ueCb->secCtxt.intAlg = 
+ue_app.c:         ueCb->secCtxt.encAlg = 
+ue_app.c:         ret = ueAppGenerateNasKey(&ueCb->secCtxt);
+ue_app.c:         ret = ueAppGenerateEnbKey(&ueCb->secCtxt,
+ue_app.c:               (U32)ueCb->secCtxt.lstUsdCnt);
+ue_app.c:            ueCb->t3412 = evnt->m.emmEvnt->u.atchAcc.t3412.val * 2;
+ue_app.c:            ueCb->t3412 = evnt->m.emmEvnt->u.atchAcc.t3412.val * 60;
+ue_app.c:            ueCb->t3412 = evnt->m.emmEvnt->u.atchAcc.t3412.val * 6 * 60;
+ue_app.c:         ueCb->t3402 = evnt->m.emmEvnt->u.atchAcc.t3402.val;
+ue_app.c:         ueCb->t3423 = evnt->m.emmEvnt->u.atchAcc.t3423.val;
+ue_app.c:         ueCb->epsAtchRes = evnt->m.emmEvnt->u.atchAcc.epsAtchRes.res;
+ue_app.c:         cmMemcpy(ueCb->ueCtxt.msId, evnt->m.emmEvnt->u.atchAcc.msId.u.imsi.id,
+ue_app.c:         ueCb->emmCause = evnt->m.emmEvnt->u.atchAcc.cause.cause; 
+ue_app.c:         cmMemcpy((U8 *)&ueCb->plmnLst, (U8 *)&evnt->m.emmEvnt->u.atchAcc.\
+ue_app.c:            ueCb->t3412 = evnt->m.emmEvnt->u.tauAcc.t3412.val * 2;
+ue_app.c:            ueCb->t3412 = evnt->m.emmEvnt->u.tauAcc.t3412.val * 60;
+ue_app.c:            ueCb->t3412 = evnt->m.emmEvnt->u.tauAcc.t3412.val * 6 * 60;
+ue_app.c:         ueCb->t3402 = evnt->m.emmEvnt->u.tauAcc.t3402.val;
+ue_app.c:         ueCb->t3423 = evnt->m.emmEvnt->u.tauAcc.t3423.val;
+ue_app.c:         cmMemcpy(ueCb->ueCtxt.msId,
+ue_app.c:         ueCb->emmCause = evnt->m.emmEvnt->u.tauAcc.cause.cause; 
+ue_app.c:         cmMemcpy((U8 *)&ueCb->plmnLst,
+ue_app.c:               ueCb->gutiChanged = TRUE;
+ue_app.c:            ueCb->t3346 = evnt->m.emmEvnt->u.tauRej.t3346.val;
+ue_app.c:   ueCb->esmTList[esmCb->tId] = NULLP;   
+ue_app.c:   if(!ueCb->esmBList[esmCb->bId])
+ue_app.c:      ueCb->esmBList[esmCb->bId] = esmCb;
+ue_app.c:   params = &ueCb->ueRabCb[drbId]; 
+ue_app.c:   ueCb->ueRabCb[drbId].drbId = drbId;
+ue_app.c:   ueCb->ueRabCb[drbId].epsBearerId = epsBearerId;
+ue_app.c:   selfAddr = &(ueCb->ueCtxt.selfAddr);
+ue_app.c:   ueCb->numRabs++;
+ue_app.c:   tfwMsg->msg.ueUetPdnConRsp.ueId                        = ueCb->ueId;
+ue_app.c:      if(ueCb->numRabs > 0)
+ue_app.c:         esmCb = ueCb->esmBList[evnt->m.esmEvnt->bearerId];
+ue_app.c:               tfwMsg->msg.ueUetPdnConRsp.ueId   = ueCb->ueId;
+ue_app.c:               if(ueCb->ueRabCb[drbId-1].apn.pres)
+ue_app.c:                     apn.len = ueCb->ueRabCb[drbId-1].apn.len;
+ue_app.c:                        ueCb->ueRabCb[drbId-1].apn.apn,
+ue_app.c:               if(ueCb->ueRabCb[drbId-1].pAddr.pres)
+ue_app.c:                     ueCb->ueRabCb[drbId-1].pAddr.pdnType;
+ue_app.c:                        ueCb->ueRabCb[drbId-1].pAddr.addrInfo,
+ue_app.c:                      ueCb->ueRabCb[drbId-1].epsBearerId);
+ue_app.c:   cmMemcpy((U8 *)&ueCb->ueCtxt.ueGuti,
+ue_app.c:      ret = ueAppVldDwnlnkSec(&ueCb->secCtxt, &srcMsg, &dstMsg);
+ue_app.c:      ret = ueAppVldDwnlnkSec(&ueCb->secCtxt, &srcMsg, &dstMsg);
+ue_app.c:   ueCb->ecmCb.state = UE_ECM_CONNECTED;
+ue_app.c:   ret = ueAppBldAndSndIpAddrToNb(ueCb->ueId, ipAddrStr, &ueAppCb->nbPst);
+ue_app.c:      UE_LOG_ERROR(ueAppCb, "UeCb List NULL ueId = %d",ueCb->ueId);
+ue_app.c:   tfwMsg->msg.ueUetPagingMsg.ueId = ueCb->ueId;
+ue_app.c:         ret = ueAppVldDwnlnkSec(&ueCb->secCtxt, &srcMsg, &dstMsg);
+ue_app.c:   p_ueCb->ecmCb.state = UE_ECM_CONNECTED;
+ue_app.c:      ret = ueAppCmpUplnkSec(&ueCb->secCtxt, reqEvnt->secHT, &srcMsg,
+ue_app.c:   params = &ueCb->ueRabCb[drbId]; 
+ue_app.c:   ueCb->ueRabCb[drbId].drbId = drbId;
+ue_app.c:   ueCb->ueRabCb[drbId].epsBearerId = epsBearerId;
+ue_app.c:         params->pAddr.len = ueCb->ueRabCb[rbIdx].pAddr.len;
+ue_app.c:         params->pAddr.pdnType = ueCb->ueRabCb[rbIdx].pAddr.pdnType;
+ue_app.c:         cmMemcpy((U8 *)&params->pAddr.addrInfo, (U8 *)&ueCb->ueRabCb[rbIdx].pAddr.addrInfo,
+ue_app.c:   ueCb->numRabs++;
+ue_app.c:  params = &ueCb->ueRabCb[drbIdx]; 
+ue_app.c:  tfwMsg->msg.ueActDedBerReq.ueId   = ueCb->ueId;
+ue_db.c:         (U8 *)&ueCb->ueId, sizeof(U8));
+ue_li.c:   ueIpInfoRsp->ueId = ueCb->ueId;
+ue_li.c:   ueCb->ecmCb.state = UE_ECM_IDLE;
+ue_li.c:   ueCb->ecmCb.state = UE_ECM_IDLE;

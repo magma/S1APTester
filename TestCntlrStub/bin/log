@@ -1,0 +1,386 @@
+[Stub] Initialising stack manager
+tag: AUTH_TYPE tagVal: MILENAGE
+[Stub] Entering trf_test_init()
+[Stub] Creating message queue..
+[Stub] Sending UE App config
+[Stub] ../src/ts_utls.c:TC_msg_recv():278: Entering
+[Stub] TC_msg_recv(): msgid=2
+[Stub] ../src/ts_utls.c:TC_API():498: Message Sent
+
+[Stub] Received (msgptr.msgType=2), expected (msgid=2)
+
+[Stub] Received a message of type = 2
+
+[Stub] UE APP Config Completed
+[Stub] Entering tsReadImsiAndSendUeConfig()
+[Stub] Reading imsi file for ueId: 1
+[Stub] IMSI 1 ::2 0 8 1 1 1 2 3 4 5 6 7 8 9 0 
+
+[STUB]: Sending Ue Config.
+[Stub] ../src/ts_utls.c:TC_msg_recv():278: Entering
+[Stub] TC_msg_recv(): msgid=4
+[Stub] ../src/ts_utls.c:TC_API():498: Message Sent
+
+[Stub] Received (msgptr.msgType=4), expected (msgid=4)
+
+[Stub] Received a message of type = 4
+
+[Stub] UE 1 Config Completed
+
+[Stub]: Sending eNodeB Config
+[Stub] ../src/ts_utls.c:TC_msg_recv():278: Entering
+[Stub] TC_msg_recv(): msgid=34
+
+ Server Socket FD =[10][Stub] ../src/ts_utls.c:TC_API():498: Message Sent
+
+[Stub] Received (msgptr.msgType=34), expected (msgid=34)
+
+[Stub] Received a message of type = 34
+
+[Stub] Received Enodeb Config Confirm from TFW
+
+[Stub] eNodeB configured successfully
+
+[Stub]: eNb Config Completed
+
+[Stub]: Sending S1 SETUP Request
+[Stub] ../src/ts_utls.c:TC_msg_recv():278: Entering
+[Stub] TC_msg_recv(): msgid=38
+[Stub] ../src/ts_utls.c:TC_API():498: Message Sent
+
+[Stub] Received (msgptr.msgType=38), expected (msgid=38)
+
+[Stub] Received a message of type = 38
+
+[Stub] Received S1-SETUP Response from TFW
+
+[Stub] S1-SETUP successful received from TFWAPP
+
+[Stub]: RECEIVED S1-SETUP RESPONSE FROM TFWAPP
+[Stub] Entering tsCompleteAttach(), ueId(1)
+
+[Stub] Sending End-to-End Attach Request, ueId(1)
+[Stub] ../src/ts_utls.c:TC_msg_recv():278: Entering
+[Stub] TC_msg_recv(): msgid=53
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:713:ueUsimCalcAndStoreAuthKeys] [TRC1]: Entering ueUsimCalcAndStoreAuthKeys
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:715:ueUsimCalcAndStoreAuthKeys] [HEX_DUMP]: Shared Key[Len(16 bytes)]:
+ [ 00 01 02 03  04 05 06 07   08 09 0a 0b  0c 0d 0e 0f ]
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:716:ueUsimCalcAndStoreAuthKeys] [HEX_DUMP]: OP Key[Len(16 bytes)]:
+ [ 00 11 22 33  44 55 66 77   88 99 aa bb  cc dd ee ff ]
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:717:ueUsimCalcAndStoreAuthKeys] [HEX_DUMP]: Rand[Len(16 bytes)]:
+ [ 00 00 00 00  00 00 00 00   00 00 00 00  00 00 00 00 ]
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:737:ueUsimCalcAndStoreAuthKeys] [HEX_DUMP]: Autn Received from MME[Len(16 bytes)]:
+ [ cd a2 6c fa  47 49 80 00   37 86 05 93  e0 3f 08 5e ]
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:738:ueUsimCalcAndStoreAuthKeys] [HEX_DUMP]: Seq Rcvd from MME[Len(6 bytes)]:
+ [ 00 00 00 00  00 21 ]
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:792:ueUsimGenAuthRsp] [TRC1]: Entering ueUsimGenAuthRsp
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:1022:ueUsimFndHighestSQNIndx] [TRC1]: Entering ueUsimFndHighestSQNIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:1034:ueUsimFndHighestSQNIndx] [HEX_DUMP]: Highest SQN:[Len(6 bytes)]:
+ [ 00 00 00 00  00 00 ]
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:957:ueUsimGetSeqIndx] [TRC1]: Entering ueUsimGetSeqIndx
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:415:ueUsimGenKasme] [TRC2]: Entering ueUsimGenKasme
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:435:ueUsimGenKasme] [HEX_DUMP]: Key(ck||ik)[Len(32 bytes)]:
+ [ 23 5e 90 18  ed 7f 96 bf   91 a9 1a ce  ce 66 fa 02 ]
+ [ 8a a0 32 f3  52 ae 92 4e   71 ca 0b ba  ac 48 ac da ]
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:436:ueUsimGenKasme] [HEX_DUMP]: S[Len(14 bytes)]:
+ [ 10 05 f5 20  00 03 cd a2   6c fa 47 49  00 06 ]
+ [LTE-CNE-AUTH] [../src/ueApp/ue_usim_auth.c:442:ueUsimGenKasme] [HEX_DUMP]: Kasme[Len(32 bytes)]:
+ [ 4b e5 9c eb  bb 8c 6e 77   6c f9 4c 1f  62 c4 d9 f1 ]
+ [ fc 93 b2 9d  f1 26 d5 ad   44 fc dd 64  a8 cc 60 39 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:846:ueAppGenerateNasKey] [TRC2]: Entering ueAppGenerateNasKey
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:863:ueAppGenerateNasKey] [HEX_DUMP]: Kasme Key[Len(32 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:863:ueAppGenerateNasKey] [HEX_DUMP] [ 4b e5 9c eb  bb 8c 6e 77   6c f9 4c 1f  62 c4 d9 f1 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:863:ueAppGenerateNasKey] [HEX_DUMP] [ fc 93 b2 9d  f1 26 d5 ad   44 fc dd 64  a8 cc 60 39 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:864:ueAppGenerateNasKey] [HEX_DUMP]: S Key[Len(7 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:864:ueAppGenerateNasKey] [HEX_DUMP] [ 15 02 00 01  01 00 01 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:869:ueAppGenerateNasKey] [HEX_DUMP]: Int Key[Len(16 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:869:ueAppGenerateNasKey] [HEX_DUMP] [ 0a 56 e6 f7  d1 6d 9d 80   46 23 c6 7b  c1 5e cc 8b ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:880:ueAppGenerateNasKey] [HEX_DUMP]: Kasme Key[Len(32 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:880:ueAppGenerateNasKey] [HEX_DUMP] [ 4b e5 9c eb  bb 8c 6e 77   6c f9 4c 1f  62 c4 d9 f1 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:880:ueAppGenerateNasKey] [HEX_DUMP] [ fc 93 b2 9d  f1 26 d5 ad   44 fc dd 64  a8 cc 60 39 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:881:ueAppGenerateNasKey] [HEX_DUMP]: S Key[Len(7 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:881:ueAppGenerateNasKey] [HEX_DUMP] [ 15 01 00 01  00 00 01 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:886:ueAppGenerateNasKey] [HEX_DUMP]: Enc Key[Len(16 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:886:ueAppGenerateNasKey] [HEX_DUMP] [ 1a e3 55 4c  b0 52 ba 7c   c2 b0 14 af  74 8f 07 0b ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:917:ueAppGenerateEnbKey] [TRC2]: Entering ueAppGenerateEnbKey
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:932:ueAppGenerateEnbKey] [HEX_DUMP]: Kasme Key[Len(32 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:932:ueAppGenerateEnbKey] [HEX_DUMP] [ 4b e5 9c eb  bb 8c 6e 77   6c f9 4c 1f  62 c4 d9 f1 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:932:ueAppGenerateEnbKey] [HEX_DUMP] [ fc 93 b2 9d  f1 26 d5 ad   44 fc dd 64  a8 cc 60 39 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:933:ueAppGenerateEnbKey] [HEX_DUMP]: S Key[Len(7 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:933:ueAppGenerateEnbKey] [HEX_DUMP] [ 11 00 00 00  00 00 04 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:937:ueAppGenerateEnbKey] [HEX_DUMP]: S Key[Len(32 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:937:ueAppGenerateEnbKey] [HEX_DUMP] [ 81 cc 34 55  1e 36 71 20   af d0 ae 20  ae 5c 97 56 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:937:ueAppGenerateEnbKey] [HEX_DUMP] [ 09 06 57 43  73 67 1c bb   d9 72 b0 5e  d5 7d 24 0f ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:584:ueAppVldDwnlnkSec] [TRC1]: Entering ueAppVldDwnlnkSec
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:954:ueAppGetSecHdr] [TRC2]: Entering ueAppGetSecHdr
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:362:ueAppIsVldSeqNmb] [TRC2]: Entering ueAppIsVldSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:331:ueAppGetSeqNmb] [TRC2]: Entering ueAppGetSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:290:ueAppEstimatedSeqNmb] [TRC2]: Entering ueAppEstimatedSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:983:ueAppGetIntBuf] [TRC2]: Entering ueAppGetIntBuf
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:290:ueAppEstimatedSeqNmb] [TRC2]: Entering ueAppEstimatedSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:748:ueAppCalcMac] [TRC2]: Entering ueAppCalcMac
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:753:ueAppCalcMac] [HEX_DUMP]: IntKey[Len(16 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:753:ueAppCalcMac] [HEX_DUMP] [ 0a 56 e6 f7  d1 6d 9d 80   46 23 c6 7b  c1 5e cc 8b ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:755:ueAppCalcMac] [INFO]: Seq Nmb:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:757:ueAppCalcMac] [INFO]: Dir:1
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:758:ueAppCalcMac] [INFO]: Bearer:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:759:ueAppCalcMac] [HEX_DUMP]: Message[Len(8 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:759:ueAppCalcMac] [HEX_DUMP] [ 00 07 5d 01  01 02 e0 e0 ]
+ue id 1 found
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:763:ueAppCalcMac] [INFO]: Mac:dff137b1
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:436:ueAppSetSeqNmb] [TRC2]: Entering ueAppSetSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:290:ueAppEstimatedSeqNmb] [TRC2]: Entering ueAppEstimatedSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:396:ueAppIncSeqNmb] [TRC2]: Entering ueAppIncSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:482:ueAppCmpUplnkSec] [TRC1]: Entering ueAppCmpUplnkSec
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:331:ueAppGetSeqNmb] [TRC2]: Entering ueAppGetSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:799:ueAppEncMsg] [TRC2]: Entering ueAppEncMsg
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:807:ueAppEncMsg] [HEX_DUMP]: EncKey[Len(16 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:807:ueAppEncMsg] [HEX_DUMP] [ 1a e3 55 4c  b0 52 ba 7c   c2 b0 14 af  74 8f 07 0b ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:809:ueAppEncMsg] [INFO]: Seq Nmb:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:811:ueAppEncMsg] [INFO]: Dir:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:812:ueAppEncMsg] [INFO]: Bearer:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:813:ueAppEncMsg] [HEX_DUMP]: Message[Len(2 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:813:ueAppEncMsg] [HEX_DUMP] [ 07 5e ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:817:ueAppEncMsg] [HEX_DUMP]: Enc Message[Len(2 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:817:ueAppEncMsg] [HEX_DUMP] [ 07 5e ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:748:ueAppCalcMac] [TRC2]: Entering ueAppCalcMac
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:753:ueAppCalcMac] [HEX_DUMP]: IntKey[Len(16 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:753:ueAppCalcMac] [HEX_DUMP] [ 0a 56 e6 f7  d1 6d 9d 80   46 23 c6 7b  c1 5e cc 8b ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:755:ueAppCalcMac] [INFO]: Seq Nmb:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:757:ueAppCalcMac] [INFO]: Dir:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:758:ueAppCalcMac] [INFO]: Bearer:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:759:ueAppCalcMac] [HEX_DUMP]: Message[Len(3 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:759:ueAppCalcMac] [HEX_DUMP] [ 00 07 5e ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:763:ueAppCalcMac] [INFO]: Mac:542e1810
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:396:ueAppIncSeqNmb] [TRC2]: Entering ueAppIncSeqNmb
+[Stub] ../src/ts_utls.c:TC_API():498: Message Sent
+
+[Stub] Received (msgptr.msgType=53), expected (msgid=53)
+
+[Stub] Received a message of type = 53
+Initial Context Setup Indication (ueId: 1) (status: 0)
+
+[Stub] Received Initial Context Setup indication
+[Stub] ../src/ts_utls.c:TC_msg_recv():278: Entering
+[Stub] TC_msg_recv(): msgid=12
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:584:ueAppVldDwnlnkSec] [TRC1]: Entering ueAppVldDwnlnkSec
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:954:ueAppGetSecHdr] [TRC2]: Entering ueAppGetSecHdr
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:362:ueAppIsVldSeqNmb] [TRC2]: Entering ueAppIsVldSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:331:ueAppGetSeqNmb] [TRC2]: Entering ueAppGetSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:290:ueAppEstimatedSeqNmb] [TRC2]: Entering ueAppEstimatedSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:983:ueAppGetIntBuf] [TRC2]: Entering ueAppGetIntBuf
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:290:ueAppEstimatedSeqNmb] [TRC2]: Entering ueAppEstimatedSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:748:ueAppCalcMac] [TRC2]: Entering ueAppCalcMac
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:753:ueAppCalcMac] [HEX_DUMP]: IntKey[Len(16 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:753:ueAppCalcMac] [HEX_DUMP] [ 0a 56 e6 f7  d1 6d 9d 80   46 23 c6 7b  c1 5e cc 8b ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:755:ueAppCalcMac] [INFO]: Seq Nmb:1
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:757:ueAppCalcMac] [INFO]: Dir:1
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:758:ueAppCalcMac] [INFO]: Bearer:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:759:ueAppCalcMac] [HEX_DUMP]: Message[Len(107 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:759:ueAppCalcMac] [HEX_DUMP] [ 01 07 42 01  02 06 20 05   f5 20 00 01  00 50 52 01 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:759:ueAppCalcMac] [HEX_DUMP] [ c1 01 09 1f  0b 76 7a 77   69 6e 74 65  72 6e 65 74 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:759:ueAppCalcMac] [HEX_DUMP] [ 06 6d 6e 63  31 31 30 06   6d 63 63 32  30 38 04
+*************NbUiNbuHdlUeRadioCapMsg: Send UE cap msg SUCCESS*********
+ 67 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:759:ueAppCalcMac] [HEX_DUMP] [ 70 72 73 05  01 c2 a8 c8   03 5d 01 00  30 10 0b 52 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:759:ueAppCalcMac] [HEX_DUMP] [ 1f 73 8c fe  56 76 4b 56   56 00 6c 00  6c 00 5e 04 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:759:ueAppCalcMac] [HEX_DUMP] [ fe fe 7a 4e  27 08 80 80   21 04 02 00  00 04 50 0b ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:759:ueAppCalcMac] [HEX_DUMP] [ f6 05 f5 20  00 03 03 3a   22 74 ff ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:763:ueAppCalcMac] [INFO]: Mac:7972aaf0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:1012:ueAppGetEncBuf] [TRC2]: Entering ueAppGetEncBuf
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:799:ueAppEncMsg] [TRC2]: Entering ueAppEncMsg
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:807:ueAppEncMsg] [HEX_DUMP]: EncKey[Len(16 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:807:ueAppEncMsg] [HEX_DUMP] [ 1a e3 55 4c  b0 52 ba 7c   c2 b0 14 af  74 8f 07 0b ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:809:ueAppEncMsg] [INFO]: Seq Nmb:1
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:811:ueAppEncMsg] [INFO]: Dir:1
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:812:ueAppEncMsg] [INFO]: Bearer:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:813:ueAppEncMsg] [HEX_DUMP]: Message[Len(106 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:813:ueAppEncMsg] [HEX_DUMP] [ 07 42 01 02  06 20 05 f5   20 00 01 00  50 52 01 c1 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:813:ueAppEncMsg] [HEX_DUMP] [ 01 09 1f 0b  76 7a 77 69   6e 74 65 72  6e 65 74 06 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:813:ueAppEncMsg] [HEX_DUMP] [ 6d 6e 63 31  31 30 06 6d   63 63 32 30  38 04 67 70 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:813:ueAppEncMsg] [HEX_DUMP] [ 72 73 05 01  c2 a8 c8 03   5d 01 00 30  10 0b 52 1f ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:813:ueAppEncMsg] [HEX_DUMP] [ 73 8c fe 56  76 4b 56 56   00 6c 00 6c  00 5e 04 fe ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:813:ueAppEncMsg] [HEX_DUMP] [ fe 7a 4e 27  08 80 80 21   04 02 00 00  04 50 0b f6 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:813:ueAppEncMsg] [HEX_DUMP] [ 05 f5 20 00  03 03 3a 22   74 ff ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:817:ueAppEncMsg] [HEX_DUMP]: Enc Message[Len(106 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:817:ueAppEncMsg] [HEX_DUMP] [ 07 42 01 02  06 20 05 f5   20 00 01 00  50 52 01 c1 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:817:ueAppEncMsg] [HEX_DUMP] [ 01 09 1f 0b  76 7a 77 69   6e 74 65 72  6e 65 74 06 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:817:ueAppEncMsg] [HEX_DUMP] [ 6d 6e 63 31  31 30 06 6d   63 63 32 30  38 04 67 70 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:817:ueAppEncMsg] [HEX_DUMP] [ 72 73 05 01  c2 a8 c8 03   5d 01 00 30  10 0b 52 1f ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:817:ueAppEncMsg] [HEX_DUMP] [ 73 8c fe 56  76 4b 56 56   00 6c 00 6c  00 5e 04 fe ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:817:ueAppEncMsg] [HEX_DUMP] [ fe 7a 4e 27  08 80 80 21   04 02 00 00  04 50 0b f6 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:817:ueAppEncMsg] [HEX_DUMP] [ 05 f5 20 00  03 03 3a 22   74 ff ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:436:ueAppSetSeqNmb] [TRC2]: Entering ueAppSetSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:290:ueAppEstimatedSeqNmb] [TRC2]: Entering ueAppEstimatedSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:396:ueAppIncSeqNmb] [TRC2]: Entering ueAppIncSeqNmb
+PDN_TYPE: 1
+PDN_ADDRESS: 194 168 200 3
+[Stub] ../src/ts_utls.c:TC_API():498: Message Sent
+
+[Stub] Received (msgptr.msgType=12), expected (msgid=12)
+
+[Stub] Received a message of type = 12
+[Stub] Received Attach Accept Indication from TFW
+[Stub] Starting Traffic to Ue with UeId 1
+[Stub] T3412 = 4
+
+[Stub] Received Attach Accept indication
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:482:ueAppCmpUplnkSec] [TRC1]: Entering ueAppCmpUplnkSec
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:331:ueAppGetSeqNmb] [TRC2]: Entering ueAppGetSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:799:ueAppEncMsg] [TRC2]: Entering ueAppEncMsg
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:807:ueAppEncMsg] [HEX_DUMP]: EncKey[Len(16 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:807:ueAppEncMsg] [HEX_DUMP] [ 1a e3 55 4c  b0 52 ba 7c   c2 b0 14 af  74 8f 07 0b ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:809:ueAppEncMsg] [INFO]: Seq Nmb:1
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:811:ueAppEncMsg] [INFO]: Dir:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:812:ueAppEncMsg] [INFO]: Bearer:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:813:ueAppEncMsg] [HEX_DUMP]: Message[Len(7 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:813:ueAppEncMsg] [HEX_DUMP] [ 07 43 00 03  52 00 c2 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:817:ueAppEncMsg] [HEX_DUMP]: Enc Message[Len(7 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:817:ueAppEncMsg] [HEX_DUMP] [ 07 43 00 03  52 00 c2 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:748:ueAppCalcMac] [TRC2]: Entering ueAppCalcMac
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:753:ueAppCalcMac] [HEX_DUMP]: IntKey[Len(16 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:753:ueAppCalcMac] [HEX_DUMP] [ 0a 56 e6 f7  d1 6d 9d 80   46 23 c6 7b  c1 5e cc 8b ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:755:ueAppCalcMac] [INFO]: Seq Nmb:1
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:757:ueAppCalcMac] [INFO]: Dir:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:758:ueAppCalcMac] [INFO]: Bearer:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:759:ueAppCalcMac] [HEX_DUMP]: Message[Len(8 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:759:ueAppCalcMac] [HEX_DUMP] [ 01 07 43 00  03 52 00 c2 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:763:ueAppCalcMac] [INFO]: Mac:79b9c8e3
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:396:ueAppIncSeqNmb] [TRC2]: Entering ueAppIncSeqNmb
+[Stub] Entering tsSendDetachRequest(), ueId(1)
+
+[Stub] Sending Detach Request, ueId(1)
+[Stub] ../src/ts_utls.c:TC_msg_recv():278: Entering
+[Stub] TC_msg_recv(): msgid=16
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:482:ueAppCmpUplnkSec] [TRC1]: Entering ueAppCmpUplnkSec
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:331:ueAppGetSeqNmb] [TRC2]: Entering ueAppGetSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:799:ueAppEncMsg] [TRC2]: Entering ueAppEncMsg
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:807:ueAppEncMsg] [HEX_DUMP]: EncKey[Len(16 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:807:ueAppEncMsg] [HEX_DUMP] [ 1a e3 55 4c  b0 52 ba 7c   c2 b0 14 af  74 8f 07 0b ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:809:ueAppEncMsg] [INFO]: Seq Nmb:2
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:811:ueAppEncMsg] [INFO]: Dir:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:812:ueAppEncMsg] [INFO]: Bearer:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:813:ueAppEncMsg] [HEX_DUMP]: Message[Len(15 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:813:ueAppEncMsg] [HEX_DUMP] [ 07 45 11 0b  f6 05 f5 20   00 03 03 3a  22 74 ff ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:817:ueAppEncMsg] [HEX_DUMP]: Enc Message[Len(15 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:817:ueAppEncMsg] [HEX_DUMP] [ 07 45 11 0b  f6 05 f5 20   00 03 03 3a  22 74 ff ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:748:ueAppCalcMac] [TRC2]: Entering ueAppCalcMac
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:753:ueAppCalcMac] [HEX_DUMP]: IntKey[Len(16 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:753:ueAppCalcMac] [HEX_DUMP] [ 0a 56 e6 f7  d1 6d 9d 80   46 23 c6 7b  c1 5e cc 8b ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:755:ueAppCalcMac] [INFO]: Seq Nmb:2
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:757:ueAppCalcMac] [INFO]: Dir:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:758:ueAppCalcMac] [INFO]: Bearer:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:759:ueAppCalcMac] [HEX_DUMP]: Message[Len(16 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:759:ueAppCalcMac] [HEX_DUMP] [ 02 07 45 11  0b f6 05 f5   20 00 03 03  3a 22 74 ff ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:763:ueAppCalcMac] [INFO]: Mac:15bd2a54
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:396:ueAppIncSeqNmb] [TRC2]: Entering ueAppIncSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:584:ueAppVldDwnlnkSec] [TRC1]: Entering ueAppVldDwnlnkSec
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:954:ueAppGetSecHdr] [TRC2]: Entering ueAppGetSecHdr
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:362:ueAppIsVldSeqNmb] [TRC2]: Entering ueAppIsVldSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:331:ueAppGetSeqNmb] [TRC2]: Entering ueAppGetSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:290:ueAppEstimatedSeqNmb] [TRC2]: Entering ueAppEstimatedSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:983:ueAppGetIntBuf] [TRC2]: Entering ueAppGetIntBuf
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:290:ueAppEstimatedSeqNmb] [TRC2]: Entering ueAppEstimatedSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:748:ueAppCalcMac] [TRC2]: Entering ueAppCalcMac
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:753:ueAppCalcMac] [HEX_DUMP]: IntKey[Len(16 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:753:ueAppCalcMac] [HEX_DUMP] [ 0a 56 e6 f7  d1 6d 9d 80   46 23 c6 7b  c1 5e cc 8b ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:755:ueAppCalcMac] [INFO]: Seq Nmb:2
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:757:ueAppCalcMac] [INFO]: Dir:1
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:758:ueAppCalcMac] [INFO]: Bearer:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:759:ueAppCalcMac] [HEX_DUMP]: Message[Len(3 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:759:ueAppCalcMac] [HEX_DUMP] [ 02 07 46 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:763:ueAppCalcMac] [INFO]: Mac:66e2aae7
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:1012:ueAppGetEncBuf] [TRC2]: Entering ueAppGetEncBuf
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:799:ueAppEncMsg] [TRC2]: Entering ueAppEncMsg
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:807:ueAppEncMsg] [HEX_DUMP]: EncKey[Len(16 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:807:ueAppEncMsg] [HEX_DUMP] [ 1a e3 55 4c  b0 52 ba 7c   c2 b0 14 af  74 8f 07 0b ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:809:ueAppEncMsg] [INFO]: Seq Nmb:2
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:811:ueAppEncMsg] [INFO]: Dir:1
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:812:ueAppEncMsg] [INFO]: Bearer:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:813:ueAppEncMsg] [HEX_DUMP]: Message[Len(2 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:813:ueAppEncMsg] [HEX_DUMP] [ 07 46 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:817:ueAppEncMsg] [HEX_DUMP]: Enc Message[Len(2 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:817:ueAppEncMsg] [HEX_DUMP] [ 07 46 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:436:ueAppSetSeqNmb] [TRC2]: Entering ueAppSetSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:290:ueAppEstimatedSeqNmb] [TRC2]: Entering ueAppEstimatedSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:396:ueAppIncSeqNmb] [TRC2]: Entering ueAppIncSeqNmb
+[Stub] ../src/ts_utls.c:TC_API():498: Message Sent
+
+[Stub] Received (msgptr.msgType=16), expected (msgid=16)
+
+[Stub] Received a message of type = 16
+
+Received Detach Accept indication
+[Stub] ../src/ts_utls.c:TC_msg_recv():278: Entering
+[Stub] TC_msg_recv(): msgid=52
+[Stub] ../src/ts_utls.c:TC_API():498: Message Sent
+
+[Stub] Received (msgptr.msgType=52), expected (msgid=52)
+
+[Stub] Received a message of type = 52
+
+Received UE Context Release indication
+
+[Stub] Sending Service Request, ueId(1)
+Deleting Ue Context from Traffic Handler
+[Stub] ../src/ts_utls.c:TC_msg_recv():278: Entering
+[Stub] TC_msg_recv(): msgid=25
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:482:ueAppCmpUplnkSec] [TRC1]: Entering ueAppCmpUplnkSec
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:494:ueAppCmpUplnkSec] [ERROR]: NAS Message With Service Request                Header Type Received
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:684:ueAppCmpUplnkSrvReqSec] [TRC2]: Entering ueAppCmpUplnkSrvReqSec
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:331:ueAppGetSeqNmb] [TRC2]: Entering ueAppGetSeqNmb
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:748:ueAppCalcMac] [TRC2]: Entering ueAppCalcMac
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:753:ueAppCalcMac] [HEX_DUMP]: IntKey[Len(16 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:753:ueAppCalcMac] [HEX_DUMP] [ 0a 56 e6 f7  d1 6d 9d 80   46 23 c6 7b  c1 5e cc 8b ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:755:ueAppCalcMac] [INFO]: Seq Nmb:3
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:757:ueAppCalcMac] [INFO]: Dir:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:758:ueAppCalcMac] [INFO]: Bearer:0
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:759:ueAppCalcMac] [HEX_DUMP]: Message[Len(2 bytes)]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:759:ueAppCalcMac] [HEX_DUMP] [ c7 23 ]
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:763:ueAppCalcMac] [INFO]: Mac:22b51a28
+ [LTE-CNE-SEC] [../src/ueApp/ue_app_sec.c:396:ueAppIncSeqNmb] [TRC2]: Entering ueAppIncSeqNmb
+[Stub] ../src/ts_utls.c:TC_API():498: Message Sent
+
+[Stub] Received (msgptr.msgType=25), expected (msgid=25)
+
+[Stub] Received a message of type = 25
+
+Received Service Reject indication
+[Stub] ../src/ts_utls.c:TC_API():498: Message Sent
+[Stub] Cleaning SCTP connection
+
+[Stub]: Sending SCTP SHUTDOWN from Stub

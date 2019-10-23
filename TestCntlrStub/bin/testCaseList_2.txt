@@ -1,0 +1,5 @@
+StepAttachWithImsi 2
+ServiceRequest    1
+SyncFailure    2
+NomalTau 1
+AttachWithSecModeReject 1

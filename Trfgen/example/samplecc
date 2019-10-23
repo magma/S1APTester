@@ -1,0 +1,3 @@
+export LD_LIBRARY_PATH=/home/vagrant/vinay/Trfgen/bin
+gcc sample.c -o sample -L /home/vagrant/vinay/Trfgen/bin/ -ltrfgen
+

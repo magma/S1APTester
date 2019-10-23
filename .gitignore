@@ -1,0 +1,10 @@
+*.o
+*.swp
+cscope.out
+tags
+
+lib*.a
+libtfw.so
+libtrfgen.so
+
+TestCntlrStub/bin/testCntrlr
