@@ -1,11 +1,3 @@
-/**
- * Copyright (c) Facebook, Inc. and its affiliates.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
 /*
  * Copyright (c) 1999, 2000, 2001, 2002 X-Way Rights BV
  *
@@ -13,12 +5,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -434,7 +426,7 @@ typedef int (*keyedHashFunctionDigest )(keyedHashFunctionParam*, byte*);
  * The struct field 'keybitsmin' contains the minimum number of bits a key
  * must contains, 'keybitsmax' the maximum number of bits a key may contain,
  * 'keybitsinc', the increment in bits that may be used between min and max.
- * 
+ *
  * NOTE: data must be at least have a bytesize of 'digestsize' as described
  * in the keyedHashFunction struct.
  * NOTE: for safety reasons, after calling digest, each specific implementation

@@ -1,11 +1,3 @@
-/**
- * Copyright (c) Facebook, Inc. and its affiliates.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
 /*
  * Copyright (c) 2002 Bob Deblier
  *
@@ -60,7 +52,7 @@ extern "C" {
 
 #if defined(__SUNPRO_C) || defined(__SUNPRO_CC)
 /* this space intentionally left blank */
-#endif               
+#endif
 
 #ifdef __cplusplus
 }

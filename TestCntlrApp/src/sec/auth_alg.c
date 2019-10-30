@@ -1,11 +1,3 @@
-/**
- * Copyright (c) Facebook, Inc. and its affiliates.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
 /*-------------------------------------------------------------------
  *          Example algorithms f1, f1*, f2, f3, f4, f5, f5*
  *-------------------------------------------------------------------
@@ -17,7 +9,7 @@
  *
  *  This has been coded for clarity, not necessarily for efficiency.
  *
- *  The functions f2, f3, f4 and f5 share the same inputs and have 
+ *  The functions f2, f3, f4 and f5 share the same inputs and have
  *  been coded together as a single function.  f1, f1* and f5* are
  *  all coded separately.
  *
@@ -48,7 +40,7 @@ void RijndaelEncrypt( u8 input[16], u8 output[16] );
  *
  *-----------------------------------------------------------------*/
 
-void f1    ( u8 k[16], u8 rand[16], u8 sqn[6], u8 amf[2], 
+void f1    ( u8 k[16], u8 rand[16], u8 sqn[6], u8 amf[2],
              u8 mac_a[8] )
 {
   u8 op_c[16];
@@ -87,7 +79,7 @@ void f1    ( u8 k[16], u8 rand[16], u8 sqn[6], u8 amf[2],
 
   for (i=0; i<16; i++)
     rijndaelInput[i] ^= temp[i];
-  
+
   RijndaelEncrypt( rijndaelInput, out1 );
   for (i=0; i<16; i++)
     out1[i] ^= op_c[i];
@@ -99,7 +91,7 @@ void f1    ( u8 k[16], u8 rand[16], u8 sqn[6], u8 amf[2],
 } /* end of function f1 */
 
 
-  
+
 /*-------------------------------------------------------------------
  *                            Algorithms f2-f5
  *-------------------------------------------------------------------
@@ -176,7 +168,7 @@ void f2345 ( u8 k[16], u8 rand[16],
   return;
 } /* end of function f2345 */
 
-  
+
 /*-------------------------------------------------------------------
  *                            Algorithm f1*
  *-------------------------------------------------------------------
@@ -187,7 +179,7 @@ void f2345 ( u8 k[16], u8 rand[16],
  *
  *-----------------------------------------------------------------*/
 
-void f1star( u8 k[16], u8 rand[16], u8 sqn[6], u8 amf[2], 
+void f1star( u8 k[16], u8 rand[16], u8 sqn[6], u8 amf[2],
              u8 mac_s[8] )
 {
   u8 op_c[16];
@@ -226,7 +218,7 @@ void f1star( u8 k[16], u8 rand[16], u8 sqn[6], u8 amf[2],
 
   for (i=0; i<16; i++)
     rijndaelInput[i] ^= temp[i];
-  
+
   RijndaelEncrypt( rijndaelInput, out1 );
   for (i=0; i<16; i++)
     out1[i] ^= op_c[i];
@@ -237,7 +229,7 @@ void f1star( u8 k[16], u8 rand[16], u8 sqn[6], u8 amf[2],
   return;
 } /* end of function f1star */
 
-  
+
 /*-------------------------------------------------------------------
  *                            Algorithm f5*
  *-------------------------------------------------------------------
@@ -282,7 +274,7 @@ void f5star( u8 k[16], u8 rand[16],
   return;
 } /* end of function f5star */
 
-  
+
 /*-------------------------------------------------------------------
  *  Function to compute OPc from OP and K.  Assumes key schedule has
     already been performed.
@@ -291,7 +283,7 @@ void f5star( u8 k[16], u8 rand[16],
 void ComputeOPc( u8 op_c[16] )
 {
   u8 i;
-  
+
   RijndaelEncrypt( OP, op_c );
   for (i=0; i<16; i++)
     op_c[i] ^= OP[i];
@@ -346,7 +338,7 @@ u8 Xtime[256] = {
 
 
 /*-------------------------------------------------------------------
- *  Rijndael key schedule function.  Takes 16-byte key and creates 
+ *  Rijndael key schedule function.  Takes 16-byte key and creates
  *  all Rijndael's internal subkeys ready for encryption.
  *-----------------------------------------------------------------*/
 
@@ -409,7 +401,7 @@ int ByteSub(u8 state[4][4])
   for (i=0; i<4; i++)
     for (j=0; j<4; j++)
       state[i][j] = S[state[i][j]];
-  
+
   return 0;
 }
 
@@ -476,8 +468,8 @@ void MixColumn(u8 state[4][4])
 
 
 /*-------------------------------------------------------------------
- *  Rijndael encryption function.  Takes 16-byte input and creates 
- *  16-byte output (using round keys already derived from 16-byte 
+ *  Rijndael encryption function.  Takes 16-byte input and creates
+ *  16-byte output (using round keys already derived from 16-byte
  *  key).
  *-----------------------------------------------------------------*/
 
@@ -492,7 +484,7 @@ void RijndaelEncrypt( u8 input[16], u8 output[16] )
 
   /* add first round_key */
   KeyAdd(state, roundKeys, 0);
-  
+
   /* do lots of full rounds */
   for (r=1; r<=9; r++)
   {
@@ -515,7 +507,3 @@ void RijndaelEncrypt( u8 input[16], u8 output[16] )
 
   return;
 } /* end of function RijndaelEncrypt */
-
-
-
-

@@ -1,11 +1,3 @@
-/**
- * Copyright (c) Facebook, Inc. and its affiliates.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
 /*
  * Copyright (c) 2002, 2003 Bob Deblier
  *
@@ -33,7 +25,7 @@
  * of importance (according to gprof):
  * <ul>
  *  <li>mpaddmul
- *  <li>mpsetmul 
+ *  <li>mpsetmul
  *  <li>mpaddsqrtrc
  *  <li>mpsub
  *  <li>mpadd
@@ -67,7 +59,7 @@
 # define MP_WORDS_TO_BITS(x)	((x) << 5)
 # define MP_WORDS_TO_NIBBLES(x)	((x) << 3)
 # define MP_WORDS_TO_BYTES(x)	((x) << 2)
-# define MP_BITS_TO_WORDS(x)	((x) >> 5) 
+# define MP_BITS_TO_WORDS(x)	((x) >> 5)
 # define MP_NIBBLES_TO_WORDS(x)	((x) >> 3)
 # define MP_BYTES_TO_WORDS(x)	((x) >> 2)
 #else
@@ -447,7 +439,7 @@ void mpclrlsb(size_t size, mpw* data);
 BEECRYPTAPI
 void mpand(size_t size, mpw* xdata, const mpw* ydata);
 
-/*!\fn void mpor(size_t size, mpw* xdata, const mpw* ydata) 
+/*!\fn void mpor(size_t size, mpw* xdata, const mpw* ydata)
  * \brief This function computes the bit-wise OR of two multi-precision
  *  integers. Modifies xdata.
  * \param size The size of the multi-precision integer.
@@ -457,7 +449,7 @@ void mpand(size_t size, mpw* xdata, const mpw* ydata);
 BEECRYPTAPI
 void mpor(size_t size, mpw* xdata, const mpw* ydata);
 
-/*!\fn void mpxor(size_t size, mpw* xdata, const mpw* ydata) 
+/*!\fn void mpxor(size_t size, mpw* xdata, const mpw* ydata)
  * \brief This function computes the bit-wise XOR of two multi-precision
  *  integers. Modifies xdata.
  * \param size The size of the multi-precision integer.

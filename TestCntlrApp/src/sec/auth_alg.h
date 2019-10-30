@@ -1,11 +1,3 @@
-/**
- * Copyright (c) Facebook, Inc. and its affiliates.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
 /*-------------------------------------------------------------------
  *          Example algorithms f1, f1*, f2, f3, f4, f5, f5*
  *-------------------------------------------------------------------
@@ -17,7 +9,7 @@
  *
  *  This has been coded for clarity, not necessarily for efficiency.
  *
- *  The functions f2, f3, f4 and f5 share the same inputs and have 
+ *  The functions f2, f3, f4 and f5 share the same inputs and have
  *  been coded together as a single function.  f1, f1* and f5* are
  *  all coded separately.
  *
@@ -32,7 +24,7 @@ void f1    ( u8 k[16], u8 rand[16], u8 sqn[6], u8 amf[2],
              u8 mac_a[8] );
 void f2345 ( u8 k[16], u8 rand[16],
              u8 res[8], u8 ck[16], u8 ik[16], u8 ak[6] );
-void f1star( u8 k[16], u8 rand[16], u8 sqn[6], u8 amf[2], 
+void f1star( u8 k[16], u8 rand[16], u8 sqn[6], u8 amf[2],
              u8 mac_s[8] );
 void f5star( u8 k[16], u8 rand[16],
              u8 ak[6] );

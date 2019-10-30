@@ -1,11 +1,3 @@
-/**
- * Copyright (c) Facebook, Inc. and its affiliates.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
 /*
  * Copyright (c) 2002, 2003 Bob Deblier
  *
@@ -530,7 +522,7 @@ int mpaddw(size_t size, mpw* xdata, mpw y)
 		load = *xdata;
 		temp = load + 1;
 		*(xdata--) = temp;
-		carry = (load > temp);	
+		carry = (load > temp);
 	}
 	return carry;
 }
@@ -591,7 +583,7 @@ int mpsubw(size_t size, mpw* xdata, mpw y)
 		load = *xdata;
 		temp = load - 1;
 		*(xdata--) = temp;
-		carry = (load < temp);	
+		carry = (load < temp);
 	}
 	return carry;
 }
@@ -907,7 +899,7 @@ size_t mpsize(size_t size, const mpw* data)
 #ifndef ASM_MPBITS
 size_t mpbits(size_t size, const mpw* data)
 {
-	return MP_WORDS_TO_BITS(size) - mpmszcnt(size, data); 
+	return MP_WORDS_TO_BITS(size) - mpmszcnt(size, data);
 }
 #endif
 
@@ -1153,7 +1145,7 @@ void mpgcd_w(size_t size, const mpw* xdata, const mpw* ydata, mpw* result, mpw* 
 		mpcopy(size, wksp, ydata);
 		mpcopy(size, result, xdata);
 	}
-		
+
 	/* get the smallest returned values, and set shift to that */
 
 	shift = mprshiftlsz(size, wksp);
@@ -1278,7 +1270,7 @@ int mpextgcd_w(size_t size, const mpw* xdata, const mpw* ydata, mpw* result, mpw
 					{
 						/* keep adding the modulus until we get a carry */
 						while (!mpaddx(sizep, ddata, size, xdata));
-					} 
+					}
 					else
 					{
 						/* in some computations, d ends up > x, hence:
@@ -1289,8 +1281,8 @@ int mpextgcd_w(size_t size, const mpw* xdata, const mpw* ydata, mpw* result, mpw
 					}
 					mpsetx(size, result, sizep, ddata);
 				}
-				return 1; 
-			}   
+				return 1;
+			}
 			return 0;
 		}
 	}
@@ -1489,7 +1481,7 @@ int i2osp(byte *osdata, size_t ossize, const mpw* idata, size_t isize)
 			byte shift = 0;
 
 			/* fill right-to-left; much easier than left-to-right */
-			do	
+			do
 			{
 				osdata[--significant_bytes] = (byte)(w >> shift);
 				shift += 8;

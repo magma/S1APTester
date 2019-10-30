@@ -1,11 +1,3 @@
-/**
- * Copyright (c) Facebook, Inc. and its affiliates.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
 /*
  * Copyright (c) 2000, 2001 Virtual Unlimited B.V.
  *
@@ -30,7 +22,7 @@
  * \author Bob Deblier <bob.deblier@pandora.be>
  * \ingroup HASH_m HASH_sha256_m
  */
- 
+
 #define BEECRYPT_DLL_EXPORT
 
 #if HAVE_CONFIG_H
@@ -102,7 +94,7 @@ void sha256Process(register sha256Param* sp)
 	register uint32_t a, b, c, d, e, f, g, h, temp;
 	register uint32_t *w;
 	register byte t;
-	
+
 	#if WORDS_BIGENDIAN
 	w = sp->data + 16;
 	#else

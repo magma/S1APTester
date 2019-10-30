@@ -1,11 +1,3 @@
-/**
- * Copyright (c) Facebook, Inc. and its affiliates.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
 /*------------------------------------------------------------------------
 * snow_3g.c
 *------------------------------------------------------------------------*/
@@ -144,7 +136,7 @@ u32 S1(u32 w)
    u8 srw1 = SR[ (u8)((w >> 16) & 0xff) ];
    u8 srw2 = SR[ (u8)((w >> 8) & 0xff) ];
    u8 srw3 = SR[ (u8)((w) & 0xff) ];
- 
+
    r0 = ( ( MULx( srw0 , 0x1b) ) ^
         ( srw1 ) ^
         ( srw2 ) ^
@@ -343,4 +335,3 @@ void GenerateKeystream(u32 n, u32 *ks)
       ClockLFSRKeyStreamMode(); /* STEP 3 */
    }
 }
-
