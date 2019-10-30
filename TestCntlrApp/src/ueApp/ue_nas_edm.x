@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 
 /* data structure of nas encode/decode functions */
 #define UE_EMM_PD 0

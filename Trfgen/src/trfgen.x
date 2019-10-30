@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 
 #define MAX_TEST_CFG 10
 #define TCP_OMIT 0 /*omit the first n seconds (to ignore TCP slowstart)*/

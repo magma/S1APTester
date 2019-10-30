@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 #define MAX_ENB_NAME_LEN  20
 #define APN_LEN 6 
 #define MAX_OP_KEY_LEN 16

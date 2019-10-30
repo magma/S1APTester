@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 /*
  * @details This library provides a set of functions which are a wrapper
  *          around SSI timers. The aim of this library is to reduce the

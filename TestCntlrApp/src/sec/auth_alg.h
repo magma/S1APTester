@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 /*-------------------------------------------------------------------
  *          Example algorithms f1, f1*, f2, f3, f4, f5, f5*
  *-------------------------------------------------------------------

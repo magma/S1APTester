@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 #define UE_APP_CONFIG_REQ 1
 #define UE_CONFIG_REQ 2
 #define UE_ATTACH_REQ 3
