@@ -20,30 +20,30 @@ The S1APTester product contains the following components:
 
 <img src="docs/img/modules.png" alt="drawing" width="700"/>
 
--	Test Controller Framework (tfwApp)
-  -	Exposes APIs towards the Test Controller Stub
-  -	Responsible for configuring and interacting with UE Application and EnodeB
+*	Test Controller Framework (tfwApp)
+  *	Exposes APIs towards the Test Controller Stub
+  *	Responsible for configuring and interacting with UE Application and EnodeB
   Application layers
--	UE Application (ueApp)
-  -	Simulates the UE
-  -	Maintains UE related configuration and call processing data. Also has state
+*	UE Application (ueApp)
+  *	Simulates the UE
+  *	Maintains UE related configuration and call processing data. Also has state
   machines per UE
-  -	Has NAS codec and security modules to build the NAS messages
--	EnodeB Application (enbApp)
-  -	Simulates the EnodeB functionality
-  -	Maintains S1 Connection details
-  -	Has S1AP and eGTP protocol stacks.
-  -	Has TUCL Convergence layer, implements TCP and UDP layers
-  -	Responsible for setting up of S1 Control and User plane
--	Traffic Generator (Trfgen)
-  -	Provides API for trigerring User plane traffic over LTE bearers of a
+  *	Has NAS codec and security modules to build the NAS messages
+*	EnodeB Application (enbApp)
+  *	Simulates the EnodeB functionality
+  *	Maintains S1 Connection details
+  *	Has S1AP and eGTP protocol stacks.
+  *	Has TUCL Convergence layer, implements TCP and UDP layers
+  *	Responsible for setting up of S1 Control and User plane
+*	Traffic Generator (Trfgen)
+  *	Provides API for trigerring User plane traffic over LTE bearers of a
   simulated UE.
-  -	It uses Iperf3 for traffic generation
--	Test Controller Stub (TestStub)
-  -	Contains example test cases which use the APIs provided by test framework
+  *	It uses Iperf3 for traffic generation
+*	Test Controller Stub (TestStub)
+  *	Contains example test cases which use the APIs provided by test framework
   for simulating various control and user plane procedures.
-  -	Triggers various test case events towards Test Controller Framework (TFW)
-  -	Receives and processes events from TFW
+  *	Triggers various test case events towards Test Controller Framework (TFW)
+  *	Receives and processes events from TFW
 
 
 #	Compilation of S1APTester modules
