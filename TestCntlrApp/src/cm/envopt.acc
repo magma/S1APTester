@@ -1,28 +1,34 @@
-
+/**
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
 
 /********************************************************************20**
-  
+
      Name:     environment options
-  
+
      Type:     C include file
-  
+
      Desc:     Environment options specifies defines required by the
                by TRILLIUM software. The defines in this file need to be
                changed by the customer to reflect the software architecture
                needed to run under the target system hardware architecture.
-  
+
      File:     envopt_t2k.h
-  
+
      Sid:      envopt_t2k.h@@/main/TeNB_Main_BR/4 - Thu Apr 24 17:05:04 2014
-    
+
      Prg:      na
-  
+
 *********************************************************************21*/
 
 #ifndef __ENVOPTH__
 #define __ENVOPTH__
-  
-  
+
+
 /*
 *     this software may be combined with the following TRILLIUM
 *     software:
@@ -67,21 +73,21 @@
 *     1000054     Data Link Layer - Q.2140
 *     1000064     Broadband ISUP
 *     1000066     LAN Emulation Services (LE Services)
-*     1000074     V5.X LAPV5-DL 
-*     1000075     V5.X PSTN Network Layer 
-*     1000094     V5.X Control Protocol 
-*     1000095     V5.X Bearer Channel Connection Protocol 
-*     1000096     V5.X Protection Protocol 
-*     1000098     V5.X Link Control Protocol 
+*     1000074     V5.X LAPV5-DL
+*     1000075     V5.X PSTN Network Layer
+*     1000094     V5.X Control Protocol
+*     1000095     V5.X Bearer Channel Connection Protocol
+*     1000096     V5.X Protection Protocol
+*     1000098     V5.X Link Control Protocol
 *     1000084     V5.X Envelope Function
 *     1000086     FR-ATM Inteworking Layer
 *     1000088     Frame Relay Data Link Layer(Q.922)
-*     1000096     V5.X Protection Protocol 
-*     1000128     X.25/X.75 Packet Level Protocol 
+*     1000096     V5.X Protection Protocol
+*     1000128     X.25/X.75 Packet Level Protocol
 *     1000135     Windows NT -- Multithreaded system services
 *     1000139     MPC860SAR driver
 *     1000163     MPC8260 driver
-*     1000237     LDF-ISUP 
+*     1000237     LDF-ISUP
 *     1000241     3GPP-MAC
 *     1000243     3GPP-NBAP
 *     1000348     MAC-HS
@@ -89,7 +95,7 @@
 *
 */
 
- 
+
 /* defines */
 /**************************************************************************
    general parameters
@@ -138,13 +144,13 @@
 /* #define SS_VW                VxWorks System Services 2.1 */
 
 /* if one of the above options SS_PS, SS_MT, SS_SK, NS or SS_VW is enabled,
- * uncomment the following lines 
+ * uncomment the following lines
  */
 #if  (defined(SS_PS) \
       || defined(SS_MT) \
       || defined(SS_SK) \
       || defined(NS)    \
-      || defined(SS_VW)) 
+      || defined(SS_VW))
 #ifndef SS
 #define SS              /* enable common system services */
 #endif
@@ -170,7 +176,7 @@
 
 /* common SS7 stack defines */
 
-#define CMSS7_SPHDROPT     
+#define CMSS7_SPHDROPT
 /* spHdrOpt option. Enable this flag for  the upper layers of SCCP as well.  */
 
 /**************************************************************************
@@ -199,7 +205,7 @@
 
 #define GS_IPCOMM302
 #define GS_IPCOMM3XX
- 
+
 #else /* not elvis 68302 */
 
 #ifdef ELVIS_PPC860
@@ -216,17 +222,17 @@
 #define PROC_PPC860        /* Denotes the processor type */
 #define PROC_PPC           /* General Power PC */
 #define ENB_RELAY          /* enable relay */
-   
+
 #ifdef RY_ENBRAW
 #undef RY_ENBRAW
 #endif /* RY_ENBRAW */
 #define RY_ENBRAW           /* enable raw channels */
 #define SS7_MICROCODE       /* ss7 microcode */
 #define CCPPC               /* Denotes which compiler is used */
-   
+
 #define PQ_PPC860           /* Force Power Quicc 860 Board */
 #define PQ_PPC8XX           /* Force Power Quicc 8XX Board */
- 
+
 #else /* not elvis PPC860*/
 
 #ifdef ELVIS_68360
@@ -252,7 +258,7 @@
 
 #define GS_IPCOMM360
 #define GS_IPCOMM3XX
- 
+
 #else /* not elvis 68360 */
 #ifdef ELVIS_68040
 #define ELVIS
@@ -272,7 +278,7 @@
 
 /* uncomment one of the following */
 #define MVME162_1
- 
+
 #else /* not elvis 68040 */
 #ifdef ELVIS_STACK
 #define ELVIS
@@ -372,7 +378,7 @@
 #define CCPPC            /* GNU Compiler */
 #define PC_PPC604        /* FORCE Power Core 604 Board */
 #define PC_PPC60X        /* FORCE Power Core 60X Board */
- 
+
 
 #endif /* ELVIS_PPC604 */
 #endif /* ELVIS_APP */
@@ -393,11 +399,11 @@
 #define CCPPC               /* Denotes which compiler is used */
 #define PQ_PPC860           /* Force Power Quicc 860 Board */
 #endif /* PQUICCADS */
- 
+
 
 #ifdef INTNT_PMC860
 /**************************************************************************
-   Integrated Windows NT SS7/PMC860 Platform 
+   Integrated Windows NT SS7/PMC860 Platform
 **************************************************************************/
 #define STKID_INTNT_PMC860_KERNEL  0x01  /* stack id for the kernel stack */
 #define MAX_USER_SPACE_STKS        0x06  /* six user space stks are possible */
@@ -447,9 +453,9 @@
 #define RY_ENBNTUK_MST       /* user space is slave */
 #define RY_ENBNTKH        1  /* relay kernel-hardware */
 
-/* 
- * select this option only if the software has already 
- * been burnt in 
+/*
+ * select this option only if the software has already
+ * been burnt in
  */
 #define PMC860_BOOTABLE          /* software is already loaded */
 #define FRC_PMC860          1    /* enable the hardware defines */
@@ -458,8 +464,8 @@
 #define INTNT_PMC860_BOARD1 1    /* Force PMC860 board-1 */
 
 /* The following are the channel ranges reserved */
-#define KERNEL_KH_RELAY_LOW_CHANID    1 
-#define KERNEL_KH_RELAY_HIGH_CHANID   MAXBRDS  
+#define KERNEL_KH_RELAY_LOW_CHANID    1
+#define KERNEL_KH_RELAY_HIGH_CHANID   MAXBRDS
 #define KERNEL_UK_RELAY_LOW_CHANID    (KERNEL_KH_RELAY_HIGH_CHANID + 1)
 #define KERNEL_UK_RELAY_HIGH_CHANID   (KERNEL_UK_RELAY_LOW_CHANID + \
                                        MAX_USER_SPACE_STKS)
@@ -503,11 +509,11 @@
 **************************************************************************/
 
 /* product version, choose one */
- 
+
 #ifndef APVER2
 #define APVER2         /* asynchronous pad, version 2.x */
 #endif
- 
+
 #define L3VER2         /* isdn, version 2.x */
 
 /* interfaces */
@@ -572,10 +578,10 @@
 #define ISDN_3_8_PLUS  /* Code version 3.10 & above */
 
 /* enable ISDN_3_8_PLUS if INT2 is enabled */
-#ifdef INT2 
+#ifdef INT2
 #ifndef ISDN_3_8_PLUS
-#define ISDN_3_8_PLUS 
-#endif 
+#define ISDN_3_8_PLUS
+#endif
 #endif /* INT2 */
 
 /*#define INT_OLD_DEFINES      use old defines in int.h */
@@ -584,7 +590,7 @@
 #define BDVER2
 
 #define INVER2         /* isdn, version 2.x */
- 
+
 #define ANVER2         /* isdn, version 2.x */
 
 #define L3VER2         /* isdn, version 2.x */
@@ -639,7 +645,7 @@
 #define NETSIDE       /*network side, option 2 or option 3 */
 
 /* Option for ITUT-88 standard - used in bearcapability encoding/decoding */
- 
+
 /* #define ITUT88      ITU-T 88 - for Bearer Capability */
 
 /* switch variants, choose none or more */
@@ -649,9 +655,9 @@
 /*#define ATT            att 4ess and 5ess, option 11 */
 /*#define NT             northern telecomm dms-100, option 12 */
 /*#define VN             vn 2 and vn 3, france, option 13 */
-/*#define ETSI           etsi, europe, option 14 */ 
-/*#define AUS            AUS, australian, option 15 */ 
-/*#define NI1            national isdn 1, north america, option 16 */ 
+/*#define ETSI           etsi, europe, option 14 */
+/*#define AUS            AUS, australian, option 15 */
+/*#define NI1            national isdn 1, north america, option 16 */
 /*#define NTT            ins net, japan, option 17 */
 /*#define INTR6          1 - TR6, german, option 18 */
 /*#define ATT5E          att 5ess, option 19 */
@@ -663,7 +669,7 @@
 /*#define BC303TMC       bellcore tr-303, tmc , option 25 */
 /*#define BC303CSC       bellcore tr-303, csc, option 26 */
 /*#define Q932           q.932 option, option 27 */
-/*#define NI2            national isdn 2, north america, option 28 */ 
+/*#define NI2            national isdn 2, north america, option 28 */
 /*#define QSIG           etsi qsig, option 29 */
 /*#define NTNI           nt ni, option 31 */
 /*#define NTMCI          nt mci, option 32 */
@@ -707,7 +713,7 @@
                          /* elements into individual elements vs. string */
 #define MF_IN         1  /* For MF purposes */
 
-#ifdef NETSIDE 
+#ifdef NETSIDE
 #define ISDN_PTMPT    1  /* ISDN Point to Multipoint. */
 #endif /* NETSIDE */
 
@@ -724,7 +730,7 @@
 /*#define NI2_BCAS          NI2 B channel service procedure */
 /*#define NI2_TREST         NI2 TREST timer */
 /*#define IN_NW_NMB         pass network number (station id) to call control */
-#endif 
+#endif
 
 /*#define ISDN_RLNK         send STATENQ msg after date link reestablishment */
 /*#define ISDN_SNDRSTIND    send IntRstInd to layer 4 after recving RST msg */
@@ -761,7 +767,7 @@
 **************************************************************************/
 
 /* product version, choose one */
- 
+
 
 /* interfaces */
 
@@ -776,7 +782,7 @@
 /* lower interface, data link, choose none or more */
 
 /* Select one or both */
-/* #define LCFRLIFRD      loosely coupled, any layer to FR layer, 
+/* #define LCFRLIFRD      loosely coupled, any layer to FR layer,
                           common functions */
 /* #define LCFRUIFRD      loosely coupled, layer 2 to any layer */
 
@@ -794,13 +800,13 @@
 
 /* layer management options */
 
-#define FN_LMINT3         /* FN uses LMINT3 code 
-                           * If this flag is enabled, enable SMFN_LMINT3 
-                           * in #ifdef SM section 
-                           * If this flag is disabled, disable SMFN_LMINT3 
-                           * in #ifdef SM section 
+#define FN_LMINT3         /* FN uses LMINT3 code
+                           * If this flag is enabled, enable SMFN_LMINT3
+                           * in #ifdef SM section
+                           * If this flag is disabled, disable SMFN_LMINT3
+                           * in #ifdef SM section
                            */
- 
+
 #ifdef LMINT3
 #ifdef FN_LMINT3
 #undef FN_LMINT3
@@ -810,7 +816,7 @@
 
 /* #define LCFNMILFN      loosely coupled, layer management */
 /* Also enable LCSMFNMILFN under #ifdef SM if SM to FN is to
- * be loosely coupled 
+ * be loosely coupled
  */
 
 /* Options chosen must be consistent with product delivered */
@@ -827,9 +833,9 @@
 #ifdef NETSIDE
 /* Select only if PVC multicast operation required */
 #define FN_MCAST         /* Multcast procedures */
-/* Enable the flag FN_MULTIPLE_LMI_ENTITIES if using PVCs that switch 
+/* Enable the flag FN_MULTIPLE_LMI_ENTITIES if using PVCs that switch
    across multiple cards */
-#define FN_MULTIPLE_LMI_ENTITIES 
+#define FN_MULTIPLE_LMI_ENTITIES
 #endif /* #ifdef NETSIDE */
 #endif /* #ifdef FN_LMI */
 
@@ -864,23 +870,23 @@
 #endif /* #ifdef FN_FRF4 */
 
 #endif /* #ifdef FN_UNI */
- 
+
 /* Select NNI signalling */
 /* #define FN_NNI         Enable NNI signalling */
 #ifdef FN_NNI
- 
+
 /* Select X76 signalling procedures */
 #define  FN_X76        /* Enable X76 procedures */
 #ifdef FN_X76
 #define X76 1
 #endif /* #ifdef FN_X76 */
- 
+
 /* Select FRF10 signalling procedures */
 #define  FN_FRF10      /* Enable FRF10 procedures */
 #ifdef FN_FRF10
 #define FRF10 1
 #endif /* #ifdef FN_FRF10 */
- 
+
 #endif /* #ifdef FN_NNI */
 
 /* Enable User side procedures of UNI */
@@ -918,7 +924,7 @@
 
 /* lower interface, data link, choose none or more */
 
-/* #define LCVFLILVT    loosely coupled, data link layer */ 
+/* #define LCVFLILVT    loosely coupled, data link layer */
 
 /* management interface, lvf , choose none or more */
 
@@ -936,7 +942,7 @@
 #define V5_2                /* V5.2 Interface */
 
 #define V5_VER2             /* V5 Version 2 */
- 
+
 #endif  /* VF */
 
 
@@ -991,7 +997,7 @@
 
 #define MF_NV        1 /* For MF purposes */
 #define V5X            /* For MF purposes */
- 
+
 #endif
 
 
@@ -1041,7 +1047,7 @@
 
 #define V5X            /* For MF purposes */
 #define MF_NV        1 /* For MF purposes */
- 
+
 #endif /* CV */
 
 
@@ -1062,7 +1068,7 @@
 
 /* #define LCBVUIBVT    loosely coupled, layer 3  BV -> Layer 4 */
 /* #define LCBVLILVT    loosely coupled, data link layer BV -> LV*/
-/* #define LCBVMILBV    loosely coupled, layer management */ 
+/* #define LCBVMILBV    loosely coupled, layer management */
 
 /* product specific options */
 
@@ -1073,7 +1079,7 @@
 
 #define V5X            /* For MF purposes */
 #define MF_NV        1 /* For MF purposes */
- 
+
 #endif /* BV */
 
 #ifdef LK       /* V5.2 Link Control Protocol */
@@ -1104,7 +1110,7 @@
 #define ACCESS_NETWORK   /* The Protection should be compiled for Access Network */
 
 /* #define LCPVLILVT     loosely coupled, data link layer PV -> LV*/
-/* #define LCPVMILPV    loosely coupled, layer management */ 
+/* #define LCPVMILPV    loosely coupled, layer management */
 
 /* product specific options */
 
@@ -1115,7 +1121,7 @@
 
 #define V5X            /* For MF purposes */
 #define MF_PV        1 /* For MF purposes */
- 
+
 #endif /* PV */
 
 
@@ -1287,58 +1293,58 @@
 
 #ifdef MV       /* V5 System Management  */
 /**************************************************************************
-   V5 System Management 
+   V5 System Management
 **************************************************************************/
- 
+
 /* interfaces */
- 
+
 /* interface to control protocol, lmv, choose none or more */
- 
+
 /* #define LCMVMILMV       loosely coupled, lmv layer */
- 
+
 /* interface to control protocol, lcv, choose none or more */
- 
+
 /* #define LCMVMILCV       loosely coupled, lcv layer */
- 
+
 /* interface to pstn, lnv, choose none or more */
- 
+
 /* #define LCMVMILNV       loosely coupled, lnv layer */
- 
+
 /* interface to bcc, lbv, choose none or more */
- 
+
 /* #define LCMVMILBV       loosely coupled, lbv layer */
- 
+
 /* interface to bcc, lpv, choose none or more */
- 
+
 /* #define LCMVMILPV       loosely coupled, lpv layer */
- 
+
 /* interface to bcc, llk, choose none or more */
- 
+
 /* #define LCMVMILLK       loosely coupled, llk layer */
- 
+
 /* interface to envelop function, lev, choose none or more */
- 
+
 /* #define LCMVMILEV       loosely coupled, lev layer */
- 
+
 /* management interface, ll1, choose none or more */
- 
+
 /* #define LCMVMILL1       loosely coupled, layer management */
- 
+
 /* layer management options */
- 
+
 /* LCLM or TCLM chosen above, if LCLM or TCLM not chosen */
 /* then choose none or one within else */
- 
+
 /* product specific options */
- 
+
 /* Whether V5.1 system or V5.2 system. Choose one or both */
 #define V5_1            /* V5.1 */
 #define V5_2            /* V5.2 */
- 
+
 /* Whether AN side system or LE side system. Choose one or both */
 #define V5_AN           /* V5.1 */
 #define V5_LE           /* V5.2 */
- 
+
 #endif
 
 
@@ -1358,15 +1364,15 @@
 /* #define AALINT3  1       AAL upper interface with bind confirm*/
 
 /* layer management options, choose none */
- 
+
 #ifndef LMINT2
 #define LMINT2          /* layer management interface 2 */
 #endif
 
 /* #define AS_LMINT3       layer management interface 3.
-                           If this flag is enabled, enable SMAS_LMINT3 
-                           in #ifdef SM section 
-                           If this flag is disabled, disable SMAS_LMINT3 
+                           If this flag is enabled, enable SMAS_LMINT3
+                           in #ifdef SM section
+                           If this flag is disabled, disable SMAS_LMINT3
                            in #ifdef SM section.
                            This flag should be turned off for pre LMINT3
                            interface.
@@ -1461,13 +1467,13 @@
 #define AS_POWER_UP_ROBUST 1
 
 /* q.saal option to compile UNI3.0 code*/
- 
+
 #define ASOPT_QSAAL1_2 1   /*   q.saal option to compile UNI3.0 code*/
- 
+
 /* q.saal option to compile UNI3.1 code*/
- 
+
 #define ASOPT_Q21x0 1     /*   q.saal option to compile UNI3.1 code*/
- 
+
 /* q.saal option to compile IDLE state of dlc */
 
 #define ASOPT_IDLE_LINK 1 /* q.saal option to compile IDLE state of dlc */
@@ -1494,7 +1500,7 @@
 #ifdef TDS_ROLL_UPGRADE_SUPPORT
 #ifndef TDS_CORE2
 #error "Rolling upgrade feature available in CORE II only."
-#endif /* TDS_CORE2 */ 
+#endif /* TDS_CORE2 */
 #endif /* TDS_ROLL_UPGRADE_SUPPORT */
 
 #ifdef AS_RUG
@@ -1529,10 +1535,10 @@
 
 #ifdef AS_RUG
 #ifndef ASDV1
-#define ASDV1        /* Upper interface version 1.0 */ 
+#define ASDV1        /* Upper interface version 1.0 */
 #endif
 #ifndef ASIV1
-#define ASIV1        /* Upper interface version 1.0 */ 
+#define ASIV1        /* Upper interface version 1.0 */
 #endif
 #endif /* AS_RUG */
 
@@ -1560,10 +1566,10 @@
 
 /*** Interface Backward Compatibility Options ***/
 /* #define PN_LMINT3       PN uses LMINT3 code  */
-                        /* If this flag is enabled, enable SMPN_LMINT3 
-                         * in #ifdef SM section 
-                         * If this flag is disabled, disable SMPN_LMINT3 
-                         * in #ifdef SM section 
+                        /* If this flag is enabled, enable SMPN_LMINT3
+                         * in #ifdef SM section
+                         * If this flag is disabled, disable SMPN_LMINT3
+                         * in #ifdef SM section
                          *
                          * This flag should be turned off for pre LMINT3
                          * interface.
@@ -1577,7 +1583,7 @@
 #endif /* LMINT3 */
 
 /* layer management options, choose none */
- 
+
 #ifndef LMINT2
 #define LMINT2          /* layer management interface 2 */
 #endif
@@ -1654,7 +1660,7 @@
 /* product specific options */
 
 /* debugging flags: compiles in dump functions */
-/* #define DBGTDSPN  1       */            
+/* #define DBGTDSPN  1       */
 
 /* type, chosen automatically */
 
@@ -1665,7 +1671,7 @@
 #endif
 
 #ifndef SIG_PNNI
-#define SIG_PNNI       1 
+#define SIG_PNNI       1
 #define DEF_SIG_PNNI      1
 #endif
 
@@ -1682,17 +1688,17 @@
 /* interfaces */
 
 /* lower interface, AMT, choose none or more */
- 
+
 /* #define LCPULIAMT     loosely coupled, signalling lower layer */
- 
+
 /* lower interface, data link, choose none or more */
- 
+
 #ifdef LCPULIAMT
- 
+
 #ifndef LCAMT
 #define LCAMT 1
 #endif
- 
+
 #endif  /* LCPULIAMT */
 
 /* lower interface, data link, choose none or more */
@@ -1722,7 +1728,7 @@
 #endif
 
 #ifndef SIG_PNNI
-#define SIG_PNNI       1 
+#define SIG_PNNI       1
 #define DEF_SIG_PNNI      1
 #endif
 
@@ -1738,7 +1744,7 @@
 /* must agree with options delivered */
 
 /* Q.2931 option */
- 
+
 /* #define Q2931                  ITU-T Q.2931 & Q.2971 code enabled */
 
 #ifndef Q2931
@@ -1746,9 +1752,9 @@
 #else
 #define DEF_Q2931         1
 #endif /* Q2931 */
- 
+
 /* PNNI Signalling options */
- 
+
 /* #define SIG_PNNI               PNNI Signalling code enabled */
 
 #ifndef SIG_PNNI
@@ -1758,7 +1764,7 @@
 #endif /* SIG_PNNI */
 
 /* AINI Signalling options */
- 
+
 /* #define SIG_AINI               AINI Signalling code enabled */
 
 #ifndef SIG_AINI
@@ -1770,7 +1776,7 @@
 /* UNI 4.0 option */
 
 /* #define UNI40                  ATM Forum UNI ver 4.0 enabled */
- 
+
 #ifndef UNI40
 #define DEF_UNI40      0
 #else
@@ -1808,7 +1814,7 @@
 
 
 /* layer management options, choose none */
- 
+
 #ifndef LMINT2
 #define LMINT2          /* layer management interface 2 */
 #endif
@@ -1852,7 +1858,7 @@
 
 #ifdef LCAMUIAMT
 
-#ifndef LCAMT    
+#ifndef LCAMT
 #define LCAMT      1    /* define LC flag for AMT interface */
 #endif
 
@@ -1906,7 +1912,7 @@
 
 /* Option to send STATUS on optional IE error */
 /* #define AMOPT_STAT_ON_OPT_ELEM_ERR 1  Send STATUS on optional IE error */
- 
+
 #ifdef AMOPT_STAT_ON_OPT_ELEM_ERR
 /* #define AM_STAT_ON_OPT_ELEM_ERR 1  Send STATUS on optional IE error */
 #endif /* AMOPT_STAT_ON_OPT_ELEM_ERR */
@@ -1933,7 +1939,7 @@
 
 /* accounting enable option */
 /* #define AM_ACNT         enable accounting by Q.93B */
- 
+
 #ifndef AM_ACNT
 #define DEF_AM_ACNT      0
 #else
@@ -1943,22 +1949,22 @@
 
 /* Option to enable routing feature between SAPs */
 /* #define AMOPT_ROUTING */
- 
-#ifdef AMOPT_ROUTING 
+
+#ifdef AMOPT_ROUTING
 #define DEF_AMOPT_ROUTING     1
 #else /* AMOPT_ROUTING */
 #define DEF_AMOPT_ROUTING     0
-#endif /* AMOPT_ROUTING */ 
+#endif /* AMOPT_ROUTING */
 
 
 /* Option to enable calling party number insertion feature */
 /* #define AMOPT_CPTYINS     */
 
-#ifdef AMOPT_CPTYINS 
+#ifdef AMOPT_CPTYINS
 #define DEF_AMOPT_CPTYINS     1
 #else /* AMOPT_CPTYINS */
 #define DEF_AMOPT_CPTYINS     0
-#endif /* AMOPT_CPTYINS */ 
+#endif /* AMOPT_CPTYINS */
 
 
 /* Option to avoid copying of message buffer before
@@ -1968,15 +1974,15 @@
  * Same is also true for encode side
  */
 /* #define AMOPT_SINGLE_DBUF_MSG    */
- 
+
 #ifdef AMOPT_SINGLE_DBUF_MSG
 #define DEF_AMOPT_SINGLE_DBUF_MSG  1
 #else /* AMOPT_SINGLE_DBUF_MSG */
 #define DEF_AMOPT_SINGLE_DBUF_MSG  0
 #endif /* AMOPT_SINGLE_DBUF_MSG */
- 
 
-/* Option to avoid following checks for outgoing calls 
+
+/* Option to avoid following checks for outgoing calls
  * (AmtXXXReq, AmtXXXRsp primitives)
  * You can turn this flag on if you are sure that the
  * layer 4 is reliable enough to avoid following error
@@ -1988,19 +1994,19 @@
  */
 
 /* #define AMOPT_XTRACHECKS     */
- 
+
 #ifdef AMOPT_XTRACHECKS
 #define DEF_AMOPT_XTRACHECKS 1
 #else
 #define DEF_AMOPT_XTRACHECKS 0
 #endif /* AMOPT_XTRACHECKS */
- 
+
 
 /* Option to use SAddMsgRef system service call instead of
- * SCpyMsgMsg call to make a copy of SETUP message for 
+ * SCpyMsgMsg call to make a copy of SETUP message for
  * retransmission purpose when timer T303 expires.
  *
- * For details, refer System Services Service Definition 
+ * For details, refer System Services Service Definition
  * documentation
  *
  * WARNING :- Please make 100% sure that your SAddMsgRef
@@ -2008,16 +2014,16 @@
  * on this flag, otherwise performance will degrade.
  */
 /* #define AMOPT_MSGREFIMPLTD  */
- 
 
-/* Optional status handling, call not released on implementation 
- * dependent conditions. It  gives status confirm to Service user, 
+
+/* Optional status handling, call not released on implementation
+ * dependent conditions. It  gives status confirm to Service user,
  * irrespective of the cause. Service user is responsible to decide
  * whether to release the call if optional Ie is not implemented down
  * the line.
  */
-/* #define AMOPT_EXPOSE_STATHNDL  Optional status handling, call not released 
-                                * on implementation dependent conditions 
+/* #define AMOPT_EXPOSE_STATHNDL  Optional status handling, call not released
+                                * on implementation dependent conditions
                                 */
 
 
@@ -2035,14 +2041,14 @@
 
 
 /* LAM Interface options */
-/*#define AM_LMINT3 */              /* AM uses LMINT3 code                         * 
-                                    * If this flag is enabled, enable SMAM_LMINT3 * 
+/*#define AM_LMINT3 */              /* AM uses LMINT3 code                         *
+                                    * If this flag is enabled, enable SMAM_LMINT3 *
                                     * in #ifdef SM section                        */
 #ifdef LMINT3
 #ifdef AM_LMINT3
 #undef AM_LMINT3
 #define AM_LMINT3         1
-#endif 
+#endif
 #endif
 
 
@@ -2075,7 +2081,7 @@
 
 /* ASD Interface Options */
 /* #define ASD2  1 */                   /* Use ASD Interface with Bind Confirm implemented */
- 
+
 #endif /* AM */
 
 
@@ -2097,7 +2103,7 @@
 
 /* #define CUSTENV */
 
-/* Note : Make sure that the flag AM_LMINT3 in #ifdef AM section 
+/* Note : Make sure that the flag AM_LMINT3 in #ifdef AM section
           and SMAM_LMINT3 in #ifdef SM section above as well as
           flag LMINT3 above are also turned-on */
 
@@ -2113,7 +2119,7 @@
 /* interfaces */
 
 /* layer management options, choose none */
- 
+
 #ifndef LMINT2
 #define LMINT2          /* layer management interface 2 */
 #endif
@@ -2176,7 +2182,7 @@
 
 #ifdef LCECUIECM
 
-#ifndef LCECM    
+#ifndef LCECM
 #define LCECM      1    /* define LC flag for ECM interface */
 #endif
 
@@ -2184,7 +2190,7 @@
 
 #ifdef LCECLIAMT
 
-#ifndef LCAMT    
+#ifndef LCAMT
 #define LCAMT      1    /* define LC flag for AMT interface */
 #endif
 
@@ -2233,7 +2239,7 @@
 /* interfaces */
 
 /* layer management options, choose none */
- 
+
 #ifndef LMINT2
 #define LMINT2          /* layer management interface 2 */
 #endif
@@ -2288,7 +2294,7 @@
 
 #ifdef LCESLIAMT
 
-#ifndef LCAMT    
+#ifndef LCAMT
 #define LCAMT      1    /* define LC flag for AMT interface */
 #endif
 
@@ -2329,7 +2335,7 @@
 /* interfaces */
 
 /* layer management options, choose none */
- 
+
 #ifndef LMINT2
 #define LMINT2          /* layer management interface 2 */
 #endif
@@ -2372,7 +2378,7 @@
 
 #ifdef LCUMUIUME
 
-#ifndef LCUME    
+#ifndef LCUME
 #define LCUME 1         /* define LC flag for UME interface */
 #endif
 
@@ -2425,7 +2431,7 @@
 /* interfaces */
 
 /* layer management options, choose none */
- 
+
 #ifndef LMINT2
 #define LMINT2          /* layer management interface 2 */
 #endif
@@ -2435,7 +2441,7 @@
 /* #define LCMULIUME 1      loosely coupled, ume service interface */
 
 /* interface, choose one or none */
- 
+
 /* layer management options */
 
 /* LCLM or TCLM chosen above, if LCLM or TCLM not chosen */
@@ -2462,7 +2468,7 @@
 
 #ifdef LCMULIUME
 
-#ifndef LCUME     
+#ifndef LCUME
 #define LCUME 1         /* define LC flag for UME interface */
 #endif
 
@@ -2499,7 +2505,7 @@
 /* interfaces */
 
 /* layer management options, choose none */
- 
+
 #ifndef LMINT2
 #define LMINT2          /* layer management interface 2 */
 #endif
@@ -2515,15 +2521,15 @@
 
 /* #define LCIMMILIM 1      loosely coupled, layer management */
 
-/* #define IM_LMINT3        new management interface. turning off 
-                            requires SMIM_LMINT3 flag also to be 
+/* #define IM_LMINT3        new management interface. turning off
+                            requires SMIM_LMINT3 flag also to be
                             turned off in #ifdef SM section */
 
 
 /* product specific options */
 
 /* #define IMOPTS_AUTOCFG_OPTION 1   Auto-Configuration feature */
-     
+
 /* #define IMOPTS_SEL_ADDR_REG   1   Selective Address Reg feature */
 
 /* #define IMOPTS_ADDR_AUTH      1   Address Authentication feature */
@@ -2609,7 +2615,7 @@
 
 #ifdef LCPAUICIP
 
-#ifndef LCCIP    
+#ifndef LCCIP
 #define LCCIP      1    /* define LC flag for CIP interface */
 #endif
 
@@ -2617,14 +2623,14 @@
 
 #ifdef LCPAUIECM
 
-#ifndef LCECM    
+#ifndef LCECM
 #define LCECM      1    /* define LC flag for ECM interface */
 #endif
 
 #endif /* LCPAUIECM */
 
 #ifdef LCPAUIMPA
- 
+
 #ifndef LCMPA
 #define LCMPA      1    /* define LC flag for MPA interface */
 #endif
@@ -2633,7 +2639,7 @@
 
 #ifdef LCPALIAMT
 
-#ifndef LCAMT    
+#ifndef LCAMT
 #define LCAMT      1    /* define LC flag for AMT interface */
 #endif
 
@@ -2821,7 +2827,7 @@
 /* signalling variants */
 
 /* Q.2931 option */
- 
+
 /* #define Q2931                   ITU-T Q.2931 & Q.2971 code enabled */
 
 #ifndef Q2931
@@ -2829,9 +2835,9 @@
 #else
 #define DEF_Q2931         1
 #endif /* Q2931 */
- 
+
 /* PNNI Signalling options */
- 
+
 /* #define SIG_PNNI               PNNI Signalling code enabled */
 
 #ifndef SIG_PNNI
@@ -2841,7 +2847,7 @@
 #endif /* SIG_PNNI */
 
 /* AINI Signalling options */
- 
+
 /* #define SIG_AINI               AINI Signalling code enabled */
 
 #ifndef SIG_AINI
@@ -2853,7 +2859,7 @@
 /* UNI 4.0 option */
 
 /* #define UNI40                  ATM Forum UNI ver 4.0 enabled */
- 
+
 #ifndef UNI40
 #define DEF_UNI40         0
 #else
@@ -2889,13 +2895,13 @@
 
 #ifdef LCALLICIP
 
-#ifndef LCCIP    
+#ifndef LCCIP
 #define LCCIP      1    /* define LC flag for CIP interface */
 #endif
 
 #endif /* LCALLICIP */
 
-#if (LCCIP) 
+#if (LCCIP)
 
 #ifndef LCATM
 #define LCATM      1    /* define LC flag for ATM stack */
@@ -2936,13 +2942,13 @@
 
 #ifdef LCEULIECM
 
-#ifndef LCECM    
+#ifndef LCECM
 #define LCECM      1    /* define LC flag for ECM interface */
 #endif
 
 #endif /* LCEULIECM */
 
-#if (LCECM) 
+#if (LCECM)
 
 #ifndef LCATM
 #define LCATM      1    /* define LC flag for ATM stack */
@@ -2979,13 +2985,13 @@
 
 #ifdef LCMULIMPA
 
-#ifndef LCMPA    
+#ifndef LCMPA
 #define LCMPA      1    /* define LC flag for MPA interface */
 #endif
 
 #endif /* LCMULIMPA */
 
-#if (LCMPA) 
+#if (LCMPA)
 
 #ifndef LCATM
 #define LCATM      1    /* define LC flag for ATM stack */
@@ -3105,29 +3111,29 @@
 
 /* interface, choose one or none */
 
-/* #define LCSMMSMILMS     stack manager loosely coupled to MOS */ 
+/* #define LCSMMSMILMS     stack manager loosely coupled to MOS */
 
-/* #define LCSMNSMILNS     stack manager loosely coupled to NTSS */ 
+/* #define LCSMNSMILNS     stack manager loosely coupled to NTSS */
 
 /* #define LCSMRYMILRY     stack manager loosely coupled to relay */
 
-/* #define LCSMAMMILAM     stack manager loosely coupled to Q.93B */ 
+/* #define LCSMAMMILAM     stack manager loosely coupled to Q.93B */
 
-/* #define LCSMASMILAS     stack manager loosely coupled to Q.SAAL */ 
+/* #define LCSMASMILAS     stack manager loosely coupled to Q.SAAL */
 
-/* #define LCSMPNMILPN     stack manager loosely coupled to PNNI */ 
+/* #define LCSMPNMILPN     stack manager loosely coupled to PNNI */
 
 /* #define LCSMACMILAC     stack manager loosely coupled to AC */
 
-/* #define LCSMECMILEC     stack manager loosely coupled to LEC */ 
+/* #define LCSMECMILEC     stack manager loosely coupled to LEC */
 
-/* #define LCSMESMILES     stack manager loosely coupled to LE Services */ 
+/* #define LCSMESMILES     stack manager loosely coupled to LE Services */
 
-/* #define LCSMUMMILUM     stack manager loosely coupled to UME */ 
+/* #define LCSMUMMILUM     stack manager loosely coupled to UME */
 
-/* #define LCSMIMMILIM     stack manager loosely coupled to IME */ 
+/* #define LCSMIMMILIM     stack manager loosely coupled to IME */
 
-/* #define LCSMSAMILSA     stack manager loosely coupled to Q.2140 */ 
+/* #define LCSMSAMILSA     stack manager loosely coupled to Q.2140 */
 
 /* #define LCSMSEMILSE     stack manager loosely coupled to SE */
 
@@ -3216,7 +3222,7 @@
 
 /* #define LCSMBVMILBV     stack manager loosely coupled to V5.X BCC Protocol */
 
-/* #define LCSMLKMILLK         Stack manager loosely coupled to V5.2 Link 
+/* #define LCSMLKMILLK         Stack manager loosely coupled to V5.2 Link
                               Control protocol.  */
 
 /* #define LCSMPVMILPV     stack manager loosely coupled to V5.X Protection Protocol */
@@ -3255,7 +3261,7 @@
 /* #define LCSMZVMILZV          stack manager loosely coupled to PSF-M3UA (FT/HA) */
 
 /* #define LCSMDTMILDT         stack manager loosely coupled to LDF - TCAP */
- 
+
 /* #define LCSMDNMILDN          stack manager loosely coupled to MTP-3 LDF */
 
 /* #define LCSMDPMILDP          stack manager loosely coupled to LDF-SCCP */
@@ -3266,7 +3272,7 @@
 
 /* #define LCSMZBMILZB      stack manager loosely coupled to PSF - GTP */
 
-/* #define LCSMZIMILZI      stack manager loosely coupled to PSF-ISUP (FT/HA) */ 
+/* #define LCSMZIMILZI      stack manager loosely coupled to PSF-ISUP (FT/HA) */
 
 /* #define LCSMZQMILZQ      stack manager loosely coupled to PSF-ISDN (FT/HA) */
 
@@ -3302,7 +3308,7 @@
 
 /* #define LCSMLNMILLN      stack manager loosely coupled to MPLS-LDP(+CR) */
 
-/* #define LCSMPAMILPA      stack manager loosely coupled to PLOA */ 
+/* #define LCSMPAMILPA      stack manager loosely coupled to PLOA */
 
 /* #define LCSMALMILAL      stack manager loosely coupled to AAL2 Signaling */
 
@@ -3365,7 +3371,7 @@
 /* #define DBSMMILEC       debug output enabled, LEC management interface */
 
 /* debug management interface, LE Services, choose none or more */
- 
+
 /* #define DBSMMILES       debug output enabled, LE Services management interface */
 
 #ifdef LCSMINMILIN
@@ -3377,7 +3383,7 @@
 #ifdef LCSMAMMILAM
 #ifndef LCLAM
 #define LCLAM  1    /* Define LC flag for LAM (Q.93B LM ) interface */
-#endif 
+#endif
 #endif /* LCSMAMMILAM */
 
 #ifdef LCSMPAMILPA
@@ -3601,7 +3607,7 @@
 #undef SMAM_LMINT3
 #define SMAM_LMINT3  1
 #endif
- 
+
 #ifdef SMIQ_LMINT3
 #undef SMIQ_LMINT3
 #define SMIQ_LMINT3  1
@@ -4045,11 +4051,11 @@
 **************************************************************************/
 
 /* product version, choose one */
- 
+
 /* #define XGVER1          X.75, version 1.x */
 #define XGVER2         /* X.75, version 2.x */
 #define L3VER2         /* X.75, version 2.x */
- 
+
 /* interfaces */
 
 /* upper interface, x.25 network, choose none or more */
@@ -4120,11 +4126,11 @@
 **************************************************************************/
 
 /* product version, choose one */
- 
+
 /* #define EIVER1          X.25, version 1.x */
 #define EIVER2         /* X.25, version 2.x */
 #define L3VER2         /* X.25, version 2.x */
- 
+
 /* interfaces */
 
 /* upper interface, x.25 network, choose none or more */
@@ -4194,7 +4200,7 @@
 **************************************************************************/
 
 /* product version, choose one */
- 
+
 /* #define XEVER1          x25, version 1.x */
 #define XEVER2         /* x25, version 2.x */
 #define L3VER2         /* x25, version 2.x */
@@ -4267,11 +4273,11 @@
 **************************************************************************/
 
 /* product version, choose one */
- 
+
 /* #define XIVER1          X.25, version 1.x */
 #define XIVER2         /* X.25, version 2.x */
 #define L3VER2         /* X.25, version 2.x */
- 
+
 /* interfaces */
 
 /* lower interface, data link, choose none or more */
@@ -4327,7 +4333,7 @@
 #define ITMSYS       /* intermediate system */
 
 #endif
- 
+
 
 #ifdef IX       /*  X.31 */
 /**************************************************************************
@@ -4335,10 +4341,10 @@
 **************************************************************************/
 
 /* product version, choose one */
- 
+
 /* #define IXVER1          X.31, version 1.x */
 #define IXVER2           /*X.31, version 2.x */
- 
+
 /* interfaces */
 
 /* upper interface, data link, choose none or more */
@@ -4389,9 +4395,9 @@
 /* #define ATT           att 4ess and 5ess, option 11 */
 /* #define NT            northern telecomm dms-100, option 12 */
 /* #define VN            vn 2 and vn 3, france, option 13 */
-/* #define ETSI          etsi, europe, option 14 */ 
-/* #define AUS           AUS, australian, option 15 */ 
-/* #define NI1           national isdn 1, north america, option 16 */ 
+/* #define ETSI          etsi, europe, option 14 */
+/* #define AUS           AUS, australian, option 15 */
+/* #define NI1           national isdn 1, north america, option 16 */
 /* #define NTT           ins net, japan, option 17 */
 /* #define TR6           1 - TR6, german, option 18 */
 /* #define ATT5E         att 5ess, option 19 */
@@ -4469,7 +4475,7 @@
 /* #define LCDAMILBD     loosely coupled, layer management */
 
 /* debug mngmt interface, choose one or none, default is debug output disabled */
- 
+
 /* #define DBLDMILBD     debug output enabled for mngmt interface */
 
 /* layer management options */
@@ -4603,7 +4609,7 @@
 /* #define LCFRUIFRD     loosely coupled, frame data link layer to layer 3 */
 #ifdef LCFRUIFRD
 #ifndef LCFR
-#define LCFR 
+#define LCFR
 #endif /* #ifndef LCFR */
 #endif /* #ifdef LCFRUIFRD */
 
@@ -4613,7 +4619,7 @@
 
 #ifdef LCFRLIFRD
 #ifndef LCFR
-#define LCFR 
+#define LCFR
 #endif /* #ifndef LCFR */
 #endif /* #ifdef LCFRLIFRD */
 
@@ -4644,7 +4650,7 @@
 /* #define FR_MCAST          Multicast: 1-way, 2-way & N-way */
 #endif /* #ifdef FR_SWITCHING */
 
-/* Enable following to avoid use of HASH lists */ 
+/* Enable following to avoid use of HASH lists */
 /* #define FR_NOHASH        No hash list to be used */
 
 /*** Start of Fragmentation related flags ***/
@@ -4754,13 +4760,13 @@
 /* if applicable, must agree with x.75, x.25 end and intermediate
    system, x.25 intermediate system, x.25 end system or x.31 data link
    interface type */
-  
+
 #define DATINT1      /* data link interface 1 */
 /* #define DATINT2       data link interface 2 */
 
 /* mac interface type */
 /* if applicable, must agree with scc or isac-s mac interface type */
-  
+
 /* #define MACINT1       mac interface 1 */
 #define MACINT2      /* mac interface 2 */
 
@@ -4840,7 +4846,7 @@
 /* if applicable, must agree with x.75, x.25 end and intermediate
    system, x.25 intermediate system, x.25 end system or x.31 data link
    interface type */
-  
+
 #define DATINT1       /* data link interface 1 */
 /* #define DATINT2       data link interface 2 */
 
@@ -4993,7 +4999,7 @@
 **************************************************************************/
 
 /* interfaces */
-  
+
 /* upper interface, mac, choose none or more */
 
 /* #define LCSCUIMAC     loosely coupled, mac layer */
@@ -5053,7 +5059,7 @@
 /* layer management options */
 
 /* #define LCISMILIS     loosely coupled, layer management */
- 
+
 /* LCLM or TCLM chosen above, if LCLM or TCLM not chosen */
 /* then choose none or one within else */
 
@@ -5097,7 +5103,7 @@
 #define SEVER2         /* sec, version 2.x */
 
 /* interfaces */
-  
+
 /* upper interface, mac, choose none or more */
 
 /* #define LCSEUIMAC     loosely coupled, mac layer */
@@ -5139,11 +5145,11 @@
 /* ASYNC support on 68302 or 68360, choose none or one */
 
 /* #define ASYNC_SUPPORT       configure SCC for ASYNC */
- 
+
 /* Tx BD 4, 5, 6, and 7 available to SCC3, choose none or one */
 
 #define TXBD_4567          /* configure Tx BD 4-7 for SCC3 */
- 
+
 /* SS7 microcode on 68302 or 68360, choose none or one */
 
 #define SS7_MICROCODE      /* configure SCC for SS7 */
@@ -5154,7 +5160,7 @@
 /* debug upper mac interface, choose one or none */
 
 /* #define DBSEUIMAC           debug dummy upper mac interface */
- 
+
 #endif /* SE */
 
 
@@ -5169,7 +5175,7 @@
 #define QIVER2         /* QUICC uses version 2 */
 
 /* interfaces */
-  
+
 /* upper interface, mac, choose none or more */
 
 /* #define LCQIUIMAC     loosely coupled, mac layer */
@@ -5215,7 +5221,7 @@
 #define PQVER2         /* PQUICC uses version 2 */
 
 /* interfaces */
-  
+
 /* upper interface, mac, choose none or more */
 
 /* #define LCPQUIMAC     loosely coupled, mac layer */
@@ -5603,13 +5609,13 @@
 /* #define LCMAMILMA       loosely coupled, layer management */
 
 #define STU2               /* new lower interface */
- 
+
 #define MAT_INTF2          /* new upper interface */
- 
+
 #define MA_LMINT3          /* new management interface. turning off
                               requires SMMA_LMINT3 flag also to be
                               turned off in #ifdef SM section */
- 
+
 /****************************** Interfaces Version Flags ******************/
 
 /* Upper interface */
@@ -5685,7 +5691,7 @@
 #define LMA_LMINT3
 #endif /* MA_LMINT3 */
 #endif /* LMINT3 */
- 
+
 /* product specific options */
 #define MSC     /* MAP MSC */
 #define VLR     /* MAP_VLR */
@@ -5717,23 +5723,23 @@
 /* Following flags are introduced only for the upper layer interface changes*/
 /* #define MA_REF_NMB_CHANGE */
 
-/* The following flag is used to testing early operation response in MAP 
+/* The following flag is used to testing early operation response in MAP
 ** acceptance test */
 /* #define MA_ACC_OPRRSP_CHANGE */
 
 /* The following flag is used for testing the exception handling in MAP */
 /* #define MAACC_EXCEPTION_TST   */
 
-/* Enable the MA_FTHA flag when operating MAP  in a 
+/* Enable the MA_FTHA flag when operating MAP  in a
 ** distributed/ fault tolerant  mode or when any MAP  provider or user
-** (Trillium supplied) is distributed/fault tolerant 
+** (Trillium supplied) is distributed/fault tolerant
 */
 /* #define MA_FTHA         SHT interface flag. */
 
 /* #define MA_RUG        Rolling upgrade support enabled */
 
 /* In a fault tolerant environment, to prevent system manager from
-** binding and enabling the lower saps uncomment the following flag 
+** binding and enabling the lower saps uncomment the following flag
 */
 /* #define MA_DIS_SAP      Disable lower saps */
 
@@ -5982,8 +5988,8 @@
 /* management interface, lzt , choose none or more */
 #define LCZJMILZJ         /* loosely coupled, layer management */
 
-/* The following flag must be turned-on if the customer chooses to 
-** implement their own packing-unpacking functions for update messages 
+/* The following flag must be turned-on if the customer chooses to
+** implement their own packing-unpacking functions for update messages
 */
 /* #define TDS_FTHA_CUST_PKUNPK */
 
@@ -6024,11 +6030,11 @@
 #define MAT2               /* new upper interface */
 #endif /* MAT2 */
 
-/* Note : Make sure that the flag SMST_LMINT3 in #ifdef SM 
-** section above and flag LMINT3 above are also turned-on 
+/* Note : Make sure that the flag SMST_LMINT3 in #ifdef SM
+** section above and flag LMINT3 above are also turned-on
 */
 #ifdef MA_LMINT3
-#undef MA_LMINT3  
+#undef MA_LMINT3
 #endif /* ST_LMINT3 */
 #define MA_LMINT3  1
 
@@ -6088,8 +6094,8 @@
 /* #define STUV2           Upper interface version 2.0 */
 /* #define IATV2           Upper interface version 2.0 */
 
-#define IA_LMINT3          /* new management interface. turning off 
-                              requires SMIA_LMINT3 flag also to be 
+#define IA_LMINT3          /* new management interface. turning off
+                              requires SMIA_LMINT3 flag also to be
                               turned off in #ifdef SM section */
 
 /* layer management options */
@@ -6220,7 +6226,7 @@
 /* Check for SS7_IS41D */
 #ifdef IA_PREPAID_SUP
 #ifndef SS7_IS41D
-#define SS7_IS41D 
+#define SS7_IS41D
 #endif /* SS7_IS41D */
 #endif /* IA_PREPAID_SUP */
 
@@ -6429,7 +6435,7 @@
 /**************************************************************************
                                 CAP parameters
 **************************************************************************/
-#ifdef QC       /* CAP */ 
+#ifdef QC       /* CAP */
 #undef QC
 #define QC 1
 
@@ -6438,14 +6444,14 @@
  */
 
 /* enable following options depending upon coupling requirements */
-/* #define LCQCLISTU    loosely coupled, lower i/f of CAP with TCAP */ 
+/* #define LCQCLISTU    loosely coupled, lower i/f of CAP with TCAP */
 /* #define LCSTUISTU    loosely coupled, upper i/f of TCAP with user */
-/* #define LCQCMILQC    loosely coupled, management i/f of CAP */ 
+/* #define LCQCMILQC    loosely coupled, management i/f of CAP */
 /* #define LCSMQCMILQC  loosely coupled, SM i/f */
-/* #define LCCULICAP    loosely coupled, lower i/f of user with CAP */ 
-/* #define LCQCUICAP    loosely coupled, upper i/f of CAP with user */ 
-/* #define LWLCCAP      light weight loosely coupled */ 
-/* #define LWLCCULICAP  light weight loosley coupled, lower i/f of user 
+/* #define LCCULICAP    loosely coupled, lower i/f of user with CAP */
+/* #define LCQCUICAP    loosely coupled, upper i/f of CAP with user */
+/* #define LWLCCAP      light weight loosely coupled */
+/* #define LWLCCULICAP  light weight loosley coupled, lower i/f of user
                         with CAP, to be enabled with LWLCCAP only */
 /*
  ************************** Interface Version ****************************
@@ -6471,9 +6477,9 @@
 /* #define QC_RUG    * To Support rolling updgrades */
 
 
-/* 
+/*
  ************************* Layer Manager Options *************************
- */ 
+ */
 /* #define QC_USTA          *  Enable alarms at initialization */
 
 /* Select one of the following for backward compatibility */
@@ -6500,13 +6506,13 @@
 #endif /* LCLM */
 
 
-/* 
+/*
  ********************** Product Features Options *************************
- */ 
+ */
 /* CAMEL Functionality: select any one or more */
 #define GSMSCF       /* Service Control Function */
 /* #define GSMSRF     * Specialized Resouce Function */
-/* #define GSMSSF     * Service Switching Function */ 
+/* #define GSMSSF     * Service Switching Function */
 /* #define GPRSSSF    * GPRS Service Switching Function, to be enabled with
                         QC_JUNE01 option only */
 
@@ -6538,7 +6544,7 @@
 #endif /* GSMSRF */
 
 /* enable appropriate flags for GSM SSF */
-#ifdef GSMSSF 
+#ifdef GSMSSF
 #define QC_FE_GSMSSF
 #endif /* GSMSSF */
 
@@ -6550,14 +6556,14 @@
 
 /*
  **************************** General Options ****************************
- */ 
+ */
 /* #define QC_FTHA              * Enables FT/HA, TDS_CORE2 must be enabled */
 /* #define QC_DEBUG             * Enable debug at initialization */
 /* #define CM_ASN_DBG           * Enable ASN debugging */
 /* #define DEBUGP               * Enable debug printing */
 /* #define CM_ASN_NO_INDEF_LEN  * ASN.1 indefinate length */
 
-/* 
+/*
  *************************** Local defines *******************************
  */
 #ifndef LCSMQCMILQC
@@ -6649,8 +6655,8 @@
 #define SS7
 #define SM_SS7
 #define STATIC_SM
-#define CM_ASN_NO_INDEF_LEN /* ASN no indefinate lenght */ 
-#define QC_SHT_GRPTYPE_ALL 
+#define CM_ASN_NO_INDEF_LEN /* ASN no indefinate lenght */
+#define QC_SHT_GRPTYPE_ALL
 
 /*
  ************** Define dependency checks (DO NOT CHANGE!!) ***************
@@ -6712,7 +6718,7 @@ CAPV2, CAPV3, CAPV4, CAPV5, CAPV6, LQCV2 and STUV2 for QC_PH4"
 /**************************************************************************
                         PSF-CAP (FT/HA) parameters
 **************************************************************************/
-#ifdef ZF      /* PSF-CAP */ 
+#ifdef ZF      /* PSF-CAP */
 #undef ZF
 #define ZF 1
 
@@ -6721,7 +6727,7 @@ CAPV2, CAPV3, CAPV4, CAPV5, CAPV6, LQCV2 and STUV2 for QC_PH4"
  */
 
 /* enable following options depending upon coupling requirements */
-/* #define LCZFMILZF    loosely coupled, management i/f of CAP */ 
+/* #define LCZFMILZF    loosely coupled, management i/f of CAP */
 /* #define LCSMZFMILZF  loosely coupled, SM i/f */
 
 /*
@@ -6786,14 +6792,14 @@ CAPV2, CAPV3, CAPV4, CAPV5, CAPV6, LQCV2 and STUV2 for QC_PH4"
 #undef ST
 #define ST 1
 
-/* Enable the ST_FTHA flag when operating TCAP  in a 
+/* Enable the ST_FTHA flag when operating TCAP  in a
 ** distributed/ fault tolerant  mode or when any TCAP  provider or user
-** (Trillium supplied) is distributed/fault tolerant 
+** (Trillium supplied) is distributed/fault tolerant
 */
 /* #define ST_FTHA         SHT interface flag. */
 
 /* In a fault tolerant environment, to prevent system manager from
-** binding and enabling the lower saps uncomment the following flag 
+** binding and enabling the lower saps uncomment the following flag
 */
 /* #define ST_DIS_SAP       Disable lower saps */
 
@@ -6801,9 +6807,9 @@ CAPV2, CAPV3, CAPV4, CAPV5, CAPV6, LQCV2 and STUV2 for QC_PH4"
 /* #define ST_USTA           Uncomment to enable alarms by default */
 /* #define ST_DEBUG          Uncomment to enable all debug prints by default */
 
-/* Option to enable Duplicate invoke ids when they are originated 
+/* Option to enable Duplicate invoke ids when they are originated
 ** from different entities(user/provider)
-*/ 
+*/
 /* #define INVOKE_ID_FLAG    Uncomment to enable duplicate invoke ids */
 
 /* interfaces */
@@ -6822,7 +6828,7 @@ CAPV2, CAPV3, CAPV4, CAPV5, CAPV6, LQCV2 and STUV2 for QC_PH4"
 #define SPT2               /* new lower interface */
 /*#define STU2                new upper interface */
 
-/* New layer manager interface-3 flag for the TCAP product 
+/* New layer manager interface-3 flag for the TCAP product
 ** Turning off this flag requires SMST_LMINT3 flag also to be
 ** turned off in SM section
 */
@@ -6845,7 +6851,7 @@ CAPV2, CAPV3, CAPV4, CAPV5, CAPV6, LQCV2 and STUV2 for QC_PH4"
 /* If LCSTUISTU is defined then define LCSTU to 1 */
 #ifdef LCSTUISTU
 #ifdef LCSTU
-#undef LCSTU 
+#undef LCSTU
 #endif /* LCSTU */
 #define LCSTU 1
 #endif /* LCSTUISTU */
@@ -6853,14 +6859,14 @@ CAPV2, CAPV3, CAPV4, CAPV5, CAPV6, LQCV2 and STUV2 for QC_PH4"
 /* If LCSTLISPT is defined, then define LCSPT to 1 */
 #ifdef LCSTLISPT
 #ifdef LCSPT
-#undef LCSPT 
+#undef LCSPT
 #endif /* LCSPT */
 #define LCSPT 1
 #endif /* LCSTLISPT */
 
 #ifdef LCSTMILST
 #ifdef LCLST
-#undef LCLST 
+#undef LCLST
 #endif /* LCLST */
 #define LCLST 1
 #endif /* LCSTMILST */
@@ -6868,7 +6874,7 @@ CAPV2, CAPV3, CAPV4, CAPV5, CAPV6, LQCV2 and STUV2 for QC_PH4"
 /* If anyone of LCSTU/LCSPT/LCLST defined then define LCSS7 to 1*/
 #if (LCSTU || LCSPT || LCLST)
 #ifdef LCSS7
-#undef LCSS7 
+#undef LCSS7
 #endif /* LCSS7 */
 #define LCSS7 1
 #endif /* LCSTU || LCSPT || LCLST */
@@ -6926,8 +6932,8 @@ CAPV2, CAPV3, CAPV4, CAPV5, CAPV6, LQCV2 and STUV2 for QC_PH4"
 /* management interface, lzt , choose none or more */
 /* #define LCZTMILZT       loosely coupled, layer management */
 
-/* The following flag must be turned-on if the customer chooses to 
-** implement their own packing-unpacking functions for update messages 
+/* The following flag must be turned-on if the customer chooses to
+** implement their own packing-unpacking functions for update messages
 */
 /* #define TDS_FTHA_CUST_PKUNPK */
 
@@ -6968,11 +6974,11 @@ CAPV2, CAPV3, CAPV4, CAPV5, CAPV6, LQCV2 and STUV2 for QC_PH4"
 #define STU2               /* new upper interface */
 #endif /* STU2 */
 
-/* Note : Make sure that the flag SMST_LMINT3 in #ifdef SM 
-** section above and flag LMINT3 above are also turned-on 
+/* Note : Make sure that the flag SMST_LMINT3 in #ifdef SM
+** section above and flag LMINT3 above are also turned-on
 */
 #ifdef ST_LMINT3
-#undef ST_LMINT3  
+#undef ST_LMINT3
 #endif /* ST_LMINT3 */
 #define ST_LMINT3  1
 
@@ -6984,12 +6990,12 @@ CAPV2, CAPV3, CAPV4, CAPV5, CAPV6, LQCV2 and STUV2 for QC_PH4"
 #endif /* ZT */
 
 /****************************************************************************
-                         LDF - TCAP section 
+                         LDF - TCAP section
 ****************************************************************************/
 #ifdef DT  /* LDF-TCAP  */
 #undef DT
 #define DT 1
- 
+
 #define DT_ULDF  1       /* LDF acts as Upper load distribution function */
 #define DT_LLDF  1       /* LDF acts as Lower load distribution function */
 /* #define LCDTMILDT        Loosed coupled management interface */
@@ -6999,15 +7005,15 @@ CAPV2, CAPV3, CAPV4, CAPV5, CAPV6, LQCV2 and STUV2 for QC_PH4"
 /* #define DT_DEBUG          Uncomment to enable all debug prints by default */
 /* #define DT_PT_HOOK       Portable Hooks */
 /*
-** DT_CUSTENV should not be defined when the acceptance tests for protable 
-** functions are executed. In that case dummy customer functions defined in 
+** DT_CUSTENV should not be defined when the acceptance tests for protable
+** functions are executed. In that case dummy customer functions defined in
 ** dtacclib.c file is used.
 ** In all other cases when the DT_PT_HOOK is defined , DT_CUSTENV also
-** has to be defined. 
+** has to be defined.
 */
 /* #define DT_CUSTENV       Customer environment */
 
-/* #define DT_RUG           Rolling upgrade support enabled */ 
+/* #define DT_RUG           Rolling upgrade support enabled */
 /****************************** Interfaces Version Flags ******************/
 
 /* TCAP Upper interface */
@@ -7021,8 +7027,8 @@ CAPV2, CAPV3, CAPV4, CAPV5, CAPV6, LQCV2 and STUV2 for QC_PH4"
 
 /* Layer management interface */
 #define LDTV1              /* Layer Management interface version 1.0 */
- 
-/******************* section not to be changed by CUSTOMERS ******************/ 
+
+/******************* section not to be changed by CUSTOMERS ******************/
 #ifdef LCDTMILDT
 #ifdef LCLDT
 #undef LCLDT
@@ -7031,10 +7037,10 @@ CAPV2, CAPV3, CAPV4, CAPV5, CAPV6, LQCV2 and STUV2 for QC_PH4"
 #endif /* LCDTMILDT */
 
 /*
-** By Default LDF assumes that the service user and provider 
+** By Default LDF assumes that the service user and provider
 ** are present in the same processor.
-** i.e. LDF interface is assumed to be BOTH ULDF and LLDF. 
-** 
+** i.e. LDF interface is assumed to be BOTH ULDF and LLDF.
+**
 */
 #ifndef DT_ULDF
 #ifndef DT_LLDF
@@ -7158,18 +7164,18 @@ CAPV2, CAPV3, CAPV4, CAPV5, CAPV6, LQCV2 and STUV2 for QC_PH4"
 /**************************************************************************
    SCCP Wrapper parameters
 **************************************************************************/
- 
+
 /* interfaces */
-   
+
 /* management interface, lws , choose none or more */
 
-#define LCWSMILWS       loosely coupled, layer management 
+#define LCWSMILWS       loosely coupled, layer management
 
 /* layer management options */
 
 /* LCLM or TCLM chosen above, if LCLM or TCLM not chosen */
 /* then choose none or one within else */
- 
+
 #ifdef LCLM             /* backward compatilbility, layer management */
 #define LCWSLM          /* loosely coupled, layer management */
 #else
@@ -7182,7 +7188,7 @@ CAPV2, CAPV3, CAPV4, CAPV5, CAPV6, LQCV2 and STUV2 for QC_PH4"
 /* #define LCWSLM           loosely coupled, layer management */
 #endif
 #endif
- 
+
 /* product specific options */
 /* selected in SCCP parameter section */
 
@@ -7234,8 +7240,8 @@ CAPV2, CAPV3, CAPV4, CAPV5, CAPV6, LQCV2 and STUV2 for QC_PH4"
 
 #define SPT2               /* new upper interface */
 
-#define SP_LMINT3          /* new management interface. turning off 
-                            * requires SMSP_LMINT3 flag also to be 
+#define SP_LMINT3          /* new management interface. turning off
+                            * requires SMSP_LMINT3 flag also to be
                             * turned off in #ifdef SM section */
 
 /* flags should be turned on for backward compatibility */
@@ -7245,7 +7251,7 @@ CAPV2, CAPV3, CAPV4, CAPV5, CAPV6, LQCV2 and STUV2 for QC_PH4"
 
 
 /* flags for preserving the address */
- 
+
 
 #define SP_PRESERVE_ADDR   /* preserve address */
 
@@ -7272,7 +7278,7 @@ CAPV2, CAPV3, CAPV4, CAPV5, CAPV6, LQCV2 and STUV2 for QC_PH4"
 /* #define SP_GNP            Generic numbering plan support */
 
 /* If SCCP is used with Trillium DFTHA architechture */
-#define SP_FTHA 
+#define SP_FTHA
 
 /* SCCP management, choose none or more */
 /* #define SP_CFGMG          SCCP management */
@@ -7300,7 +7306,7 @@ CAPV2, CAPV3, CAPV4, CAPV5, CAPV6, LQCV2 and STUV2 for QC_PH4"
 /* class 1 implementation. uncomment for old implementation.
  * SP_OLD_CLASS1 is no longer supported in sccp release 3.2 onwards */
 /* #define SP_OLD_CLASS1    old class1 */
- 
+
 /* if possible, SCCP should transmit XUDT or UDT */
 /* #define SP_TX_XUDT       tranmission of XUDT by default */
 
@@ -7409,7 +7415,7 @@ CAPV2, CAPV3, CAPV4, CAPV5, CAPV6, LQCV2 and STUV2 for QC_PH4"
 
 /* 1. Dependency of ZP and SP_FTHA */
 #ifdef ZP
-#ifndef SP_FTHA                
+#ifndef SP_FTHA
 #error "Please define SP_FTHA in #ifdef SP section of envopt.h"
 #endif /* SP_FTHA */
 #endif /* ZP */
@@ -7552,7 +7558,7 @@ the #ifdef SP section of envopt.h"
 /******************* section not to be changed by CUSTOMERS ******************/
 
 #ifdef ITU96
-#define SS7_ITU96   
+#define SS7_ITU96
 #endif
 
 #ifndef SS7
@@ -7716,18 +7722,18 @@ the #ifdef SP section of envopt.h"
 **************************************************************************/
 
 /* product version, choose one */
- 
+
 /* #define TPVER1          tup, version 1.x */
 #define TPVER2         /* tup, version 2.x */
- 
+
 /* interfaces */
- 
+
 /* upper interface, choose none or more */
- 
+
 /* #define LCTPUITPT               loosely coupled, TUP User upper layer */
- 
+
 /* lower interface, choose none or more */
- 
+
 /* #define LCTPLISNT               loosely coupled, mtp - level 3 */
 
 /* management interface, ltp , choose none or more */
@@ -7757,11 +7763,11 @@ the #ifdef SP section of envopt.h"
 #endif
 
 /* product specific options */
- 
+
 /* variants, choose none or more */
 /* must agree with options delivered */
 /* must agree with mtp 3 variants */
- 
+
 /* #define CHINA         china */
 
 /* type, chosen automatically */
@@ -7777,9 +7783,9 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    MTP Level 3 Wrapper parameters
 **************************************************************************/
- 
+
 /* interfaces */
-   
+
 /* management interface, lwp , choose none or more */
 
 /* #define LCWNMILWN       loosely coupled, layer management */
@@ -7792,42 +7798,42 @@ the #ifdef SP section of envopt.h"
 
 /* LCLM or TCLM chosen above, if LCLM or TCLM not chosen */
 /* then choose none or one within else */
- 
+
 #ifdef LCLM             /* backward compatilbility, layer management */
 /* choose all */
- 
+
 #define LCWNLM          /* loosely coupled, layer management */
 #else
 #ifdef TCLM             /* backward compatilbility, layer management */
 /* choose all */
- 
+
 #define TCWNLM          /* tightly coupled, layer management */
 #else                   /* tightly or loosely coupled, layer management */
 /* choose none or one */
- 
+
 #define TCWNLM          /* tightly coupled, layer management */
 /* #define LCWNLM           loosely coupled, layer management */
 #endif
 #endif
- 
+
 /* product specific options */
 
 /* variants, choose none or more */
 /* must agree with options delivered */
 /* if applicable, must agree with q.930, mtp 3, sccp variants */
- 
+
 /* #define BELL          bellcore, option 11 */
 /* #define ANS88         ansi, option 12 */
 /* #define ANS92         ansi, option 12 */
 /* #define TTC           ttc, japan, option 13 */
 /* #define CHINA         china, option 15 */
- 
+
 /* type, chosen automatically */
- 
+
 #ifndef SS7
 #define SS7             /* for message functions */
 #endif
- 
+
 #endif
 
 
@@ -7868,7 +7874,7 @@ the #ifdef SP section of envopt.h"
 /* must agree with options delivered */
 /* if applicable, must agree with q.930, mtp 3, sccp variants */
 /* old style options (backward compatibility only */
- 
+
 /* #define BELL          bellcore, option 11 */
 /* #define ANS88         ansi, option 12 */
 /* #define ANS92         ansi, option 12 */
@@ -7879,11 +7885,11 @@ the #ifdef SP section of envopt.h"
 /* new style options */
 
 /* type, chosen automatically */
- 
+
 #ifndef SS7
 #define SS7             /* for message functions */
 #endif
- 
+
 #endif
 
 
@@ -7894,7 +7900,7 @@ the #ifdef SP section of envopt.h"
 #undef SN
 #define SN 1
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interfaces Coupling Options ***/
 
@@ -7914,8 +7920,8 @@ the #ifdef SP section of envopt.h"
 /*** Interface Backward Compatiblity Options: flags should be turned
      off for backward comatibility  ***/
 
-#define SN_LMINT3          /* new management interface. turning off 
-                              requires SMSN_LMINT3 flag also to be 
+#define SN_LMINT3          /* new management interface. turning off
+                              requires SMSN_LMINT3 flag also to be
                               turned off in #ifdef SM section */
 
 #define SNT2           /* new upper interface */
@@ -7943,8 +7949,8 @@ the #ifdef SP section of envopt.h"
 
 /* product specific options */
 
-/* Enable the SN_FTHA flag when operating MTP3 in a 
- * distributed/ fault tolerant  mode or when any MTP3 user 
+/* Enable the SN_FTHA flag when operating MTP3 in a
+ * distributed/ fault tolerant  mode or when any MTP3 user
  * (Trillium supplied) is distributed/fault tolerant */
 
 /* #define SN_FTHA         SHT interface flag. */
@@ -7974,8 +7980,8 @@ the #ifdef SP section of envopt.h"
 /*#define ANS92          ansi, option 12 */
 /*#define ANS96          ansi, option 12 */
 /*#define CHINA          china, option 15 */
-#define BICI           bici, option 17 
-/*#define TTC            ttc, japan, option 13 */        
+#define BICI           bici, option 17
+/*#define TTC            ttc, japan, option 13 */
 /*#define NTT            ntt, Japan, option 25 */
 /*#define SN_SG          signalling gateway */
 /************** section NOT to be changed by CUSTOMERS **********/
@@ -8105,7 +8111,7 @@ the #ifdef SP section of envopt.h"
 #define SN_FTHA
 #endif
 
-/* ZN_DFTHA should be enabled if PSF-MTP3 is compiled for distributed 
+/* ZN_DFTHA should be enabled if PSF-MTP3 is compiled for distributed
  * environment */
 /* #define  ZN_DFTHA     distributed PSF - MTP3 environment */
 
@@ -8124,12 +8130,12 @@ the #ifdef SP section of envopt.h"
 **************************************************************************/
 
 /*** Product Version, choose one ***/
- 
+
 /* #define SDVER1          mtp level 2, version 1.x */
 #define SDVER2         /* mtp level 2, version 2.x */
 
 
-/* #define SD_RUG    1       Rolling upgrade support enabled */ 
+/* #define SD_RUG    1       Rolling upgrade support enabled */
 /****************************** Interfaces Version Flags ******************/
 
 /* MTP2 upper interface */
@@ -8149,7 +8155,7 @@ the #ifdef SP section of envopt.h"
 
 #define LCSDLIMAC     /* loosely coupled, mac layer */
 /* #define BCSDLIMAC     backward compatibility, mac layer */
- 
+
 /* management interface, lsd , choose none or more */
 
 /* #define LCSDMILSD       loosely coupled, layer management */
@@ -8173,8 +8179,8 @@ the #ifdef SP section of envopt.h"
 
 #define SDT2               /* new upper interface */
 
-#define SD_LMINT3          /* new management interface. turning off 
-                              requires SMSD_LMINT3 flag also to be 
+#define SD_LMINT3          /* new management interface. turning off
+                              requires SMSD_LMINT3 flag also to be
                               turned off in #ifdef SM section */
 
 
@@ -8207,9 +8213,9 @@ the #ifdef SP section of envopt.h"
 /* must agree with options delivered */
 /* if applicable, must agree with mtp 3 variants */
 
-/* #define TTC           ttc, japan, option 13 */        
+/* #define TTC           ttc, japan, option 13 */
 
-/* #define NTT           ntt, japan, option 25 */        
+/* #define NTT           ntt, japan, option 25 */
 
 
 /*** Internal defines - do not change ***/
@@ -8304,11 +8310,11 @@ the #ifdef SP section of envopt.h"
 /* #define TCP_COMPAT_42        compatibility */
 
 /* llc interface type, choose one or none */
- 
+
 /* #define LLCINT1       llc interface 1 */
- 
+
 /* mac interface type, choose one */
- 
+
 #define MACINT1      /* mac interface 1 */
 /* #define MACINT2       mac interface 2 */
 /* #define MACINT3       mac interface 3 */
@@ -8357,11 +8363,11 @@ the #ifdef SP section of envopt.h"
 /* product specific options */
 
 /* llc interface type, choose one or none */
- 
+
 /* #define LLCINT1       llc interface 1 */
- 
+
 /* mac interface type, choose one */
- 
+
 #define MACINT1      /* mac interface 1 */
 /* #define MACINT2       mac interface 2 */
 /* #define MACINT3       mac interface 3 */
@@ -8385,7 +8391,7 @@ the #ifdef SP section of envopt.h"
 /* #define LCLCLIMAC               loosely coupled llc, lower interface (mac.x) */
 
 /* lower ECM interface, choose none or more */
- 
+
 #define LCLCLIECM               /* loosely coupled lower ECM interface */
 
 /* debug lower ECM interface, choose none or more */
@@ -8418,13 +8424,13 @@ the #ifdef SP section of envopt.h"
 
 #ifdef LCLCLIECM
 
-#ifndef LCECM    
+#ifndef LCECM
 #define LCECM      1    /* define LC flag for ECM interface */
 #endif
 
 #endif /* LCLCLIECM */
 
-#if (LCECM) 
+#if (LCECM)
 
 #ifndef LCATM
 #define LCATM      1    /* define LC flag for ATM stack */
@@ -8435,12 +8441,12 @@ the #ifdef SP section of envopt.h"
 /* product specific options */
 
 /* llc interface type, choose one */
- 
+
 /* #define LLCINT1       llc interface 1 */
 /* #define LLCINT2       llc interface 2 */
- 
+
 /* mac interface type, choose one */
- 
+
 /* #define MACINT1       mac interface 1 */
 /* #define MACINT2       mac interface 2 */
 /* #define MACINT3       mac interface 3 */
@@ -8452,19 +8458,19 @@ the #ifdef SP section of envopt.h"
 #endif
 
 #endif
- 
+
 
 #ifdef M1        /* dummy mac (MACINT1) */
 /**************************************************************************
    mac parameters
 **************************************************************************/
- 
+
 /* interfaces */
- 
+
 /* upper interface, choose none or more */
- 
+
 /* #define LCM1UIMAC               loosely coupled mac, upper interface (mac.x)
- 
+
  layer management options */
 
 /* LCLM or TCLM chosen above, if LCLM or TCLM not chosen */
@@ -8486,9 +8492,9 @@ the #ifdef SP section of envopt.h"
 /* #define LCM1LM           loosely coupled, layer management */
 #endif
 #endif
- 
+
 /* product specific options */
- 
+
 /* mac interface type, choose one */
 
 #define MACINT1      /* mac interface 1 */
@@ -8500,13 +8506,13 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    mac parameters
 **************************************************************************/
- 
+
 /* interfaces */
- 
+
 /* upper interface, choose none or more */
- 
+
 /* #define LCM2UIMAC               loosely coupled mac, upper interface (mac.x)
- 
+
  layer management options */
 
 /* LCLM or TCLM chosen above, if LCLM or TCLM not chosen */
@@ -8528,9 +8534,9 @@ the #ifdef SP section of envopt.h"
 /* #define LCM2LM           loosely coupled, layer management */
 #endif
 #endif
- 
+
 /* product specific options */
- 
+
 /* mac interface type, choose one */
 
 #define MACINT2      /* mac interface 2 */
@@ -8542,13 +8548,13 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    mac parameters
 **************************************************************************/
- 
+
 /* interfaces */
- 
+
 /* upper interface, choose none or more */
- 
+
 /* #define LCM3UIMAC               loosely coupled mac, upper interface (mac.x) */
- 
+
 /* layer management options */
 
 /* LCLM or TCLM chosen above, if LCLM or TCLM not chosen */
@@ -8570,9 +8576,9 @@ the #ifdef SP section of envopt.h"
 /* #define LCM3LM           loosely coupled, layer management */
 #endif
 #endif
- 
+
 /* product specific options */
- 
+
 /* mac interface type, choose one */
 
 #define MACINT3      /* mac interface 3 */
@@ -8584,7 +8590,7 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    ARI If Parameters
 **************************************************************************/
- 
+
 /* interfaces */
 
 /* layer management options, choose none */
@@ -8594,9 +8600,9 @@ the #ifdef SP section of envopt.h"
 #endif
 
 /* upper interface, choose none or more */
- 
+
 /* #define LCARUIARI 1      loosely coupled AR, upper interface (ari.x) */
- 
+
 /* layer management options */
 
 /* LCLM or TCLM chosen above, if LCLM or TCLM not chosen */
@@ -8615,7 +8621,7 @@ the #ifdef SP section of envopt.h"
 /* product specific options */
 
 /* debug upper ari interface, choose one or none */
- 
+
 /* #define DBARUIARI 1        debug dummy upper ari interface */
 
 /* type, chosen automatically */
@@ -8627,7 +8633,7 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    AAL5 CPCS parameters
 **************************************************************************/
- 
+
 /* interfaces */
 
 /* layer management options, choose none */
@@ -8637,9 +8643,9 @@ the #ifdef SP section of envopt.h"
 #endif
 
 /* upper interface, choose none or more */
- 
+
 /* #define LCM6UIAAL 1      loosely coupled mac, upper interface (mac.x) */
- 
+
 /* layer management options */
 
 /* LCLM or TCLM chosen above, if LCLM or TCLM not chosen */
@@ -8661,7 +8667,7 @@ the #ifdef SP section of envopt.h"
 /* #define LCM6LM 1         loosely coupled, layer management */
 #endif
 #endif
- 
+
 /* interface flags, chosen automatically */
 
 #ifdef LCM6UIAAL
@@ -8683,7 +8689,7 @@ the #ifdef SP section of envopt.h"
 /* product specific options */
 
 /* debug upper aal interface, choose one or none */
- 
+
 /* #define DBM6UIAAL 1        debug dummy upper aal interface */
 
 /* type, chosen automatically */
@@ -8700,9 +8706,9 @@ the #ifdef SP section of envopt.h"
    PXY parameters
 **************************************************************************/
 /* upper interface, choose none or more */
- 
+
 /* #define LCP1UIPXY 1       loosely coupled PXY lower interface (pxy.x) */
- 
+
 /* layer management options */
 
 /* interface flags, chosen automatically */
@@ -8718,7 +8724,7 @@ the #ifdef SP section of envopt.h"
 /* product specific options */
 
 /* debug upper pxy interface, choose one or none */
- 
+
 /* #define DBP1UIPXY 1        debug dummy upper pxy interface */
 
 /* type, chosen automatically */
@@ -8729,7 +8735,7 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    AAL5 CPCS parameters - ATM convergence layer
 **************************************************************************/
- 
+
 /* interfaces */
 
 /* layer management options, choose none */
@@ -8739,23 +8745,23 @@ the #ifdef SP section of envopt.h"
 #endif
 
 /* upper interface, choose none or more */
- 
+
 /* #define LCACUIAAL 1      loosely coupled mac, upper interface (mac.x) */
-/* #define LCACMILAC 1      loosely coupled LAC, management interface */ 
+/* #define LCACMILAC 1      loosely coupled LAC, management interface */
 /* #define TDS_ATM_BS 1     use berkeley sockets */
 
 /* AAL SAP mode options: define at least one*/
 #define AC_ATM_LPBK     0    /* Loopback */
 /*#define AC_ATM_HARDWARE 1     Actual Hardware */
- 
+
 /* Physical SAP mode options: define at least one if AALSAP mode is Hardware*/
 /*#define AC_ATM_SUN   1       SUNP ADAPTER */
 /*#define AC_ATM_FORE  2       Fore Adapter */
 /*#define AC_ATM_SOCK    3     Sockets */
- 
+
 #define AC_ATM_NMB_PMODES  4    /* Number of Physical Modes */
 
- 
+
 /* layer management options */
 
 /* LCLM or TCLM chosen above, if LCLM or TCLM not chosen */
@@ -8777,7 +8783,7 @@ the #ifdef SP section of envopt.h"
 /* #define LCACLM 1         loosely coupled, layer management */
 #endif
 #endif
- 
+
 /* interface flags, chosen automatically */
 
 #ifdef LCACUIAAL
@@ -8799,7 +8805,7 @@ the #ifdef SP section of envopt.h"
 /* product specific options */
 
 /* debug upper aal interface, choose one or none */
- 
+
 /* #define DBACUIAAL 1        debug dummy upper aal interface */
 
 /* type, chosen automatically */
@@ -8819,11 +8825,11 @@ the #ifdef SP section of envopt.h"
 
 /* interfaces */
 
-#ifndef LMINT2     
-/* 
- * layer management interface 2 
+#ifndef LMINT2
+/*
+ * layer management interface 2
  */
-#define LMINT2     
+#define LMINT2
 #endif  /* LMINT2 */
 
 #ifndef MACINT1
@@ -8842,7 +8848,7 @@ the #ifdef SP section of envopt.h"
 #define DATVER2 1
 #endif  /* DATVER2 */
 
-/* upper interface(for AF_NI only), MAC, data link, 
+/* upper interface(for AF_NI only), MAC, data link,
  * enable for loosely coupled operation
  */
 /* #define LCAFUIMAC 1     loosely coupled, data link layer */
@@ -8853,7 +8859,7 @@ the #ifdef SP section of envopt.h"
 
 /* #define LCAFLIAAL 1     loosely coupled, aal layer */
 
-/* lower interface(for AF_SI only), FRD, 
+/* lower interface(for AF_SI only), FRD,
  * enable for loosely coupled operation
  */
 
@@ -8908,7 +8914,7 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    PMC - Sierra LASAR driver parameters
 **************************************************************************/
- 
+
 /* interfaces */
 
 /* layer management options, choose none */
@@ -8918,7 +8924,7 @@ the #ifdef SP section of envopt.h"
 #endif
 
 /* upper interface, choose one or none */
- 
+
 /* #define LCPLUIAAL           loosely coupled aal, upper interface (aal.x) */
 
 /* debug upper interface, choose one or none */
@@ -8971,7 +8977,7 @@ the #ifdef SP section of envopt.h"
 /* UNI 4.0 option */
 
 /* #define UNI40                 ATM Forum UNI ver 4.0 enabled */
- 
+
 #ifndef UNI40
 #define DEF_UNI40      0
 #else
@@ -9003,7 +9009,7 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    Fujitsu ALC driver parameters
 **************************************************************************/
- 
+
 /* interfaces */
 
 /* layer management options, choose none */
@@ -9013,7 +9019,7 @@ the #ifdef SP section of envopt.h"
 #endif
 
 /* upper interface, choose none or more */
- 
+
 /* #define LCFAUIAAL 1       loosely coupled aal, upper interface (aal.x) */
 
 /* management interface, lfa, choose none or more */
@@ -9037,11 +9043,11 @@ the #ifdef SP section of envopt.h"
 #else                   /* tightly or loosely coupled, layer management */
 /* choose none or one */
 
-#define TCFALM           tightly coupled, layer management 
+#define TCFALM           tightly coupled, layer management
 /* #define LCFALM 1         loosely coupled, layer management */
 #endif
 #endif
- 
+
 /* interface flags, chosen automatically */
 
 #ifdef LCFAUIAAL
@@ -9063,7 +9069,7 @@ the #ifdef SP section of envopt.h"
 /* product specific options */
 
 /* debug upper aal interface, choose one or none */
- 
+
 /* #define DBFAUIAAL 1          debug dummy upper aal interface */
 
 /*#define DBFAMILFA 1          debug stack manager interface */
@@ -9085,7 +9091,7 @@ the #ifdef SP section of envopt.h"
 #endif
 
 /* #define FAPOLLINTR       ALC Polled Interrupts */
-/* #define FAALCEVAL        Fujitsu Evaluation board */ 
+/* #define FAALCEVAL        Fujitsu Evaluation board */
 /* #define FARXATCPRES      Receive ATC is present */
 /* #define FATXATCPRES      Transmit ATC is present */
 /* #define FANTCPRES        NTC is present */
@@ -9109,13 +9115,13 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    mac parameters
 **************************************************************************/
- 
+
 /* interfaces */
- 
+
 /* upper interface, choose none or more */
- 
+
 /* #define LCODUIMAC               loosely coupled mac, upper interface (mac.x) */
- 
+
 /* layer management options */
 
 /* LCLM or TCLM chosen above, if LCLM or TCLM not chosen */
@@ -9137,9 +9143,9 @@ the #ifdef SP section of envopt.h"
 /* #define LCODLM           loosely coupled, layer management */
 #endif
 #endif
- 
+
 /* product specific options */
- 
+
 #endif
 
 
@@ -9151,7 +9157,7 @@ the #ifdef SP section of envopt.h"
 #define SI 1
 
 /* product version, choose one */
- 
+
 /* #define SIVER1          isup, version 1.x */
 #define SIVER2         /* isup, version 2.x */
 
@@ -9182,19 +9188,19 @@ the #ifdef SP section of envopt.h"
                               SMSN_LMINT3 flag also to be turned off in #ifdef
                               SM section */
 /* flags should be turned on for backward compatibility */
-/* #define SI_218_COMP        Backward compatibility flag for 219 release. If 
+/* #define SI_218_COMP        Backward compatibility flag for 219 release. If
                               enabled LSI and SIT interface conforms to 2.18.
                               This flag will be phased out in the next release
-                              of ISUP that is the behaviour if flag is enabled 
+                              of ISUP that is the behaviour if flag is enabled
                               will be removed in the next release */
 /* #define SIT_OLD_DEFINES    Some defines in SIT interface are prefixed with
                               SIT_ to avoid conflicts with other layers. This
                               option enables the old defines (without SIT_)
-                              This option will be phased out in the next 
+                              This option will be phased out in the next
                               release of ISUP */
 
 #define SI_INFINITETRY 1   /* maintenance timers should run forever */
-                              
+
 /* #define SI_RUG       Rolling upgrade support enabled */
 /****************************** Interfaces Version Flags ******************/
 
@@ -9379,9 +9385,9 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    ISUP Wrapper parameters
 **************************************************************************/
- 
+
 /* interfaces */
-   
+
 /* management interface, lwp , choose none or more */
 
 /* #define LCWIMILWI       loosely coupled, layer management */
@@ -9390,30 +9396,30 @@ the #ifdef SP section of envopt.h"
 
 /* LCLM or TCLM chosen above, if LCLM or TCLM not chosen */
 /* then choose none or one within else */
- 
+
 #ifdef LCLM             /* backward compatilbility, layer management */
 /* choose all */
- 
+
 #define LCWILM          /* loosely coupled, layer management */
 #else
 #ifdef TCLM             /* backward compatilbility, layer management */
 /* choose all */
- 
+
 #define TCWILM          /* tightly coupled, layer management */
 #else                   /* tightly or loosely coupled, layer management */
 /* choose none or one */
- 
+
 #define TCWILM          /* tightly coupled, layer management */
 /* #define LCWILM           loosely coupled, layer management */
 #endif
 #endif
- 
+
 /* product specific options */
 
 /* variants, choose none or more */
 /* must agree with options delivered */
 /* if applicable, must agree with q.930, mtp 3, sccp variants */
- 
+
 /* #define BELL          bellcore, option 11 */
 /* #define ANS88         ansi, option 12 */
 /* #define ANS92         ansi, option 12 */
@@ -9421,9 +9427,9 @@ the #ifdef SP section of envopt.h"
 /* #define SINGTEL       singapore telecom, option 19 */
 /* #define Q767          q.767, option 17 */
 /* #define Q767IT        q.767 italy, option 20 */
- 
+
 /* type, chosen automatically */
- 
+
 #ifndef SS7
 #define SS7             /* for message functions */
 #endif
@@ -9431,7 +9437,7 @@ the #ifdef SP section of envopt.h"
 #ifdef Q767IT
 #define Q767            /* q.767, option 17 */
 #endif
- 
+
 #endif /* WI */
 
 
@@ -9440,30 +9446,30 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    TUP Wrapper parameters
 **************************************************************************/
- 
+
 /* interfaces */
- 
+
 /* management interface, lwu , choose none or more */
- 
+
 #define LCWUMILWU      /* loosely coupled, layer management */
- 
+
 /* debug mngmt interface, choose one or none, default is debug output disabled */
- 
+
 #define DBWUMILWU    /* debug output enabled for mngmt interface */
- 
+
 /* layer management options */
- 
+
 /* LCLM or TCLM chosen above, if LCLM or TCLM not chosen */
 /* then choose none or one within else */
- 
+
 #ifdef LCLM             /* backward compatilbility, layer management */
 /* choose all */
- 
+
 #define LCWULM          /* loosely coupled, layer management */
 #else
 #ifdef TCLM             /* backward compatilbility, layer management */
 /* choose all */
- 
+
 #define TCWULM          /* tightly coupled, layer management */
 #else                   /* tightly or loosely coupled, layer management */
 /* choose none or one */
@@ -9471,23 +9477,23 @@ the #ifdef SP section of envopt.h"
 /* #define LCWULM           loosely coupled, layer management */
 #endif
 #endif
- 
+
 /* product specific options */
- 
+
 /* variants, choose none or more */
 /* must agree with options delivered */
 /* product specific options */
- 
+
 /* #define CHINA         china */
 
 /* type, chosen automatically */
- 
+
 #ifndef SS7
 #define SS7             /* for message functions */
 #endif
- 
+
 #endif
- 
+
 
 
 #ifdef BI        /* b-isup */
@@ -9496,7 +9502,7 @@ the #ifdef SP section of envopt.h"
 **************************************************************************/
 
 /* product version, choose one */
- 
+
 /* interfaces */
 
 /* upper interface, choose none or more */
@@ -9513,7 +9519,7 @@ the #ifdef SP section of envopt.h"
 
 #ifdef LCBIUIBIT      /* loosely coupled, upper interface */
 #ifndef LCATM
-#define LCATM     
+#define LCATM
 #endif
 #define DEF_LCATM     1
 #endif
@@ -9561,7 +9567,7 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    b-isup protocol specific interface function parameters
 **************************************************************************/
- 
+
 /* interfaces */
 /* #define ICC_1_5_REORG   1       ICC 1.5 file reorganization */
 
@@ -9575,14 +9581,14 @@ the #ifdef SP section of envopt.h"
 /* #define RMT_VER_2       1       RMT interface version 2 */
 /* #define CC_RMTFCDESC_VER_2  1   Version 2 RM Traffic Descriptor */
 /* #define ICC_AUDIT  1            ICC auditing enabled */
- 
+
 /* upper interface, choose none or more */
 /*  #define LCBWUICCT   loosely coupled upper interface (call control) */
- 
+
 /* lower interface, choose none or more */
 /* Always tightly coupled to b-isup */
 /* #define LCBWLIRMT       resource manager */
- 
+
 /* management interface, lbw , choose none or more */
 /* #define LCBWMILBW       loosely coupled, layer management */
 
@@ -9600,13 +9606,13 @@ the #ifdef SP section of envopt.h"
 #endif
 
 #endif  /* BW */
- 
+
 
 #ifdef IW        /* isup protocol specific interface function */
 /**************************************************************************
    isup protocol specific interface function parameters
 **************************************************************************/
- 
+
 /* interfaces */
 /* #define ICC_1_5_REORG   1       ICC 1.5 file reorganization */
 
@@ -9638,10 +9644,10 @@ the #ifdef SP section of envopt.h"
 #endif /* CCT_VER_2 */
 
 #endif /* (CCT_VER_2 || RMT_VER_2 || IW_COT_NEW) */
- 
+
 /* upper interface, choose none or more */
 /*   #define LCIWUICCT   loosely coupled upper interface (call control) */
- 
+
 #ifdef LCIWUICCT
 #define LCSIT 1
 #define LCCCT 1
@@ -9649,15 +9655,15 @@ the #ifdef SP section of envopt.h"
 /* lower interface, choose none or more */
 /* Always tightly coupled to isup */
 /* #define LCIWLIRMT      resource manager */
- 
+
 /* management interface, liw , choose none or more */
 /* #define LCIWMILIW      loosely coupled, layer management */
- 
+
 #ifdef LCIWUICCT           /* If CCT is Loosely coupled then define LCSIT to
                            enable the packing/unpacking utility functions
                            in interface files of SIT */
 #ifndef LCSIT
-#define LCSIT 1 
+#define LCSIT 1
 #endif
 #endif
 
@@ -9681,7 +9687,7 @@ the #ifdef SP section of envopt.h"
 #define ISDN_3_10_PLUS          /* Q.930/Q.931 code version 3.11 and above */
 #define CDPTYNMB_32DIGIT        /* Called Part Number 32 digit */
 /* #define QW_COT_NEW              New prototype definition of RMT */
- 
+
 /* interfaces */
 /* #define ICC_1_5_REORG   1       ICC 1.5 file reorganization */
 
@@ -9695,10 +9701,10 @@ the #ifdef SP section of envopt.h"
 /* #define RMT_VER_2       1       RMT interface version 2 */
 /* #define CC_RMTFCDESC_VER_2  1   Version 2 RM Traffic Descriptor */
 /* #define ICC_AUDIT  1            ICC auditing enabled */
- 
+
 /* upper interface, choose none or more */
 /*   #define LCQWUICCT   loosely coupled upper interface (call control) */
- 
+
 #ifdef LCQWUICCT
 #define LCINUIINT
 #define LCUICMINT
@@ -9708,10 +9714,10 @@ the #ifdef SP section of envopt.h"
 /* lower interface, choose none or more */
 /* Always tightly coupled to isdn */
 /* #define LCQWLIRMT      resource manager */
- 
+
 /* management interface, liw , choose none or more */
 /* #define LCQWMILQW     loosely coupled, layer management */
- 
+
 #if (defined(LCQWUICCT) || defined(LCQWLIRMT))
 #ifndef LCCMCC
 #define LCCMCC        1
@@ -9720,7 +9726,7 @@ the #ifdef SP section of envopt.h"
 #define LCATM         1
 #endif
 #endif
- 
+
 #endif  /* QW */
 
 
@@ -9728,7 +9734,7 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    Q.93B protocol specific interface function parameters
 **************************************************************************/
- 
+
 /* interfaces */
 /* #define ICC_1_5_REORG   1       ICC 1.5 file reorganization */
 
@@ -9742,17 +9748,17 @@ the #ifdef SP section of envopt.h"
 /* #define RMT_VER_2       1       RMT interface version 2 */
 /* #define CC_RMTFCDESC_VER_2  1   Version 2 RM Traffic Descriptor */
 /* #define ICC_AUDIT  1            ICC auditing enabled */
- 
+
 /* upper interface, choose none or more */
 /* #define LCAWUICCT   loosely coupled upper interface (call control) */
- 
+
 /* lower interface, choose none or more */
 /* Always tightly coupled to isdn */
 /* #define LCAWLIRMT      resource manager */
- 
+
 /* management interface, liw , choose none or more */
 /* #define LCAWMILAW     loosely coupled, layer management */
- 
+
 #if (defined(LCAWUICCT) || defined(LCAWLIRMT) || defined(LCAWMILAW))
 #ifndef LCCMCC
 #define LCCMCC        1
@@ -9774,7 +9780,7 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    resource management parameters
 **************************************************************************/
- 
+
 /* interfaces */
 /* #define ICC_1_5_REORG   1  ICC 1.5 file reorganization */
 
@@ -9789,13 +9795,13 @@ the #ifdef SP section of envopt.h"
 /* #define CC_RMTFCDESC_VER_2  1   Version 2 RM Traffic Descriptor */
 /* #define ICC_IN_AUD_ENA   1      Enable auditing for ISDN resources */
 /* #define ICC_ATM_AUD_ENA  1      Enable auditing for ATM resources */
- 
+
 /* upper interface, choose none or more */
 /* #define LCRMUIRMT   loosely coupled, call control */
- 
+
 /* management interface */
 /* #define LCRMMILRM   loosely coupled, layer management */
- 
+
 #ifdef LCRMUIRMT
 #ifndef LCRMT
 #define LCRMT 1
@@ -9804,7 +9810,7 @@ the #ifdef SP section of envopt.h"
 
 #ifdef LCRMUIRMT
 #ifndef LCCMCC
-#define LCCMCC        1    
+#define LCCMCC        1
 #endif
 #ifndef LCATM
 #define LCATM         1
@@ -9828,7 +9834,7 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    router parameters
 **************************************************************************/
- 
+
 /* interfaces */
 /* #define ICC_1_5_REORG   1  ICC 1.5 file reorganization */
 
@@ -9841,13 +9847,13 @@ the #ifdef SP section of envopt.h"
 /* #define RTT_VER_2  1            RTT interface version 2 */
 /* #define ICC_AUDIT  1            ICC auditing enabled */
 /* #define CC_RMTFCDESC_VER_2  1   Version 2 RM Traffic Descriptor */
- 
+
 /* upper interface, choose none or more */
 /* #define LCRTUIRTT   loosely coupled, call control */
- 
+
 /* management interface */
 /*   #define LCRTMILRT   loosely coupled, layer management */
- 
+
 #ifdef LCRTUIRTT
 #ifndef LCRTT
 #define LCRTT  1
@@ -9870,7 +9876,7 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    switching fabric manager parameters
 **************************************************************************/
- 
+
 /* interfaces */
 /* #define ICC_1_5_REORG   1  ICC 1.5 file reorganization */
 
@@ -9884,10 +9890,10 @@ the #ifdef SP section of envopt.h"
 /* #define ICC_AUDIT  1            ICC auditing enabled */
 /* #define CC_RMTFCDESC_VER_2  1   Version 2 RM Traffic Descriptor */
 /* #define CC_SWTCHIDX_VER_2  1    Version 2 Switch Index */
- 
+
 /* upper interface, choose none or more */
 /* #define LCSFUISFT   loosely coupled, call control */
- 
+
 /* management interface */
 /*   #define LCSFMILSF   loosely coupled, layer management */
 
@@ -9905,9 +9911,9 @@ the #ifdef SP section of envopt.h"
 #define LCATM         1
 #endif
 #endif
- 
+
 #endif  /* SF */
- 
+
 
 #ifdef XM        /* Connection Manager interface function */
 /**************************************************************************
@@ -10132,7 +10138,7 @@ the #ifdef SP section of envopt.h"
 #endif /* SIG_PNNI */
 
 /* AINI Signalling options */
- 
+
 /* #define SIG_AINI               AINI Signalling code enabled */
 
 #ifndef SIG_AINI
@@ -10167,9 +10173,9 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    Call Control parameters for interworking
 **************************************************************************/
- 
+
 /* product version, choose one */
- 
+
 /* interfaces */
 /* #define ICC_1_5_REORG   1  ICC 1.5 file reorganization */
 
@@ -10185,24 +10191,24 @@ the #ifdef SP section of envopt.h"
 /* #define CC_SWTCHIDX_VER_2  1    Version 2 Switch Index */
 /* #define ICC_AUDIT  1            ICC auditing enabled */
 
-#ifndef RTT_VER_2 
+#ifndef RTT_VER_2
 /* #define RTT_VER_2       1       RTT version 2 */
 #endif
 
-#ifndef RMT_VER_2 
+#ifndef RMT_VER_2
 /* #define RMT_VER_2       1       RMT version 2 */
 #endif
 
-#ifndef SFT_VER_2 
+#ifndef SFT_VER_2
 /* #define SFT_VER_2       1       SFT version 2 */
 #endif
- 
+
 /* lower interface, choose none or more */
 /* #define LCCCLICCT            loosely coupled, PSIF */
 /* #define LCCCLIRMT            loosely coupled, resource management */
 /* #define LCCCLIRTT            loosely coupled, router */
 /* #define LCCCLISFT            loosely coupled, switching fabric */
- 
+
 #ifdef LCCCLICCT
 #ifndef LCCCT
 #define LCCCT 1
@@ -10230,7 +10236,7 @@ the #ifdef SP section of envopt.h"
 
 /* management interface, */
 /* #define LCCCMILCC            loosely coupled, layer management */
- 
+
 #if (defined(LCCCLICCT) || defined(LCCCLIRTT) || defined(LCCCLIRMT) || defined(LCCCLISFT) || defined(LCCCMILCC))
 #ifndef LCCMCC
 #define LCCMCC        1
@@ -10242,19 +10248,19 @@ the #ifdef SP section of envopt.h"
 #define DEF_LCATM     1
 #endif
 #endif
- 
+
 /* Interworkings */
 
-/* #define CCSIBIIWF 1                 ISUP - BISUP interworking */ 
-/* #define CCINSIIWF 1                 ISDN - ISUP  interworking */ 
-/* #define CCAMSIIWF 1                 Q.93B - ISUP interworking */ 
+/* #define CCSIBIIWF 1                 ISUP - BISUP interworking */
+/* #define CCINSIIWF 1                 ISDN - ISUP  interworking */
+/* #define CCAMSIIWF 1                 Q.93B - ISUP interworking */
 
-/* #define SS7_BIITU2BIITU     1        BB ITU to BB ITU interworking */ 
+/* #define SS7_BIITU2BIITU     1        BB ITU to BB ITU interworking */
 /* #define SS7_SIITU2BIITU     1        NB ITU to BB ITU interworking */
 /* #define SS7_SI7672BIITU     1        NB Q767 to BB ITU interworking */
 /* #define SS7_SIANS2BIITUN    1        NB ANSI-92 to BB ITU interworking */
 
-/* #define ICC_SIITU2INITU     1        NB ITU-92 to ISDN ITU interworking */ 
+/* #define ICC_SIITU2INITU     1        NB ITU-92 to ISDN ITU interworking */
 /* #define CC_INITU2SIITU      1        ITU ISDN to ITU ISUP mapping */
 /* #define CC_INETSI2SIITU     1        ETSI ISDN to ITU ISUP mapping */
 /* #define CC_INQSIG2SIITU     1        QSIG ISDN to ITU ISUP mapping */
@@ -10279,26 +10285,26 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    isup parameters required for ICC
 **************************************************************************/
- 
+
 /* interfaces */
- 
+
 #ifdef LCCCLICCT
 #define LCSIUISIT               /* if loosely coupled wrapper then define */
 #endif
- 
+
 /* variants, choose none or more */
 /* must agree with options delivered */
- 
+
 /* ISUP protocol variants */
- 
+
 /* #define ANS92                ansi, option 12 */
 /* #define Q767                 q.767, option 17 */
 /* #define ETSI_SS7             ETSI, option 22 */
- 
+
 
 #ifndef SS7
 /* #define SS7                  for message functions */
- 
+
 #endif
 
 #ifndef SIT_PARAMETER
@@ -10306,37 +10312,37 @@ the #ifdef SP section of envopt.h"
 #endif
 
 #endif  /* CCSI */
- 
+
 #ifdef CCBI        /* b-isup */
 /**************************************************************************
    b-isup parameters required for ICC
 **************************************************************************/
- 
+
 #ifdef LCCCLICCT
  #define LCBIUIBIT               /* if loosely coupled wrapper then define */
                                  /* loosely coupled BISUP */
 #endif
- 
+
 /* variants, choose none or more */
 /* must agree with options delivered */
- 
+
 /* B-ISUP protocol variants */
- 
+
 /* #define ATF2             ATM-Forum, option 13 */
- 
+
 #ifdef LCBIUIBIT
 #ifndef ATM_BISUP
 /* #define ATM_BISUP     1   b-isup */
 #endif
 #endif
- 
+
 #endif /* CCBI */
 
 #ifdef CCIN
 /**************************************************************************
    isdn parameters required for ICC
 **************************************************************************/
- 
+
 /* #define INVER2                 isdn, version 2.x */
 /* #define ANVER2                 isdn, version 2.x */
 /* #define ISDN_3_8_PLUS          Code version 3.10 & above */
@@ -10384,33 +10390,33 @@ the #ifdef SP section of envopt.h"
 
 /* variants, choose none or more */
 /* must agree with options delivered */
- 
+
 /* Q.93B protocol variants */
- 
+
 /* Q.2931 option */
- 
+
 /* #define Q2931                   ITU-T Q.2931 & Q.2971 code enabled */
- 
+
 #ifndef Q2931
 #define DEF_Q2931         0
 #else
 #define DEF_Q2931         1
 #endif /* Q2931 */
- 
+
 /* PNNI Signalling options */
- 
+
 #ifndef SIG_PNNI
 #define SIG_PNNI               /* PNNI Signalling code enabled */
 #endif /* SIG_PNNI */
- 
+
 #ifndef SIG_PNNI
 #define DEF_SIG_PNNI      0
 #else
 #define DEF_SIG_PNNI      1
 #endif /* SIG_PNNI */
- 
+
 /* AINI Signalling options */
- 
+
 /* #define SIG_AINI               AINI Signalling code enabled */
 
 #ifndef SIG_AINI
@@ -10420,22 +10426,22 @@ the #ifdef SP section of envopt.h"
 #endif /* SIG_AINI */
 
 /* UNI 4.0 option */
- 
+
 #define UNI40                  /* ATM Forum UNI ver 4.0 enabled */
- 
+
 #ifndef UNI40
 #define DEF_UNI40      0
 #else
 #define DEF_UNI40      1
- 
+
 /* #define LIJ             Leaf Initiated Join capabiltity */
- 
+
 #ifndef LIJ
 #define DEF_LIJ          0
 #else
 #define DEF_LIJ          1
 #endif /* LIJ */
- 
+
 #endif /* UNI40 */
 
 #endif /* CCAM */
@@ -10444,7 +10450,7 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    PNNI parameters required for ICC
 **************************************************************************/
- 
+
 /* interfaces */
 
 /* #define LCPULIPCI     loosely coupled, dummy pnni user lower layer */
@@ -10467,10 +10473,10 @@ the #ifdef SP section of envopt.h"
 #endif
 
 #ifndef SIG_PNNI
-#define SIG_PNNI       1 
+#define SIG_PNNI       1
 #define DEF_SIG_PNNI      1
 #endif
- 
+
 /* #define PNNI_ROUTING_ENABLED    1 Enable PNNI routing in CC */
 
 #endif /* CCPN */
@@ -10555,7 +10561,7 @@ the #ifdef SP section of envopt.h"
 /* management interface, lzc */
 /* #define LCZCMILZC         loosely coupled, layer management */
 
-/* The following flag must be turned-on if the customer chooses to implement */ 
+/* The following flag must be turned-on if the customer chooses to implement */
 /* his own packing-unpacking functions for update messages */
 
 /* #define CUSTENV */
@@ -10572,7 +10578,7 @@ the #ifdef SP section of envopt.h"
 /* management interface, lzr */
 /* #define LCZRMILZR         loosely coupled, layer management */
 
-/* The following flag must be turned-on if the customer chooses to implement */ 
+/* The following flag must be turned-on if the customer chooses to implement */
 /* his own packing-unpacking functions for update messages */
 
 /* #define CUSTENV */
@@ -10589,7 +10595,7 @@ the #ifdef SP section of envopt.h"
 /* management interface, lzs */
 /* #define LCZSMILZS         loosely coupled, layer management */
 
-/* The following flag must be turned-on if the customer chooses to implement */ 
+/* The following flag must be turned-on if the customer chooses to implement */
 /* his own packing-unpacking functions for update messages */
 
 /* #define CUSTENV */
@@ -10603,7 +10609,7 @@ the #ifdef SP section of envopt.h"
 **************************************************************************/
 
 /* product version, choose one */
- 
+
 /* #define CCVER1          isup, version 1.x */
 #define CCVER2         /* isup, version 2.x */
 
@@ -10620,56 +10626,56 @@ the #ifdef SP section of envopt.h"
 /* if applicable, must agree with q.930, mtp 3, sccp variants */
 
 /*
-#ifndef BELL 
+#ifndef BELL
 #define BELL            bellcore, option 11
 #define SI_ANSILNP      Support of ANSI local number portability
-#endif 
+#endif
 */
 /*
 #ifndef ANS88
-#define ANS88         ansi, option 12 
-#endif 
+#define ANS88         ansi, option 12
+#endif
 */
 /*
 #ifndef ANS92
-#define ANS92          ansi, option 12 
-#endif 
+#define ANS92          ansi, option 12
+#endif
 */
 /*
 #ifndef TTC
 #define TTC           ttc, japan, option 13
-#endif 
+#endif
 */
 
 /*
 #ifndef SINGTEL
 #define SINGTEL        singapore telecom, option 19
-#endif 
+#endif
 */
 /*
 #ifndef Q767
-#define Q767          q.767, option 17 
-#endif 
+#define Q767          q.767, option 17
+#endif
 */
-/* 
+/*
 #ifndef Q767IT
 #define Q767IT        q.767 italy, option 20
-#endif 
+#endif
 */
-/* 
+/*
 #ifndef ETSI_SS7
 #define ETSI_SS7         ETSI, option 22
-#endif 
+#endif
 */
-/* 
+/*
 #ifndef GT_FTZ
-#define GT_FTZ        GT_FTZ, option 23 
+#define GT_FTZ        GT_FTZ, option 23
 #endif
 */
 
-/* 
+/*
 #ifndef RUSSIA_SS7
-#define RUSSIA_SS7     RUSSIA_SS7, option 24 
+#define RUSSIA_SS7     RUSSIA_SS7, option 24
 #endif
 */
 
@@ -10700,26 +10706,26 @@ the #ifdef SP section of envopt.h"
 **************************************************************************/
 
 /* product version, choose one */
- 
+
 /* #define CCVER1          tup, version 1.x */
 #define CCVER2         /* tup, version 2.x */
- 
+
 /* variants, choose none or more */
 /* must agree with options delivered */
 /* must agree with tup variants */
- 
-/* 
+
+/*
 #ifndef CHINA
 #define CHINA         china
-#endif 
+#endif
 */
 
 /* interfaces */
- 
+
 /* upper interface, choose none or more */
- 
+
 /* #define LCCCLITPT               loosely coupled, TUP User upper layer */
- 
+
 /* type, chosen automatically */
 
 #ifndef SS7
@@ -10733,7 +10739,7 @@ the #ifdef SP section of envopt.h"
 **************************************************************************/
 
 /* product version, choose one */
- 
+
 /* interfaces */
 
 /* upper interface, choose none or more */
@@ -10742,7 +10748,7 @@ the #ifdef SP section of envopt.h"
 
 #ifdef LCCCLIBIT      /* loosely coupled, upper interface */
 #ifndef LCATM
-#define LCATM     
+#define LCATM
 #endif
 #define DEF_LCATM     1
 #ifndef ATM_BISUP
@@ -10926,14 +10932,14 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    BS parameters
 **************************************************************************/
- 
+
 /* interfaces */
- 
+
 /* upper interface, choose none or more */
- 
+
 /* #define LCBSUIBST               loosely coupled bs upper interface */
 /* #define BCBSUIMAC               backward compatibility, mac */
- 
+
 /* layer management options */
 
 /* LCLM or TCLM chosen above, if LCLM or TCLM not chosen */
@@ -10955,9 +10961,9 @@ the #ifdef SP section of envopt.h"
 /* #define LCBSLM           loosely coupled, layer management */
 #endif
 #endif
- 
+
 /* product specific options */
- 
+
 #endif /* BS */
 
 
@@ -10982,7 +10988,7 @@ the #ifdef SP section of envopt.h"
 
 #define SG_PRESERVE_STANDBY   /* preserve standby in dedicated configuration */
 
-/* #define SG_RUG           Rolling upgrade support enabled */ 
+/* #define SG_RUG           Rolling upgrade support enabled */
 /****************************** Interfaces Version Flags ******************/
 
 /* MR Management interface */
@@ -11038,7 +11044,7 @@ the #ifdef SP section of envopt.h"
 
 /* #define SH_DEBUG     enable all debug print masks at compile time  */
 
-/* #define SH_RUG           Rolling upgrade support enabled */ 
+/* #define SH_RUG           Rolling upgrade support enabled */
 /****************************** Interfaces Version Flags ******************/
 
 /* SH Peer interface */
@@ -11085,7 +11091,7 @@ the #ifdef SP section of envopt.h"
 
 /* #define MR_PORT_MCAST     for customer defined portable multicast fns */
 
-/* #define MR_RUG            Rolling upgrade support enabled */ 
+/* #define MR_RUG            Rolling upgrade support enabled */
 /****************************** Interfaces Version Flags ******************/
 
 /* MR Peer interface */
@@ -11156,7 +11162,7 @@ the #ifdef SP section of envopt.h"
 #endif
 
 /* #define UNI40                  ATM Forum UNI ver 4.0 enabled */
- 
+
 #ifndef UNI40
 #define DEF_UNI40      0
 #else
@@ -11178,7 +11184,7 @@ the #ifdef SP section of envopt.h"
 #else
 #define DEF_Q2931         1
 #endif /* Q2931 */
- 
+
 /*** Following options must be defined ***/
 
 #define SAR          /* Use the SAR section in hardware header files */
@@ -11191,7 +11197,7 @@ the #ifdef SP section of envopt.h"
                               GPRS stack
  **************************************************************************/
 /**************************************************************************
-                             Network Services (GN) 
+                             Network Services (GN)
  **************************************************************************/
 #ifdef GN
 
@@ -11204,7 +11210,7 @@ the #ifdef SP section of envopt.h"
 /* lower interface, frd, choose none or more */
 
 /* #define LCGNLIFRD   loosely coupled, frd layer */
- 
+
 /* management interface, lgn, choose none or more */
 
 /* #define LCGNMILGN    loosely coupled, layer management */
@@ -11247,14 +11253,14 @@ the #ifdef SP section of envopt.h"
 #endif /* GN */
 
 /**************************************************************************
-                             GTP (GT) 
+                             GTP (GT)
  **************************************************************************/
 #ifdef GT
 
 #undef GT
 #define GT 1
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interface Coupling Options ***/
 
@@ -11302,20 +11308,20 @@ the #ifdef SP section of envopt.h"
 /* type, chosen automatically */
 
 /* upper interface */
-#ifdef LCGTUIGGU 
+#ifdef LCGTUIGGU
 #ifdef LCGGU
 #undef LCGGU
 #endif
 #define LCGGU 1
-#endif 
+#endif
 
 /* lower interface */
-#ifdef LCGTLIHIT 
+#ifdef LCGTLIHIT
 #ifdef LCHIT
 #undef LCHIT
 #endif
 #define LCHIT 1
-#endif 
+#endif
 
 /* layer management interface */
 #ifdef LCGTMILGT
@@ -11327,7 +11333,7 @@ the #ifdef SP section of envopt.h"
 
 /* 1. Dependency of ZB and GT_FTHA */
 #ifdef ZB
-#ifndef GT_FTHA 
+#ifndef GT_FTHA
 #define GT_FTHA   1
 #endif /* GT_FTHA */
 #endif /* ZB */
@@ -11381,24 +11387,24 @@ the #ifdef SP section of envopt.h"
 
 /* product specific options */
 #define GPRS_SOLSA         /* Backward Compatibility - Enable Support of LSA */
-/* #define GL_FTHA         FTHA flag */ 
+/* #define GL_FTHA         FTHA flag */
 
 
 /* product version, choose one or both */
 /* Enable following when code supports SGSN  */
 /* #define SGSN         Code for SGSN */
- 
+
 /* Enable following when code supports MS */
 /* #define MST           Code for MS */
 
 /* #ifndef SGSN */
 /* #undef GG                       BSSGP not supported */
 /* #endif  SGSN */
- 
+
 /* #ifndef MST */
 /* #undef GZ                       RLC/MAC not supported */
 /* #endif  MST */
- 
+
 
 /* interfaces */
 
@@ -11419,7 +11425,7 @@ the #ifdef SP section of envopt.h"
 #define LCGZUIGBR
 #endif /* #ifdef GZ */
 #endif /* #ifdef LCGLLIGBR */
- 
+
 /* acceptance test flags */
 #ifdef LCGLUIGLS
 #ifdef GM
@@ -11459,7 +11465,7 @@ the #ifdef SP section of envopt.h"
 
 
 /**************************************************************************
-                             BSSGP (GG) 
+                             BSSGP (GG)
  **************************************************************************/
 
 #ifdef GG
@@ -11467,7 +11473,7 @@ the #ifdef SP section of envopt.h"
 #undef GG
 #define GG 1
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interfaces Coupling Options ***/
 
@@ -11527,10 +11533,10 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    SNDCP parameters
 **************************************************************************/
-#undef GS 
+#undef GS
 #define GS 1
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interfaces Coupling Options ***/
 
@@ -11594,10 +11600,10 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    SGSN Relay parameters
 **************************************************************************/
-#undef GR 
+#undef GR
 #define GR 1
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interfaces Coupling Options ***/
 
@@ -11637,10 +11643,10 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    Inerworking Function (IWF) parameters
 **************************************************************************/
-#undef GW 
+#undef GW
 #define GW 1
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interfaces Coupling Options ***/
 
@@ -11661,10 +11667,10 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    SGSN/RNC Relay parameters
 **************************************************************************/
-#undef GU 
+#undef GU
 #define GU 1
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interfaces Coupling Options ***/
 
@@ -11685,16 +11691,16 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    GMM/SM parameters
 **************************************************************************/
-#undef GM 
+#undef GM
 #define GM 1
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 /*** Product options ***/
 #define GMMSM_UMTS     1    /* to enable UMTS */
 #define GMMSM_GSM      1    /* to enable GSM */
 
 /** general flags **/
-#define SGSN_CNTRL_DISTRIBUTED  /* if SGSN control is distributed */ 
+#define SGSN_CNTRL_DISTRIBUTED  /* if SGSN control is distributed */
 #define GMMSM_WITH_TRACE        /* to enable trace */
 #define GM_USTA                 /* to enable alarms */
 #define GM_RUG                  /* for rolling upgrade */
@@ -11705,22 +11711,22 @@ the #ifdef SP section of envopt.h"
 
 /** GSM flags: distribution **/
 #define GMMSM_LLC_TLLI_DISTRIBUTION    /* to enable TLLI distribution at LLC */
-#define GMMSM_BSSGP_TLLI_DISTRIBUTION  /* to enable TLLI distribution at 
+#define GMMSM_BSSGP_TLLI_DISTRIBUTION  /* to enable TLLI distribution at
                                           BSSGP */
 #define LLC_ENHANCEMENT                /* to support LLC enhancements */
 
 /** GSM flags: Specification conformance **/
-#define GMMSM_GSM_R98      /* to support R98 */ 
-#define GMMSM_GSM_R99      /* to support R99 */ 
+#define GMMSM_GSM_R98      /* to support R98 */
+#define GMMSM_GSM_R99      /* to support R99 */
 #define GMMSM_GSM_R4       /* to support R4 */
 
 /** UMTS flags: distribution **/
-/* #define GMMSM_RANAP_DISTRIBUTED  * enable if RANAP is distributed */ 
+/* #define GMMSM_RANAP_DISTRIBUTED  * enable if RANAP is distributed */
 
 /** UMTS flags: release **/
 #define GMMSM_UMTS_R99     /* to support R99 */
 #define GMMSM_UMTS_R4      /* to support R4 */
-#define GMMSM_R5           /* to enable R5 at LM interface */ 
+#define GMMSM_R5           /* to enable R5 at LM interface */
 #define GMMSM_REL5         /* to enable R5 at GMU interface */
 
 /** layer manager flag **/
@@ -11729,29 +11735,29 @@ the #ifdef SP section of envopt.h"
 
 /** interface flags **/
 #define GMUV2              /* to enable GMUINTERFACE V2 */
-#define RPT_REL5           /* to enable RANAP REL5 */ 
+#define RPT_REL5           /* to enable RANAP REL5 */
 #define RPTV2              /* to enable RPTV2 */
 #define GBRV1              /* to enable BSSGP (GBR) version 1 */
-#define GLSV1              /* to enable LLC (GLS) version 1 */ 
+#define GLSV1              /* to enable LLC (GLS) version 1 */
 
 /*** Interfaces Coupling Options ***/
 #define LCGMUIGMU    1 /* upper interface LC */
-#define LWLCGMUIGMU  1 /* upper interface LW LC */ 
+#define LWLCGMUIGMU  1 /* upper interface LW LC */
 
 /** lower interface **/
 /* BSSGP */
-#define LCGMLIGBR    1 /* lower interface LC GMM -> BSSGP */ 
+#define LCGMLIGBR    1 /* lower interface LC GMM -> BSSGP */
 #define LCGGUIGBR    1 /* lower interface LC BSSGP -> GMM */
 
 /* LLC */
 #define LCGMLIGLS    1 /* lower interface LC GMM -> LLC */
-#define LCGLUIGLS    1 /* lower interface LC LLC -> GMM */ 
+#define LCGLUIGLS    1 /* lower interface LC LLC -> GMM */
 
 /* RANAP interface: select none or either of them */
 #define LCGMLIRPT    1 /* lower interface LC GMM -> RANAP */
 #define LCRAUIRPT    1 /* lower interface LC RANAP -> GMM */
 #define LWLCGMLIRPT  1 /* lower interface LW LC GMM -> RANAP */
-#define LWLCRAUIRPT  1 /* lower interface LW LC RANAP -> GMM */ 
+#define LWLCRAUIRPT  1 /* lower interface LW LC RANAP -> GMM */
 
 /** management interface **/
 #define LCGMMILGM    1 /*  loosely coupled, layer management */
@@ -11839,7 +11845,7 @@ the #ifdef SP section of envopt.h"
 
 #ifndef GM_FTHA
 #error "GM_FTHA should be defined if GM_RUG is defined"
-#endif 
+#endif
 
 #ifndef TDS_ROLL_UPGRADE_SUPPORT
 #error "Please enable TDS_ROLL_UPGRADE_SUPPORT in make file"
@@ -11857,7 +11863,7 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
                         PSF-GMM/SM (FT/HA) parameters
 **************************************************************************/
-#ifdef ZK      /* PSF-GMMSM */ 
+#ifdef ZK      /* PSF-GMMSM */
 #undef ZK
 #define ZK 1
 
@@ -11866,7 +11872,7 @@ the #ifdef SP section of envopt.h"
  */
 
 /* enable following options depending upon coupling requirements */
-#define LCZKMILZK    /* loosely coupled, management i/f of GMMSM */ 
+#define LCZKMILZK    /* loosely coupled, management i/f of GMMSM */
 #define LCSMZKMILZK  /* loosely coupled, SM i/f */
 
 /*
@@ -11925,10 +11931,10 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    GO parameters
 **************************************************************************/
-#undef GO 
+#undef GO
 #define GO 1
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interfaces Coupling Options ***/
 
@@ -11938,7 +11944,7 @@ the #ifdef SP section of envopt.h"
 
 
 /* GO -> GTP i/f */
-#ifdef LCGOLIGGU 
+#ifdef LCGOLIGGU
 #ifndef LCGGU
 #define LCGGU 1
 #endif /* LCGGU */
@@ -11951,10 +11957,10 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    GH parameters
 **************************************************************************/
-#undef GH 
+#undef GH
 #define GH 1
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interfaces Coupling Options ***/
 
@@ -11964,7 +11970,7 @@ the #ifdef SP section of envopt.h"
 
 
 /* GH -> GTP i/f */
-#ifdef LCGHLIGGU 
+#ifdef LCGHLIGGU
 #ifndef LCGGU
 #define LCGGU 1
 #endif /* LCGGU */
@@ -11977,10 +11983,10 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    GI parameters
 **************************************************************************/
-#undef GI 
+#undef GI
 #define GI 1
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interfaces Coupling Options ***/
 
@@ -11990,7 +11996,7 @@ the #ifdef SP section of envopt.h"
 
 
 /* GI -> GTP i/f */
-#ifdef LCGILIGGU 
+#ifdef LCGILIGGU
 #ifndef LCGGU
 #define LCGGU 1
 #endif /* LCGGU */
@@ -12003,10 +12009,10 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    NM parameters
 **************************************************************************/
-#undef NM 
+#undef NM
 #define NM 1
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interfaces Coupling Options ***/
 
@@ -12029,10 +12035,10 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
    GB parameters
 **************************************************************************/
-#undef GB 
+#undef GB
 #define GB 1
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interfaces Coupling Options ***/
 
@@ -12059,7 +12065,7 @@ the #ifdef SP section of envopt.h"
 #undef GA
 #define GA 1
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interfaces Coupling Options ***/
 
@@ -12135,7 +12141,7 @@ the #ifdef SP section of envopt.h"
 #undef MM
 #define MM 1
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interfaces Coupling Options ***/
 
@@ -12164,7 +12170,7 @@ the #ifdef SP section of envopt.h"
 #undef GE
 #define GE 1
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interfaces Coupling Options ***/
 
@@ -12185,7 +12191,7 @@ the #ifdef SP section of envopt.h"
 #endif /* GE */
 
 /****************************************************************************
-                        End of GPRS stack                                    
+                        End of GPRS stack
 ****************************************************************************/
 
 /* variants, choose none or more */
@@ -12198,7 +12204,7 @@ the #ifdef SP section of envopt.h"
 #undef RN
 #define RN 1
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interface Coupling Options ***/
 
@@ -12220,7 +12226,7 @@ the #ifdef SP section of envopt.h"
 /* #define SPTV1          1    Lower Interface compliant to SCCP ITU-92 */
 /* #define SPTV2          1    Lower Interface compliant to SCCP ITU-96 */
 
-#define RN_USTA 
+#define RN_USTA
 #define RN_DEBUG
 
 /* variants, choose none or more */
@@ -12232,7 +12238,7 @@ the #ifdef SP section of envopt.h"
 #ifdef  RNSAP_FDD
 #ifndef RNSAP_TDD
 #define RNSAP_TDD    1   /* RNSAP TDD case */
-#endif 
+#endif
 #endif
 
 
@@ -12257,12 +12263,12 @@ the #ifdef SP section of envopt.h"
 #endif /* SPTV1 */
 
 /* upper interface */
-#ifdef LCRNUIRNT 
+#ifdef LCRNUIRNT
 #ifdef LCRNT
 #undef LCRNT
 #endif
 #define LCRNT 1
-#endif 
+#endif
 
 #ifdef LWLCRNUIRNT
 #ifdef LWLCRNT
@@ -12273,12 +12279,12 @@ the #ifdef SP section of envopt.h"
 
 
 /* lower interface */
-#ifdef LCRNLISPT 
+#ifdef LCRNLISPT
 #ifdef LCSPT
 #undef LCSPT
 #endif
 #define LCSPT 1
-#endif 
+#endif
 
 /* layer management interface */
 #ifdef LCRNMILRN
@@ -12321,7 +12327,7 @@ the #ifdef SP section of envopt.h"
 #undef RA
 #define RA 1
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interface Coupling Options ***/
 
@@ -12368,12 +12374,12 @@ the #ifdef SP section of envopt.h"
 #ifndef RA_CN
 #ifndef RA_UTRAN
 #ifndef RA_HNB
-#define RA_HNBGW     1   
-#define HM_HNBGW     1   
-#define RA_UTRAN      1   
-#endif 
-#endif 
-#endif 
+#define RA_HNBGW     1
+#define HM_HNBGW     1
+#define RA_UTRAN      1
+#endif
+#endif
+#endif
 
 #ifndef SPCO
 #define SPCO
@@ -12396,12 +12402,12 @@ the #ifdef SP section of envopt.h"
 #endif /* SPTV1 */
 
 /* upper interface */
-#ifdef LCRAUIRPT 
+#ifdef LCRAUIRPT
 #ifdef LCRPT
 #undef LCRPT
 #endif
 #define LCRPT 1
-#endif 
+#endif
 
 #ifdef LWLCRAUIRPT
 #ifdef LWLCRPT
@@ -12512,12 +12518,12 @@ the #ifdef SP section of envopt.h"
 #endif /*RPT_REL7*/
 
 /* lower interface */
-#ifdef LCRALISPT 
+#ifdef LCRALISPT
 #ifdef LCSPT
 #undef LCSPT
 #endif
 #define LCSPT 1
-#endif 
+#endif
 
 /* layer management interface */
 #ifdef LCRAMILRA
@@ -12552,7 +12558,7 @@ the #ifdef SP section of envopt.h"
 
 /* 1. Dependency of ZA and RA_FTHA */
 #ifdef ZA
-#ifndef RA_FTHA 
+#ifndef RA_FTHA
 #define RA_FTHA   1
 #endif /* RA_FTHA */
 #endif /* ZA */
@@ -12644,7 +12650,7 @@ the #ifdef SP section of envopt.h"
 #define LCHIUISCT
 #endif /* LCHIUISCT */
 #ifndef LCHIMILHI
-#define LCHIMILHI 
+#define LCHIMILHI
 #endif /* LCHIMILHI */
 #endif /* HI_MULTI_THREADED */
 
@@ -12656,7 +12662,7 @@ the #ifdef SP section of envopt.h"
 
 #ifdef LCHIMILHI
 #ifndef LCLHI
-#define LCLHI 
+#define LCLHI
 #endif
 #endif /* LCHIMILHI */
 
@@ -12673,8 +12679,8 @@ the #ifdef SP section of envopt.h"
 #ifdef HI_LKSCTP
 #ifndef CM_LKSCTP
 #define CM_LKSCTP
-#endif 
-#endif 
+#endif
+#endif
 
 #ifdef HI_TLS
 #ifndef CM_TLS
@@ -12704,7 +12710,7 @@ the #ifdef SP section of envopt.h"
    H.323 Control Parameters
 **************************************************************************/
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interfaces Coupling Options ***/
 
@@ -12727,7 +12733,7 @@ the #ifdef SP section of envopt.h"
 /* #define LCHCMILHC           loosely coupled, layer management */
 
 
-/******************* section not to be changed by CUSTOMERS ******************/ 
+/******************* section not to be changed by CUSTOMERS ******************/
 #ifdef LCHCUIHCT
 
 #ifndef LCHCT
@@ -12748,7 +12754,7 @@ the #ifdef SP section of envopt.h"
 
 #ifndef HCCC
 #define HCCC
-#endif /* HCC */ 
+#endif /* HCC */
 
 #endif /* CC || LCHCUICCT || LWLCHCUICCT */
 
@@ -12816,7 +12822,7 @@ the #ifdef SP section of envopt.h"
    H.225 Annex G Parameters
 **************************************************************************/
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interfaces Coupling Options ***/
 
@@ -12838,7 +12844,7 @@ the #ifdef SP section of envopt.h"
 /* #define HG_ACTIVE_MODE      active mode */
 
 
-/******************* section not to be changed by CUSTOMERS ******************/ 
+/******************* section not to be changed by CUSTOMERS ******************/
 #ifdef LCHGUIHGT
 
 #ifndef LCHGT
@@ -12881,7 +12887,7 @@ the #ifdef SP section of envopt.h"
    H.323 User Parameters
 **************************************************************************/
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interfaces Coupling Options ***/
 
@@ -12948,7 +12954,7 @@ the #ifdef SP section of envopt.h"
 /* #define LWLCLXUILXT      lightweight loosely coupled LXT interface */
 /* #define LCLXLIHRT        loosely coupled transport layer HRT Interface */
 /* #define LCLXLIGGU        loosely coupled transport layer GGU Interface */
-/* #define LCLXMILLX        loosely coupled IuUP to stack manager 
+/* #define LCLXMILLX        loosely coupled IuUP to stack manager
                               Also enable LCSMLXMILLX under #ifdef SM */
 
 /* #define  DEBUGP          enable to turn ON debug support */
@@ -13079,7 +13085,7 @@ the #ifdef SP section of envopt.h"
    RTP/RTCP Parameters
 **************************************************************************/
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interfaces Coupling Options ***/
 
@@ -13113,7 +13119,7 @@ the #ifdef SP section of envopt.h"
 /* #define CM_RTP_SDES_BUF         SDES items are mBufs */
 
 
-/******************* section not to be changed by CUSTOMERS ******************/ 
+/******************* section not to be changed by CUSTOMERS ******************/
 
 #ifdef LCHRUIHRT
 
@@ -13168,80 +13174,80 @@ the #ifdef SP section of envopt.h"
 **************************************************************************/
 #undef IQ
 #define IQ 1
- 
+
 /* product version, choose one */
- 
+
 /* #define IQVER1           ISDN-Q.SAAL Convergence Layer, version 1.x */
- 
+
 /* #define L3VER2           isdn, version 2.x */
- 
+
 /* #define BDVER2           lapb/d , version 2.x */
- 
+
 /* interfaces */
- 
+
 /* upper interface, choose none or more */
- 
+
 /* #define LCIQUIDAT        loosely coupled, upper interface (dat.x) */
- 
+
 /* #define LCINLIDAT        loosely coupled, data link layer */
- 
+
 /* lower interface, choose none or more */
- 
+
 /* #define LCIQLIASD        loosely coupled, Q.SAAL */
- 
+
 /* loosely coupled IQ-Q.SAAL */
- 
+
 /* #define LCASUIASD 1       loosely coupled, data link layer */
- 
+
 #ifdef LCASUIASD
- 
+
 #ifndef LCASD
 #define LCASD 1         /* define LC flag for ASD interface */
 #endif
- 
+
 #ifndef LCATM
 #define LCATM 1         /* define LC flag for ATM stack */
 #endif
- 
+
 #endif /* LCASUIASD */
- 
+
 /* management interface, liq , choose none or more */
- 
+
 /* #define LCIQMILIQ        loosely coupled, layer management */
- 
+
 #ifdef LCIQMILIQ
- 
+
 #ifndef LCLIQ
 #define LCLIQ 1        /* loosely coupled, layer manager */
 #endif
- 
+
 #endif /* LCIQMILIQ */
 /* layer management options */
- 
+
 #define IQ_LMINT3          /* new management interface. turning off requires
                               SMIQ_LMINT3 flag also to be turned off in #ifdef
                               SM section */
- 
+
 /* #define DAT2                new upper interface */
 /* #define ASD2                new lower interface */
- 
+
 /* flags should be turned on for backward compatibility */
- 
- 
+
+
 /* product specific options */
- 
+
 /* variants, choose none or more */
 /* must agree with options delivered */
 /* if applicable, must agree with q.930, mtp 3, sccp variants */
- 
- 
+
+
 /* type, chosen automatically */
- 
+
 #ifdef IQ_LMINT3
 #undef IQ_LMINT3
 #define IQ_LMINT3   1
 #endif /* IQ_LMINT3 */
- 
+
 #endif /* IQ */
 
 
@@ -13258,14 +13264,14 @@ the #ifdef SP section of envopt.h"
 #ifdef VN             /* vn 2 and vn 3, france, option 13 */
 #define ISDN_VN    1  /* vn 2 and vn 3, france, option 13 */
 #endif
-#ifdef ETSI           /* etsi, europe, option 14 */ 
-#define ISDN_ETSI  1  /* etsi, europe, option 14 */ 
+#ifdef ETSI           /* etsi, europe, option 14 */
+#define ISDN_ETSI  1  /* etsi, europe, option 14 */
 #endif
-#ifdef AUS            /* AUS, australian, option 15 */ 
-#define ISDN_AUS   1  /* AUS, australian, option 15 */ 
+#ifdef AUS            /* AUS, australian, option 15 */
+#define ISDN_AUS   1  /* AUS, australian, option 15 */
 #endif
-#ifdef NI1            /* national isdn 1, north america, option 16 */ 
-#define ISDN_NI1   1  /* national isdn 1, north america, option 16 */ 
+#ifdef NI1            /* national isdn 1, north america, option 16 */
+#define ISDN_NI1   1  /* national isdn 1, north america, option 16 */
 #endif
 #ifdef NTT            /* ins net, japan, option 17 */
 #define ISDN_NTT   1  /* ins net, japan, option 17 */
@@ -13293,7 +13299,7 @@ the #ifdef SP section of envopt.h"
 #ifndef NTDMS250      /* we need to define NTDMS250 for NTSPRINT */
 #define NTDMS250
 #define ISDN_NTDMS250 1 /* northern telecom dms-250, option 23 */
-#endif 
+#endif
 #endif /* NTSPRINT */
 #ifdef BC303          /* bellcore tr-303, tmc and csc, option 24 */
 #define ISDN_303    1 /* bellcore tr-303, tmc and csc, option 24 */
@@ -13504,14 +13510,14 @@ the #ifdef SP section of envopt.h"
 /*#define GCP_MG  */                   /* Gateway Side */
 /*#define GCP_MGC */                   /* Gateway Controller Side */
 
-/* 
+/*
  * Feature Support Flags  - MGCP Only
  */
 
 /*#define GCP_2705BIS */               /* Support for RFC 2705 BIS */
 /*#define GCP_MGCP_PARSE_DIG_MAP */    /* Pass Digit Map as String for MGCP */
 
-/* 
+/*
  * Feature Support Flags  - MEGACO Only
  */
 
@@ -13520,7 +13526,7 @@ the #ifdef SP section of envopt.h"
 /* #define GCP_MGCO_SHORT_TOKEN  */    /* Use Short Tokens while Transmitting */
 
 
-/* 
+/*
  * Feature Support Flags  - Common to MGCP/Megaco
  */
 
@@ -13586,7 +13592,7 @@ the #ifdef SP section of envopt.h"
 #ifdef LCMGLIHIT
 
 #ifndef LCHIT
-#define LCHIT              /* Loose coupling for HIT Interface */ 
+#define LCHIT              /* Loose coupling for HIT Interface */
 #endif /* LCHIT */
 
 #endif /* LCMGLIHIT */
@@ -13601,9 +13607,9 @@ the #ifdef SP section of envopt.h"
 #endif /* LCMGMILMG */
 
        /******************************************************
-                          RUG Specific Flags 
+                          RUG Specific Flags
        ******************************************************/
-       
+
 /* #define MG_RUG  */          /* product MG rolling upgrade enabled */
 #ifdef MG_RUG
 #define MGT1                  /* base release version of MGT intf */
@@ -13625,7 +13631,7 @@ the #ifdef SP section of envopt.h"
 
 #endif /* MG_RUG */
 
- 
+
 
 /**************** Define dependency checks (DO NOT CHANGE!!) *****************/
 
@@ -13633,7 +13639,7 @@ the #ifdef SP section of envopt.h"
  * Feature Specific Dependency Checks
  */
 
-#ifdef GCP_MGCO_PARSE_DIG_MAP 
+#ifdef GCP_MGCO_PARSE_DIG_MAP
 #ifndef GCP_MGCO
 #error "GCP_MGCO_PARSE_DIG_MAP is a megaco feature. Enable GCP_MGCO"
 #endif
@@ -13645,7 +13651,7 @@ the #ifdef SP section of envopt.h"
 #endif
 #endif /* GCP_USE_AH */
 
-#ifdef GCP_MGCO_SHORT_TOKEN 
+#ifdef GCP_MGCO_SHORT_TOKEN
 #ifndef GCP_MGCO
 #error "GCP_MGCO_SHORT_TOKEN is a megaco feature. Enable GCP_MGCO"
 #endif
@@ -13656,7 +13662,7 @@ the #ifdef SP section of envopt.h"
 
 #ifndef GCP_MGCP
 #error "MGCP Digit Map Parse is MGCP Feature. Enable GCP_MGCP."
-#endif 
+#endif
 
 #endif /* GCP_MGCP_PARSE_DIG_MAP */
 
@@ -13673,7 +13679,7 @@ the #ifdef SP section of envopt.h"
 
 #ifndef CM_AAAA
 #define CM_AAAA
-#endif 
+#endif
 
 #endif /* IPV6_SUPPORTED */
 
@@ -13815,7 +13821,7 @@ the #ifdef SP section of envopt.h"
  * [TEL2]: Packages added in GCP 1.5 Release
  */
 
- /* #define GCP_PKG_MGCO_OCP            */  /* Media Gateway Overload Control package */ 
+ /* #define GCP_PKG_MGCO_OCP            */  /* Media Gateway Overload Control package */
  /* #define GCP_PKG_MGCO_FLR_CTL        */  /* Floor Control package */
  /* #define GCP_PKG_MGCO_IND_VIEW       */  /* Indication of being viewed package */
  /* #define GCP_PKG_MGCO_VOL_CTL        */  /* Volume Control package */
@@ -13858,90 +13864,90 @@ the #ifdef SP section of envopt.h"
 #ifndef GCP_PKG_MGCO_ANALOG
 #define GCP_PKG_MGCO_ANALOG
 #endif /* GCP_PKG_MGCO_ANALOG */
-#endif 
+#endif
 
 #if (defined (GCP_PKG_MGCO_AN_DISP))
 #ifndef GCP_PKG_MGCO_EN_ALERT
 #define GCP_PKG_MGCO_EN_ALERT
 #endif /* GCP_PKG_MGCO_EN_ALERT */
-#endif 
+#endif
 
 #if (defined (GCP_PKG_MGCO_ENH_DTMF))
 #ifndef GCP_PKG_MGCO_EXT_DTMF
 #define GCP_PKG_MGCO_EXT_DTMF
 #endif /* GCP_PKG_MGCO_EXT_DTMF */
-#endif 
+#endif
 
 #if (defined (GCP_PKG_MGCO_EXT_DTMF))
 #ifndef GCP_PKG_MGCO_DTMFDET
 #define GCP_PKG_MGCO_DTMFDET
 #endif /* GCP_PKG_MGCO_DTMFDET */
-#endif 
+#endif
 
 #if (defined (GCP_PKG_MGCO_H245_IND_EXT))
 #ifndef GCP_PKG_MGCO_H_245_IND
 #define GCP_PKG_MGCO_H_245_IND
 #endif /* GCP_PKG_MGCO_H_245_IND */
-#endif 
+#endif
 
 #if (defined (GCP_PKG_MGCO_H245_COM_EXT))
 #ifndef GCP_PKG_MGCO_H_245_COM
 #define GCP_PKG_MGCO_H_245_COM
 #endif /* GCP_PKG_MGCO_H_245_COM */
-#endif 
+#endif
 
 #if (defined (GCP_PKG_MGCO_H324_EXT))
 #ifndef GCP_PKG_MGCO_H_324
 #define GCP_PKG_MGCO_H_324
 #endif /* GCP_PKG_MGCO_H_324 */
-#endif 
+#endif
 
 #if (defined (GCP_PKG_MGCO_TRIG_FLEX_TN))
 #ifndef GCP_PKG_MGCO_TRIG_XD_CALPG_TNGN
 #define GCP_PKG_MGCO_TRIG_XD_CALPG_TNGN
 #endif /* GCP_PKG_MGCO_TRIG_XD_CALPG_TNGN */
-#endif 
+#endif
 
 #if (defined (GCP_PKG_MGCO_TRIG_XD_CALPG_TNGN))
 #ifndef GCP_PKG_MGCO_XD_CALPG_TNGN
 #define GCP_PKG_MGCO_XD_CALPG_TNGN
 #endif /* GCP_PKG_MGCO_XD_CALPG_TNGN */
-#endif 
+#endif
 
 /* For Packages extending Operator Services Package */
 #if (defined (GCP_PKG_MGCO_OSEXT))
 #ifndef GCP_PKG_MGCO_OSES
 #define GCP_PKG_MGCO_OSES
 #endif /* GCP_PKG_MGCO_OSES */
-#endif 
+#endif
 
 /* For Packages extending BCAS Package */
 #if (defined (GCP_PKG_MGCO_BCASADDR) || defined (GCP_PKG_MGCO_ICAS))
 #ifndef GCP_PKG_MGCO_BCAS
 #define GCP_PKG_MGCO_BCAS
 #endif /* GCP_PKG_MGCO_BCAS */
-#endif 
+#endif
 
 /* For Packages extending Advanced Audio Server Base Package */
 #if (defined (GCP_PKG_MGCO_AASDIGCOLLECT) || defined (GCP_PKG_MGCO_AASRECODING))
 #ifndef GCP_PKG_MGCO_ADVAUSRVRBASE
 #define GCP_PKG_MGCO_ADVAUSRVRBASE
 #endif /* GCP_PKG_MGCO_ADVAUSRVRBASE */
-#endif 
+#endif
 
 /* For Packages extending LabelKey Package */
 #if (defined (GCP_PKG_MGCO_FUNCKEY) || defined (GCP_PKG_MGCO_SOFTKEY))
 #ifndef GCP_PKG_MGCO_LABELKEY
 #define GCP_PKG_MGCO_LABELKEY
 #endif /* GCP_PKG_MGCO_LABELKEY */
-#endif 
+#endif
 
 /* For Packages extending Key Package */
 #if (defined (GCP_PKG_MGCO_KEYPAD) || defined (GCP_PKG_MGCO_LABELKEY))
 #ifndef GCP_PKG_MGCO_KEY
 #define GCP_PKG_MGCO_KEY
 #endif /* GCP_PKG_MGCO_KEY */
-#endif 
+#endif
 
 /* For Packages extending Tonegen Package */
 #if (defined (GCP_PKG_MGCO_DTMFGEN) || defined (GCP_PKG_MGCO_CPGEN) || \
@@ -13954,7 +13960,7 @@ the #ifdef SP section of envopt.h"
 #ifndef GCP_PKG_MGCO_TONEGEN
 #define GCP_PKG_MGCO_TONEGEN
 #endif /* GCP_PKG_MGCO_TONEGEN */
-#endif 
+#endif
 
 /* For Packages extending Tonedet Package */
 #if (defined (GCP_PKG_MGCO_DTMFDET) || defined (GCP_PKG_MGCO_CPDET) || \
@@ -13962,7 +13968,7 @@ the #ifdef SP section of envopt.h"
 #ifndef GCP_PKG_MGCO_TONEDET
 #define GCP_PKG_MGCO_TONEDET
 #endif /* GCP_PKG_MGCO_TONEDET */
-#endif 
+#endif
 
 /* For Packages extending Network Package */
 #if (defined (GCP_PKG_MGCO_RTP) || defined (GCP_PKG_MGCO_TDMC) || \
@@ -13970,7 +13976,7 @@ the #ifdef SP section of envopt.h"
 #ifndef GCP_PKG_MGCO_NETWORK
 #define GCP_PKG_MGCO_NETWORK
 #endif /* GCP_PKG_MGCO_NETWORK */
-#endif 
+#endif
 
 #endif /* GCP_MGCO */
 
@@ -13992,7 +13998,7 @@ the #ifdef SP section of envopt.h"
 /* #define GCP_PKG_MGCP_CNTRY_SPEC_TONE    */   /* Country Specific Tone */
 /* #define GCP_PKG_MGCP_SIGLST             */   /* Signal List */
 /* #define GCP_PKG_MGCP_DTMF_DLPL_BASPBX   */   /* Dial Pulse Basic PBX */
-/* #define GCP_PKG_MGCP_FXO_LSG_ANALOG     */   
+/* #define GCP_PKG_MGCP_FXO_LSG_ANALOG     */
 /* #define GCP_PKG_MGCP_DTMF_DIAL_PULSE    */   /* DTMF Dial Pulse */
 /* #define GCP_PKG_MGCP_NAM_MF_GRP_DE      */
 /* #define GCP_PKG_MGCP_MF_WINKSTART       */   /* Multi Frequency Winkstart */
@@ -14062,24 +14068,24 @@ the #ifdef SP section of envopt.h"
 #endif /* !SNT2 */
 
 #ifdef L4
-#undef L4   
+#undef L4
 #endif /* L4 */
 
 #endif   /* GCP_PROV_MTP3 */
 
 #ifdef GCP_CH
- 
+
 #ifndef GCP_MGCO
 #define GCP_MGCO
 #endif /*GCP_MGCO */
 
 #endif /* GCP_CH */
- 
+
 
 #ifdef GCP_ASN
 
 #ifndef MG_WRAP_ASN1_ENCDEC
-#define MG_WRAP_ASN1_ENCDEC  
+#define MG_WRAP_ASN1_ENCDEC
 #endif /*MG_WRAP_ASN1_ENCDEC */
 
 #ifndef GCP_PKG_MGCO_GENERIC
@@ -14087,7 +14093,7 @@ the #ifdef SP section of envopt.h"
 #endif /*DGCP_PKG_MGCO_GENERIC*/
 
 #endif /*GCP_ASN*/
-  
+
 
 #ifdef MG_ASN_TEST
 
@@ -14100,13 +14106,13 @@ the #ifdef SP section of envopt.h"
 #ifndef CM_ABNF_DBG
 #define CM_ABNF_DBG
 #endif /*CM_ABNF_DBG */
-#endif /*MG_ASN_DBG*/  
+#endif /*MG_ASN_DBG*/
 
 #endif /*MG_ASN_TEST*/
 
 #ifdef GCP_MGCP
 #ifndef GCP_MGCO
-   
+
 #ifdef GCP_ASN
 #undef GCP_ASN
 #endif /* GCP_ASN */
@@ -14124,7 +14130,7 @@ the #ifdef SP section of envopt.h"
 #endif /* GCP_NTFY_AVL */
 
 #endif /*not def GCP_MGCO */
-#endif /*GCP_MGCP */      
+#endif /*GCP_MGCP */
 
 #ifdef GCP_NTFY_AVL
 
@@ -14149,7 +14155,7 @@ the #ifdef SP section of envopt.h"
 #endif /* MGT_MGCO_V2  */
 
 #ifndef GCP_PKG_MGCO_ROOT
-#define GCP_PKG_MGCO_ROOT   
+#define GCP_PKG_MGCO_ROOT
 #endif /*GCP_PKG_MGCO_ROOT */
 #endif /* GCP_VER_2_1 */
 
@@ -14192,7 +14198,7 @@ the #ifdef SP section of envopt.h"
 
 #ifndef LCLZG
 #define LCLZG
-#endif 
+#endif
 
 #endif /* LCZGMILZG */
 
@@ -14230,7 +14236,7 @@ the #ifdef SP section of envopt.h"
 
 #ifndef GCP_VER_1_3
 #define GCP_VER_1_3
-#endif 
+#endif
 
 #ifndef MGT_GCP_VER_1_4
 #define MGT_GCP_VER_1_4                /* Support for GCP Release 1.4 */
@@ -14271,7 +14277,7 @@ the #ifdef SP section of envopt.h"
 
 
 /*
- * Interface Flags 
+ * Interface Flags
  */
 
 /* #define LCDGMILDG */    /* Layer Manager Loosely Coupled */
@@ -14282,7 +14288,7 @@ the #ifdef SP section of envopt.h"
 /* #define LCDGLIHIT  */   /* HIT Interface */
 /* #define LCDGUIHIT  */   /* HIT Interface */
 
-/* 
+/*
  * Multi-Threading Flags
  */
 
@@ -14308,7 +14314,7 @@ the #ifdef SP section of envopt.h"
 
 #ifndef CM_AAAA
 #define CM_AAAA
-#endif 
+#endif
 
 #endif /* IPV6_SUPPORTED */
 
@@ -14386,10 +14392,10 @@ the #ifdef SP section of envopt.h"
 ****************************************************************************/
 
 /****************************************************************************
-                         LDF - MTP3 section 
+                         LDF - MTP3 section
 ****************************************************************************/
 #ifdef DN  /* MTP-3 LDF  */
- 
+
 /* SN_SG should be enabled if LDF-MTP3 is used in Signalling Gateway */
 /* #define SN_SG  1 */
 
@@ -14406,7 +14412,7 @@ the #ifdef SP section of envopt.h"
 /* #define DN_DEBUG       debug flag   */
 /* #define DN_USTA        usta flag   */
 
-/* #define DN_RUG           Rolling upgrade support enabled */ 
+/* #define DN_RUG           Rolling upgrade support enabled */
 /****************************** Interfaces Version Flags ******************/
 
 /* MTP3 Upper interface */
@@ -14418,7 +14424,7 @@ the #ifdef SP section of envopt.h"
 /* Layer management interface */
 #define LDNV1              /* Layer Management interface version 1.0 */
 
-/******************* section not to be changed by CUSTOMERS ******************/ 
+/******************* section not to be changed by CUSTOMERS ******************/
 #ifdef LCDNMILDN
 #ifdef LCLDN
 #undef LCLDN
@@ -14428,9 +14434,9 @@ the #ifdef SP section of envopt.h"
 
 /*
 ** MUST define DN_ULDF and/or DN_LLDF.
-** If (DN_ULDF not defined ) and (DN_LLDF not defined) 
+** If (DN_ULDF not defined ) and (DN_LLDF not defined)
 ** then LDF assumes that it acts as both ULDF and LLDF
-** 
+**
 */
 
 #ifndef DN_ULDF
@@ -14477,10 +14483,10 @@ the #ifdef SP section of envopt.h"
                        End of LDF-MTP3 Section
 ****************************************************************************/
 /****************************************************************************
-                         LDF - ISUP section 
+                         LDF - ISUP section
 ****************************************************************************/
 #ifdef DI  /* ISUP LDF  */
- 
+
 #define DI_ULDF  1       /* LDF acts as Upper load distribution function */
 #define DI_LLDF  1       /* LDF acts as Lower load distribution function */
 /* #define DI_RUG           Enable rolling upgrade support in LDF ISUP */
@@ -14495,22 +14501,22 @@ the #ifdef SP section of envopt.h"
 /****************************** Interfaces Version Flags ******************/
 
 /* ISUP Upper interface - define the latest version */
-/* #define SITV1              Upper interface version 1.0 */ 
-#define SITV2              /* Upper interface version 2.0 */ 
+/* #define SITV1              Upper interface version 1.0 */
+#define SITV2              /* Upper interface version 2.0 */
 
-/* MTP3 upper interface - define the latest version */  
+/* MTP3 upper interface - define the latest version */
 #define SNTV1              /* Lower interface version 1.0 */
 
 /* Layer management interface - define the latest version */
 #define LDIV1              /* Layer Management interface version 1.0 */
- 
-/**************** section not to be changed by CUSTOMERS *****************/ 
+
+/**************** section not to be changed by CUSTOMERS *****************/
 
 /*
 ** MUST define DI_ULDF and/or DI_LLDF.
-** If (DI_ULDF not defined ) and (DI_LLDF not defined) 
+** If (DI_ULDF not defined ) and (DI_LLDF not defined)
 ** then LDF assumes that it acts as both ULDF and LLDF
-** 
+**
 */
 
 #ifndef DI_ULDF
@@ -14535,7 +14541,7 @@ the #ifdef SP section of envopt.h"
 #endif /* SNT2 */
 
 
-/* define dependency checks */ 
+/* define dependency checks */
 #ifdef LCDILISIT
 #ifndef LCSIT
 #define LCSIT 1
@@ -14710,12 +14716,12 @@ the #ifdef SP section of envopt.h"
 /******************************************************************/
 #ifdef SO
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 /* These options can be enabled in the make file also */
 /* #define LCSOUISOT        loosely coupled SOT Interface User */
 /* #define LWLCSOUISOT      lightweight loosely coupled SOT interface */
 /* #define LCSOLIHIT        loosely coupled transport layer Interface */
-/* #define LCSOMILSO        loosely coupled SIP to stack manager 
+/* #define LCSOMILSO        loosely coupled SIP to stack manager
                               Also enable LCSMSOMILSO under #ifdef SM */
 
 /* #define  CM_SDP_V_2      enable to be compatable to SDP rel 2  */
@@ -14856,19 +14862,19 @@ the #ifdef SP section of envopt.h"
 #ifndef CM_SDP_SIP_IM_SUPPORT
 #define CM_SDP_SIP_IM_SUPPORT
 #endif /* CM_SDP_SIP_IM_SUPPORT */
-#endif /* CM_SDP_OPAQUE*/ 
+#endif /* CM_SDP_OPAQUE*/
 #endif /* SO_INSTMSG */
 
 #ifdef SO_COMPRESS
 #ifndef CM_COMPRESS
 #define CM_COMPRESS
-#endif 
-#endif 
+#endif
+#endif
 
 
 #ifdef SO_NAT
 #ifndef SO_USE_UDP_SRVR
-#define SO_USE_UDP_SRVR 
+#define SO_USE_UDP_SRVR
 #endif
 #endif
 
@@ -14907,15 +14913,15 @@ the #ifdef SP section of envopt.h"
 
 /*-- SIP Dependency on version of common ABNF Library --*/
 
-/*-- SIP 2.2 works with CM_ABNF_V_1_3 and SIP 2.1 works with 
+/*-- SIP 2.2 works with CM_ABNF_V_1_3 and SIP 2.1 works with
      CM_ABNF_V_1_2. We may use the SOT interface version to
-     check which SIP version we are using. 
-     
-     Please note that this is not the best option if the 
-     SIP product version is changed later while the SOT 
-     interface remains the same. 
-     
-     Please update accordingly for any product and SOT 
+     check which SIP version we are using.
+
+     Please note that this is not the best option if the
+     SIP product version is changed later while the SOT
+     interface remains the same.
+
+     Please update accordingly for any product and SOT
      interface changes in the future --*/
 #ifdef SOT2
 #ifndef CM_ABNF_V_1_3
@@ -14977,7 +14983,7 @@ the #ifdef SP section of envopt.h"
    SIP User Parameters
 **************************************************************************/
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 
 /*** Interfaces Coupling Options ***/
 
@@ -15120,7 +15126,7 @@ the #ifdef SP section of envopt.h"
 /* #define SNT_BACK_COMP_MERGED_NIF Backward compatibility for customer's own NIF */
 
 /* M3UA Functionality specific defines */
-/* #define IT_ABORT_ASSOC  * flexibility to LM for specifying whether to abort assoc or not */ 
+/* #define IT_ABORT_ASSOC  * flexibility to LM for specifying whether to abort assoc or not */
 /* #define OG_RTE_ON_LPS_STA  * Only at ASP, if enabled then outgoing route willdepend upon Local PS state (it has to be active) */
 
 /*** Interfaces Coupling Options ***/
@@ -15147,7 +15153,7 @@ the #ifdef SP section of envopt.h"
 
 /* Interface coupling options for MTP3 : Applicable only at SG */
 /* Following define is to be used only when SNT_BACK_COMP_MERGED_NIF is not used
- */ 
+ */
 /* #define LCITLISNT       loosely coupled, lower interface for dummy mtp3 */
 /* #define LCSNUISNT       loosely coupled, MTP upper layer */
 
@@ -15270,7 +15276,7 @@ the #ifdef SP section of envopt.h"
 /*                    LDF-M3UA Layer                              */
 /******************************************************************/
 #ifdef DV  /* M3UA LDF  */
- 
+
 /* SNTIWF should be enabled if LDF-M3UA is used in Signalling Gateway */
 #ifndef SNTIWF
 #define SNTIWF 1
@@ -15283,7 +15289,7 @@ the #ifdef SP section of envopt.h"
 /* #define DV_DEBUG       debug flag   */
 /* #define DV_USTA        usta flag   */
 
-/* #define DV_RUG         Rolling upgrade support enabled */ 
+/* #define DV_RUG         Rolling upgrade support enabled */
 /****************************** Interfaces Version Flags ******************/
 
 /* M3UA Upper interface */
@@ -15295,7 +15301,7 @@ the #ifdef SP section of envopt.h"
 /* Layer management interface */
 #define LDVV1            /* Layer Management interface version 1.0 */
 
-/******************* section not to be changed by CUSTOMERS ******************/ 
+/******************* section not to be changed by CUSTOMERS ******************/
 #ifdef LCDVMILDV
 #ifdef LCLDV
 #undef LCLDV
@@ -15306,14 +15312,14 @@ the #ifdef SP section of envopt.h"
 #if defined(TDS_ROLL_UPGRADE_SUPPORT) || defined(DV_RUG)
 #if !defined(TDS_CORE2) || !defined(TDS_ROLL_UPGRADE_SUPPORT) || !defined(DV_RUG)
 #error "Please enable TDS_CORE2, TDS_ROLL_UPGRADE_SUPPORT & DV_RUG flags"
-#endif 
+#endif
 #endif
 
 /*
 ** MUST define DV_ULDF and/or DV_LLDF.
-** If (DV_ULDF not defined ) and (DV_LLDF not defined) 
+** If (DV_ULDF not defined ) and (DV_LLDF not defined)
 ** then LDF assumes that it acts as both ULDF and LLDF
-** 
+**
 */
 
 #ifndef DV_ULDF
@@ -15382,7 +15388,7 @@ the #ifdef SP section of envopt.h"
 
 /* #define LCNFMILNF       loosely coupled, layer management */
 
-/* Option required for NIF accepatnce tests. If this is set, ITSG must 
+/* Option required for NIF accepatnce tests. If this is set, ITSG must
  * also be defined and ITASP must not be defined.*/
 
 /* #define SN    */
@@ -15460,10 +15466,10 @@ the #ifdef SP section of envopt.h"
 /* #define LCD3LIDDT        loosely coupled, at LAPD interface to NIF*/
 
 
-#ifdef LVTVER2   /* The flag make the additional code dormat at the LVT 
+#ifdef LVTVER2   /* The flag make the additional code dormat at the LVT
                     interface for Disc Req and UDat API's  */
 #undef LVTVER2
-#endif 
+#endif
 
 #ifndef DAT2
 #define DAT2  1
@@ -15481,9 +15487,9 @@ the #ifdef SP section of envopt.h"
 /*#define IUA    1   ISDN Q.931 User Adoptation layer   */
 /*#define V5UA   1  * V5.2 User Adoptation layer         */
 /*#define DUA    1  * DPNSS/DASS2 User Adoptation layer  */
-/* #define MULTUA *MULTIPLE protocol User adotation layer      
-                    If MULTIUA is define make sure 
-                    that all the supported protocol 
+/* #define MULTUA *MULTIPLE protocol User adotation layer
+                    If MULTIUA is define make sure
+                    that all the supported protocol
                     #defines are  also define          */
 
 /************** section NOT to be changed by CUSTOMERS **********/
@@ -15630,7 +15636,7 @@ the #ifdef SP section of envopt.h"
 #define MACINT4  1
 #endif
 
-#ifndef DATVER2 
+#ifndef DATVER2
 #define DATVER2 1
 #endif
 
@@ -16308,7 +16314,7 @@ the #ifdef SP section of envopt.h"
 #endif          /* PH */
 
 /**************************************************************************
-                      3GPP-UH Section : MAC-HS User 
+                      3GPP-UH Section : MAC-HS User
 **************************************************************************/
 #ifdef UH
 #undef UH
@@ -16332,7 +16338,7 @@ the #ifdef SP section of envopt.h"
 #endif          /* UH */
 
 /**************************************************************************
-                      3GPP-CH Section : Node-B Application 
+                      3GPP-CH Section : Node-B Application
 **************************************************************************/
 #ifdef CH
 #undef CH
@@ -16380,7 +16386,7 @@ the #ifdef SP section of envopt.h"
 
 #endif          /* US */
 
-#endif          /* RR_UE */ 
+#endif          /* RR_UE */
 /**************************************************************************
                       3GPP-BM Section
 **************************************************************************/
@@ -16524,12 +16530,12 @@ the #ifdef SP section of envopt.h"
 **************************************************************************/
 #ifdef HM
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 /* These options can be enabled in the make file also */
 /* #define LCHMUIRUT        loosely coupled RUT Interface User */
 /* #define LCHMUIHNT        loosely coupled HNT Interface User */
 /* #define LCHMLISCT        loosely coupled transport layer Interface */
-/* #define LCHMMILHM        loosely coupled Iuh to stack manager 
+/* #define LCHMMILHM        loosely coupled Iuh to stack manager
                               Also enable LCSMHMMILHM under #ifdef SM */
 
 /* #define  CMINETDBG       enable socket debugging supprt */
@@ -16598,7 +16604,7 @@ the #ifdef SP section of envopt.h"
 
 /*#define SNT2                  SNT interface flag */
 /*#define ASI2                  ASI interface flag */
-/*#define ASD2                  ASD interface flag */ 
+/*#define ASD2                  ASD interface flag */
 /****************************** Interfaces Version Flags ******************/
 
 /* Upper interface */
@@ -16647,25 +16653,25 @@ the #ifdef SP section of envopt.h"
 #ifdef LCALUIALT
 #ifndef LCALT
 #define LCALT     1 /* loosely coupled, ALT interface */
-#endif           /* LCALT */ 
+#endif           /* LCALT */
 #endif           /* LCALUIALT */
 
 #ifdef LCALLIASD
 #ifndef LCASD
 #define LCASD     1 /* loosely coupled, ASD interface */
-#endif           /* LCASD */ 
+#endif           /* LCASD */
 #endif           /* LCALLIASD */
 
 #ifdef LCALLIASI
 #ifndef LCASI
 #define LCASI     1 /* loosely coupled, ASI interface */
-#endif           /* LCASI */ 
+#endif           /* LCASI */
 #endif           /* LCALLIASI */
 
 #ifdef LCALLISNT
 #ifndef LCSNT
 #define LCSNT     1 /* loosely coupled, SNT interface */
-#endif           /* LCSNT */ 
+#endif           /* LCSNT */
 #endif           /* LCALLISNT */
 
 #if (LCLAL || LCALT || LCASD || LCASI)
@@ -16783,7 +16789,7 @@ the #ifdef SP section of envopt.h"
 
 /* For Fault Tolerant, High Availability interface support */
 #ifndef SU_FTHA
-#define SU_FTHA 
+#define SU_FTHA
 #endif
 
 /*** Interfaces Coupling Options ***/
@@ -16844,9 +16850,9 @@ the #ifdef SP section of envopt.h"
 
 /* type, chosen automatically */
 
-/*  If the management interface is loosely coupled in any of the two 
- *  directions, then define the general loosely coupled 
- *  flag (LCLSU) 
+/*  If the management interface is loosely coupled in any of the two
+ *  directions, then define the general loosely coupled
+ *  flag (LCLSU)
  */
 
 #ifdef LCSUMILSU
@@ -16883,9 +16889,9 @@ the #ifdef SP section of envopt.h"
 #endif /* LCSMNPMILNP */
 
 
-/*  If the upper interface is loosely coupled in any of the two 
- *  directions, then define the general loosely coupled 
- *  flag (LCSPT) 
+/*  If the upper interface is loosely coupled in any of the two
+ *  directions, then define the general loosely coupled
+ *  flag (LCSPT)
  */
 
 #ifdef LCSUUISPT
@@ -16920,9 +16926,9 @@ the #ifdef SP section of envopt.h"
 
 #endif /* LCSTLISPT */
 
-/*  If the lower interface is loosely coupled in any of the two 
- *  directions, then define the general loosely coupled 
- *  flag (LCSCT) 
+/*  If the lower interface is loosely coupled in any of the two
+ *  directions, then define the general loosely coupled
+ *  flag (LCSCT)
  */
 #ifdef LCSULISCT
 
@@ -17013,9 +17019,9 @@ the #ifdef SP section of envopt.h"
 
 /************** section NOT to be changed by CUSTOMERS **********/
 
-/*  If the layer manager  interface is loosely coupled in any of the two 
- *  directions, then define the general loosely coupled 
- *  flag (LCLNP) 
+/*  If the layer manager  interface is loosely coupled in any of the two
+ *  directions, then define the general loosely coupled
+ *  flag (LCLNP)
  */
 
 #ifdef LCNPMILNP
@@ -17034,9 +17040,9 @@ the #ifdef SP section of envopt.h"
 
 #endif /* LCSMNPMILNP */
 
-/*  If the lower  interface is loosely coupled in any of the two 
- *  directions, then define the general loosely coupled 
- *  flag (LCSPT) 
+/*  If the lower  interface is loosely coupled in any of the two
+ *  directions, then define the general loosely coupled
+ *  flag (LCSPT)
  */
 
 #ifdef LCNPLISPT
@@ -17107,7 +17113,7 @@ the #ifdef SP section of envopt.h"
 #define CMSS7_SPHDROPT   /* header option. Enable this flag for
                           * the upper layers of SCCP  as well.
                           */
-                          
+
 /* #define  SUSG  1       SUA works as SGP */
 
 #ifndef SPCO
@@ -17288,8 +17294,8 @@ the #ifdef SP section of envopt.h"
 /****************************************************************************
                      3GPP-MAC Section
 ****************************************************************************/
-#ifdef MK 
-#undef MK 
+#ifdef MK
+#undef MK
 #define MK 1
 
 
@@ -17377,7 +17383,7 @@ the #ifdef SP section of envopt.h"
 #error "MKT2 flag is mandatory for rolling upgrade. Please enable"
 #endif
 #endif
-   
+
 
 #ifndef LMINT3
 #define LMINT3
@@ -17445,8 +17451,8 @@ the #ifdef SP section of envopt.h"
 /****************************************************************************
                      MAC-HS Section
 ****************************************************************************/
-#ifdef MD 
-#undef MD 
+#ifdef MD
+#undef MD
 #define MD 1
 #define MD_MAC_EHS 1
 #define MD_MAC_E 1
@@ -17533,7 +17539,7 @@ the #ifdef SP section of envopt.h"
 #define LFPV1   /* Lower interface version 1.0 */
 
 
-#ifdef TDS_ROLL_UPGRADE_SUPPORT 
+#ifdef TDS_ROLL_UPGRADE_SUPPORT
 #define FP_FTHA
 #define FP_RUG
 #define FPT2
@@ -17737,7 +17743,7 @@ the #ifdef SP section of envopt.h"
 /* #define IB_ENC_VALIDATE  Enable Encode validation for NBAP Msgs */
 
 #ifndef LMINT3
-#define LMINT3 
+#define LMINT3
 #endif
 
 #ifndef SCT2
@@ -17760,7 +17766,7 @@ the #ifdef SP section of envopt.h"
 #define LCLIB    1  /* loosely coupled, LIB interface */
 #endif /* LCLIB */
 #ifdef NBU_REL5_IP
-#ifndef LCSCT   
+#ifndef LCSCT
 #define LCSCT 1   /* To resuse packing/unpacking functions at layer inf */
 #endif           /*  LCSCT   */
 #endif           /* NBU_REL5_IP */
@@ -17769,13 +17775,13 @@ the #ifdef SP section of envopt.h"
 #ifdef LCIBUINBU
 #ifndef LCNBU
 #define LCNBU     1 /* loosely coupled, NBU interface */
-#endif           /* LCNBU */ 
+#endif           /* LCNBU */
 #endif           /* LCIBUINBU */
 
 #ifdef LCIBLIASD
 #ifndef LCASD
 #define LCASD     1 /* loosely coupled, ASD interface */
-#endif           /* LCASD */ 
+#endif           /* LCASD */
 #endif           /* LCIBLIASD */
 
 #if (LCLIB || LCASD )
@@ -17787,11 +17793,11 @@ the #ifdef SP section of envopt.h"
 #ifdef LCIBLISCT
 #ifndef LCSCT
 #define LCSCT     1 /* loosely coupled, ASD interface */
-#endif           /* LCASD */ 
+#endif           /* LCASD */
 #endif           /* LCIBLIASD */
 
 
-#ifdef IB_NODEB 
+#ifdef IB_NODEB
 #ifdef NBU_REL5_ATM
 #ifdef NBU_REL5_IP
 #error "In Node-B if REL5 ATM enabled should not enable IP"
@@ -17808,7 +17814,7 @@ the #ifdef SP section of envopt.h"
 /**************************************************************************
                      UMTS-NBAP User(Dummy) Parameters
 **************************************************************************/
-#ifdef UL 
+#ifdef UL
 #undef UL
 #define UL 1
 
@@ -17829,7 +17835,7 @@ the #ifdef SP section of envopt.h"
 #ifdef LCULLINBU
 #ifndef LCNBU
 #define LCNBU     1 /* loosely coupled, NBU interface */
-#endif           /* LCNBU */ 
+#endif           /* LCNBU */
 #endif           /* LCULLINBU */
 
 #endif          /* UL */
@@ -17881,9 +17887,9 @@ the #ifdef SP section of envopt.h"
 
 /* type, chosen automatically */
 
-/*  If the user interface is loosely coupled in any of the two 
- *  directions, then define the general loosely coupled 
- *  flag (LWLCBPT) 
+/*  If the user interface is loosely coupled in any of the two
+ *  directions, then define the general loosely coupled
+ *  flag (LWLCBPT)
  */
 
 #ifdef LWLCBPBPT
@@ -17933,9 +17939,9 @@ the #ifdef SP section of envopt.h"
 
 /* type, chosen automatically */
 
-/*  If the user interface is loosely coupled in any of the two 
- *  directions, then define the general loosely coupled 
- *  flag (LWLCBPT) 
+/*  If the user interface is loosely coupled in any of the two
+ *  directions, then define the general loosely coupled
+ *  flag (LWLCBPT)
  */
 
 #ifdef LWLCBUBPT
@@ -17999,7 +18005,7 @@ the #ifdef SP section of envopt.h"
 /******************* section not to be changed by CUSTOMERS ******************/
 
 #ifdef ITU96
-#define SS7_ITU96   
+#define SS7_ITU96
 #endif
 
 #ifndef SS7
@@ -18078,17 +18084,17 @@ the #ifdef SP section of envopt.h"
 /* GMMSM Lower interface */
 
 /* RPT */
-#define RA        
-#define RA_AUDIT       
+#define RA
+#define RA_AUDIT
 #define RPT_AUDIT
 #define RU
 
 /* GLS */
-#define GL        
+#define GL
 #define LLC_ENHANCEMENT
 
 /* GBR */
-#define GG        
+#define GG
 
 
 /******************* Test case option ***************************************/
@@ -18098,16 +18104,16 @@ the #ifdef SP section of envopt.h"
 #define GMMSM
 
 #ifndef GMMSM_GSM
-#define GMMSM_GSM   
-#define GMMSM_GSM_R4  
-#define GMMSM_R5   
-#define GMMSM_REL5 
+#define GMMSM_GSM
+#define GMMSM_GSM_R4
+#define GMMSM_R5
+#define GMMSM_REL5
 #endif /* GMMSM_GSM */
 
 #ifndef GMMSM_UMTS
-#define GMMSM_UMTS    
-#define GMMSM_UMTS_R99    
-#define GMMSM_UMTS_R4    
+#define GMMSM_UMTS
+#define GMMSM_UMTS_R99
+#define GMMSM_UMTS_R4
 #endif /* GMMSM_UMTS */
 
 #define LCDKLIGMU        /* Loosely coupled GMU interface */
@@ -18179,11 +18185,11 @@ the #ifdef SP section of envopt.h"
 
 #ifdef AQ
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 /* These options can be enabled in the make file also */
 /* #define LCAQUIAQU        loosely coupled AQU Interface User */
 /* #define LCAQLIHIT        loosely coupled transport layer Interface */
-/* #define LCAQMILAQ        loosely coupled Diameter to stack manager 
+/* #define LCAQMILAQ        loosely coupled Diameter to stack manager
                               Also enable LCSMAQMILAQ under #ifdef SM */
 
 /* #define  CMINETDBG       enable socket debugging supprt */
@@ -18231,7 +18237,7 @@ the #ifdef SP section of envopt.h"
 #define LCHIUIHIT
 #endif
 #ifndef LCHIMILHI
-#define LCHIMILHI 
+#define LCHIMILHI
 #endif
 #ifdef SS_SINGLE_THREADED
 #undef SS_SINGLE_THREADED
@@ -18296,7 +18302,7 @@ the #ifdef SP section of envopt.h"
  * stream parameters in cookie chunk */
 #ifndef SCT6
 #define SCT6
-#endif 
+#endif
 #endif   /* AQ_SCTP */
 
 
@@ -18312,7 +18318,7 @@ the #ifdef SP section of envopt.h"
 #ifndef AQ_MULT_VEND_PER_APP
 #define AQ_MULT_VEND_PER_APP
 #endif /* AQ_MULT_VEND_PER_APP */
-#endif /* LAQv2 */ 
+#endif /* LAQv2 */
 
 #if ( (defined SS || defined SS_MT) && defined(AQ))
 #define SS_RDWR_LOCK_SUPPORT
@@ -18331,7 +18337,7 @@ the #ifdef SP section of envopt.h"
 #ifndef CMXTA_RET_ERR_NONE
 #define CMXTA_RET_ERR_NONE
 #endif /* CMXTA_RET_ERR_NONE */
-#endif /* SS_MT && AQ */ 
+#endif /* SS_MT && AQ */
 
 #endif /* AQ */
 
@@ -18388,11 +18394,11 @@ the #ifdef SP section of envopt.h"
 /*#define  EGTP_U_MULTI_THREADED 1 *//* Multithreading Feature  */
 /*#define  SS_MT_TMR       1 */    /* SSI Timer for Multithreading */
 
-/******************* section to be changed by CUSTOMERS ******************/ 
+/******************* section to be changed by CUSTOMERS ******************/
 /* These options can be enabled in the make file also */
 /* #define LCEGUIEGT        loosely coupled EGT Interface User */
 /* #define LCEGLIHIT        loosely coupled transport layer Interface */
-/* #define LCEGMILEG        loosely coupled EGTP to stack manager 
+/* #define LCEGMILEG        loosely coupled EGTP to stack manager
                               Also enable LCSMEGMILEG under #ifdef SM */
 
 /* #define  CMINETDBG       enable socket debugging supprt */
@@ -18425,7 +18431,7 @@ the #ifdef SP section of envopt.h"
                eGTP-C PSF Section
 **************************************************************************/
 
-#ifdef HW                                    /* PSF-eGTP-C (FT/HA) */ 
+#ifdef HW                                    /* PSF-eGTP-C (FT/HA) */
 
 #undef HW
 #define HW 1                                 /* Re-define HW flag explicitly */
@@ -18489,7 +18495,7 @@ the #ifdef SP section of envopt.h"
 
 /* Management interface */
 /* #define LCNHMILNH        loosely coupled with layer manager */
-/* #define LCSMNHMILNH      stack manager loosely coupled to NH */ 
+/* #define LCSMNHMILNH      stack manager loosely coupled to NH */
 
 /******************* section NOT to be changed by CUSTOMERS ******************/
 /* interface flags, automatically chosen */
@@ -18571,8 +18577,8 @@ the #ifdef SP section of envopt.h"
 /****************************************************************************
                      LTE-MAC Section
 ****************************************************************************/
-#ifdef RG 
-#undef RG 
+#ifdef RG
+#undef RG
 #define RG 1
 
 
@@ -18580,8 +18586,8 @@ the #ifdef SP section of envopt.h"
 
 #define RG_SC1 1
 
-/* 
- * ADD-[ccpu00118351] Introduced timing deltas in FDD for DL control, DL data, 
+/*
+ * ADD-[ccpu00118351] Introduced timing deltas in FDD for DL control, DL data,
  * Reception Request, CRC Indication, HARQ feedback Indication.
  */
 #ifdef LTEMAC_DLUE_TMGOPTMZ
@@ -18611,7 +18617,7 @@ the #ifdef SP section of envopt.h"
 #define TFU_DLCNTRL_DLDELTA  (TFU_DELTA)
 #else
 /* Number of subframes in advance DL control should be sent from SCH */
-#define TFU_DLCNTRL_DLDELTA   3 
+#define TFU_DLCNTRL_DLDELTA   3
 
 /* Number of subframes in advance DL data should be sent from MAC */
 #define TFU_DLDATA_DLDELTA    3
@@ -18653,7 +18659,7 @@ the #ifdef SP section of envopt.h"
 /* Number of subframes in advance reception request should be sent from SCH to PHY */
 #define TFU_RECPREQ_DLDELTA   2
 
-/* Number of subframes in  Advance the Downlink control is 
+/* Number of subframes in  Advance the Downlink control is
    given from  MAC to PHY */
 #define TFU_DLCNTRL_DLDELTA TFU_DELTA
 
@@ -18751,33 +18757,33 @@ the #ifdef SP section of envopt.h"
 
 #endif /* __ENVOPTH__ */
 
-  
+
 /********************************************************************30**
-  
+
          End of file:     envopt_t2k.h@@/main/TeNB_Main_BR/4 - Thu Apr 24 17:05:04 2014
-     
+
 *********************************************************************31*/
 
 
 /********************************************************************40**
-  
+
         Notes:
-  
+
 *********************************************************************41*/
 
 /********************************************************************50**
 
 *********************************************************************51*/
 
-   
+
 /********************************************************************60**
-  
+
         Revision history:
-  
+
 *********************************************************************61*/
-  
+
 /********************************************************************70**
-  
+
   version    initials                   description
 -----------  ---------  ------------------------------------------------
 1.1             jrl     1. initial release.
@@ -18806,13 +18812,13 @@ the #ifdef SP section of envopt.h"
 
 1.10            nkk     1. added options for gc
 
-1.11            nkk     1. delete the following products from the "combined 
-                           with" list: 
+1.11            nkk     1. delete the following products from the "combined
+                           with" list:
                               Multilink, Spanning Tree, ISO IP (End System),
                               and ISO IP (Intermediate System).
-                nkk     2. add the following products to the "combined 
-                           with" list: 
-                              MOS, SDLC, ISUP, TCAP, ADCCP-NRM, 
+                nkk     2. add the following products to the "combined
+                           with" list:
+                              MOS, SDLC, ISUP, TCAP, ADCCP-NRM,
                               SNMP Agent, SNMP Package, SCARF, and ESCC.
                 mma     3. added options for tp
                 nkk     4. copied LCLM into "general parameters" section.
@@ -18833,7 +18839,7 @@ the #ifdef SP section of envopt.h"
 1.13         ---  jrl   1. remove XE, EI and SC defines from AP, should
                            normally be provided in makefile command line
 
-1.14         ---  lc    1. add defines for the SCCP product 
+1.14         ---  lc    1. add defines for the SCCP product
              ---  lc    2. remove comments for ST
 
 1.15         ---  jrl   1. add data link interface type to lapb/lapd
@@ -18854,7 +18860,7 @@ the #ifdef SP section of envopt.h"
 1.21         ---  nkk   1. add SS7_MICROCODE define (SS7 microcode on 68302).
              ---  nkk   2. change ARP to MACINT3.
              ---  nkk   3. replace MA with OD for ODI.
-             ---  nkk   4. add M1, M2, and M3 for MACINT1, MACINT2, 
+             ---  nkk   4. add M1, M2, and M3 for MACINT1, MACINT2,
                            and MACINT3 dummy layers.
 
 1.22         ---  jrl   1. remove ANS define for ss7, replaced by
@@ -18879,7 +18885,7 @@ the #ifdef SP section of envopt.h"
 
 1.29         ---  rg    1. added support for Q.93B (AM).
              ---  nkk   1. added LCTULIMAC to tcp and udp sections.
-             ---  nkk   2. added LLCINT and MACINT to tcp and udp 
+             ---  nkk   2. added LLCINT and MACINT to tcp and udp
                            sections.
              ---  nkk   4. added support for Q.SAAL (AS).
              ---  nkk   5. added support for CPCS  (AC).
@@ -18896,7 +18902,7 @@ the #ifdef SP section of envopt.h"
              ---  nkk   3. remove BCSEUIMAC define
 
 1.32         ---  nkk   1. text changes.
-             ---  nkk   2. undefine BCSPKINT, LCATLIMAC, LCODUIMAC and 
+             ---  nkk   2. undefine BCSPKINT, LCATLIMAC, LCODUIMAC and
                            LCBSUIBST (defaults are "undefined").
 
 1.33         ---  nkk   1. text changes
@@ -18954,19 +18960,19 @@ the #ifdef SP section of envopt.h"
                            them with ASD and AAL, respectively.
              ---  rg    3. removed AC and AT sections; split SM section into
                            MU and SM sections.
-             ---  nkk   4. move FCSPKINT outside of MOS section into head 
+             ---  nkk   4. move FCSPKINT outside of MOS section into head
                            of file.
 
 2.3          ---  jrl   1. add SSINT2 and LMINT2 for M6 and MU
 
 2.4          ---  nkk   1. change LC for atm
 
-2.5          ---  mc    1. added LCXXMILXX to AM, AS, UM, ST, SP, TP, SN, WP, 
+2.5          ---  mc    1. added LCXXMILXX to AM, AS, UM, ST, SP, TP, SN, WP,
                            SD, and MS sections.
              ---  mc    2. added LCSMXXMILXX to SM section.
              ---  bn    3. added new defines for Q.930 pertaining to specific
                            software options to included/excluded from the
-                           compilation for the purpose of generating more 
+                           compilation for the purpose of generating more
                            compact code.
 
 2.6          ---  bn    1. miscellaneous changes.
@@ -19010,7 +19016,7 @@ the #ifdef SP section of envopt.h"
                            flags as "1" (for ansi preprocessing).
              ---  nkk   3. added support for Q.SAAL's Q.2110 interface.
              ---  nkk   4. defined ATM as "1".
-             ---  nkk   5. added ASOPT_DISC_NO_CRED option to disconnect 
+             ---  nkk   5. added ASOPT_DISC_NO_CRED option to disconnect
                            when tx credit exceeded.
 
 2.21         ---  bn    1. add NI2 and QSIG for Q.930
@@ -19019,12 +19025,12 @@ the #ifdef SP section of envopt.h"
 2.22         ---  bn    1. add ANVER2 for Q.930
 
 2.23         ---  rg    1. added section for LES (ES).
-             ---  mc    2. added BDVER2, SSINT2, and LCDAMILBD to er, br, 
-                           bd, ld, and lb.  
+             ---  mc    2. added BDVER2, SSINT2, and LCDAMILBD to er, br,
+                           bd, ld, and lb.
              ---  mc    3. added LCSMDAMILBD to SM.
              ---  mc    4. added MACVER2 to IS and XEVER2 to XE.
 
-2.24         ---  rg    1. added flags: LCECMILEC, LCESMILES, LCSMESMILES. 
+2.24         ---  rg    1. added flags: LCECMILEC, LCESMILES, LCSMESMILES.
              ---  rg    2. added LCATM and ATM flags for all ATM products.
              ---  rg    3. updated some comments.
              ---  fmg   4. removed SSINT2 define from backward compatible
@@ -19044,13 +19050,13 @@ the #ifdef SP section of envopt.h"
 
 2.28         ---  jrl   1. enable MACINT5 for SD and SE
 
-2.29         ---  rg    1. merged sections for BUS (BS) and LES (ES) 
+2.29         ---  rg    1. merged sections for BUS (BS) and LES (ES)
                            into LES/BUS (ES).
-             ---  rg    2. removed section for LECS (CS) 
+             ---  rg    2. removed section for LECS (CS)
              ---  bn    3. change TPVER1 to TPVER2
 
-2.30         ---  mc    1. add XGVER2, EIVER2, XIVER2, IXVER2 and L3VER2 to 
-                           XG, EI, XI, and IX sections. 
+2.30         ---  mc    1. add XGVER2, EIVER2, XIVER2, IXVER2 and L3VER2 to
+                           XG, EI, XI, and IX sections.
              ---  mc    2. add APVER2 for AP.
              ---  mc    3. add LCSMXNMILXN for network layer.
              ---  fmg   4. added ME section...
@@ -19102,11 +19108,11 @@ the #ifdef SP section of envopt.h"
 
 2.47         ---  krp   1. changes to ifdef BR and ER sections
 
-2.48         ---  krp   1. Removed backward compatibility Layer Management 
+2.48         ---  krp   1. Removed backward compatibility Layer Management
                            options for BR
              ---  krp   2. Added #define FR(to ensure management compilation)
 
-2.49         ---  krp   1. Added Frame Relay Network - Q.933 - FN product 
+2.49         ---  krp   1. Added Frame Relay Network - Q.933 - FN product
                            options
 
 2.50         ---  bn    1. change LC to TC for SI
@@ -19124,7 +19130,7 @@ the #ifdef SP section of envopt.h"
              ---  rrb   2. removed IISP and added IISP_UNI30, DEF_IISP_UNI30
                            IISP_UNI31 and DEF_IISP_UNI31 definitions.
              ---  mc    3. removed SNTINT1 option from SP, SI, TP, BI, and SN.
- 
+
 2.54         ---  sa    1. added EC product specific compile flags.
              ---  dm    2. Added ATM_BISUP
              ---  ak    3. added DEF_SIG_PNNI in PN and PU sections
@@ -19147,13 +19153,13 @@ the #ifdef SP section of envopt.h"
 2.60         ---  sg    1. add missing #endif in AF
 
 2.61         ---  ada   1. added FR section
-             ---  ada   2. added LCSMFRMILFR flag 
+             ---  ada   2. added LCSMFRMILFR flag
              ---  ak    3. added HASH_OPEN_ADDRESSING define in PNNI section
 
-2.62         ---  bn    1. surrounded country options in #ifdef CC area by 
+2.62         ---  bn    1. surrounded country options in #ifdef CC area by
                            #ifndef coresponding flags to avoid macroredifiniton
 
-2.63         ---  krp   1. Added FR product code in comments. 
+2.63         ---  krp   1. Added FR product code in comments.
              ---  krp   2. Changed some compile flags for FR
 
 2.64         ---  krp   1. miscellaneous changes for LMI
@@ -19163,17 +19169,17 @@ the #ifdef SP section of envopt.h"
 2.66         ---  aa    1. Added the section for MAP (MA) and MAP user (AU)
              ---  bn    2. Added flags for CHINA TUP.
 
-2.67         ---  krp   1. Added Q933-LMI integrated product flags. 
+2.67         ---  krp   1. Added Q933-LMI integrated product flags.
 
 2.68         ---  dm    1. Added ATF2 for B-ISUP.
              ---  dm    2. Added TUP wrapper section.
              ---  kr    3. Added support for PMC-Sierra LASAR driver (PL)
              ---  pc    4. added ETSI variant for SI
 
-2.69         ---  ada   1. For AF added options to support FRD interface. 
-             ---  ada   2. defined LCSMAFMILAF 
-             ---  bn    3. added CV support for V5.X Control Protocol 
-             ---  bn    4. added MV support for V5.X System Manager 
+2.69         ---  ada   1. For AF added options to support FRD interface.
+             ---  ada   2. defined LCSMAFMILAF
+             ---  bn    3. added CV support for V5.X Control Protocol
+             ---  bn    4. added MV support for V5.X System Manager
              ---  bn    5. miscellanious changes in NV section.
 
 2.70         ---  dm    1. added support for GT_FTZ SI
@@ -19184,11 +19190,11 @@ the #ifdef SP section of envopt.h"
 2.72         ---  krp   1. Made modifications for FN to support
                            new signalling options.
 
-2.73         ---  ada   1. In AC section commented out LCACUIAAL and 
-                           LCACMILAC. 
+2.73         ---  ada   1. In AC section commented out LCACUIAAL and
+                           LCACMILAC.
 
-2.74         ---  krp   1. Modified the FR section for release 1.3. 
-                          
+2.74         ---  krp   1. Modified the FR section for release 1.3.
+
 2.75         ---  krp   1. commented LAPF in FR section.
 
 2.76         ---  bn    1. changed default setting for CV as tightly coupled
@@ -19196,20 +19202,20 @@ the #ifdef SP section of envopt.h"
 
 2.77         ---  av    1. added #define V5_1 flag for MV section.
              ---  mc    2. added VM section.
-             
+
 2.78         ---  pm    1. added ANS96 define for mtp3.
 *********************************************************************81*/
- 
- 
+
+
 /********************************************************************90**
- 
+
      ver       pat    init                  description
 ------------ -------- ---- ----------------------------------------------
 2.78         ---      ak   1. added IM section.
 
 2.79         ---      bn   1. added BV section.
 
-2.80         ---      ash  1. MACINT4 added for SD/QI/SE and enabled by 
+2.80         ---      ash  1. MACINT4 added for SD/QI/SE and enabled by
                               default.
 
 2.81         ---      apr  1. RY_ENBMMAP is added for ELVIS_STACK
@@ -19224,7 +19230,7 @@ the #ifdef SP section of envopt.h"
 2.83         ---      av   1. Added support in MV section for Link and
                               Protection protocol.
 
-2.84         ---      mc   1. added BDVER2, EV_ISDN, EV_TST_ISDN, and MACINT 
+2.84         ---      mc   1. added BDVER2, EV_ISDN, EV_TST_ISDN, and MACINT
                               defines in EV section.
              ---      mc   2. added MACVER2 and MACINT1 defines to VM section.
              ---      mc   3. change MACINT1 as default in the LD section.
@@ -19233,7 +19239,7 @@ the #ifdef SP section of envopt.h"
 2.85         ---      sb   1. removed backward compatability for loosely
                               coupled interfaces.
                            2. Removed ANVER1, INVER1
- 
+
 2.86         ---      sb   1. Added flag LCUICMINT.
 
 2.87         ---      sb   1. Added flags ISDN_BC303TMC, ISDN_BC303CSC.
@@ -19242,7 +19248,7 @@ the #ifdef SP section of envopt.h"
 
 2.89         ---      sg   1. Added IA and IU section
 
-2.90         ---      manb 1. Modified FRATM - AF section to add 
+2.90         ---      manb 1. Modified FRATM - AF section to add
                               additional parameters.
              ---      kvm  2. added CMATM2
              ---      rb   3. Added DBASMILAS flag for debug option at
@@ -19261,7 +19267,7 @@ the #ifdef SP section of envopt.h"
                               for FN.
              ---      rrp  7. Added flags FR_FRAGMENT, FR_TRAFFFIC_MONITOR
                               in the FR section.
-             ---      rrp  8. Changed NETSIDE flag in FR section 
+             ---      rrp  8. Changed NETSIDE flag in FR section
                               to FR_SWITCHING
 
 2.92         ---      rb   1. Added DBASV3XIPE.
@@ -19272,10 +19278,10 @@ the #ifdef SP section of envopt.h"
              ---      rm   2. ADDED  PL_DISC_CHK for PL section
              ---      ag   3. ADDED  UNI40 option for FA section
 
-2.94         ---      pm   1. added ANS96 option. 
+2.94         ---      pm   1. added ANS96 option.
              ---      sb   2. Added flag ISDN_PTMPT for ISDN point
                               to Multipoint.
- 
+
 2.95         ---      aa   1. editted ac section.
 
 2.96         ---      kr   1. added XN section
@@ -19290,7 +19296,7 @@ the #ifdef SP section of envopt.h"
              ---      sj   3. Merged the old PLOA and new PLOA definitions
                              and removed redundent definitions.
              ---      bbk  4. Added CMDPT_DUP flag for PAMC
-2.99         ---      sj   1. Disable Loosely coupled interface for PLOA 
+2.99         ---      sj   1. Disable Loosely coupled interface for PLOA
 3.1          ---      bbk  1. Changed copyright header date.
 3.2          ---      mp   1. Enabled LocaExchange and Access Network
                               for BCC.
@@ -19301,7 +19307,7 @@ the #ifdef SP section of envopt.h"
 3.4          ---      cg   1. Added flags ASOPT_QSAAL1_2 and ASOPT_Q21x0
                               for Q.SAAL.
 
-3.5          ---      rb   1. Added code segment to define LCLAM and 
+3.5          ---      rb   1. Added code segment to define LCLAM and
                               LCLAS based on compile flags LCSMAMMILAM
                               and LCSMASMILAS.
              ---      rb   2. Added compile time option AM_PART_MSG_DEC
@@ -19318,7 +19324,7 @@ the #ifdef SP section of envopt.h"
 3.8          ---      pk   1. Added LCSMIXMILIX flag under #ifdef SM
 
              ---      pk.  2. Added BDVER2 and INVER2 under #ifdef IX
-3.9          ---      pk   1. uncommented PORTVER and IXVER2           
+3.9          ---      pk   1. uncommented PORTVER and IXVER2
 3.10         ---      ag   1. Added #ifdef SS and #ifdef NS sections
                               for NTSS release
              ---      hrg  2. Added sections for INAP
@@ -19333,7 +19339,7 @@ the #ifdef SP section of envopt.h"
              ---      kr   4. Changed RY section
 
 3.13         ---      rs   1. Modified section for the Interworking Call
-                              Control. Also added CCBI and CCSI options.  
+                              Control. Also added CCBI and CCSI options.
 
 3.14         ---      dvs  1. Change Log Update
 
@@ -19366,9 +19372,9 @@ the #ifdef SP section of envopt.h"
 3.23         ---      ag   1. Added new section for QW (PSIF ISDN)
                            2. Restructured section on ICC (Interworking Call
                               Control)
-                           3. Renamed ETSI to ETSI_SS7, as this was also 
+                           3. Renamed ETSI to ETSI_SS7, as this was also
                               being used for ISDN and resulted in conflict.
-                              This caused SS7_ETSI to get defined even in 
+                              This caused SS7_ETSI to get defined even in
                               case when ETSI was enabled only for ISDN product
 
 3.24         ---      kp   1. Added SS_MT for MTSS-Solaris and checks for
@@ -19379,30 +19385,30 @@ the #ifdef SP section of envopt.h"
 
                       nct  2. Added PR (MPC860SAR driver) section.
                            3. Removed nested / * for mccXXX compilers.
- 
+
 3.26         ---      sr   1. changes for Japan MTP-3
 3.27         ---      dvs  1. uncommented #PORTVER
 3.28         ---      nj   1. Added define (AIN_SCP, AIN_IP) for AIN variant of INAP.
                       nj   2. Added defines (LIE_LMINT3, STU2, IET2) for new
                               interface of INAP.
-3.29         ---      ssk  1. Added defines (SMIA_LMINT3, IA_LMINT3, STU2, 
-                              IET2) for new interface of IS41 
+3.29         ---      ssk  1. Added defines (SMIA_LMINT3, IA_LMINT3, STU2,
+                              IET2) for new interface of IS41
 
 3.30         ---      kp   1. Added support for VxWorks System Services 2.1
 
-                      rs   2. Added RUSSIAN ISUP, PSF-ISUP and LMINT3 releated 
-                              defines. 
+                      rs   2. Added RUSSIAN ISUP, PSF-ISUP and LMINT3 releated
+                              defines.
 
 3.31         ---      rs   1. Modified sections for the Interworking Call
                               Control. Added CCAM and CCPN options. Added
                               support for Q.93B PSIF (AW)
 
-3.32         ---      mk   1. Added PSIF-Q.93B section. Added PSIF-Q.93B 
-                              enviornment defines. Added Q.93B parameters 
+3.32         ---      mk   1. Added PSIF-Q.93B section. Added PSIF-Q.93B
+                              enviornment defines. Added Q.93B parameters
                               required for ICC.
-                             
-3.33         ---      tej  1. Added options in FN section 
-                      ash  2. Added more options for MTP2 (SD). Also 
+
+3.33         ---      tej  1. Added options in FN section
+                      ash  2. Added more options for MTP2 (SD). Also
                               added SS7_NTT
 
 3.34         ---      sr   1. Added NTT option for SN.
@@ -19426,10 +19432,10 @@ the #ifdef SP section of envopt.h"
 3.41         ---      dvs  1. Updated MA section for MAP-GSM
 
 3.42         ---      dvs  1. Added GPRS Tunneling protocol (GTP) section
-3.43         ---      bn   1. Added flag SI_ANSILNP in SI and CCSI 
+3.43         ---      bn   1. Added flag SI_ANSILNP in SI and CCSI
                               sections
 
-3.44         ---      dvs  1. Disable flag PORTVER                             
+3.44         ---      dvs  1. Disable flag PORTVER
 3.45         ---      dvs  1. Disable flag MSVER2
 3.46         ---      sg   1. Added section for LLC (GL). Added stack
                               manager loose coupling flag for GPRS LLC.
@@ -19445,10 +19451,10 @@ the #ifdef SP section of envopt.h"
 
 3.53         ---      mk   1. Added defines SMAM_LMINT3, AM_LMINT3, AMT2
                               and ASD2.
-             ---      mk   2. Added code segment to define LCLAM 
+             ---      mk   2. Added code segment to define LCLAM
                               based on compile flags LCSMAMMILAM, LCAMMILAM
-             ---      mk   3. At AMT Interface, added compile time 
-                              flag AMTOPT_RSTRSP for implementing AmtRstRsp 
+             ---      mk   3. At AMT Interface, added compile time
+                              flag AMTOPT_RSTRSP for implementing AmtRstRsp
              ---      mk   4. removed the debug flags DBAMUIAMT, DBAMLIASD
                               DBAMLILAM.
              ---      mk   5. Added flags AMOPT_AAL2, AMOPT_IISP_USRALLOCVCC,
@@ -19468,10 +19474,10 @@ the #ifdef SP section of envopt.h"
              ---      pm   4. added support for SNDCP (GPRS).
              ---      pm   5. uncommented the LMINT3 flag.
 
-3.55         ---      rm   1. Updated for PLOA 
+3.55         ---      rm   1. Updated for PLOA
 
 3.56         ---      pm   1. Renamed the GPRS_SGSN_SUPPORTED flag to
-                              GPRS_ETSI_SGSN and GPRS_MS_SUPPORTED flag 
+                              GPRS_ETSI_SGSN and GPRS_MS_SUPPORTED flag
                               to GPRS_ETSI_MS.
 
 3.57         ---      bsp  1. Added SR 3511 variant definition in TCAP-
@@ -19500,15 +19506,15 @@ the #ifdef SP section of envopt.h"
 3.63         ---      sam  1. Added ISDN-Q.SAAL Convergence Layer section.
                               Modified ifdef SM section to include LMINT3
                               related defines for IQ.
-3.64         ---      mg   1. Updated ICC, CC, RM, RT, SF, IW, AW, QW 
+3.64         ---      mg   1. Updated ICC, CC, RM, RT, SF, IW, AW, QW
                               sections for ICC1.4 release. Added XM section
                               for new release of ICC1.4
-             ---      pk   2. Added ifdef ZQ section. 
+             ---      pk   2. Added ifdef ZQ section.
                            3. Modified ifdef IN section for release 3.10
                               of Q.930/Q.931.
-3.65         ---      dvs  1. opened ISDN_3_8_PLUS flag under #ifdef qw 
+3.65         ---      dvs  1. opened ISDN_3_8_PLUS flag under #ifdef qw
 3.66         ---      mg   1. opened ISDN_3_8_PLUS, INVER2, CDPTYNMB_32DIGIT
-                              flag under #ifdef CCIN 
+                              flag under #ifdef CCIN
 3.67         ---      mg   1. Defined ANVER2 in #ifdef CCIN for suppressing
                               warnings in int.x
 3.68         ---      rs   1. Added section for GW (Interworking function
@@ -19523,10 +19529,10 @@ the #ifdef SP section of envopt.h"
                            2. LSI_PARAMETER flag is removed from the #ifdef SI
                               section.
 3.72         ---      bbk  1. Added section for MGCP under #ifdef MG
-/main/220    ---      bsr  1. For non-ANSI compilation added STDIO_INCLD in 
+/main/220    ---      bsr  1. For non-ANSI compilation added STDIO_INCLD in
                               sections SS_MT and NU
 /main/221    ---      ssk  1. Added section for LDF-MTP3 under #ifdef DN
-                           2. Added new flags in SP section for 
+                           2. Added new flags in SP section for
                               SCCP ITU-96 release
 /main/223    ---      mrw  1. Added VO (MPC8260 driver) section
 
@@ -19543,14 +19549,14 @@ the #ifdef SP section of envopt.h"
                            2. Added flag for loose coupling between Stack
                               Manager and MPLS.
 /main/228    ---      jdb  1. Added Am_ACNT accounting enable by Q.93B.
-/main/229    ---      sa   1. Added section for AAL2 Signaling (AL) 
+/main/229    ---      sa   1. Added section for AAL2 Signaling (AL)
                               AAL2 Signaling service uers (AA)
 /main/230    ---      bsr  1. Added section for H.225 Annex G (HG)
 /main/231    ---      cp   1. Modified SP and ZP sections.
 /main/231    ---      vb   1. Added section for LDF-SCCP
 /main/232    ---      ssk  1. Modification for LDF-MTP3 section
                               Added DN_DEBUG,DN_USTA and set of rules
-                              undefine the mandatory flags if they are 
+                              undefine the mandatory flags if they are
                               defined.
 /main/233    ---      ash  1. Modified for SG, SH and MR changes for
                               distributed release
@@ -19561,7 +19567,7 @@ the #ifdef SP section of envopt.h"
 /main/235    ---      ark  1. Modified SG/SH/MR section to have TDS_CORE2
 /main/236    ---      uv   1. position of flags modified in  ZN section
 /main/237    ---      nb   1. Added new options for Q.2140
-/main/240    ---      ssk  1. Added new section for DT and updated the 
+/main/240    ---      ssk  1. Added new section for DT and updated the
                               ST and ZT sections for DFT/HA TCAP release.
 
                       hl   2. Added new section for IUA and IUA-NIF and updated
@@ -19572,19 +19578,19 @@ the #ifdef SP section of envopt.h"
                               MEGACO and MGCP 1.2 release
 *********************************************************************91*/
 /********************************************************************90**
- 
+
      ver       pat    init                  description
 ------------ -------- ---- ----------------------------------------------
 /main/243    ---      mr   1. Added new flags in #ifdef LD section for
                               3.4 release.
-/main/244    ---      nj   1. Fixed the options in SCTP section  
+/main/244    ---      nj   1. Fixed the options in SCTP section
 
 /main/245    ---      bsr  1. Added a new section for SIP
-/main/246    ---      hy   1. SITVER2, SI_OLD_BIND defines removed, 
+/main/246    ---      hy   1. SITVER2, SI_OLD_BIND defines removed,
                               SI_218_COMP, SI_FTHA , ANS95, ITU97, ETSIV3
-                              and RMT_CICGRP_STATUS etc added as part of 
-                              ISUP 2.19 , PSF-ISUP 1.3 and PSIF-ISUP 1.4 
-                              release 
+                              and RMT_CICGRP_STATUS etc added as part of
+                              ISUP 2.19 , PSF-ISUP 1.3 and PSIF-ISUP 1.4
+                              release
                            2. Comments inside comments warning is resolved
                               for entire file.
                            3. SS7_ANS95 option 18 is defined for ANS95.
@@ -19592,15 +19598,15 @@ the #ifdef SP section of envopt.h"
 /main/248    ---      nb   1. Add Signalling Gateway option for MTP3
                            2. Modify #ifdef ZN section for psf-MTP3
 
-/main/249    ---      dw   1. Change in #ifdef GT section 
+/main/249    ---      dw   1. Change in #ifdef GT section
 /main/250    ---      nt   1. Section added for SUA and SUA-NIF
 /main/251    ---      dw   1. For adding #ifdef RA section for RANAP
-/main/252    ---      srg  1. BSSGP Backward compatibility flags GPRS_SOLSA, 
+/main/252    ---      srg  1. BSSGP Backward compatibility flags GPRS_SOLSA,
                               GPRS_3DIDIT_MNC and GG_FTHA are added.
 /main/253    ---      as   1. Added a new section for CAP.
 /main/255    ---      cy   1. Changes in IN, ZQ and QW sections.
 /main/256    ---     srini 1. GS_FTHA flag is added for SNDCP.
-/main/257    ---      brp  1. LLC Backward compatibility flags GL_FTHA is 
+/main/257    ---      brp  1. LLC Backward compatibility flags GL_FTHA is
                               added.
 /main/258    ---      jie  1. Updated MA/AU sections for MAP 1.5 release.
 /main/259    ---      cvp  1. Updated HI section.
@@ -19608,10 +19614,10 @@ the #ifdef SP section of envopt.h"
 /main/261    ---      srg  1. Section added for BSSAP+.
                            2. Section added for MM only with loosely coupled
                               lower interface flag ( LCMMLIGAP ).
-                           3. Sections GM, GR are modifed with appropriate 
+                           3. Sections GM, GR are modifed with appropriate
                               coupling flags.
 /main/262    ---      pk   1. Updated HC & HZ section.
-                           2. Added new define FD_SETSIZE under 
+                           2. Added new define FD_SETSIZE under
                               CM_INET_LARGE_FDSETSIZE flag in the HI
                               section
 /main/263    ---      nt   1. Section for M3UA updated.
@@ -19628,11 +19634,11 @@ the #ifdef SP section of envopt.h"
                            2. RUG and interface version flags added in SS7
                               product sections and CORE (SG, MR, SH) sections.
              ---      tz   1. Added LDF-ISUP section.
-                           2. Added LCSMDIMILDI define for stack manager 
-                              loose coupling to LDF-ISUP. 
+                           2. Added LCSMDIMILDI define for stack manager
+                              loose coupling to LDF-ISUP.
 /main/268    ---      sa   1. Added section for 3GPP MAC, RLC, NBAP and RRC
-/main/269    ---      nb   1. Added section for ISM 
-/main/270    ---      sgr  1. Modified RANAP section for RANAP 2.1 
+/main/269    ---      nb   1. Added section for ISM
+/main/270    ---      sgr  1. Modified RANAP section for RANAP 2.1
 /main/271    ---      ssp  1. Added section for 3GPP NBAP.
 /main/272    ---      sm   1. GMM section addded
 /main/273    ---      dw   1. Added new flags in RY section
@@ -19650,9 +19656,9 @@ the #ifdef SP section of envopt.h"
 /main/285    ---      rs   1. Added DFTHA-M3UA section
 /main/286    ---      wh   1. SIP release 2.1 changes
 /main/287    ---      bn   1. V5.X release 1.2 changes
-/main/288    ---      jz   1. Added PSF-MAP section 
+/main/288    ---      jz   1. Added PSF-MAP section
 /main/289    ---      UD   Added WIN specific dependencies
-/main/291    ---      vt   1. Added FP section 
+/main/291    ---      vt   1. Added FP section
 /main/292    ---      kk   1. Added PSF-CAP section
 /main/293    ---      vt   1. FP release 1.2
 /main/294    ---     jz   1. RLC Release 1.2.
@@ -19667,15 +19673,15 @@ the #ifdef SP section of envopt.h"
 /main/304    ---      hr   1. M2PA release
 /main/306    ---      rk   1. IUA Rel 1.3 Update
 /main/308    ---      bn   2. DPNSS/DASS2
-/main/309    ---      kk   1. CAP 2.3 release 
+/main/309    ---      kk   1. CAP 2.3 release
 /main/310    ---      kp   1. TLS support in TUCL.
 /main/311    ---      st   1. Update Rel 6 flag for MAP 2.3 Release.
 /main/312    ---      yk   1. Modified IA section for MAP IS-41 1.4 relaese.
-/main/313    ---     rbabu 1. Updated for NBAP Sfotware 1.2 release.   
+/main/313    ---     rbabu 1. Updated for NBAP Sfotware 1.2 release.
 /main/314    ---      vsr  1. Updated for LDF-RANAP 1.1 release.
 /main/316    ---      sal  1. Created for Release of 2.1(RFC 3868 Support)
 /main/317    ---      gs   1. Added new flags for MAC 1.3 release
-/main/318    ---      kkj  1. Created for GMM 2.1 release, 
+/main/318    ---      kkj  1. Created for GMM 2.1 release,
                            2. Correted FP section
 /main/319    ---      yk   1. Created for GMM/SM LDF 1.1 Release
 /main/321    ---      st   1. Updated for LAPDm 1.1 Release.
@@ -19695,10 +19701,10 @@ the #ifdef SP section of envopt.h"
 /main/337    ---       hs   1. Updated for release of TUCL 2.1
 /main/338    ---      SN   MAC-HS release 2.1
 /main/339    ---      gs    MAC Release 2.1
-/main/340    ---      gs   Making TDS_CORE2 enabled default 
+/main/340    ---      gs   Making TDS_CORE2 enabled default
 /main/341    ---      rs   Updated for IuUP 1.1 release.
 /main/342    ---     sy       1. Updated for Release SIP 2.3
-/main/344    ---     rer      1. Updated for Release RLC2.2 
+/main/344    ---     rer      1. Updated for Release RLC2.2
 /main/345    ---     sn 1. S1AP Initial Release
 /main/346    ---     pc 1. Additions for IuUP 1.2 Release.
 /main/347    ---     pc 1. Additions for eGTP 1.1 Release.
@@ -19709,7 +19715,7 @@ the #ifdef SP section of envopt.h"
 /main/352    ---     vk 1. Updated for Release of LTE RRC 2.1.
 /main/353    ---   apany 1. LTE MAC 2.1 release
 /main/354    ---   mmittal 1.Uncommented MAP version 1 and 2 for ptr1 build
-/main/356    ---   mc  1. Updated for RANAP 5.1 Release 
+/main/356    ---   mc  1. Updated for RANAP 5.1 Release
 /main/357    ---      pmacharla         Initial for eGTP release 2.1
 /main/358    ---  djain 1. Updated for MAP 2.5 release.
 /main/359    ---     hsingh 1. Updated for Release of LTE RRC 3.1.
@@ -19722,5 +19728,3 @@ the #ifdef SP section of envopt.h"
 /main/365    ---      nh    1. Updated for PSF-DIAMETER 1.1 release.
 /main/367    ---     nu      1. Updated for SIGTRAN Monitoring Stack release.
 *********************************************************************91*/
-
-
