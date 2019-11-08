@@ -1,9 +1,15 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+# All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
 #-------------------------------------------------------------#
 #User macros (to be modified)
 #-------------------------------------------------------------#
 #ifeq ($(BLDENV),lnx_perf_msstub_acc)
 #CCueFLAGS=-DTF -DLCCTF -DLCTFUITFU -DLCTFU -DLCTFUITFU -DTFU_VER_2 \
-#          -UTFU_TDD -DRG -UYS_LTE_PAL -DYS_MSPD -DYS_MSPD_OSAL 
+#          -UTFU_TDD -DRG -UYS_LTE_PAL -DYS_MSPD -DYS_MSPD_OSAL
 #else
 #ifeq ($(BLDENV),lnx_e2e_msstub_acc)
 #CCueFLAGS=-DTF -DLCCTF -DLCTFUITFU -DLCTFU -DLCTFUITFU -DTFU_VER_2 \
@@ -30,7 +36,7 @@ UE_SEC_SRC= \
     $(IN_DIR)/sha256.c \
     $(IN_DIR)/snow_3g. \
     $(IN_DIR)/snow3g_f8f9.c \
-    $(IN_DIR)/aes.c 
+    $(IN_DIR)/aes.c
 
 
 # Product objects-------------------------------------------------------
@@ -43,13 +49,13 @@ UE_SEC_OBJS= \
     $(OUT_DIR)/sha256.o \
     $(OUT_DIR)/snow_3g.o \
     $(OUT_DIR)/snow3g_f8f9.o \
-    $(OUT_DIR)/aes.o 
+    $(OUT_DIR)/aes.o
 
 
 ALL_INC= $(CM_INC)
 #-------------------------------------------------------------#
 #-------------------------------------------------------------#
-#Compiler macros             
+#Compiler macros
 #-------------------------------------------------------------#
 
 $(OUT_DIR)/auth_alg.$(OBJ): $(IN_DIR)/auth_alg.c $(ALL_INC)
@@ -89,14 +95,13 @@ $(OUT_DIR)/aes.$(OBJ): $(IN_DIR)/aes.c $(ALL_INC)
 	$(OUT_DIR)/aes.$(OBJ)
 
 #-------------------------------------------------------------#
-#Linker macros             
+#Linker macros
 #-------------------------------------------------------------#
 $(OUT_DIR)/libuesec.a:$(UE_SEC_OBJS)
-	 $(AR) rcs $(LIB_DIR)/libuesec.a 
+	 $(AR) rcs $(LIB_DIR)/libuesec.a
 
 #-------------------------------------------------------------#
-#Clean macros             
+#Clean macros
 #-------------------------------------------------------------#
 clean:
 	\rm -f $(OUT_DIR)/libuesec.a $(UE_SEC_OBJS)
-

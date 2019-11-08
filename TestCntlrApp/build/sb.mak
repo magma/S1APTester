@@ -1,3 +1,9 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+# All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
 #
 #
 ##-------------------------------------------------------------#
@@ -37,16 +43,16 @@ sbOBJS= \
     $(OUT_DIR)/sb_ptui.$(OBJ) \
     $(OUT_DIR)/sb_ptli.$(OBJ) \
     $(OUT_DIR)/sb_mtu.$(OBJ) \
-    $(OUT_DIR)/sb_port.$(OBJ) 
+    $(OUT_DIR)/sb_port.$(OBJ)
 
 
 SBCM_INC=$(VS_DIR)/sb.h $(VS_DIR)/sb.x $(VS_DIR)/sb_mtu.h $(VS_DIR)/sb_mtu.x $(VS_DIR)/sb_port.h $(VS_DIR)/sb_port.x $(VS_DIR)/sb_err.h
 
 ALL_INC=$(SBCM_INC) $(CM_INC) $(MT_DIR)
-   
+
 #-------------------------------------------------------------#
 #-------------------------------------------------------------#
-#Compiler macros             
+#Compiler macros
 #-------------------------------------------------------------#
 
 $(OUT_DIR)/sb_bdy1.$(OBJ): $(IN_DIR)/sb_bdy1.$(SRC) $(ALL_INC)
@@ -94,16 +100,15 @@ $(OUT_DIR)/sb_port.$(OBJ): $(IN_DIR)/sb_port.$(SRC) $(ALL_INC)
 	$(CCsbFLAGS) $(IN_DIR)/sb_port.$(SRC)
 
 #-------------------------------------------------------------#
-#Linker macros             
+#Linker macros
 #-------------------------------------------------------------#
 $(OUT_DIR)/libsb.a:$(sbOBJS)
-	$(AR) -cr $(OUT_DIR)/libsb.a $(sbOBJS)	
+	$(AR) -cr $(OUT_DIR)/libsb.a $(sbOBJS)
 
 $(OUT_DIR)/sbprepro:$(sbOBJS)
 
 #-------------------------------------------------------------#
-#Clean macros             
+#Clean macros
 #-------------------------------------------------------------#
 clean:
 	\rm -f $(OUT_DIR)/libsb.a $(sbOBJS)
-

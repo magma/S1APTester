@@ -4,7 +4,7 @@
 
 
 # Build LTE S1 Simulator.
-all: 
+all:
 	make -f fw.mak
 
 clean:

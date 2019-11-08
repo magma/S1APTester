@@ -1,9 +1,15 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+# All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
 #-------------------------------------------------------------#
 # Makefile for DSC application files
 #-------------------------------------------------------------#
 
 #-------------------------------------------------------------#
-# Obj macros             
+# Obj macros
 #-------------------------------------------------------------#
 ueOBJS=\
 	$(OUT_DIR)/ue_ptmi.$(OBJ)\
@@ -33,14 +39,14 @@ FUCM_INC= \
 	$(IN_DIR)/ue_app_sec.x   $(IN_DIR)/ue_app_sec.h \
 	$(IN_DIR)/ue_usim_auth.h $(IN_DIR)/ue_usim_auth.x \
 	$(IN_DIR)/ue_alg_intf.x  $(IN_DIR)/ue_aes_mode.h \
-	$(IN_DIR)/ue_aes_mode.x  
+	$(IN_DIR)/ue_aes_mode.x
 
 
-ALL_INC= $(FUCM_INC) $(CM_INC) 
+ALL_INC= $(FUCM_INC) $(CM_INC)
 
 #-------------------------------------------------------------#
 #-------------------------------------------------------------#
-# Compiler macros             
+# Compiler macros
 #-------------------------------------------------------------#
 $(OUT_DIR)/ue_ptmi.$(OBJ): $(IN_DIR)/ue_ptmi.c $(ALL_INC)
 	$(CC) -c -o $(OUT_DIR)/ue_ptmi.o $(COPTS) $(IOPTS) $(POPTS) \
@@ -110,13 +116,12 @@ $(OUT_DIR)/ue_ptli.$(OBJ): $(IN_DIR)/ue_ptli.c $(ALL_INC)
 	$(CC) -c -o $(OUT_DIR)/ue_ptli.o $(COPTS) $(IOPTS) $(POPTS) \
 	$(IN_DIR)/ue_ptli.c
 #-------------------------------------------------------------#
-# Compile rule             
+# Compile rule
 #-------------------------------------------------------------#
 $(OUT_DIR)/ueApp:$(ueOBJS)
 
 #-------------------------------------------------------------#
-# Clean macros             
+# Clean macros
 #-------------------------------------------------------------#
 clean:
 	\rm -f ../obj/ue*.o
-

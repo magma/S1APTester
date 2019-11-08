@@ -1,3 +1,9 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+# All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
 # /***************************************************************************
 #
 #       Name:   S1 Simulator Test Stub
@@ -6,16 +12,16 @@
 #
 #       Desc:   Compile, assemble and link product software for
 #               various configurations. Further comments are
-#               embedded in the file. 
+#               embedded in the file.
 #
 #       Env:    Linux 2.4.x with GNU C (gcc)
 #
 #               BUILD TARGETS:
 #                  clean    : remove test stub object files
-#   
+#
 #       File:  tc.mak
 #
-#       Prg:   
+#       Prg:
 #
 # **************************************************************************/
 
@@ -117,7 +123,7 @@ all: $(tcObjs)
 	$(LL) $(OBJ_DIR)/*.o -ltfw -lpthread -L ../../TestCntlrApp/lib \
 	   -liperf -L ../../Trfgen/lib/ \
 	   -ltrfgen -L ../../Trfgen/lib -o $(BIN_DIR)/testCntrlr -lm
-	
+
 	\ln -sf $(CFG_DIR)/imsi.txt $(BIN_DIR)/imsi.txt
 	\ln -sf $(CFG_DIR)/nbAppCfg.txt $(BIN_DIR)/nbAppCfg.txt
 	\ln -sf $(CFG_DIR)/tfwAppcfg.txt $(BIN_DIR)/tfwAppcfg.txt

@@ -1,3 +1,9 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+# All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
 #
 #
 ##-------------------------------------------------------------#
@@ -29,7 +35,7 @@ szSRCS= \
     $(IN_DIR)/sz_tmr.$(SRC) \
     $(IN_DIR)/sz_ui.$(SRC) \
     $(IN_DIR)/sz_utils.$(SRC) \
-    $(IN_DIR)/sz_3gdb.$(SRC) 
+    $(IN_DIR)/sz_3gdb.$(SRC)
 
 
 # Product objects-------------------------------------------------------
@@ -51,16 +57,16 @@ szOBJS= \
     $(OUT_DIR)/sz_tmr.$(OBJ) \
     $(OUT_DIR)/sz_ui.$(OBJ) \
     $(OUT_DIR)/sz_utils.$(OBJ) \
-    $(OUT_DIR)/sz_3gdb.$(OBJ) 
+    $(OUT_DIR)/sz_3gdb.$(OBJ)
 
 
 SZCM_INC=$(VS_DIR)/sz.h $(VS_DIR)/sz.x $(VS_DIR)/sz_err.h
 
 ALL_INC=$(SZCM_INC) $(CM_INC)
-   
+
 #-------------------------------------------------------------#
 #-------------------------------------------------------------#
-#Compiler macros             
+#Compiler macros
 #-------------------------------------------------------------#
 
 $(OUT_DIR)/sz_db.$(OBJ): $(IN_DIR)/sz_db.$(SRC) $(ALL_INC)
@@ -105,7 +111,7 @@ $(OUT_DIR)/sz_sm.$(OBJ): $(IN_DIR)/sz_sm.$(SRC) $(ALL_INC)
 
 $(OUT_DIR)/sz_smlienb.$(OBJ): $(IN_DIR)/sz_smlienb.$(SRC) $(ALL_INC)
 	$(CC) -c -o $(OUT_DIR)/sz_smlienb.$(OBJ) $(COPTS) $(IOPTS) $(POPTS) \
-	$(CCszFLAGS) $(IN_DIR)/sz_smlienb.$(SRC) 
+	$(CCszFLAGS) $(IN_DIR)/sz_smlienb.$(SRC)
 
 $(OUT_DIR)/sz_smuienb.$(OBJ): $(IN_DIR)/sz_smuienb.$(SRC) $(ALL_INC)
 	$(CC) -c -o $(OUT_DIR)/sz_smuienb.$(OBJ) $(COPTS) $(IOPTS) $(POPTS) \
@@ -136,16 +142,15 @@ $(OUT_DIR)/sz_utils.$(OBJ): $(IN_DIR)/sz_utils.$(SRC) $(ALL_INC)
 	$(CCszFLAGS) $(IN_DIR)/sz_utils.$(SRC)
 
 #-------------------------------------------------------------#
-#Linker macros             
+#Linker macros
 #-------------------------------------------------------------#
 $(OUT_DIR)/libsz.a:$(szOBJS)
-	$(AR) -cr $(OUT_DIR)/libsz.a $(szOBJS)	
+	$(AR) -cr $(OUT_DIR)/libsz.a $(szOBJS)
 
 $(OUT_DIR)/szprepro:$(szOBJS)
 
 #-------------------------------------------------------------#
-#Clean macros             
+#Clean macros
 #-------------------------------------------------------------#
 clean:
 	\rm -f $(OUT_DIR)/libsz.a $(szOBJS)
-

@@ -1,3 +1,9 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+# All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
 # /***************************************************************************
 #
 #       Name:   S1 Simulator Traffic Generator
@@ -6,16 +12,16 @@
 #
 #       Desc:   Compile, assemble and link product software for
 #               various configurations. Further comments are
-#               embedded in the file. 
+#               embedded in the file.
 #
 #       Env:    Linux 2.4.x with GNU C (gcc)
 #
 #               BUILD TARGETS:
 #                  clean    : remove traffic generator object files
-#   
+#
 #       File:  trfgen.mak
 #
-#       Prg:   
+#       Prg:
 #
 # **************************************************************************/
 
@@ -59,7 +65,7 @@ COPTS=-pipe -Wall -Wunused -Wno-comment -Wshadow -Werror \
       -Wcast-qual -fno-strict-aliasing -Wno-variadic-macros
 
 # linker options:
-LOPTS=-lpthread -ldl 
+LOPTS=-lpthread -ldl
 
 # include options:
 IOPTS= -I$(TRF_GEN_DIR_INC)
@@ -68,20 +74,20 @@ trfGenOBJS=\
         $(OBJ_DIR)/trfgen.$(OBJ)
 
 TRGN_INC= \
-    $(IN_DIR)/trfgen.x 
+    $(IN_DIR)/trfgen.x
 
 ALL_INC=$(TRGN_INC)
- 
+
 all: TARGETS
 TARGETS:
 	@echo "Compiling Traffic Generator..."
 	$(CC) $(COPTS) $(SERVER_MODE) -c -o $(OBJ_DIR)/trfgen.o $(IOPTS) \
 	$(TRF_GEN_DIR)/trfgen.c
-	
+
 	@echo "Linking Objects, Creating Shared Library"
 	$(CC) -shared $(OBJ_DIR)/*.o \
 	   -liperf -L $(LIB_DIR) $(LOPTS) -o $(LIB_DIR)/$(LIBNAME)
 
 clean:
 	\rm -f $(LIB_DIR)/$(LIBNAME) $(OBJ_DIR)/*.o $(OBJ_DIR)/*.a  \
-		$(OBJ_DIR)/*~ $(OBJ_DIR)/*.bak $(OBJ_DIR)/*.err 
+		$(OBJ_DIR)/*~ $(OBJ_DIR)/*.bak $(OBJ_DIR)/*.err

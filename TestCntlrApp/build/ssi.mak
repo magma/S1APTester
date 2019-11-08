@@ -1,9 +1,15 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+# All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
 #-------------------------------------------------------------#
 # Makefile for product SSI
 #-------------------------------------------------------------#
 
 #-------------------------------------------------------------#
-# Obj macros             
+# Obj macros
 #-------------------------------------------------------------#
 mtOBJS= \
 	$(OUT_DIR)/cm_bdy5.$(OBJ)   \
@@ -50,14 +56,14 @@ MT_INC=\
    $(IN_DIR)/ss_mem.x    $(IN_DIR)/ss_msg.h    $(IN_DIR)/ss_msg.x   \
    $(IN_DIR)/ss_queue.h  $(IN_DIR)/ss_queue.x  $(IN_DIR)/ss_strm.h  \
    $(IN_DIR)/ss_strm.x   $(IN_DIR)/ss_task.h   $(IN_DIR)/ss_task.x  \
-   $(IN_DIR)/ss_timer.x  $(IN_DIR)/ssi.h       $(IN_DIR)/ssi.x  
+   $(IN_DIR)/ss_timer.x  $(IN_DIR)/ssi.h       $(IN_DIR)/ssi.x
 
 ALL_INC=$(MT_INC) $(CM_INC)
 
 #-------------------------------------------------------------#
-#Compiler macros             
+#Compiler macros
 #-------------------------------------------------------------#
-#Compiler macros             
+#Compiler macros
 #-------------------------------------------------------------#
 $(OUT_DIR)/cm_bdy5.$(OBJ): $(IN_DIR)/cm_bdy5.c $(ALL_INC)
 	$(CC) -c -o $(OUT_DIR)/cm_bdy5.o $(COPTS) $(IOPTS) $(POPTS) \
@@ -140,13 +146,13 @@ $(OUT_DIR)/ss_tskent.$(OBJ): $(IN_DIR)/ss_tskent.c $(ALL_INC)
 
 
 #-------------------------------------------------------------#
-# Compile rule             
+# Compile rule
 #-------------------------------------------------------------#
 $(OUT_DIR)/ssi:$(mtOBJS)
 	$(AR) rcs $(LIB_DIR)/libssi.a $(mtOBJS)
 
 #-------------------------------------------------------------#
-# Clean macros             
+# Clean macros
 #-------------------------------------------------------------#
 clean:
 	\rm -f $(mtOBJS)
