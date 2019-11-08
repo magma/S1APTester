@@ -65,3 +65,7 @@ $ make
 ```
 On successful compilation, the “libtrfgen.so” library gets generated under
 Trfgen/lib folder.
+
+## License
+
+S1APTester is BSD License licensed, as found in the LICENSE file.
