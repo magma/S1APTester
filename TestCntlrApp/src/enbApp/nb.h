@@ -798,6 +798,8 @@ PUBLIC S16 nbUpdateUePagInfo(S1apPdu *s1apPagMsg, NbPagingMsgInfo *uePagingInfo,
 PUBLIC S16 nbUiBuildAndSendNasNonDlvryIndToTfw( U8 ueId );
 
 EXTERN S16 nbSendErabsRelInfo(NbErabRelLst *erabInfo);
+
+EXTERN  S16 nbNotifyPlmnInfo(U8 ueId, NbPlmnId plmnId);
 /* Broadcasted PLMN List */
 typedef struct _nbBPlmnList
 {

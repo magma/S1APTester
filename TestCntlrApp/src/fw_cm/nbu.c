@@ -2558,6 +2558,205 @@ Buffer *mBuf;
    RETVALUE(ROK);
 }
 #endif
+/*
+ *
+ *     Fun:     cmPkNotifyPlmnInfo
+ *
+ *     Desc:    pack the structure NbuNotifyPlmnInfo
+ *
+ *     Ret:     ROK  -ok
+ *
+ *     Notes:    None
+ *
+ *     File:
+ *
+ */
+
+PRIVATE S16 cmPkNotifyPlmnInfo
+(
+NbuNotifyPlmnInfo *param,
+ Buffer *mBuf
+)
+{
+   TRC3(cmPkNotifyPlmnInfo)
+   RETVALUE(ROK);
+} /*end of function cmPkNotifyPlmnInfo*/
+
+/*
+ *
+ *    Fun:     cmPkNbuNotifyPlmnInfo
+ *
+ *    Desc:    pack the Plmn Info msg
+ *
+ *    Ret:    ROK  -ok
+ *
+ *    Notes:    None
+ *
+ *    File:
+ *
+ */
+#ifdef ANSI
+PUBLIC S16 cmPkNbuNotifyPlmnInfo
+(
+ Pst *pst,
+ NbuNotifyPlmnInfo *msg
+)
+#else
+PUBLIC S16 cmPkNbNotifyPlmnInfo (pst, msg)
+Pst *pst;
+NbuNotifyPlmnInfo *msg;
+#endif
+{
+   S16 ret1;
+   Buffer *mBuf;
+   mBuf = NULLP;
+   TRC3(cmPkNbuNotifyPlmnInfo)
+
+      if((ret1 = SGetMsg(pst->region, pst->pool, &mBuf)) != ROK)
+      {
+#if (ERRCLASS & ERRCLS_ADD_RES)
+         if(ret1 != ROK)
+         {
+            SLogError(pst->srcEnt, pst->srcInst, pst->srcProcId,
+                  __FILE__, __LINE__, (ErrCls)ERRCLS_ADD_RES,
+                  (ErrVal)ENBU014, (ErrVal)0, "SGetMsg() failed");
+         }
+#endif /*  ERRCLASS & ERRCLS_ADD_RES  */
+         RETVALUE(ret1);
+      }
+   switch(pst->selector)
+   {
+      case NBU_SEL_LC:
+#ifdef LCNBU
+         ret1 = cmPkNotifyPlmnInfo(msg, EVTNBUUPDATEPLMNINFO,mBuf);
+#if(ERRCLASS & ERRCLS_ADD_RES)
+         if(ret1 != ROK)
+         {
+            SPutMsg(mBuf);
+            SLogError(pst->srcEnt, pst->srcInst, pst->srcProcId,
+                  __FILE__, __LINE__, (ErrCls)ERRCLS_ADD_RES,
+                  (ErrVal)ENBU015, (ErrVal)ret1, "Packing failure");
+            RETVALUE( ret1 );
+         }
+#endif /*  ERRCLASS & ERRCLS_ADD_RES  */
+         break;
+#endif
+#ifdef LWLCNBU
+      case NBU_SEL_LWLC:
+         CMCHKPKLOG(cmPkPtr, (PTR)msg, mBuf, ENBU016, pst);
+         break;
+#endif
+     default:
+         break;
+   }
+   pst->event = (Event)EVTNBUUPDATEPLMNINFO;
+   RETVALUE(SPstTsk(pst,mBuf));
+}
+
+#ifdef LCNBU
+/*
+ *
+ *    Fun:     cmUnPkNotifyPlmnInfo
+ *
+ *    Desc:    unpack the primitive NbuNotifyPlmnInfo
+*
+ *    Ret:    ROK  -ok
+ *
+ *    Notes:    None
+ *
+ *    File:
+ *
+ */
+
+#ifdef ANSI
+PRIVATE S16 cmUnPkNotifyPlmnInfo
+(
+ NbuNotifyPlmnInfo *msg,
+ Buffer *mBuf
+ )
+#else
+PRIVATE S16 cmUnPkNotifyPlmnInfo(msg, mBuf)
+NbuNotifyPlmnInfo *msg;
+Buffer *mBuf;
+#endif
+{
+   TRC3(cmUnPkNotifyPlmnInfo)
+   RETVALUE(ROK);
+}
+#endif
+
+/*
+ *
+ *    Fun:    cmUnPkNbuNotifyPlmnInfo
+ *
+ *    Desc:    unpack the NbuNotifyPlmnInfo Msg
+ *
+ *    Ret:    ROK  -ok
+ *
+ *    Notes:    None
+ *
+ *    File:
+ *
+ */
+
+#ifdef ANSI
+PUBLIC S16 cmUnPkNbuNotifyPlmnInfo
+(
+ NbuNotifyPlmnInfoHdl func,
+ Pst *pst,
+ Buffer *mBuf
+ )
+#else
+PUBLIC S16 cmUnPkNbuNotifyPlmnInfo(func, pst, mBuf)
+NbuNotifyPlmnInfoHdl  func;
+Pst *pst;
+Buffer *mBuf;
+#endif
+{
+#ifdef LWLCNBU
+   S16 ret1 = ROK;
+   NbuNotifyPlmnInfo *msg = NULLP;
+#else
+   NbuNotifyPlmnInfo msg;
+#endif
+
+   TRC3(cmUnPkNbuNotifyPlmnInfo)
+      switch(pst->selector)
+      {
+#ifdef LCNBU
+         case NBU_SEL_LC:
+            ret1 = cmUnPkNotifyPlmnInfo((NbuNotifyPlmnInfo *)&msg,mBuf);
+#if(ERRCLASS & ERRCLS_DEBUG)
+            if(ret1 != ROK)
+            {
+               SPutMsg(mBuf);
+               SLogError(pst->dstEnt, pst->dstInst, pst->dstProcId,
+                     __FILE__, __LINE__, (ErrCls)ERRCLS_DEBUG,
+                     (ErrVal)ENBU024, (ErrVal)ret1, "Unpacking failure");
+               RETVALUE( ret1 );
+            }
+#endif /*  ERRCLASS & ERRCLS_DEBUG   */
+            break;
+#endif
+#ifdef LWLCNBU
+         case  NBU_SEL_LWLC:
+            CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &msg, mBuf, (ErrVal)ENBU025, pst);
+            break;
+#endif
+         default:
+            break;
+      }
+
+   SPutMsg(mBuf);
+#ifdef LWLCNBU
+   ret1 = (*func)(pst, msg);
+   SPutSBuf(pst->region, pst->pool, (Data *) msg, sizeof(NbuNotifyPlmnInfo));
+   RETVALUE(ret1);
+#else
+   RETVALUE((*func)(pst, &msg));
+#endif
+}
+
 /********************************************************************30**
 
          End of file:     

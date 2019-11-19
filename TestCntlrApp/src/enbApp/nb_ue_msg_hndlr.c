@@ -37,15 +37,15 @@ EXTERN S16 NbHandleUeIpInfoRsp(NbuUeIpInfoRsp*);
 *         Setup Comlpete message received from UE.
 *
 * @details
-*     Function: NbHandleInitialUeMsg   
+*     Function: NbHandleInitialUeMsg
 *
 *         Processing steps:
 *         - Selection of MME to send the NAS PDU.
 *         - Building of S1AP InitUE message and delivering it to
 *           selected MME through S1AP stack.
 *
-* 
-* @param NbuInitialUeMsg *initialUeMsg 
+*
+* @param NbuInitialUeMsg *initialUeMsg
 * @return ROK/RFAILED
 */
 
@@ -63,6 +63,7 @@ PUBLIC S16 NbHandleInitialUeMsg
    NbUeCb *ueCb = NULLP;
    NbUeCb tmpUeCb;
    U8 offset  = 0;
+   S16 ret = 0;
    if ( ROK == (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(initialUeMsg->ueId),
       sizeof(U8),0,(PTR *)&ueCb)))
    {
@@ -189,6 +190,14 @@ PUBLIC S16 NbHandleInitialUeMsg
       RETVALUE(RFAILED);
    }
 
+   /* Send PLMN Update message to UEAPP to update
+    * PLMN in UeCb for MAC key generation*/
+   ret = nbNotifyPlmnInfo(ueCb->ueId, tai.plmnId);
+   if (ret == ROK){
+     NB_LOG_DEBUG(&nbCb, "Successfully sent PLMN Info to UEAPP\n");
+   } else {
+     NB_LOG_DEBUG(&nbCb, "Failed to send PLMN Info to UEAPP\n");
+   }
    RETVALUE(ROK);
 }
 #ifdef MULTI_ENB_SUPPORT
@@ -503,4 +512,31 @@ PUBLIC Void nbHandleUeIpInfoReq(U8 ueId,U8 bearerId)
    }
 }
 
+PUBLIC S16 nbNotifyPlmnInfo(U8 ueId, NbPlmnId plmnId )
+{
+  S16 ret = ROK;
+  U8      pLMNId[3];
+  NbuNotifyPlmnInfo *msg = NULLP;
 
+  NB_ALLOC(&msg, sizeof(NbuNotifyPlmnInfo));
+  msg->ueId      = ueId;
+  msg->plmnId[0] = (((plmnId.mcc[1])<<4) | (plmnId.mcc[0]));
+
+  if (plmnId.numMncDigits == 2)
+  {
+     msg->plmnId[1] =((0xf0) | (plmnId.mcc[2]));
+     msg->plmnId[2] =(((plmnId.mnc[1])<<4) | (plmnId.mnc[0]));
+  }
+  else
+  {
+     msg->plmnId[1] =(((plmnId.mnc[0])<<4) | (plmnId.mcc[2]));
+     msg->plmnId[2] =(((plmnId.mnc[2])<<4) | (plmnId.mnc[1]));
+  }
+  /* Send the PLMN Info to UEAPP */
+  ret = cmPkNbuNotifyPlmnInfo(&nbCb.ueAppPst, msg);
+  if(ret != ROK)
+  {
+     ("Failed To Send Plmn Info To UeApp\n");
+  }
+  RETVALUE(ret);
+}

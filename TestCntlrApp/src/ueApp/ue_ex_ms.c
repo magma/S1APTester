@@ -90,6 +90,8 @@ EXTERN S16 UeLiNbuS1RelInd(Pst*, NbuS1RelInd*);
 EXTERN S16 cmUnPkNbuUeIpInfoReq(NbuUeIpInfoReqHdl func,Pst *pst,Buffer *mBuf);
 EXTERN S16 UeLiNbuUeIpInfoReq(Pst *pst,NbuUeIpInfoReq  *p_ueMsg);
 EXTERN S16 ueUiProcErabsRelInfoMsg(Pst *pst,NbuErabsRelInfo *pNbuErabsRelInfo);
+EXTERN S16 UeLiNbuNotifyPlmnInfo(Pst *pst,NbuNotifyPlmnInfo  *p_ueMsg);
+EXTERN S16 cmUnPkNbuNotifyPlmnInfo(NbuNotifyPlmnInfoHdl func,Pst *pst,Buffer *mBuf);
 
 PRIVATE S16 ueHandleEvtFromTfw
 (
@@ -166,9 +168,14 @@ PRIVATE S16 ueHandleEvtFromEnodeB
          ret = cmUnPkNbuErabsRelInfo(ueUiProcErabsRelInfoMsg, pst, mBuf);
          break;
       }
-      case EVTNBUUEIPINFOREQ:                
+      case EVTNBUUEIPINFOREQ:
       {
          ret = cmUnPkNbuUeIpInfoReq(UeLiNbuUeIpInfoReq, pst, mBuf);
+         break;
+      }
+      case EVTNBUUPDATEPLMNINFO:
+      {
+         ret = cmUnPkNbuNotifyPlmnInfo(UeLiNbuNotifyPlmnInfo, pst, mBuf);
          break;
       }
       default:
