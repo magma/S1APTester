@@ -1991,11 +1991,11 @@ PRIVATE S16 handleEsmInformationReq
  *        Desc:  Handles the Send Esm Information Req to TC stub
  *
  *        Ret:   ROK
- * 
+ *
  *        Notes: None
- * 
+ *
  *        File: fw_uemsg_handler.c
- * 
+ *
 */
 PUBLIC S16 sendUeEsmInformationReqToTstCntlr
 (
@@ -2019,3 +2019,36 @@ PUBLIC S16 sendUeEsmInformationReqToTstCntlr
    FW_LOG_EXITFN(fwCb, ret);
 }
 
+/*
+ *        Fun:  sendUePdnDisconnTmrExpToTstCntlr
+ *
+ *        Desc:  Sends PDN Disconnect timer exp to TC stub
+ *
+ *        Ret:   ROK
+ *
+ *        Notes: None
+ *
+ *        File: fw_uemsg_handler.c
+ *
+*/
+PUBLIC S16 sendUePdnDisconnTmrExpToTstCntlr(FwCb *fwCb, UeIdCb *ueIdCb, U16 reason)
+{
+   S16 ret = ROK;
+
+   uePdnDisconnFail_t *tfwPdnDisconnFail = NULLP;
+   FW_LOG_ENTERFN(fwCb);
+
+   FW_ALLOC_MEM(fwCb, &tfwPdnDisconnFail , sizeof(uePdnDisconnFail_t));
+   if(tfwPdnDisconnFail == NULLP)
+         RETVALUE(RFAILED);
+   cmMemset((U8*)tfwPdnDisconnFail, 0, sizeof(uePdnDisconnFail_t));
+
+   tfwPdnDisconnFail->ueId = ueIdCb->ue_id;
+
+   FW_LOG_DEBUG(fwCb, "Invoking Test Controller Callback");
+   (fwCb->testConrollerCallBack)(UE_PDN_DISCONNECT_TIMEOUT_IND,
+           tfwPdnDisconnFail, sizeof(uePdnDisconnFail_t));
+
+   FW_FREE_MEM(fwCb, tfwPdnDisconnFail, sizeof(uePdnDisconnFail_t));
+   FW_LOG_EXITFN(fwCb, ret);
+}
