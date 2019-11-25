@@ -377,7 +377,7 @@ int TC_msg_recv(int msgid, int timeout)
          printf("Initial Context Setup Indication (ueId: %d) (status: %d)\n", tfwIntCtxSetupInd->ueId,tfwIntCtxSetupInd->status);
          break;
       case UE_PDN_DISCONNECT_TIMEOUT_IND:
-         printf("[Stub] Received PDN Disconnect Timeout Indication from TFW\n");
+         printf("[Stub] Received PDN Disconnect Timeout Ind from TFW\n");
          tfwPdnDisconnFail = (uePdnDisconnFail_t *)&msgptr.msg;
          printf("[Stub] PDN Disconnect failed for ueId(%d)\n",
                  tfwPdnDisconnFail->ueId);

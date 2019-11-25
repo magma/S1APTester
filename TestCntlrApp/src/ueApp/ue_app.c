@@ -9111,37 +9111,30 @@ PRIVATE S16 ueProcUeEsmInformationRsp(UetMessage *p_ueMsg, Pst *pst)
  *       File:  ue_app.c
  *
  */
-PRIVATE S16 ueProcUeActvDefBerAcc
-(
- UetMessage *p_ueMsg,
- Pst *pst
-)
-{
-   U16 ueId;
-   UeCb *ueCb = NULLP;
-   S16 ret;
-   UeAppCb *ueAppCb;
+PRIVATE S16 ueProcUeActvDefBerAcc(UetMessage *p_ueMsg, Pst *pst) {
+  U16 ueId;
+  UeCb *ueCb = NULLP;
+  S16 ret;
+  UeAppCb *ueAppCb;
 
-   UE_GET_CB(ueAppCb);
+  UE_GET_CB(ueAppCb);
 
-   UE_LOG_ENTERFN(ueAppCb);
-   UE_LOG_DEBUG(ueAppCb, "Received UE Activate Dedicated Bearer Acc FROM TFW");
+  UE_LOG_ENTERFN(ueAppCb);
+  UE_LOG_DEBUG(ueAppCb, "Received UE Activate Dedicated Bearer Acc FROM TFW");
 
-   ueId = p_ueMsg->msg.ueActDefBerAcc.ueId;
-   /* Fetching the UeCb */
-   ret = ueDbmFetchUe(ueId, (PTR *)&ueCb);
-   if (ret != ROK)
-   {
-      UE_LOG_ERROR(ueAppCb, "UeCb List NULL ueId = %d", ueId);
-      RETVALUE(ret);
-   }
-   ret = ueAppBuildAndSendActDefltBerContextAccept(
-           ueCb,p_ueMsg->msg.ueActDedBerAcc.bearerId);
-   if (ret != ROK)
-   {
-      RETVALUE(ret);
-   }
-   RETVALUE(ret);
+  ueId = p_ueMsg->msg.ueActDefBerAcc.ueId;
+  /* Fetching the UeCb */
+  ret = ueDbmFetchUe(ueId, (PTR *)&ueCb);
+  if (ret != ROK) {
+    UE_LOG_ERROR(ueAppCb, "UeCb List NULL ueId = %d", ueId);
+    RETVALUE(ret);
+  }
+  ret = ueAppBuildAndSendActDefltBerContextAccept(
+      ueCb, p_ueMsg->msg.ueActDedBerAcc.bearerId);
+  if (ret != ROK) {
+    RETVALUE(ret);
+  }
+  RETVALUE(ret);
 }
 
 /*
@@ -9157,98 +9150,86 @@ PRIVATE S16 ueProcUeActvDefBerAcc
  *       File:  ue_app.c
  *
  */
-PRIVATE S16 ueProcUePdnDisconnectReq
-(
- UetMessage *p_ueMsg,
- Pst *pst
-)
-{
-   S16 ret = ROK;
-   U8  ueId = 0;
-   U8 isPlainMsg = TRUE;
-   UeAppMsg srcMsg;
-   UeAppMsg dstMsg;
-   UeAppCb *ueAppCb = NULLP;
-   UeCb *ueCb = NULLP;
-   CmNasEvnt           *pdnDisconnectReqEvnt = NULLP;
-   NhuDedicatedInfoNAS nasEncPdu;
-   NbuUlNasMsg *nbUePdnDisconnectReq = NULLP;
+PRIVATE S16 ueProcUePdnDisconnectReq(UetMessage *p_ueMsg, Pst *pst) {
+  S16 ret = ROK;
+  U8 ueId = 0;
+  U8 isPlainMsg = TRUE;
+  UeAppMsg srcMsg;
+  UeAppMsg dstMsg;
+  UeAppCb *ueAppCb = NULLP;
+  UeCb *ueCb = NULLP;
+  CmNasEvnt *pdnDisconnectReqEvnt = NULLP;
+  NhuDedicatedInfoNAS nasEncPdu;
+  NbuUlNasMsg *nbUePdnDisconnectReq = NULLP;
 
-   UE_GET_CB(ueAppCb);
-   UE_LOG_ENTERFN(ueAppCb);
+  UE_GET_CB(ueAppCb);
+  UE_LOG_ENTERFN(ueAppCb);
 
-   UE_LOG_DEBUG(ueAppCb, "Recieved PDN Disconnect Request");
-   ueId = p_ueMsg->msg.ueUetPdnDisconnectReq.ueId;
-   ret = ueDbmFetchUe(ueId, (PTR *)&ueCb);
-   if( ret != ROK)
-   {
-      UE_LOG_ERROR(ueAppCb, "UeCb List NULL ueId = %d", ueId);
-   }
-   ret = ueAppUtlBldStandAlonePdnDisconnectReq(&pdnDisconnectReqEvnt,
-         &p_ueMsg->msg.ueUetPdnDisconnectReq);
-   if (ret != ROK)
-   {
-      UE_LOG_ERROR(ueAppCb, "Building pdn disconnect req message failed");
-      RETVALUE(ret);
-   }
+  UE_LOG_DEBUG(ueAppCb, "Recieved PDN Disconnect Request");
+  ueId = p_ueMsg->msg.ueUetPdnDisconnectReq.ueId;
+  ret = ueDbmFetchUe(ueId, (PTR *)&ueCb);
+  if (ret != ROK) {
+    UE_LOG_ERROR(ueAppCb, "UeCb List NULL ueId = %d", ueId);
+  }
+  ret = ueAppUtlBldStandAlonePdnDisconnectReq(
+      &pdnDisconnectReqEvnt, &p_ueMsg->msg.ueUetPdnDisconnectReq);
+  if (ret != ROK) {
+    UE_LOG_ERROR(ueAppCb, "Building pdn disconnect req message failed");
+    RETVALUE(ret);
+  }
 
-   if ((ret = ueAppEsmHdlOutUeEvnt(pdnDisconnectReqEvnt, ueCb))!= ROK)
-   {
-      UE_LOG_ERROR(ueAppCb, "Handling PDN disconnect Request failed \n");
-      RETVALUE(RFAILED);
-   }
+  if ((ret = ueAppEsmHdlOutUeEvnt(pdnDisconnectReqEvnt, ueCb)) != ROK) {
+    UE_LOG_ERROR(ueAppCb, "Handling PDN disconnect Request failed \n");
+    RETVALUE(RFAILED);
+  }
 
-   cmMemset((U8 *)&nasEncPdu, 0, sizeof(NhuDedicatedInfoNAS));
+  cmMemset((U8 *)&nasEncPdu, 0, sizeof(NhuDedicatedInfoNAS));
 
-   /* Encode the PDU */
-   ret = ueAppEdmEncode(pdnDisconnectReqEvnt, &nasEncPdu);
-   if (ret != ROK)
-   {
-      UE_LOG_ERROR(ueAppCb, "Pdn Disconnect Req Encode Failed");
+  /* Encode the PDU */
+  ret = ueAppEdmEncode(pdnDisconnectReqEvnt, &nasEncPdu);
+  if (ret != ROK) {
+    UE_LOG_ERROR(ueAppCb, "Pdn Disconnect Req Encode Failed");
+    CM_FREE_NASEVNT(&pdnDisconnectReqEvnt);
+    RETVALUE(ret);
+  }
+  /** Integrity Protected **/
+  if (CM_EMM_SEC_HDR_TYPE_PLAIN_NAS_MSG != pdnDisconnectReqEvnt->secHT) {
+    isPlainMsg = FALSE;
+    srcMsg.val = nasEncPdu.val;
+    srcMsg.len = nasEncPdu.len;
+    ret = ueAppCmpUplnkSec(&ueCb->secCtxt, pdnDisconnectReqEvnt->secHT, &srcMsg,
+                           &dstMsg);
+    if (ROK != ret) {
+      UE_LOG_ERROR(ueAppCb, "Uplink Security Failed");
+      EDM_FREE(nasEncPdu.val, CM_MAX_EMM_ESM_PDU);
+      pdnDisconnectReqEvnt->pdu = NULLP;
       CM_FREE_NASEVNT(&pdnDisconnectReqEvnt);
       RETVALUE(ret);
-   }
-   /** Integrity Protected **/
-   if (CM_EMM_SEC_HDR_TYPE_PLAIN_NAS_MSG != pdnDisconnectReqEvnt->secHT)
-   {
-      isPlainMsg = FALSE;
-      srcMsg.val = nasEncPdu.val;
-      srcMsg.len = nasEncPdu.len;
-      ret = ueAppCmpUplnkSec(&ueCb->secCtxt, pdnDisconnectReqEvnt->secHT, &srcMsg,
-                             &dstMsg);
-      if (ROK != ret)
-      {
-         UE_LOG_ERROR(ueAppCb, "Uplink Security Failed");
-         EDM_FREE(nasEncPdu.val, CM_MAX_EMM_ESM_PDU);
-         pdnDisconnectReqEvnt->pdu = NULLP;
-         CM_FREE_NASEVNT(&pdnDisconnectReqEvnt);
-         RETVALUE(ret);
-      }
-      EDM_FREE(nasEncPdu.val, CM_MAX_EMM_ESM_PDU);
-      nasEncPdu.val = dstMsg.val;
-      nasEncPdu.len = dstMsg.len;
-   }
-   CM_FREE_NASEVNT(&pdnDisconnectReqEvnt);
+    }
+    EDM_FREE(nasEncPdu.val, CM_MAX_EMM_ESM_PDU);
+    nasEncPdu.val = dstMsg.val;
+    nasEncPdu.len = dstMsg.len;
+  }
+  CM_FREE_NASEVNT(&pdnDisconnectReqEvnt);
 
-   nbUePdnDisconnectReq = (NbuUlNasMsg *)ueAlloc(sizeof(NbuUlNasMsg));
-   nbUePdnDisconnectReq->ueId = ueId;
-   nbUePdnDisconnectReq->nasPdu.pres = TRUE;
-   nbUePdnDisconnectReq->nasPdu.len = nasEncPdu.len;
-   nbUePdnDisconnectReq->nasPdu.val = (U8 *)ueAlloc(nbUePdnDisconnectReq->nasPdu.len);
-   cmMemcpy((U8 *)nbUePdnDisconnectReq->nasPdu.val, nasEncPdu.val,
-         nbUePdnDisconnectReq->nasPdu.len);
+  nbUePdnDisconnectReq = (NbuUlNasMsg *)ueAlloc(sizeof(NbuUlNasMsg));
+  nbUePdnDisconnectReq->ueId = ueId;
+  nbUePdnDisconnectReq->nasPdu.pres = TRUE;
+  nbUePdnDisconnectReq->nasPdu.len = nasEncPdu.len;
+  nbUePdnDisconnectReq->nasPdu.val =
+      (U8 *)ueAlloc(nbUePdnDisconnectReq->nasPdu.len);
+  cmMemcpy((U8 *)nbUePdnDisconnectReq->nasPdu.val, nasEncPdu.val,
+           nbUePdnDisconnectReq->nasPdu.len);
 
-   if (isPlainMsg)
-   {
-     EDM_FREE(nasEncPdu.val, CM_MAX_EMM_ESM_PDU);
-   }
+  if (isPlainMsg) {
+    EDM_FREE(nasEncPdu.val, CM_MAX_EMM_ESM_PDU);
+  }
 
-   ret = ueSendUlNasMsgToNb(nbUePdnDisconnectReq, &ueAppCb->nbPst);
-   if (ret != ROK)
-   {
-      UE_LOG_ERROR(ueAppCb, "Sending PDN Disconnect Req to enbAPP failed");
-      ret = RFAILED;
-   }
+  ret = ueSendUlNasMsgToNb(nbUePdnDisconnectReq, &ueAppCb->nbPst);
+  if (ret != ROK) {
+    UE_LOG_ERROR(ueAppCb, "Sending PDN Disconnect Req to enbAPP failed");
+    ret = RFAILED;
+  }
 
-   UE_LOG_EXITFN(ueAppCb, ret);
+  UE_LOG_EXITFN(ueAppCb, ret);
 } /* End of ueProcUePdnDisconnectReq */

@@ -478,53 +478,48 @@ PUBLIC Void fwHndlPdnTmrExp
 } /* fwHndlPdnTmrExp */
 
 /*
-*        Fun:  fwHndlPdnDisconnTmrExp
-*
-*        Desc:  Handles on timer expiry
-*
-*        Ret:   ROK
-*
-*        Notes: None
-*
-*        File: fw_tmr.c
-*
-*/
-PUBLIC Void fwHndlPdnDisconnTmrExp
-(
-   PTR  cb
-)
-{
-   FwCb *fwCb = NULLP;
-   FwCb *tmrFwCb = NULLP;
-   UeIdCb   *ueIdCb = NULLP;
-   FwTmrCb  *tmrCb = NULLP;
+ *        Fun:  fwHndlPdnDisconnTmrExp
+ *
+ *        Desc:  Handles on timer expiry
+ *
+ *        Ret:   ROK
+ *
+ *        Notes: None
+ *
+ *        File: fw_tmr.c
+ *
+ */
+PUBLIC Void fwHndlPdnDisconnTmrExp(PTR cb) {
+  FwCb *fwCb = NULLP;
+  FwCb *tmrFwCb = NULLP;
+  UeIdCb *ueIdCb = NULLP;
+  FwTmrCb *tmrCb = NULLP;
 
-   FW_GET_CB(fwCb);
-   FW_LOG_ENTERFN(fwCb);
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
 
-   if (cb == NULLP)
-   {
-      FW_LOG_ERROR(fwCb, "Received Invalid Parameters");
-      FW_LOG_EXITFNVOID(fwCb);
-   }
+  if (cb == NULLP) {
+    FW_LOG_ERROR(fwCb, "Received Invalid Parameters");
+    FW_LOG_EXITFNVOID(fwCb);
+  }
 
+  tmrCb = (FwTmrCb *)cb;
+  tmrFwCb = tmrCb->fwCb;
+  ueIdCb = tmrCb->ueIdCb;
 
-   tmrCb = (FwTmrCb *)cb;
-   tmrFwCb = tmrCb->fwCb;
-   ueIdCb = tmrCb->ueIdCb;
+  if ((NULLP == tmrFwCb) || (NULLP == ueIdCb)) {
+    FW_LOG_ERROR(fwCb, "Invalid parameters received");
+    FW_LOG_EXITFNVOID(fwCb);
+  }
 
-   if ((NULLP == tmrFwCb) || (NULLP == ueIdCb))
-   {
-      FW_LOG_ERROR(fwCb, "Invalid parameters received");
-      FW_LOG_EXITFNVOID(fwCb);
-   }
+  FW_LOG_ERROR(fwCb, "UE Pdn Disconnection timer expired (ue_id = %d)",
+               ueIdCb->ue_id);
 
-   FW_LOG_ERROR(fwCb, "UE Pdn Disconnection timer expired (ue_id = %d)", ueIdCb->ue_id);
+  /* Inform Stub with current state */
+  FW_LOG_DEBUG(fwCb, "Sending indication to Test Controller");
+  sendUePdnDisconnTmrExpToTstCntlr(tmrFwCb, ueIdCb,
+                                   FW_RSN_UE_PDN_DISCON_TIMER_EXPIRED);
+  FW_FREE_MEM(fwCb, ueIdCb->tmrCb, sizeof(FwTmrCb));
 
-   /* Inform Stub with current state */
-   FW_LOG_DEBUG(fwCb, "Sending indication to Test Controller");
-   sendUePdnDisconnTmrExpToTstCntlr(tmrFwCb, ueIdCb, FW_RSN_UE_PDN_DISCON_TIMER_EXPIRED);
-   FW_FREE_MEM(fwCb, ueIdCb->tmrCb, sizeof(FwTmrCb));
-
-   FW_LOG_EXITFNVOID(fwCb);
+  FW_LOG_EXITFNVOID(fwCb);
 } /* fwHndlPdnDisconnTmrExp */

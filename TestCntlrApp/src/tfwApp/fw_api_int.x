@@ -116,9 +116,9 @@ typedef enum {
    PATH_SW_REQ_ACK,
    ENB_CONFIGURATION_TRANSFER,
    MME_CONFIGURATION_TRANSFER = 81,
-   UE_ACTV_DEFAULT_EPS_BEARER_CNTXT_ACCEPT,
-   UE_PDN_DISCONNECT_REQ,
-   UE_PDN_DISCONNECT_TIMEOUT_IND
+  UE_ACTV_DEFAULT_EPS_BEARER_CNTXT_ACCEPT,
+  UE_PDN_DISCONNECT_REQ,
+  UE_PDN_DISCONNECT_TIMEOUT_IND
 }tfwCmd;
 
 typedef enum
@@ -932,11 +932,10 @@ typedef struct uepdnConReq
    pdn_APN  pdnAPN_pr;
 }uepdnConReq_t;
 
-typedef struct uepdnDisconnectReq
-{
-   U8       ue_Id;
-   U8       epsBearerId;
-}uepdnDisconnectReq_t;
+typedef struct uepdnDisconnectReq {
+  U8 ue_Id;
+  U8 epsBearerId;
+} uepdnDisconnectReq_t;
 
 typedef struct _errCause
 {

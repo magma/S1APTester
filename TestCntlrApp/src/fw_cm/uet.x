@@ -205,8 +205,8 @@ typedef enum _ueMsgTypes
    UE_ESM_INFORMATION_RSP_TYPE,
    UE_EPS_DEACTIVATE_BER_REQ,
    UE_EPS_DEACTIVATE_BER_ACC,
-   UE_EPS_DEFAULT_BER_ACC,
-   UE_PDN_DISCONNECT_REQ_TYPE,
+  UE_EPS_DEFAULT_BER_ACC,
+  UE_PDN_DISCONNECT_REQ_TYPE,
 }UeMsgTypes;
 
 typedef struct _ueEmmEpsAtchType
@@ -857,18 +857,16 @@ typedef struct _ueUetEsmInformationRsp
 }UeUetEsmInformationRsp;
 
 /* Activate default EPS bearer context accept message */
-typedef struct ueEsmActDefBearCtxtAcc
-{
-   U8 ueId;
-   U8 bearerId;
-}UeEsmActDefBearCtxtAcc;
+typedef struct ueEsmActDefBearCtxtAcc {
+  U8 ueId;
+  U8 bearerId;
+} UeEsmActDefBearCtxtAcc;
 
 /* PDN Disconnect Request message */
-typedef struct _ueUetPdnDisconnectReq
-{
-   U8 ueId;
-   U8 bearerId;
-}UeUetPdnDisconnectReq;
+typedef struct _ueUetPdnDisconnectReq {
+  U8 ueId;
+  U8 bearerId;
+} UeUetPdnDisconnectReq;
 
 typedef struct _uetMessage
 {

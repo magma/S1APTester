@@ -101,9 +101,9 @@ PRIVATE S16 handleUeDeActvBerAcc(UeDeActvBearCtxtAcc_t* data);
 PRIVATE Void handleEsmInformationRsp(ueEsmInformationRsp_t* data);
 PRIVATE Void handleMultiEnbConfigReq(multiEnbConfigReq_t* data);
 PUBLIC Void handleX2HoTriggerReq(NbX2HOTriggerReq* data);
-PRIVATE S16 handleActvDfltEpsBearerContextAcc(UeActDefEpsBearCtxtAcc_t* data);
-PRIVATE Void handlPdnDisconnectReq(uepdnDisconnectReq_t* data);
-EXTERN Void fwHndlPdnDisconnTmrExp(PTR  cb);
+PRIVATE S16 handleActvDfltEpsBearerContextAcc(UeActDefEpsBearCtxtAcc_t *data);
+PRIVATE Void handlPdnDisconnectReq(uepdnDisconnectReq_t *data);
+EXTERN Void fwHndlPdnDisconnTmrExp(PTR cb);
 PUBLIC FwCb gfwCb;
 
 /* Adding UEID, epsupdate type, active flag into linked list for 
@@ -3224,32 +3224,28 @@ PRIVATE Void handleMultiEnbConfigReq(multiEnbConfigReq_t* data)
  *
  */
 
-PRIVATE S16 handleActvDfltEpsBearerContextAcc(UeActDefEpsBearCtxtAcc_t* data)
-{
-   FwCb *fwCb = NULLP;
-   UetMessage *uetMsg = NULLP;
-   UeEsmActDefBearCtxtAcc *actvDefBerAcc = NULLP;
+PRIVATE S16 handleActvDfltEpsBearerContextAcc(UeActDefEpsBearCtxtAcc_t *data) {
+  FwCb *fwCb = NULLP;
+  UetMessage *uetMsg = NULLP;
+  UeEsmActDefBearCtxtAcc *actvDefBerAcc = NULLP;
 
-   FW_GET_CB(fwCb);
-   FW_LOG_ENTERFN(fwCb);
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
 
-   FW_ALLOC_MEM(fwCb, &uetMsg, sizeof(UetMessage));
+  FW_ALLOC_MEM(fwCb, &uetMsg, sizeof(UetMessage));
 
-   uetMsg->msgType = UE_EPS_DEFAULT_BER_ACC;
-   actvDefBerAcc = &uetMsg->msg.ueActDefBerAcc;
+  uetMsg->msgType = UE_EPS_DEFAULT_BER_ACC;
+  actvDefBerAcc = &uetMsg->msg.ueActDefBerAcc;
 
-   if (actvDefBerAcc)
-   {
-     actvDefBerAcc->ueId           = data->ue_Id;
-     actvDefBerAcc->bearerId       = data->bearerId;
+  if (actvDefBerAcc) {
+    actvDefBerAcc->ueId = data->ue_Id;
+    actvDefBerAcc->bearerId = data->bearerId;
 
-     fwSendToUeApp(uetMsg);
-   }
-   else
-   {
-     FW_LOG_ERROR(fwCb, "Memory allocation failed for ActDefBearCtxtAcc\n");
-   }
-     FW_LOG_EXITFN(fwCb, ROK);
+    fwSendToUeApp(uetMsg);
+  } else {
+    FW_LOG_ERROR(fwCb, "Memory allocation failed for ActDefBearCtxtAcc\n");
+  }
+  FW_LOG_EXITFN(fwCb, ROK);
 }
 
 /*
@@ -3266,50 +3262,42 @@ PRIVATE S16 handleActvDfltEpsBearerContextAcc(UeActDefEpsBearCtxtAcc_t* data)
  *   File:  fw_api_int.c
  *
  */
-PRIVATE Void handlPdnDisconnectReq(uepdnDisconnectReq_t* data)
-{
-   FwCb *fwCb = NULLP;
-   S16 ret;
-   UetMessage *uetMsg = NULLP;
-   UeUetPdnDisconnectReq *uePdnDisconnectReq = NULLP;
-   UeIdCb *ueIdCb = NULLP;
+PRIVATE Void handlPdnDisconnectReq(uepdnDisconnectReq_t *data) {
+  FwCb *fwCb = NULLP;
+  S16 ret;
+  UetMessage *uetMsg = NULLP;
+  UeUetPdnDisconnectReq *uePdnDisconnectReq = NULLP;
+  UeIdCb *ueIdCb = NULLP;
 
-   FW_GET_CB(fwCb);
-   FW_LOG_ENTERFN(fwCb);
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
 
-   if (SGetSBuf(fwCb->init.region, fwCb->init.pool,
-            (Data **)&uetMsg, (Size) sizeof(UetMessage)) == ROK)
-   {
-     cmMemset((U8 *)(uetMsg), 0,sizeof(UetMessage));
-   }
-   else
-   {
-      RETVOID;
-   }
-   if (SGetSBuf(fwCb->init.region, fwCb->init.pool,
-            (Data **)&ueIdCb, (Size) sizeof(UeIdCb)) == ROK)
-   {
-      cmMemset((U8 *)(ueIdCb), 0,sizeof(UeIdCb));
-   }
-   else
-   {
-      RETVOID;
-   }
+  if (SGetSBuf(fwCb->init.region, fwCb->init.pool, (Data **)&uetMsg,
+               (Size)sizeof(UetMessage)) == ROK) {
+    cmMemset((U8 *)(uetMsg), 0, sizeof(UetMessage));
+  } else {
+    RETVOID;
+  }
+  if (SGetSBuf(fwCb->init.region, fwCb->init.pool, (Data **)&ueIdCb,
+               (Size)sizeof(UeIdCb)) == ROK) {
+    cmMemset((U8 *)(ueIdCb), 0, sizeof(UeIdCb));
+  } else {
+    RETVOID;
+  }
 
-   insertUeCb(data->ue_Id, 0, 0, ueIdCb);
-   uetMsg->msgType = UE_PDN_DISCONNECT_REQ_TYPE;
-   uePdnDisconnectReq = &uetMsg->msg.ueUetPdnDisconnectReq;
-   uePdnDisconnectReq->ueId    = data->ue_Id;
-   uePdnDisconnectReq->bearerId = data->epsBearerId;
-   fwSendToUeApp(uetMsg);
-   // Start T3492 timer
-   FW_LOG_DEBUG(fwCb, "\n-------------------------------\n\
+  insertUeCb(data->ue_Id, 0, 0, ueIdCb);
+  uetMsg->msgType = UE_PDN_DISCONNECT_REQ_TYPE;
+  uePdnDisconnectReq = &uetMsg->msg.ueUetPdnDisconnectReq;
+  uePdnDisconnectReq->ueId = data->ue_Id;
+  uePdnDisconnectReq->bearerId = data->epsBearerId;
+  fwSendToUeApp(uetMsg);
+  // Start T3492 timer
+  FW_LOG_DEBUG(fwCb, "\n-------------------------------\n\
             Starting T3492\n-------------------------------\n");
-   /* 10ms(tick)*600 = 6000ms = 6s timer*/
-   ret = fwStartTmr(fwCb, ueIdCb, fwHndlPdnDisconnTmrExp, 600);
-   if (ROK != ret)
-   {
-      FW_LOG_ERROR(fwCb, "Failed to start T3492 timer");
-   }
-   RETVOID;
+  /* 10ms(tick)*600 = 6000ms = 6s timer*/
+  ret = fwStartTmr(fwCb, ueIdCb, fwHndlPdnDisconnTmrExp, 600);
+  if (ROK != ret) {
+    FW_LOG_ERROR(fwCb, "Failed to start T3492 timer");
+  }
+  RETVOID;
 }
