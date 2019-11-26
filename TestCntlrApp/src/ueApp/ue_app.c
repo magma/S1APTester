@@ -215,6 +215,10 @@ PRIVATE S16 ueProcUeEsmInformationRsp(UetMessage *p_ueMsg, Pst *pst);
 PRIVATE S16 ueAppEsmHndlIncEsmInfoReq(UeEsmCb *esmCb, CmNasEvnt *evnt, UeCb *ueCb);
 PRIVATE S16 ueAppUtlBldEsmInformationRsp(CmNasEvnt **esmEvnt, UeUetEsmInformationRsp  *ueEsmInformationRsp);
 PRIVATE S16 ueProcUePdnDisconnectReq(UetMessage *p_ueMsg,Pst *pst);
+PRIVATE S16 ueAppUtlBldStandAlonePdnDisconnectReq(
+  CmNasEvnt **esmEvnt,
+  UeUetPdnDisconnectReq *ueUetPdnDisConReq);
+
 
 PRIVATE S16 ueAppGetDrb(UeCb *ueCb, U8 *drb)
 {
@@ -9136,6 +9140,65 @@ PRIVATE S16 ueProcUeActvDefBerAcc(UetMessage *p_ueMsg, Pst *pst) {
   }
   RETVALUE(ret);
 }
+
+/*
+ *
+ *       Fun: ueAppUtlBldStandAlonePdnDisconnectReq
+ *
+ *       Desc:
+ *
+ *       Ret:  ROK - ok; RFAILED - failed
+ *
+ *       Notes: none
+ *
+ *       File:  ue_app.c
+ *
+ */
+
+PRIVATE S16 ueAppUtlBldStandAlonePdnDisconnectReq
+(
+ CmNasEvnt **esmEvnt,
+ UeUetPdnDisconnectReq *ueUetPdnDisConReq
+)
+{
+   CmEsmMsg    *msg = NULLP;
+   printf("Building PDN Disconnect Request for Ue\n");
+
+   if(esmEvnt == NULLP)
+   {
+      RETVALUE(RFAILED);
+   }
+
+   /* Allocate memory for mme evnt */
+   CM_ALLOC_NASEVNT (esmEvnt, CM_ESM_PD);
+   if (*esmEvnt == NULLP)
+   {
+      RETVALUE(RFAILED);
+   }
+
+   /*Allocate memory for ESM message*/
+   if (cmGetMem(&(*esmEvnt)->memCp, sizeof(CmEsmMsg), (Ptr *)&msg) != ROK)
+   {
+      CM_FREE_NASEVNT(esmEvnt);
+      RETVALUE(RFAILED);
+   }
+
+   msg->protDisc = CM_ESM_PD;
+   (*esmEvnt)->m.esmEvnt = msg;
+
+   (*esmEvnt)->secHT = CM_NAS_SEC_HDR_TYPE_INT_PRTD_ENC;
+   /* Fill ESM PDN disconnect request message */
+
+   /*Fill mandatory IE's*/
+   /* EPS barer ID IE*/
+   msg->bearerId = ueUetPdnDisConReq->bearerId;
+
+   /* PDN disconnect request message identity*/
+   msg->msgType = CM_ESM_MSG_PDN_DISCONN_REQ;
+
+   RETVALUE(ROK);
+}
+
 
 /*
  *

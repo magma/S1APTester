@@ -1598,31 +1598,55 @@ PUBLIC S16 sendUeNwInitDetachReqIndToTstCntlr
    FW_FREE_MEM(fwCb, tfwNwInitDetReq, sizeof(ueNwInitdetachReq_t));
    FW_LOG_EXITFN(fwCb, ret);
 }
-PRIVATE S16 handleAndSendDeActvBerReqInd 
+PRIVATE S16 handleAndSendDeActvBerReqInd
 (
- Pst *pst, 
+ Pst *pst,
  UetMessage *msgreq
 )
 {
    S16 ret = ROK;
    FwCb *fwCb = NULLP;
 
-   UeUetDeActvBearCtxtReq *params  = NULLP; 
+   UeUetDeActvBearCtxtReq *params  = NULLP;
    UeDeActvBearCtxtReq_t *ueDeActvBerReq = NULLP;
    U8 idx;
+   U8 flag = 0;
+   UeIdCb *ueIdCb = NULLP;
+
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
 
+   CmLList  *tmpNode = NULLP;
+   CM_LLIST_FIRST_NODE(&fwCb->ueIdList, tmpNode);
 
-  params = &msgreq->msg.ueDeActvBerReq;
- 
-   FW_ALLOC_MEM(fwCb, &ueDeActvBerReq , sizeof(UeDeActvBearCtxtReq_t));
+   params = &msgreq->msg.ueDeActvBerReq;
+
+   while (tmpNode != NULLP)
+   {
+       ueIdCb = (UeIdCb*)tmpNode->node;
+       if (ueIdCb->ue_id == params->ueId)
+       {
+           printf("ue id %d found\n", params->ueId);
+           flag = 1;
+           ueIdCb->link.node = (PTR)ueIdCb;
+       }
+       tmpNode = tmpNode->next;
+   }
+
+   if (flag == 1)
+   {
+       FW_LOG_DEBUG(fwCb, "\nStoping timer T3492\n");
+       fwStopTmr(fwCb, ueIdCb);
+   }
+
+
+  FW_ALLOC_MEM(fwCb, &ueDeActvBerReq , sizeof(UeDeActvBearCtxtReq_t));
 
   cmMemset((U8 *)ueDeActvBerReq, 0, sizeof(UeDeActvBearCtxtReq_t));
   ueDeActvBerReq->ue_Id           = params->ueId;
-  ueDeActvBerReq->bearerId        = params->bearerId; 
-  ueDeActvBerReq->esmCause        = params->esmCause; 
-   (fwCb->testConrollerCallBack)(UE_DEACTIVATE_BER_REQ,ueDeActvBerReq, 
+  ueDeActvBerReq->bearerId        = params->bearerId;
+  ueDeActvBerReq->esmCause        = params->esmCause;
+   (fwCb->testConrollerCallBack)(UE_DEACTIVATE_BER_REQ,ueDeActvBerReq,
          sizeof(UeDeActvBearCtxtReq_t));
 
    FW_FREE_MEM(fwCb,ueDeActvBerReq, sizeof(UeDeActvBearCtxtReq_t));
