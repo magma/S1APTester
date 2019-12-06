@@ -2341,16 +2341,7 @@ PUBLIC S16 tfwApi
       case UE_PDN_DISCONNECT_REQ:
       {
          FW_LOG_DEBUG(fwCb, "UE_PDN_DISCONNECT_REQ");
-         if(fwCb->nbState == ENB_IS_UP)
-         {
-            handlPdnDisconnectReq((uepdnDisconnectReq_t*)msg);
-         }
-         else
-         {
-            FW_LOG_ERROR(fwCb, "FAILED TO SEND UE_PDN_DISCONN_REQ: "\
-                  "ENBAPP IS NOT UP");
-            ret = RFAILED;
-         }
+         handlPdnDisconnectReq((uepdnDisconnectReq_t*)msg);
          break;
       }
 

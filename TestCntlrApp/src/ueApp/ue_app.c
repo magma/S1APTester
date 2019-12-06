@@ -218,7 +218,7 @@ PRIVATE S16 ueProcUePdnDisconnectReq(UetMessage *p_ueMsg,Pst *pst);
 PRIVATE S16 ueAppUtlBldStandAlonePdnDisconnectReq(
   CmNasEvnt **esmEvnt,
   UeUetPdnDisconnectReq *ueUetPdnDisConReq);
-
+PRIVATE S16 ueAppEsmHndlOutPDNDisConnectReq(UeEsmCb *esmCb, CmNasEvnt *evnt);
 
 PRIVATE S16 ueAppGetDrb(UeCb *ueCb, U8 *drb)
 {
@@ -917,11 +917,10 @@ PRIVATE S16 ueAppUtlBldStandAlonePdnConReq
 
    /* Request type IE*/  
    msg->u.conReq.reqType.pres = TRUE;
-   msg->u.conReq.reqType.val = ueUetPdnConReq->reqType;
-
+   msg->u.conReq.reqType.val = CM_ESM_REQTYPE_INIT;
    /* PDN type IE*/
-     msg->u.conReq.pdnType.pres = TRUE;
-     msg->u.conReq.pdnType.val = ueUetPdnConReq->pdnType;
+   msg->u.conReq.pdnType.pres = TRUE;
+   msg->u.conReq.pdnType.val = ueUetPdnConReq->pdnType;
 
    if( ueUetPdnConReq->nasPdnApn.len != 0) {
      msg->u.conReq.apn.pres      = TRUE;
@@ -1606,9 +1605,6 @@ PRIVATE S16 ueAppEsmHndlOutEsmInformationRsp(UeEsmCb *esmCb, CmNasEvnt *evnt)
    /* Update procedure transaction state */
    esmCb->pState = UE_ESM_ST_PROC_TXN_PENDING;
 
-   /* Updating bearerId and transaction Id to event */
-   evnt->m.esmEvnt->bearerId = esmCb->bId;
-   evnt->m.esmEvnt->prTxnId = esmCb->tId;
    UE_LOG_EXITFN(ueAppCb, ROK);
 } /* ueAppEsmHndlOutPDNConnectReq */
 
@@ -1836,12 +1832,17 @@ PRIVATE S16 ueAppEsmHdlOutUeEvnt(CmNasEvnt *evnt, UeCb *ueCb)
    UE_LOG_DEBUG(ueAppCb, "Outgoing esm events");
 
    esmMsg = evnt->m.esmEvnt;
-
    if ((esmMsg->msgType != CM_ESM_MSG_PDN_CONN_REQ) && (esmMsg->msgType != CM_ESM_MSG_BEAR_RES_ALLOC_REQ)
-   && (esmMsg->msgType != CM_ESM_MSG_ESM_INFO_RSP)) 
+   && (esmMsg->msgType != CM_ESM_MSG_ESM_INFO_RSP)
+   && (!CM_ESM_MSG_PDN_DISCONN_REQ))
    {
        /*esmMsg->bearerId = 6;*/
       ret = ueAppUtlFndEsmCb(&esmCb, esmMsg->bearerId, UE_ESM_BID_KEY, ueCb);
+   }
+   else if (esmMsg->msgType == CM_ESM_MSG_PDN_DISCONN_REQ)
+   {
+      ret = ueAppUtlFndEsmCb(&esmCb, esmMsg->u.disconReq.lnkBearerId,
+                             UE_ESM_BID_KEY, ueCb);
    }
    else
    {
@@ -1898,6 +1899,21 @@ PRIVATE S16 ueAppEsmHdlOutUeEvnt(CmNasEvnt *evnt, UeCb *ueCb)
             ret = ueAppEsmHndlOutEsmInformationRsp(esmCb, evnt);
             break;
          }
+      case CM_ESM_MSG_PDN_DISCONN_REQ:
+         {
+            /* Update the PTI in esmCb*/
+            for (int i = 1; i < CM_ESM_MAX_BEARER_ID; i++)
+            {
+              if (ueCb->esmTList[i] == NULLP)
+              {
+                esmCb->tId = i;
+                break;
+              }
+            }
+            ret = ueAppEsmHndlOutPDNDisConnectReq(esmCb, evnt);
+            break;
+         }
+
       default:
          {
             ret = ueAppEsmHndlInvEvnt(esmCb, evnt, ueCb);
@@ -9191,7 +9207,9 @@ PRIVATE S16 ueAppUtlBldStandAlonePdnDisconnectReq
 
    /*Fill mandatory IE's*/
    /* EPS barer ID IE*/
-   msg->bearerId = ueUetPdnDisConReq->bearerId;
+   msg->bearerId = 0;
+   /* Linked bearer ID*/
+   msg->u.disconReq.lnkBearerId = ueUetPdnDisConReq->bearerId;
 
    /* PDN disconnect request message identity*/
    msg->msgType = CM_ESM_MSG_PDN_DISCONN_REQ;
@@ -9296,3 +9314,34 @@ PRIVATE S16 ueProcUePdnDisconnectReq(UetMessage *p_ueMsg, Pst *pst) {
 
   UE_LOG_EXITFN(ueAppCb, ret);
 } /* End of ueProcUePdnDisconnectReq */
+
+/*
+ *
+ *       Fun: ueAppEsmHndlOutPDNDisConnectReq
+ *
+ *       Desc:
+ *
+ *       Ret:  ROK - ok; RFAILED - failed
+ *
+ *       Notes: none
+ *
+ *       File:  ue_app.c
+ *
+ */
+PRIVATE S16 ueAppEsmHndlOutPDNDisConnectReq(UeEsmCb *esmCb, CmNasEvnt *evnt)
+{
+   UeAppCb *ueAppCb = NULLP;
+
+   UE_GET_CB(ueAppCb);
+   UE_LOG_ENTERFN(ueAppCb);
+
+   UE_LOG_DEBUG(ueAppCb, "PDN disconnect request");
+
+   /* Update procedure transaction state */
+   esmCb->pState = UE_ESM_ST_PROC_TXN_PENDING;
+
+  /* Updating transaction Id to event */
+   evnt->m.esmEvnt->prTxnId = esmCb->tId;
+   UE_LOG_EXITFN(ueAppCb, ROK);
+} /* ueAppEsmHndlOutPDNDisConnectReq */
+

@@ -266,7 +266,11 @@ CmEsmEdmMsgFormat esmMsgTab[CM_ESM_MAX_MSG_TYPE][CM_ESM_MAX_IE_SEQ] =
    },
    /* CM_ESM_IDX_PDN_DISCONN_REQ */
    {
-      {0, 0, 0, TRUE, 0, NULLP, NULLP, NULLP},
+      {0, EDM_PRES_MANDATORY, EDM_FMTV,
+         FALSE, 4, NULLP, cmEsmEncEpsLnkBearerId, cmEsmDecEpsLnkBearerId},
+
+      {0, EDM_PRES_MANDATORY, EDM_FMTV,
+         TRUE, 4, NULLP, cmEsmEncSpareHalfOct, cmEsmDecSpareHalfOct },
    },
    /* CM_ESM_IDX_PDN_DISCONN_REJ */
    {
@@ -1723,6 +1727,9 @@ U32 *len;
             break;
          case CM_ESM_MSG_BEAR_RES_MOD_REQ:   
             bearerId = &msg->u.bearModReq.lnkBearerId;
+            break;
+         case CM_ESM_MSG_PDN_DISCONN_REQ:
+            bearerId = &msg->u.disconReq.lnkBearerId;
             break;
          default:
             EDM_DBG_ERROR((EDM_PRNTBUF, "Invalid msg type (%d)\n",
