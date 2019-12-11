@@ -97,7 +97,6 @@ EXTERN S16 ueUiProcErabsInfoMsg(Pst*, NbuErabsInfo*);
 EXTERN S16 ueAppBldAndSndIpInfoRspToNb(UeCb*, U8, Pst*);
 PUBLIC S16 ueSendErabRelInd(NbuErabRelIndList*, Pst*);
 PRIVATE S16 ueProcUeActvDedBerAcc(UetMessage *p_ueMsg,Pst *pst);
-PRIVATE S16 ueProcUeActvDefBerAcc(UetMessage *p_ueMsg,Pst *pst);
 PRIVATE S16 ueProcUeDeActvBerAcc(UetMessage *p_ueMsg,Pst *pst);
 PRIVATE S16 ueAppUtlBldActDedBerContextReject(UeCb *ueCb, CmNasEvnt **esmEvnt,
                 U8 epsBearerId, U8 esmCause);
@@ -881,7 +880,7 @@ PRIVATE S16 ueAppUtlBldStandAlonePdnConReq
 )
 {
    CmEsmMsg    *msg = NULLP;
-   printf("Building PDN Connection Request for Ue\n");
+   printf("Building PDN Connection Request\n");
 
    if(esmEvnt == NULLP)
    {
@@ -5474,12 +5473,6 @@ PUBLIC S16 ueUiProcessTfwMsg(UetMessage *p_ueMsg, Pst *pst)
 
          break;
       }
-      case UE_EPS_DEFAULT_BER_ACC:
-      {
-         UE_LOG_DEBUG(ueAppCb, "RECEIVED Actv Default Bearer Acc from TFW");
-         ret = ueProcUeActvDefBerAcc(p_ueMsg, pst);
-         break;
-      }
       case UE_PDN_DISCONNECT_REQ_TYPE:
       {
          UE_LOG_DEBUG(ueAppCb, "RECEIVED UE PDN DISCONNECT REQ FROM TFWAPP");
@@ -9120,45 +9113,6 @@ PRIVATE S16 ueProcUeEsmInformationRsp(UetMessage *p_ueMsg, Pst *pst)
 
 /*
  *
- *       Fun: ueProcUeActvDefBerAcc
- *
- *       Desc:
- *
- *       Ret:  ROK - ok; RFAILED - failed
- *
- *       Notes: none
- *
- *       File:  ue_app.c
- *
- */
-PRIVATE S16 ueProcUeActvDefBerAcc(UetMessage *p_ueMsg, Pst *pst) {
-  U16 ueId;
-  UeCb *ueCb = NULLP;
-  S16 ret;
-  UeAppCb *ueAppCb;
-
-  UE_GET_CB(ueAppCb);
-
-  UE_LOG_ENTERFN(ueAppCb);
-  UE_LOG_DEBUG(ueAppCb, "Received UE Activate Dedicated Bearer Acc FROM TFW");
-
-  ueId = p_ueMsg->msg.ueActDefBerAcc.ueId;
-  /* Fetching the UeCb */
-  ret = ueDbmFetchUe(ueId, (PTR *)&ueCb);
-  if (ret != ROK) {
-    UE_LOG_ERROR(ueAppCb, "UeCb List NULL ueId = %d", ueId);
-    RETVALUE(ret);
-  }
-  ret = ueAppBuildAndSendActDefltBerContextAccept(
-      ueCb, p_ueMsg->msg.ueActDedBerAcc.bearerId);
-  if (ret != ROK) {
-    RETVALUE(ret);
-  }
-  RETVALUE(ret);
-}
-
-/*
- *
  *       Fun: ueAppUtlBldStandAlonePdnDisconnectReq
  *
  *       Desc:
@@ -9178,7 +9132,7 @@ PRIVATE S16 ueAppUtlBldStandAlonePdnDisconnectReq
 )
 {
    CmEsmMsg    *msg = NULLP;
-   printf("Building PDN Disconnect Request for Ue\n");
+   printf("Building PDN Disconnect Request\n");
 
    if(esmEvnt == NULLP)
    {

@@ -101,7 +101,6 @@ PRIVATE S16 handleUeDeActvBerAcc(UeDeActvBearCtxtAcc_t* data);
 PRIVATE Void handleEsmInformationRsp(ueEsmInformationRsp_t* data);
 PRIVATE Void handleMultiEnbConfigReq(multiEnbConfigReq_t* data);
 PUBLIC Void handleX2HoTriggerReq(NbX2HOTriggerReq* data);
-PRIVATE S16 handleActvDfltEpsBearerContextAcc(UeActDefEpsBearCtxtAcc_t *data);
 PRIVATE Void handlPdnDisconnectReq(uepdnDisconnectReq_t *data);
 EXTERN Void fwHndlPdnDisconnTmrExp(PTR cb);
 PUBLIC FwCb gfwCb;
@@ -2332,12 +2331,6 @@ PUBLIC S16 tfwApi
     	 handleEnbConfigTransfer((NbEnbConfigTrnsf*)msg);
          break;
       }
-      case UE_ACTV_DEFAULT_EPS_BEARER_CNTXT_ACCEPT:
-      {
-         FW_LOG_DEBUG(fwCb, "UE_ACTV_DEFAULT_EPS_BEARER_CNTXT_ACCEPT");
-         handleActvDfltEpsBearerContextAcc((UeActDefEpsBearCtxtAcc_t*)msg);
-         break;
-      }
       case UE_PDN_DISCONNECT_REQ:
       {
          FW_LOG_DEBUG(fwCb, "UE_PDN_DISCONNECT_REQ");
@@ -3198,45 +3191,6 @@ PRIVATE Void handleMultiEnbConfigReq(multiEnbConfigReq_t* data)
    }
    fwSendToNbApp(msgReq);
    RETVOID;
-}
-
-/*
- *
- *   Fun:   handleActvDfltEpsBearerContextAcc
- *
- *   Desc:  This function is used to handle Activate
- *          default EPS bearer context accept
- *
- *   Ret:   None
- *
- *   Notes: None
- *
- *   File:  fw_api_int.c
- *
- */
-
-PRIVATE S16 handleActvDfltEpsBearerContextAcc(UeActDefEpsBearCtxtAcc_t *data) {
-  FwCb *fwCb = NULLP;
-  UetMessage *uetMsg = NULLP;
-  UeEsmActDefBearCtxtAcc *actvDefBerAcc = NULLP;
-
-  FW_GET_CB(fwCb);
-  FW_LOG_ENTERFN(fwCb);
-
-  FW_ALLOC_MEM(fwCb, &uetMsg, sizeof(UetMessage));
-
-  uetMsg->msgType = UE_EPS_DEFAULT_BER_ACC;
-  actvDefBerAcc = &uetMsg->msg.ueActDefBerAcc;
-
-  if (actvDefBerAcc) {
-    actvDefBerAcc->ueId = data->ue_Id;
-    actvDefBerAcc->bearerId = data->bearerId;
-
-    fwSendToUeApp(uetMsg);
-  } else {
-    FW_LOG_ERROR(fwCb, "Memory allocation failed for ActDefBearCtxtAcc\n");
-  }
-  FW_LOG_EXITFN(fwCb, ROK);
 }
 
 /*

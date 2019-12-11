@@ -116,7 +116,6 @@ typedef enum {
    PATH_SW_REQ_ACK,
    ENB_CONFIGURATION_TRANSFER,
    MME_CONFIGURATION_TRANSFER = 81,
-  UE_ACTV_DEFAULT_EPS_BEARER_CNTXT_ACCEPT,
   UE_PDN_DISCONNECT_REQ,
   UE_PDN_DISCONNECT_TIMEOUT_IND,
   UE_PDN_DISCONNECT_REJ
@@ -1238,12 +1237,6 @@ typedef struct ueActDedBearCtxtAcc
    U8                   ue_Id;
    U8                   bearerId;  
 }UeActDedBearCtxtAcc_t;
-
-typedef struct ueActDefEpsBearCtxtAcc
-{
-   U8                   ue_Id;
-   U8                   bearerId;
-}UeActDefEpsBearCtxtAcc_t;
 
 typedef struct ueActDedBearCtxtRej
 {
