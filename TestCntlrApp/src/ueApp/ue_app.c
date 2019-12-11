@@ -9115,7 +9115,7 @@ PRIVATE S16 ueProcUeEsmInformationRsp(UetMessage *p_ueMsg, Pst *pst)
  *
  *       Fun: ueAppUtlBldStandAlonePdnDisconnectReq
  *
- *       Desc:
+ *       Desc: Builds standalone PDN disconnect request
  *
  *       Ret:  ROK - ok; RFAILED - failed
  *
@@ -9176,7 +9176,7 @@ PRIVATE S16 ueAppUtlBldStandAlonePdnDisconnectReq
  *
  *       Fun: ueProcUePdnDisconnectReq
  *
- *       Desc:
+ *       Desc: Processes PDN disconnect request
  *
  *       Ret:  ROK - ok; RFAILED - failed
  *

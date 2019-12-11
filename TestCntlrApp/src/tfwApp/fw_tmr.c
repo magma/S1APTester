@@ -480,7 +480,7 @@ PUBLIC Void fwHndlPdnTmrExp
 /*
  *        Fun:  fwHndlPdnDisconnTmrExp
  *
- *        Desc:  Handles on timer expiry
+ *        Desc:  Handles timer expiry
  *
  *        Ret:   ROK
  *
