@@ -204,7 +204,8 @@ typedef enum _ueMsgTypes
    UE_ESM_INFORMATION_REQ_TYPE,
    UE_ESM_INFORMATION_RSP_TYPE,
    UE_EPS_DEACTIVATE_BER_REQ,
-   UE_EPS_DEACTIVATE_BER_ACC
+   UE_EPS_DEACTIVATE_BER_ACC,
+  UE_PDN_DISCONNECT_REQ_TYPE,
 }UeMsgTypes;
 
 typedef struct _ueEmmEpsAtchType
@@ -854,6 +855,12 @@ typedef struct _ueUetEsmInformationRsp
    UeEmmNasPdnApn  nasPdnApn;
 }UeUetEsmInformationRsp;
 
+/* PDN Disconnect Request message */
+typedef struct _ueUetPdnDisconnectReq {
+  U8 ueId;
+  U8 bearerId;
+} UeUetPdnDisconnectReq;
+
 typedef struct _uetMessage
 {
    UeMsgTypes    msgType;
@@ -904,6 +911,7 @@ typedef struct _uetMessage
      UeUetEsmInformationRsp  ueEsmInformationRsp;
      UeUetDeActvBearCtxtReq ueDeActvBerReq;
      UeUetDeActvBearCtxtAcc ueDeActvBerAcc;
+     UeUetPdnDisconnectReq  ueUetPdnDisconnectReq;
    }msg;
 }UetMessage;
 /* Ue Interface general Structure declerations */

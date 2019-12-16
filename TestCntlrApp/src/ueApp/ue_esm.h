@@ -203,6 +203,11 @@ common Max Pdu for both EMM and ESM */
          _msgIdx = CM_ESM_EVNT_PDN_CONN_REJ; \
          break; \
       } \
+      case CM_ESM_MSG_PDN_DISCONN_REQ: \
+      { \
+         _msgIdx = CM_ESM_EVNT_PDN_DISCONN_REQ; \
+         break; \
+      } \
       case  CM_ESM_MSG_BEAR_RES_ALLOC_REQ:\
       {\
          _msgIdx = CM_ESM_EVNT_BEAR_RES_ALLOC_REQ;\

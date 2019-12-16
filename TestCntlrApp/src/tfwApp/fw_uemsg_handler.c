@@ -1598,31 +1598,55 @@ PUBLIC S16 sendUeNwInitDetachReqIndToTstCntlr
    FW_FREE_MEM(fwCb, tfwNwInitDetReq, sizeof(ueNwInitdetachReq_t));
    FW_LOG_EXITFN(fwCb, ret);
 }
-PRIVATE S16 handleAndSendDeActvBerReqInd 
+PRIVATE S16 handleAndSendDeActvBerReqInd
 (
- Pst *pst, 
+ Pst *pst,
  UetMessage *msgreq
 )
 {
    S16 ret = ROK;
    FwCb *fwCb = NULLP;
 
-   UeUetDeActvBearCtxtReq *params  = NULLP; 
+   UeUetDeActvBearCtxtReq *params  = NULLP;
    UeDeActvBearCtxtReq_t *ueDeActvBerReq = NULLP;
    U8 idx;
+   U8 flag = 0;
+   UeIdCb *ueIdCb = NULLP;
+
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
 
+   CmLList  *tmpNode = NULLP;
+   CM_LLIST_FIRST_NODE(&fwCb->ueIdList, tmpNode);
 
-  params = &msgreq->msg.ueDeActvBerReq;
- 
-   FW_ALLOC_MEM(fwCb, &ueDeActvBerReq , sizeof(UeDeActvBearCtxtReq_t));
+   params = &msgreq->msg.ueDeActvBerReq;
+
+   while (tmpNode != NULLP)
+   {
+       ueIdCb = (UeIdCb*)tmpNode->node;
+       if (ueIdCb->ue_id == params->ueId)
+       {
+           printf("ue id %d found\n", params->ueId);
+           flag = 1;
+           ueIdCb->link.node = (PTR)ueIdCb;
+       }
+       tmpNode = tmpNode->next;
+   }
+
+   if (flag == 1)
+   {
+       FW_LOG_DEBUG(fwCb, "\nStoping timer T3492\n");
+       fwStopTmr(fwCb, ueIdCb);
+   }
+
+
+  FW_ALLOC_MEM(fwCb, &ueDeActvBerReq , sizeof(UeDeActvBearCtxtReq_t));
 
   cmMemset((U8 *)ueDeActvBerReq, 0, sizeof(UeDeActvBearCtxtReq_t));
   ueDeActvBerReq->ue_Id           = params->ueId;
-  ueDeActvBerReq->bearerId        = params->bearerId; 
-  ueDeActvBerReq->esmCause        = params->esmCause; 
-   (fwCb->testConrollerCallBack)(UE_DEACTIVATE_BER_REQ,ueDeActvBerReq, 
+  ueDeActvBerReq->bearerId        = params->bearerId;
+  ueDeActvBerReq->esmCause        = params->esmCause;
+   (fwCb->testConrollerCallBack)(UE_DEACTIVATE_BER_REQ,ueDeActvBerReq,
          sizeof(UeDeActvBearCtxtReq_t));
 
    FW_FREE_MEM(fwCb,ueDeActvBerReq, sizeof(UeDeActvBearCtxtReq_t));
@@ -1991,11 +2015,11 @@ PRIVATE S16 handleEsmInformationReq
  *        Desc:  Handles the Send Esm Information Req to TC stub
  *
  *        Ret:   ROK
- * 
+ *
  *        Notes: None
- * 
+ *
  *        File: fw_uemsg_handler.c
- * 
+ *
 */
 PUBLIC S16 sendUeEsmInformationReqToTstCntlr
 (
@@ -2019,3 +2043,36 @@ PUBLIC S16 sendUeEsmInformationReqToTstCntlr
    FW_LOG_EXITFN(fwCb, ret);
 }
 
+/*
+ *        Fun:  sendUePdnDisconnTmrExpToTstCntlr
+ *
+ *        Desc:  Sends PDN Disconnect timer exp to TC stub
+ *
+ *        Ret:   ROK
+ *
+ *        Notes: None
+ *
+ *        File: fw_uemsg_handler.c
+ *
+ */
+PUBLIC S16 sendUePdnDisconnTmrExpToTstCntlr(FwCb *fwCb, UeIdCb *ueIdCb,
+                                            U16 reason) {
+  S16 ret = ROK;
+
+  uePdnDisconnFail_t *tfwPdnDisconnFail = NULLP;
+  FW_LOG_ENTERFN(fwCb);
+
+  FW_ALLOC_MEM(fwCb, &tfwPdnDisconnFail, sizeof(uePdnDisconnFail_t));
+  if (tfwPdnDisconnFail == NULLP)
+    RETVALUE(RFAILED);
+  cmMemset((U8 *)tfwPdnDisconnFail, 0, sizeof(uePdnDisconnFail_t));
+
+  tfwPdnDisconnFail->ueId = ueIdCb->ue_id;
+
+  FW_LOG_DEBUG(fwCb, "Invoking Test Controller Callback");
+  (fwCb->testConrollerCallBack)(UE_PDN_DISCONNECT_TIMEOUT_IND,
+                                tfwPdnDisconnFail, sizeof(uePdnDisconnFail_t));
+
+  FW_FREE_MEM(fwCb, tfwPdnDisconnFail, sizeof(uePdnDisconnFail_t));
+  FW_LOG_EXITFN(fwCb, ret);
+}

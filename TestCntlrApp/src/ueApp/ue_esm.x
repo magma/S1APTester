@@ -523,6 +523,12 @@ typedef struct cmEsmInfoResp
    CmEsmProtCfgOpt   protCfgOpt;
 } CmEsmInfoResp;
 
+/* PDN Disconnect request */
+typedef struct cmEsmPdnDisConnReq
+{
+  CmEsmLinkedBearId  lnkBearerId;
+} CmEsmPdnDisConnReq;
+
 /* ESM Message */
 /* cm_esm_x_001.main_2: Updated cmEsmMsg structure */
 typedef struct cmEsmMsg
@@ -549,6 +555,7 @@ typedef struct cmEsmMsg
       CmEsmBearResModRej      bearModRej;
       CmEsmInfoReq            infoReq;
       CmEsmInfoResp           esmInfoResp;
+      CmEsmPdnDisConnReq      disconReq;
    }u;
 }CmEsmMsg;
 
