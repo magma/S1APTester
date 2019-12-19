@@ -262,8 +262,8 @@ typedef struct _ueCb
    UeAppInfo   ueCtxt;       /* Addtional UE Information for this UE */
    UeEmmCb     emmCb;        /* EMM Context for this UE */
    UeEcmCb     ecmCb;        /* ECM Context for this UE */
-   UeEsmCb     *esmTList[CM_ESM_MAX_BEARER_ID];/* TRANS List of ESM Cbs */
-   UeEsmCb     *esmBList[CM_ESM_MAX_BEARER_ID];/* BID List of ESM Cbs */
+   UeEsmCb     *esmTList[16];/* TRANS List of ESM Cbs. BID range is 5-15 */
+   UeEsmCb     *esmBList[16];/* BID List of ESM Cbs. BID range is 5-15 */
    U32         transIdCntr;   /* Transaction counter for sending the 
                                  ESM Procedural transactions. */
    U16         cellId; /* cellId */

@@ -274,7 +274,8 @@ CmEsmEdmMsgFormat esmMsgTab[CM_ESM_MAX_MSG_TYPE][CM_ESM_MAX_IE_SEQ] =
    },
    /* CM_ESM_IDX_PDN_DISCONN_REJ */
    {
-      {0, 0, 0, TRUE, 0, NULLP, NULLP, NULLP},
+      {0, EDM_PRES_MANDATORY, EDM_FMTV,
+         TRUE, 8, NULLP, cmEsmEncCause, cmEsmDecCause},
    },
    /* cm_esm_edm_c_001.main_2: Adding entry for bearer resource allocation messages */
    /* CM_ESM_IDX_BEAR_RES_ALLOC_REQ */
@@ -2818,6 +2819,9 @@ U32 len;
             break;
          case CM_ESM_MSG_BEAR_RES_MOD_REQ:
             cause = &msg->u.bearModReq.cause;
+            break;
+         case CM_ESM_MSG_PDN_DISCONN_REJ:
+            cause = &msg->u.disconRej.cause;
             break;
          default:
             EDM_DBG_ERROR((EDM_PRNTBUF, "Invalid msg type (%d)\n",

@@ -206,6 +206,7 @@ typedef enum _ueMsgTypes
    UE_EPS_DEACTIVATE_BER_REQ,
    UE_EPS_DEACTIVATE_BER_ACC,
   UE_PDN_DISCONNECT_REQ_TYPE,
+  UE_PDN_DISCONNECT_REJ_TYPE,
 }UeMsgTypes;
 
 typedef struct _ueEmmEpsAtchType
@@ -861,6 +862,14 @@ typedef struct _ueUetPdnDisconnectReq {
   U8 bearerId;
 } UeUetPdnDisconnectReq;
 
+/* PDN Disconnect Reject*/
+typedef struct _ueUetPdnDisconnectRej
+{
+  U8 ueId;
+  U8 cause;
+}UeUetPdnDisconnectRej;
+
+
 typedef struct _uetMessage
 {
    UeMsgTypes    msgType;
@@ -912,6 +921,7 @@ typedef struct _uetMessage
      UeUetDeActvBearCtxtReq ueDeActvBerReq;
      UeUetDeActvBearCtxtAcc ueDeActvBerAcc;
      UeUetPdnDisconnectReq  ueUetPdnDisconnectReq;
+     UeUetPdnDisconnectRej  ueUetPdnDisconnectRej;
    }msg;
 }UetMessage;
 /* Ue Interface general Structure declerations */
