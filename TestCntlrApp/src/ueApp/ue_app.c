@@ -218,6 +218,10 @@ PRIVATE S16 ueAppUtlBldStandAlonePdnDisconnectReq(
   CmNasEvnt **esmEvnt,
   UeUetPdnDisconnectReq *ueUetPdnDisConReq);
 PRIVATE S16 ueAppEsmHndlOutPDNDisConnectReq(UeEsmCb *esmCb, CmNasEvnt *evnt);
+PRIVATE S16 ueAppEsmHndlIncPdnDisconRej(UeEsmCb *esmCb,CmNasEvnt *evnt,
+  UeCb *ueCb);
+
+
 
 PRIVATE S16 ueAppGetDrb(UeCb *ueCb, U8 *drb)
 {
@@ -816,7 +820,7 @@ PRIVATE S16 ueAppEdmDecode
 {
    UeAppCb *ueAppCb = NULLP;
 
-   UE_GET_CB(ueAppCb); 
+   UE_GET_CB(ueAppCb);
    UE_LOG_ENTERFN(ueAppCb);
 
    UE_LOG_DEBUG(ueAppCb, "Decoding the received EDM event");
@@ -1670,8 +1674,7 @@ PRIVATE S16 ueAppUtlAddEsmCb(UeEsmCb **esmCb, UeCb *ueCb)
       UE_LOG_ERROR(ueAppCb, "Failed to allocate memory\n"); 
       RETVALUE(RFAILED);
    }
-
-   for (i = 1; i < CM_ESM_MAX_BEARER_ID; i++)
+   for (i = 1; i < CM_ESM_MAX_BEARERS; i++)
    {
       if (ueCb->esmTList[i] == NULLP)
       {
@@ -1749,11 +1752,11 @@ PUBLIC S16 ueAppUtlFndEsmCb(UeEsmCb **esmCb, U8 key, UeAppEsmKeyType type,
    if (((key < UE_ESM_TRANS_ID_INDX) || (key > UE_ESM_MAX_TRANS_ID)))
       UE_LOG_EXITFN(ueAppCb, RFAILED);
 
-   if ((type == UE_ESM_TRANS_KEY) && (key < CM_ESM_MAX_BEARER_ID))
+   if ((type == UE_ESM_TRANS_KEY) && (key < CM_ESM_MAX_BEARERS))
    {
       *esmCb = ueCb->esmTList[key];
    }
-   else if ((type == UE_ESM_BID_KEY) && (key < CM_ESM_MAX_BEARER_ID))
+   else if ((type == UE_ESM_BID_KEY) && (key < CM_ESM_MAX_BEARERS))
    {
       *esmCb = ueCb->esmBList[key];
    }
@@ -1833,15 +1836,10 @@ PRIVATE S16 ueAppEsmHdlOutUeEvnt(CmNasEvnt *evnt, UeCb *ueCb)
    esmMsg = evnt->m.esmEvnt;
    if ((esmMsg->msgType != CM_ESM_MSG_PDN_CONN_REQ) && (esmMsg->msgType != CM_ESM_MSG_BEAR_RES_ALLOC_REQ)
    && (esmMsg->msgType != CM_ESM_MSG_ESM_INFO_RSP)
-   && (!CM_ESM_MSG_PDN_DISCONN_REQ))
+   && (esmMsg->msgType != CM_ESM_MSG_PDN_DISCONN_REQ))
    {
        /*esmMsg->bearerId = 6;*/
       ret = ueAppUtlFndEsmCb(&esmCb, esmMsg->bearerId, UE_ESM_BID_KEY, ueCb);
-   }
-   else if (esmMsg->msgType == CM_ESM_MSG_PDN_DISCONN_REQ)
-   {
-      ret = ueAppUtlFndEsmCb(&esmCb, esmMsg->u.disconReq.lnkBearerId,
-                             UE_ESM_BID_KEY, ueCb);
    }
    else
    {
@@ -1900,15 +1898,6 @@ PRIVATE S16 ueAppEsmHdlOutUeEvnt(CmNasEvnt *evnt, UeCb *ueCb)
          }
       case CM_ESM_MSG_PDN_DISCONN_REQ:
          {
-            /* Update the PTI in esmCb*/
-            for (int i = 1; i < CM_ESM_MAX_BEARER_ID; i++)
-            {
-              if (ueCb->esmTList[i] == NULLP)
-              {
-                esmCb->tId = i;
-                break;
-              }
-            }
             ret = ueAppEsmHndlOutPDNDisConnectReq(esmCb, evnt);
             break;
          }
@@ -7043,7 +7032,6 @@ PRIVATE S16 ueAppEsmHdlIncUeEvnt
          if (esmMsg->msgType == CM_ESM_MSG_ACTV_DED_BEAR_REQ) {
             ret = ueAppUtlAddEsmCb(&esmCb, ueCb);
          }else {
- 
          UE_LOG_ERROR(ueAppCb, "esmCb not found");
          RETVALUE(RFAILED);
          }
@@ -7124,6 +7112,12 @@ PRIVATE S16 ueAppEsmHdlIncUeEvnt
          {
             UE_LOG_DEBUG(ueAppCb, "Received CM_ESM_MSG_ESM_INFO_REQ: MSG");
             ret = ueAppEsmHndlIncEsmInfoReq(esmCb, evnt, ueCb);
+            break;
+         }
+      case CM_ESM_MSG_PDN_DISCONN_REJ:
+         {
+            UE_LOG_DEBUG(ueAppCb, "Received CM_ESM_MSG_PDN_DISCONN_REJ: MSG");
+            ret = ueAppEsmHndlIncPdnDisconRej(esmCb, evnt, ueCb);
             break;
          }
       default:
@@ -9298,4 +9292,51 @@ PRIVATE S16 ueAppEsmHndlOutPDNDisConnectReq(UeEsmCb *esmCb, CmNasEvnt *evnt)
    evnt->m.esmEvnt->prTxnId = esmCb->tId;
    UE_LOG_EXITFN(ueAppCb, ROK);
 } /* ueAppEsmHndlOutPDNDisConnectReq */
+
+ /*
+ *
+ *       Fun: ueAppEsmHndlOutPDNDisconRej
+ *
+ *       Desc: Handles PDN Disconnect Rej message
+ *
+ *       Ret:  ROK - ok; RFAILED - failed
+ *
+ *       Notes: none
+ *
+ *       File:  ue_app.c
+ *
+ */
+PRIVATE S16 ueAppEsmHndlIncPdnDisconRej
+(
+ UeEsmCb *esmCb,
+ CmNasEvnt *evnt,
+ UeCb *ueCb
+)
+{
+   S16 ret = ROK;
+   UeAppCb *ueAppCb   = NULLP;
+   UetMessage *tfwMsg = NULLP;
+   UE_GET_CB(ueAppCb);
+   UE_LOG_ENTERFN(ueAppCb);
+
+   TRC2(ueAppEsmHndlIncPdnDisconRej)
+
+   UE_LOG_DEBUG(ueAppCb, "PDN Disconnect Reject");
+
+   /* Update procedure transaction state */
+   esmCb->pState = UE_ESM_ST_PROC_TXN_INACTIVE;
+   /* send pdn disconnection reject indication to user */
+   tfwMsg = (UetMessage*)ueAlloc(sizeof(UetMessage));
+   tfwMsg->msg.ueUetPdnDisconnectRej.ueId = ueCb->ueId;
+   tfwMsg->msg.ueUetPdnDisconnectRej.cause    = \
+     evnt->m.esmEvnt->u.disconRej.cause.val;
+   tfwMsg->msgType = UE_PDN_DISCONNECT_REJ_TYPE;
+   ret = ueSendToTfwApp(tfwMsg, &ueAppCb->fwPst);
+   if (ret != ROK)
+   {
+      UE_LOG_ERROR(ueAppCb, "Sending PDN Disconnect Reject to "\
+            "TFWAPP failed");
+   }
+   RETVALUE(ROK);
+} /* ueAppEsmHndlIncPdnDisconRej */
 
