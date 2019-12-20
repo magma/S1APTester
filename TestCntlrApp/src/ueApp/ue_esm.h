@@ -85,8 +85,9 @@ common Max Pdu for both EMM and ESM */
 #define CM_ESM_MAX_LEN_ACCESS_PTNAME 100
 #define CM_ESM_MAX_LEN_PDN_ADDRESS 13
 #define CM_ESM_MAX_LEN_PROT_CFG_OPT 247
-#define CM_ESM_MAX_BEARER_ID 11
+#define CM_ESM_MAX_BEARERS 11
 #define CM_ESM_BEARER_ID_INDX 5
+#define CM_ESM_MAX_BEARER_ID (CM_ESM_MAX_BEARERS + CM_ESM_BEARER_ID_INDX)
 #define CM_ESM_MAX_PARAMS    10
 
 /* cm_esm_h_001.main_1: TFT Related Macro */
