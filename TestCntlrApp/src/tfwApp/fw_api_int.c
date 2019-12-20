@@ -543,6 +543,37 @@ PUBLIC S16 handlAuthResp(ueAuthResp_t *data)
 }
 
 /*
+ *
+ *   Fun:   handlAuthFailure
+ *
+ *   Desc:  This function is used to handle Auth Failure
+ *          from Test Controller
+ *
+ *   Ret:   None
+ *
+ *   Notes: None
+ *
+ *   File:  fw_api_int.c
+ *
+ */
+PUBLIC S16 handlAuthFailure(ueAuthFailure_t *data)
+{
+   FwCb *fwCb = NULLP;
+   UetMessage *uetMsg = NULLP;
+   FW_GET_CB(fwCb);
+   FW_LOG_ENTERFN(fwCb);
+
+   FW_ALLOC_MEM(fwCb, &uetMsg, sizeof(UetMessage));
+   uetMsg->msgType = UE_AUTH_FAILURE_TYPE;
+
+   uetMsg->msg.ueUetAuthFailure.ueId = data->ue_Id;
+   uetMsg->msg.ueUetAuthFailure.cause = data->cause;
+   cmMemcpy(uetMsg->msg.ueUetAuthFailure.auts, data->auts, TFW_AUTS_LEN);
+
+   fwSendToUeApp(uetMsg);
+   RETVALUE(ROK);
+}
+/*
  * 
  *   Fun:   handlRadCapUpd
  * 
@@ -2335,6 +2366,21 @@ PUBLIC S16 tfwApi
       {
          FW_LOG_DEBUG(fwCb, "UE_PDN_DISCONNECT_REQ");
          handlPdnDisconnectReq((uepdnDisconnectReq_t*)msg);
+         break;
+      }
+      case UE_AUTH_FAILURE:
+      {
+         FW_LOG_DEBUG(fwCb, "UE_AUTH_FAILURE");
+         if (fwCb->nbState == ENB_IS_UP)
+         {
+            handlAuthFailure((ueAuthFailure_t*)msg);
+         }  
+         else
+         {
+            FW_LOG_ERROR(fwCb, "FAILED TO SEND UE_AUTH_RESP: "\
+                  "ENBAPP IS NOT UP");
+            ret = RFAILED;
+         }
          break;
       }
 

@@ -116,9 +116,10 @@ typedef enum {
    PATH_SW_REQ_ACK,
    ENB_CONFIGURATION_TRANSFER,
    MME_CONFIGURATION_TRANSFER = 81,
-  UE_PDN_DISCONNECT_REQ,
-  UE_PDN_DISCONNECT_TIMEOUT_IND,
-  UE_PDN_DISCONNECT_REJ
+   UE_PDN_DISCONNECT_REQ,
+   UE_PDN_DISCONNECT_TIMEOUT_IND,
+   UE_PDN_DISCONNECT_REJ,
+   UE_AUTH_FAILURE = 85
 }tfwCmd;
 
 typedef enum
@@ -1492,10 +1493,17 @@ typedef struct UeAuthRejInd
    U8 ue_Id;
 }ueAuthRejInd_t;
 
+typedef struct UeAuthFailure
+{
+   U8 ue_Id;
+   U8 cause;
+   U8 auts[TFW_AUTS_LEN];
+}ueAuthFailure_t;
+
 typedef struct UeEmmStatus
 {
    U8 ue_Id;
-   U8 cause;   
+   U8 cause;
 }ueEmmStatus_t;
 
 typedef struct UeEsmInformationReq

@@ -100,6 +100,10 @@ extern "C" {
 #define UE_ESM_IP_SEC_SIZE 4
 #define UE_ESM_IPV6_FLOW_LABEL_SIZE  3
 #define UE_ESM_TFT_MAX_PARAM_BUF   10
+
+/* Authentication failure param AUTS length */
+#define TFW_AUTS_LEN         14
+
 #ifdef TFW_STUB /* definitions only required by test controller */
 
 /* Mobile Identity types */

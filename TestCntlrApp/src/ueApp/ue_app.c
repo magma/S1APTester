@@ -797,6 +797,53 @@ PRIVATE S16 ueProcUeAuthResp(UetMessage *tfwMsg, Pst *pst)
 
 /*
  *
+ *       Fun: ueProcUeAuthFailure
+ *
+ *       Desc:
+ *
+ *       Ret:  ROK - ok; RFAILED - failed
+ *
+ *       Notes: none
+ *
+ *       File:  ue_app.c
+ *
+ */
+PRIVATE S16 ueProcUeAuthFailure(UetMessage *tfwMsg, Pst *pst)
+{
+   S16 ret = ROK;
+   U16 ueId;
+
+   UeAppCb *ueAppCb = NULLP;
+   UeCb *ueCb = NULLP;
+   UE_GET_CB(ueAppCb);
+
+   UE_LOG_ENTERFN(ueAppCb);
+   ueId = tfwMsg->msg.ueUetAuthFailure.ueId;
+
+   /* Fetching the UeCb */
+   ret = ueDbmFetchUe(ueId, (PTR*)&ueCb);
+   if (ret != ROK)
+   {
+      UE_LOG_ERROR(ueAppCb, "UeCb List NULL ueId = %d", ueId);
+      RETVALUE(ret);
+   }
+   ueCb->authFlr.cause.cause = tfwMsg->msg.ueUetAuthFailure.cause;
+   UE_LOG_DEBUG(ueAppCb, "Authentication Failed, Failure cause is %d",
+         ueCb->authFlr.cause.cause);
+   ueCb->authFlr.cause.pres = TRUE;
+   ueCb->authFlr.failrPrm.pres = TRUE;
+   ueCb->authFlr.failrPrm.len = UE_AUTS_SIZE;
+   ret = ueAppSndAuthFailure(ueCb);
+   if (ret != ROK)
+   {
+      UE_LOG_ERROR(ueAppCb, "Sending Authentication Failure "\
+            "message to ENB failed");
+   }
+   UE_LOG_EXITFN(ueAppCb, ret);
+   RETVALUE(ret);
+}
+/*
+ *
  *       Fun: ueAppEdmDecode
  *
  *       Desc: This function decodes NAS message received from eNodeB. 
@@ -5479,7 +5526,13 @@ PUBLIC S16 ueUiProcessTfwMsg(UetMessage *p_ueMsg, Pst *pst)
          ret = ueProcUePdnDisconnectReq(p_ueMsg, pst);
          break;
       }
-
+      case UE_AUTH_FAILURE_TYPE:
+      {
+         UE_LOG_DEBUG(ueAppCb, "RECIEVED UE AUTHENTICATION FAILURE "\
+               "MESSAGE FROM TFWAPP");
+         ret = ueProcUeAuthFailure(p_ueMsg, pst);
+         break;
+      }
       default:
       {
          UE_LOG_ERROR(ueAppCb, "Recieved Invalid message of type: %d",
