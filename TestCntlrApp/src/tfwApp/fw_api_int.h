@@ -10,14 +10,14 @@
 /**********************************************************************
 
      Name:     S1SIM TFW API Interface
-  
+
      Type:     C header file
-  
+
      Desc:     This file contains the macros for Test Framework Interface.
 
      File:     fw_api_int.h
 
-     Prg:      
+     Prg:
 
 **********************************************************************/
 
@@ -81,7 +81,7 @@ extern "C" {
 #define MAX_APN_LENGTH                6
 #define MAX_LEN_PDN_ADDRESS          13
 #define MAX_LEN_ACCESS_PTNAME       100
-#define MAX_NUM_OF_ENBS             5
+#define MAX_NUM_OF_ENBS             32
 
 #define TFW_MAX_NUM_BPLMNS            5
 #define TFW_MAX_NUM_CSG_ID          256
@@ -95,7 +95,7 @@ extern "C" {
 #define TFW_MAX_GRPS_PER_MME        256
 #define TFW_MAX_CODES_PER_MME       256
 
-#define UE_ESM_IPV4_SIZE 4 
+#define UE_ESM_IPV4_SIZE 4
 #define UE_ESM_IPV6_SIZE 6
 #define UE_ESM_IP_SEC_SIZE 4
 #define UE_ESM_IPV6_FLOW_LABEL_SIZE  3
