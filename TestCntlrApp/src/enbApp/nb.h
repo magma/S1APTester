@@ -283,7 +283,8 @@ typedef struct _nbUeTunInfo
    CmHashListEnt             ueHashEnt;
    U32       lclTeId;
    U32       remTeId;
-   U32        bearerId;
+   U32       bearerId;
+   U16       remotePort;
    CmTptAddr sgwAddr;
 }NbUeTunInfo;
 

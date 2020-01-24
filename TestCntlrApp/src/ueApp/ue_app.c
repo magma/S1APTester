@@ -175,7 +175,8 @@ PRIVATE Void updateGutiInUeCb(UeCb *ueCb, CmEmmEpsMI *guti);
 PRIVATE S16 compareGutiInUeCb(UeCb *ueCb, CmEmmEpsMI *epsMi);
 PRIVATE Void reverse(U8* str);
 PRIVATE U8* itoa(int num, U8* str, int base);
-PUBLIC Void populateIpAddrStrFromUeCb(U8 *temp_ip, UeCb *ueCb,U8 bearerId,BearType *bearerType);
+PUBLIC Void populateIpAddrStrFromUeCb(U8 *temp_ip, UeCb *ueCb,U8 bearerId,
+        BearType *bearerType, NbuUeIpInfoRsp*);
 PRIVATE S16 ueAppRcvEmmMsg(CmNasEvnt *evnt, U8 emmMsgType, UeCb *ueCb);
 PRIVATE S16 ueAppUtlMovEsmCbTransToBid(UeEsmCb *esmCb, UeCb *ueCb);
 PRIVATE S16 uefillDefEsmInfoToUeCb(UeCb *ueCb, CmNasEvnt*, U8, U8);
@@ -6041,7 +6042,8 @@ PUBLIC Void populateIpAddrStrFromUeCb
  U8 *temp_ip,
  UeCb *ueCb,
  U8  bearerId,
- BearType *bearerType
+ BearType *bearerType,
+ NbuUeIpInfoRsp  *ueIpInfoRsp
 )
 {
    CmEsmPdnAdd *pdn_addr = NULLP;
@@ -6049,20 +6051,32 @@ PUBLIC Void populateIpAddrStrFromUeCb
    U8 ip_addr[20] = {0};
    U32 counter = 0;
    U8 idx = 0;
+   U8 pf_idx = 0;
+   U8 tft_idx = 0;
    /*pdn_addr = &evnt->m.emmEvnt->u.atchAcc.esmEvnt->m.esmEvnt->u.actReq.\
     * pAddr; */
      for(idx = 1; idx < UE_APP_MAX_DRBS; idx++)
-   {
+     {
       if (ueCb->drbs[idx] == UE_APP_DRB_INUSE)
       {
         if(ueCb->ueRabCb[idx-1].epsBearerId == bearerId)
         {
            pdn_addr = &ueCb->ueRabCb[idx-1].pAddr;
-           *bearerType = ueCb->ueRabCb[idx-1].bearerType; 
+           *bearerType = ueCb->ueRabCb[idx-1].bearerType;
+           for(pf_idx = 0; pf_idx < ueCb->ueRabCb[idx-1].tft.noOfPfs; pf_idx++)
+           {
+             if (ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].remotePort.pres)
+             {
+	       ueIpInfoRsp->tft[tft_idx].remotePort =
+                   ntohs(ueCb->ueRabCb[idx-1].tft.pfList[0].remotePort.port);
+               tft_idx++;
+             }
+           }
            break;
         }
       }
    }
+   ueIpInfoRsp->num_pf = tft_idx;
    if((pdn_addr != NULLP) && pdn_addr->pres)
    {
       for(counter = 0; counter < (pdn_addr->len - 1) ; counter++)
@@ -6970,7 +6984,7 @@ PRIVATE S16 ueAppEsmHndlIncEsmInfoReq
    esmCb->pState = UE_ESM_ST_PROC_TXN_INACTIVE;
    /* send ESM Information Indication to user */
    tfwMsg = (UetMessage*)ueAlloc(sizeof(UetMessage));
-   tfwMsg->msg.ueEsmInformationReq.ueId                        = ueCb->ueId;
+   tfwMsg->msg.ueEsmInformationReq.ueId = ueCb->ueId;
    tfwMsg->msgType = UE_ESM_INFORMATION_REQ_TYPE;
    ret = ueSendToTfwApp(tfwMsg, &ueAppCb->fwPst); 
    if (ret != ROK)

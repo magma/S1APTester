@@ -102,7 +102,8 @@ EXTERN S16 ueUiProcIpInfoReqMsg(UeCb * p_ueCb, U8 bearerId);
 EXTERN S16 ueAppBldAndSndIpInfoRspToNb(UeCb *ueCb,U8 bearerId, Pst *pst);
 EXTERN S16 UeLiNbuUeIpInfoReq(Pst *pst,NbuUeIpInfoReq  *p_ueMsg);
 EXTERN S16 ueSendUeIpInfoRsp(U8 ueId,U8 bearedId, S8 * ipAddr);
-EXTERN Void populateIpAddrStrFromUeCb(U8 *temp_ip, UeCb *ueCb,U8 bearerId,BearType *bearerType);
+EXTERN Void populateIpAddrStrFromUeCb(U8 *temp_ip, UeCb *ueCb,U8 bearerId,
+        BearType *bearerType, NbuUeIpInfoRsp*);
 
 PUBLIC S16 ueAppBldAndSndIpInfoRspToNb(UeCb *ueCb,U8 bearerId, Pst *pst);
 EXTERN S16 UeLiNbuPagingMsg(Pst *pst, UePagingMsg  *p_ueMsg);
@@ -117,11 +118,18 @@ PUBLIC S16 ueAppBldAndSndIpInfoRspToNb(UeCb *ueCb, U8 bearerId, Pst *pst)
    U8 ipAddrStr[20] = {0};
    BearType bearerType = 0;
    NbuUeIpInfoRsp  *ueIpInfoRsp = NULLP;
-   populateIpAddrStrFromUeCb(ipAddrStr,ueCb,bearerId,&bearerType);
+   U16 destPort = 0;
+   //populateIpAddrStrFromUeCb(ipAddrStr,ueCb,bearerId,&bearerType, &destPort);
    ueIpInfoRsp = (NbuUeIpInfoRsp *)ueAlloc(sizeof(NbuUeIpInfoRsp));  
+   populateIpAddrStrFromUeCb(ipAddrStr,ueCb,bearerId,&bearerType, ueIpInfoRsp);
    ueIpInfoRsp->ueId = ueCb->ueId;
    ueIpInfoRsp->bearerId = bearerId;
    ueIpInfoRsp->berType =  bearerType;
+/*   if (destPort)
+   {
+     ueIpInfoRsp->tft.remotePort = destPort;
+   }
+*/
    strcpy(ueIpInfoRsp->IpAddr, (S8*)ipAddrStr);
 
    ret = UeLiNbuSendUeIpInfo(pst,ueIpInfoRsp);

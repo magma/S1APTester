@@ -175,12 +175,20 @@ typedef enum  _bearerType
  DEDICATED_BER
 }BearerType;
 
+typedef struct _ulTft
+{
+   U16         remotePort;   /* Remote Port Idemtifier */
+}UlTft;
+
 typedef struct _nbuUeIpInfoRsp
 {
    U8 ueId;
    U8 bearerId;
    S8 IpAddr[20];
    BearerType berType;
+   U8 num_pf;
+#define MAX_TFT_PF 4
+   UlTft tft[MAX_TFT_PF];
 }NbuUeIpInfoRsp;
 
 typedef struct _nbuTunDelReq

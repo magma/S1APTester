@@ -43,7 +43,7 @@ PUBLIC S16 NbEnbDropInitCtxtSetup(NbDropInitCtxtSetup *dropInitCtxtSetup);
 PUBLIC S16 nbDelUeCb(U8 ueId);
 PUBLIC S16 nbUeTnlCreatCfm(U8, U32);
 PUBLIC S16 nbPrcDamUeDelCfm(U8);
-PUBLIC S16 nbCreateUeTunnReq(U8, U32,U8);
+PUBLIC S16 nbCreateUeTunnReq(U8, U32,U8, NbuUeIpInfoRsp*);
 PUBLIC S16 NbEnbUeRelReqHdl(NbUeCntxtRelReq*);
 PUBLIC S16 NbEnbResetReqHdl(NbResetRequest *resetReq);
 /*PUBLIC S16 NbEnbErabRelIndHdl(NbErabRelInd *erabRelInd);*/
@@ -421,9 +421,10 @@ PUBLIC S16 nbPrcDamUeDelCfm(U8 ueId)
    RETVALUE(ret);
 }
 
-PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U32 ueIpAddr,U8 bearerId)
+PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U32 ueIpAddr,U8 bearerId, NbuUeIpInfoRsp *rsp)
 {
    U8 idx       = 0;
+   U8 num_tft   = 0;
    NbUeCb *ueCb = NULLP;
    U32 berId = bearerId;
 
@@ -470,6 +471,11 @@ PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U32 ueIpAddr,U8 bearerId)
                tnlInfo->pdnAddr          = ueIpAddr;
                nbCpyCmTptAddr(&tnlInfo->dstAddr, &(tunInfo->sgwAddr));
                nbCpyCmTptAddr(&tnlInfo->srcAddr, &(nbCb.datAppAddr));
+               tnlInfo->num_pf = rsp->num_pf;
+               for(num_tft=0; num_tft<tnlInfo->num_pf; num_tft++)
+               {
+	         tnlInfo->tft[num_tft].remotePort = rsp->tft[num_tft].remotePort;
+               }
                RETVALUE(nbIfmDamTnlCreatReq(tnlInfo));
             }
       }

@@ -36,7 +36,7 @@ extern "C" {
 #define EVDAMMODIFYEGTPTUNEL        3
 #define EVTDAMDELEGTPTUNEL          4
 #define EUTXXX 1
-
+#define MAX_TFT_PF 4
 /** @def WR_DAM_CFG_OK 
  * This Macro defines the Configuration Status Success.
  */
@@ -136,6 +136,8 @@ typedef struct NbDamTunInfo
    NbEgtpTeid                remTeid;
    NbEgtpTeid                lclTeid;
    U32                       pdnAddr;
+   U8                        num_pf;
+   UlTft                     tft[MAX_TFT_PF];
 } NbDamTnlInfo;
 
 /**

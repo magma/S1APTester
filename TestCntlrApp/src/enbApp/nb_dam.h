@@ -205,6 +205,8 @@ typedef struct nbIpInfo
    CmHashListEnt             ueHashEnt;
    U8    drbId;
    U32   pdnAddr;
+   U8    num_pf;
+   UlTft tft[MAX_TFT_PF];
 }NbIpInfo;
 
 typedef struct nbDamUeCb

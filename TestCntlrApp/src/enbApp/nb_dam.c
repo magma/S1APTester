@@ -40,7 +40,7 @@ PRIVATE S16 nbDamLSapCfg(LnbMngmt *cfg, CmStatus *status);
 PRIVATE S16 nbDamLSapCntrl(LnbCntrl *sapCntrl,CmStatus *status,Elmnt elmnt);
 PRIVATE S16 nbDamBndLSap (NbLiSapCb *sapCb,CmStatus  *status,Elmnt elmnt);
 PRIVATE S16 nbDamUbndLSap (NbLiSapCb  *sapCb);
-PRIVATE  NbDamUeCb *nbDamGetueCbkeyUeIp(U32 ueIpAddr,U8 *drbId);
+PRIVATE  NbDamUeCb *nbDamGetueCbkeyUeIp(U32 ueIpAddr,U8 *drbId, U16 remotePort);
 PUBLIC  NbDamUeCb *nbDamGetUe(U8 ueId);
 PUBLIC S16 nbDamEgtpDatInd(Pst*, EgtUEvnt*);
 
@@ -481,6 +481,7 @@ NbDamTnlInfo                 *tnlInfo
    NbDamTnlType    tnlType = tnlInfo->tnlType;
    NbDamDrbCb      *drbCb  = NULLP;
    NbIpInfo        *ipInfo = NULLP;
+   U8 idx = 0;
 
    if (rbId >= NB_DAM_MAX_DRBS)
    {
@@ -549,6 +550,12 @@ NbDamTnlInfo                 *tnlInfo
    NB_ALLOC(&(ipInfo), sizeof(NbIpInfo));
    ipInfo->pdnAddr = tnlInfo->pdnAddr;
    ipInfo->drbId = rbId;
+
+   ipInfo->num_pf = tnlInfo->num_pf;
+   for(idx=0; idx<tnlInfo->num_pf; idx++ )
+   {
+     ipInfo->tft[idx].remotePort = tnlInfo->tft[idx].remotePort;
+   }
    if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ipInfo,
                      (U8 *)&ipInfo->pdnAddr, sizeof(U32)))
    {   
@@ -711,6 +718,7 @@ PUBLIC S16 nbDamPcapDatInd
 )
 {
    U32                       ueIpAddr;
+   U16                       remotePort = 0;
    MsgLen                    len = 0;
    NbDamTnlCb                *tnl;
    NbDamUeCb                 *ueCb = NULLP;
@@ -744,8 +752,21 @@ PUBLIC S16 nbDamPcapDatInd
    ueIpAddr = (ipPkt[0] << 24) + (ipPkt[1] << 16) +
       (ipPkt[2] << 8 ) + ipPkt[3];
 
+   ipIdx = 22; /* IP (20) | UDP src port (2) */
+   for(idx = 0; idx < 2; idx++)
+   {
+      if((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK))
+      {    
+         NB_LOG_ERROR(&nbCb,"Failed to get message type");
+         SPutMsg(mBuf);
+         RETVALUE(RFAILED);
+      }
+      ipIdx++;
+   }
+   remotePort = (ipPkt[0] << 8) + ipPkt[1];
+
    /* get the ueCb */
-   ueCb = nbDamGetueCbkeyUeIp(ueIpAddr, &drbId);
+   ueCb = nbDamGetueCbkeyUeIp(ueIpAddr, &drbId, remotePort);
    if(ueCb == NULLP)
    {
       NB_FREEMBUF(mBuf);
@@ -1550,24 +1571,47 @@ PUBLIC S16 nbDamDeInit
    RETVALUE(nbDamDeRegTmr());
 }
 
-PRIVATE  NbDamUeCb * nbDamGetueCbkeyUeIp(U32 ueIpAddr,U8 *drbId)
+PRIVATE  NbDamUeCb * nbDamGetueCbkeyUeIp(U32 ueIpAddr,U8 *drbId, U16 remotePort)
 {
    NbDamUeCb   *ueCb = NULLP;
    NbDamUeCb   *prevUeCb = NULLP;
    NbIpInfo    *ipInfo = NULLP;
-
+   NbIpInfo    *prevIpInfo = NULLP;
+   U8           ueIpMatchFound = 0;
+   U8           idx = 0;
    for(;((cmHashListGetNext(&(nbDamCb.ueCbs), (PTR)prevUeCb, (PTR*)&ueCb)) == ROK);)
    {
-      if ( ROK == (cmHashListFind(&(ueCb->ipInfo), (U8 *)&(ueIpAddr),
-                  sizeof(U32), 0, (PTR *)&ipInfo)))
-      {    
-         *drbId = ipInfo->drbId; 
-         break;
+      for (;((cmHashListGetNext(&(ueCb->ipInfo), (PTR)prevIpInfo, (PTR*)&ipInfo)) == ROK);)
+      {
+         if(ipInfo->pdnAddr == ueIpAddr)
+         {
+            ueIpMatchFound = TRUE;
+            for (idx=0; idx<ipInfo->num_pf; idx++)
+            {
+            printf("**** TFT remote port %d remote port%d\n",ipInfo->tft[idx].remotePort, remotePort);
+              if(ipInfo->tft[idx].remotePort == remotePort)
+              {
+                *drbId = ipInfo->drbId;
+                 RETVALUE(ueCb);
+              }
+            }
+            //printf("Going to else\n");
+             prevIpInfo = ipInfo;
+             if ( ROK == (cmHashListFind(&(ueCb->ipInfo), (U8 *)&(ueIpAddr),
+                sizeof(U32), 0, (PTR *)&ipInfo)))
+             {
+                *drbId = ipInfo->drbId;
+	        ipInfo = prevIpInfo;
+             }
+          }
+          prevIpInfo = ipInfo;
+          ipInfo = NULLP;
       }
+      if (ueIpMatchFound)
+         break;
       prevUeCb = ueCb;
       ueCb = NULLP;
-   } 
-
+   }
    RETVALUE(ueCb);
 }
 
