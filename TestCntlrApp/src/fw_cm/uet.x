@@ -848,11 +848,13 @@ typedef struct _ueUetEmmStatus
 typedef struct _ueUetEsmInformationReq
 {
    U8 ueId;
+   U8 tId;
 }UeUetEsmInformationReq;
 
 typedef struct _ueUetEsmInformationRsp
 {
    U8 ueId;
+   U8 tId;
    UeEmmNasPdnApn  nasPdnApn;
 }UeUetEsmInformationRsp;
 

@@ -1501,11 +1501,13 @@ typedef struct UeEmmStatus
 typedef struct UeEsmInformationReq
 {
    U8 ue_Id;
+   U8 tId;
 }ueEsmInformationReq_t;
 
 typedef struct UeEsmInformationRsp
 {
    U8 ue_Id;
+   U8 tId;
    pdn_APN  pdnAPN_pr;
 }ueEsmInformationRsp_t;
 typedef struct multiEnbCfgParam

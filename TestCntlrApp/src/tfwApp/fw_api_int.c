@@ -3131,6 +3131,7 @@ PRIVATE Void handleEsmInformationRsp(ueEsmInformationRsp_t* data)
    uetMsg->msgType = UE_ESM_INFORMATION_RSP_TYPE;
    ueEsmInfoRsp = &uetMsg->msg.ueEsmInformationRsp;
    ueEsmInfoRsp->ueId    = data->ue_Id;
+   ueEsmInfoRsp->tId     = data->tId;
    if(data->pdnAPN_pr.pres == TRUE)
    {
       ueEsmInfoRsp->nasPdnApn.len = data->pdnAPN_pr.len;
