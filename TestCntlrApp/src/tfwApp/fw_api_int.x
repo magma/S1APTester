@@ -115,7 +115,10 @@ typedef enum {
    X2_HO_TRIGGER_REQ,
    PATH_SW_REQ_ACK,
    ENB_CONFIGURATION_TRANSFER,
-   MME_CONFIGURATION_TRANSFER = 81
+   MME_CONFIGURATION_TRANSFER = 81,
+  UE_PDN_DISCONNECT_REQ,
+  UE_PDN_DISCONNECT_TIMEOUT_IND,
+  UE_PDN_DISCONNECT_REJ
 }tfwCmd;
 
 typedef enum
@@ -929,6 +932,11 @@ typedef struct uepdnConReq
    pdn_APN  pdnAPN_pr;
 }uepdnConReq_t;
 
+typedef struct uepdnDisconnectReq {
+  U8 ue_Id;
+  U8 epsBearerId;
+} uepdnDisconnectReq_t;
+
 typedef struct _errCause
 {
    U8 pres;
@@ -1527,6 +1535,10 @@ typedef struct _fwNbMmeConfigTrnsf
    }u;
 }FwNbMmeConfigTrnsf_t;
 
+typedef struct uePdnDisconnFail
+{
+   U8 ueId;
+}uePdnDisconnFail_t;
 
 typedef FwErabRelCmd_t FwErabRelRsp_t;
 
