@@ -189,6 +189,12 @@ typedef struct _nbuTunDelReq
    U32 erabId;
 }NbuTunDelReq;
 
+typedef struct _nbuNotifyPlmnInfo
+{
+   U8 ueId;
+   U8 plmnId[3];
+}NbuNotifyPlmnInfo;
+
 typedef S16 (*NbuInitialUeMsgHdl)(Pst*, NbuInitialUeMsg*);
 typedef S16 (*NbuUlNasMsgHdl)(Pst*, NbuUlNasMsg*);
 typedef S16 (*NbuDlNasMsgHdl)(Pst*, NbuDlNasMsg*);
@@ -201,6 +207,7 @@ typedef S16 (*NbuErabsRelInfoMsgHdl) (Pst *, NbuErabsRelInfo*);
 typedef S16 (*NbuUeIpInfoReqHdl) (Pst *, NbuUeIpInfoReq*);
 typedef S16 (*NbuUeIpInfoRspHdl) (Pst *, NbuUeIpInfoRsp*);
 typedef S16 (*NbuErabRelIndHdl)(Pst *, NbuErabRelIndList*);/*NbErabRelInd*);*/
+typedef S16 (*NbuNotifyPlmnInfoHdl) (Pst *, NbuNotifyPlmnInfo*);
 EXTERN S16 cmPkNbuInitialUeMsg(Pst *pst,NbuInitialUeMsg *req);
 EXTERN S16 cmPkNbuErabRelInd(Pst *pst, NbuErabRelIndList *);
 EXTERN S16 cmPkNbuUlNasMsg(Pst *pst,NbuUlNasMsg *msg);
@@ -212,6 +219,7 @@ EXTERN S16 cmPkNbuErabsInfo (Pst *pst,NbuErabsInfo *msg);
 EXTERN S16 cmPkNbuUeIpInfoRsp (Pst *pst,NbuUeIpInfoRsp *msg);
 EXTERN S16 cmPkNbuUlRrcMsg ARGS((Pst *pst, NbuUlRrcMsg *msg));
 EXTERN S16 cmPkNbuErabsRelInfo (Pst *pst,NbuErabsRelInfo *msg);
+EXTERN S16 cmPkNbuNotifyPlmnInfo ARGS((Pst *pst,NbuNotifyPlmnInfo *req));
 
 EXTERN S16 cmUnPkNbuInitialUeMsg(NbuInitialUeMsgHdl, Pst*, Buffer*);
 EXTERN S16 cmUnPkNbuErabRelInd(NbuErabRelIndHdl, Pst*, Buffer*);
@@ -231,6 +239,8 @@ EXTERN S16 NbUiNbuHdlUeRadioCapMsg(Pst *pst, NbuUlRrcMsg *msg);
 EXTERN S16 cmUnPkNbuUeIpInfoReq (NbuUeIpInfoReqHdl func,Pst *pst,Buffer *mBuf);
 EXTERN S16 cmUnPkNbuUeIpInfoRsp (NbuUeIpInfoRspHdl func,Pst *pst,Buffer *mBuf);
 EXTERN S16 cmUnPkNbuErabsRelInfo(NbuErabsRelInfoMsgHdl func, Pst *pst, Buffer *mBuf);
+EXTERN S16 cmUnPkNbuNotifyPlmnInfo (NbuNotifyPlmnInfoHdl func,Pst *pst,Buffer *mBuf);
+
 /********************************************************************30**
 
          End of file:     

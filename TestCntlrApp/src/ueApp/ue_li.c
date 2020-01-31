@@ -111,6 +111,8 @@ EXTERN S16 UeLiNbuUlRrcMsgDatRsp(Pst *pst, NbuUlRrcMsg *msg);
 EXTERN S16 ueSendUeRadCapInd(UeCb *ueCb);
 EXTERN S16 ueSendErabRelInd(NbuErabRelIndList *pErabRel, Pst *pst);
 PUBLIC S16 UeLiNbuErabRelInd(Pst *pst,NbuErabRelIndList *msg);
+EXTERN S16 UeLiNbuNotifyPlmnInfo(Pst *pst,NbuNotifyPlmnInfo  *p_ueMsg);
+
 PUBLIC S16 ueAppBldAndSndIpInfoRspToNb(UeCb *ueCb, U8 bearerId, Pst *pst)
 {
    S16 ret = ROK;
@@ -445,6 +447,48 @@ PUBLIC S16 ueSendUlRrcMsgToNb(NbuUlRrcMsg *pUlRrcMsg, Pst *pst)
    UE_LOG_DEBUG(ueAppCb, "Sending UE UL RRC message to EnodeB APP");
    ret = UeLiNbuUlRrcMsgDatRsp(pst, pUlRrcMsg); 
 
+   RETVALUE(ret);
+}
+
+PUBLIC S16 UeLiNbuNotifyPlmnInfo
+(
+ Pst             *pst,          /* Post structure */
+ NbuNotifyPlmnInfo  *p_ueMsg        /* request message */
+)
+{
+   S16   ret = RFAILED;
+   U8    ueId;
+   UeAppCb *ueAppCb=NULLP;
+   UeCb *ueCb = NULLP;
+   U8 plmn_idx;
+
+   UE_GET_CB(ueAppCb);
+
+   UE_LOG_ENTERFN(ueAppCb);
+
+   /* sanity check */
+   if (!pst || !p_ueMsg)
+   {
+      RETVALUE(ret);
+   } /* end of if pst or p_ueMsg are not valid pointers */
+
+   ueId     = p_ueMsg->ueId;
+   /* Fetching the UeCb */
+   ret = ueDbmFetchUe(ueId, (PTR *)&ueCb);
+   if (ret != ROK)
+   {
+      UE_LOG_ERROR(ueAppCb,"[UEAPP]: UeCb List NULL ueId = %d", ueId);
+      RETVALUE(ret);
+   }
+   /* Storing Serving PLMN into the UeCB */
+   cmMemcpy((U8 *)&ueCb->srvPlmn, (U8 *)&p_ueMsg->plmnId,
+         sizeof(p_ueMsg->plmnId));
+   UE_LOG_DEBUG(ueAppCb,"[UEAPP]: Stored Serving Plmn of (ueId = %d)\n", ueId);
+   for (plmn_idx = 0; plmn_idx < sizeof(ueCb->srvPlmn); plmn_idx++)
+   {
+      UE_LOG_DEBUG(ueAppCb,"[UEAPP]: srvPlmn[%d] = %d",
+        plmn_idx, ueCb->srvPlmn[plmn_idx]);
+   }
    RETVALUE(ret);
 }
 

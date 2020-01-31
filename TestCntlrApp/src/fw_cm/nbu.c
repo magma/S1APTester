@@ -8,7 +8,7 @@
 
 /********************************************************************20**
 
-     Name:     
+     Name:
 
      Type:     C source file
 
@@ -16,8 +16,8 @@
 
      File:     nbu.c
 
-     Sid:      
-     Prg:      
+     Sid:
+     Prg:
 
 *********************************************************************21*/
 
@@ -51,7 +51,7 @@
 #include "nbu.x"
 
 
-#ifdef LCNBU 
+#ifdef LCNBU
 PRIVATE S16 cmPkInitialUeMsg ARGS((NbuInitialUeMsg *param,
  Buffer *mBuf
  ));
@@ -84,7 +84,7 @@ PRIVATE S16 cmUnPkDlNasMsg ARGS((NbuDlNasMsg *msg,
 #if 0
 /*
  *
- *    Fun:    cmPkNbuUeInfo 
+ *    Fun:    cmPkNbuUeInfo
  *
  *    Desc:    pack the ue UeInfo msg contain ueid,ue ip addr
  *
@@ -92,7 +92,7 @@ PRIVATE S16 cmUnPkDlNasMsg ARGS((NbuDlNasMsg *msg,
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 #ifdef ANSI
@@ -127,7 +127,7 @@ UeIpAddr *req;
    switch(pst->selector)
    {
       case NBU_SEL_LC:
-#ifdef LCNBU 
+#ifdef LCNBU
          ret1 = cmPkUeInfo(req, EVTNBUUEATTACHREQ ,mBuf);
 #if(ERRCLASS & ERRCLS_ADD_RES)
          if(ret1 != ROK)
@@ -148,22 +148,22 @@ UeIpAddr *req;
 #endif
      default:
          break;
-   } 
+   }
    pst->event = (Event)EVTNBUUEINFO;
    RETVALUE(SPstTsk(pst,mBuf));
-} 
-#endif 
+}
+#endif
 /*
  *
  *    Fun:    cmUnPkNbuNbuUeInfo
  *
- *    Desc:    unpack the primitive UE Info 
+ *    Desc:    unpack the primitive UE Info
  *
  *    Ret:    ROK  -ok
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 #if 0
@@ -191,7 +191,7 @@ Buffer *mBuf;
    TRC3(cmUnPkNbuUeInfo)
       switch(pst->selector)
       {
-#ifdef LCNBU 
+#ifdef LCNBU
          case NBU_SEL_LC:
             ret1 = cmUnPkUeInfo((UeIpAddr *)&req,mBuf);
 #if(ERRCLASS & ERRCLS_DEBUG)
@@ -210,7 +210,7 @@ Buffer *mBuf;
          case  NBU_SEL_LWLC:
             CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &req, mBuf, (ErrVal)ENBU025, pst);
             break;
-#endif 
+#endif
          default:
             break;
       }
@@ -222,25 +222,25 @@ Buffer *mBuf;
    RETVALUE(ret1);
 #else
    RETVALUE((*func)(pst, &req));
-#endif 
+#endif
 }
-#ifdef LCNBU 
+#ifdef LCNBU
 /*
  *
- *    Fun:   cmUnPkUeInfo 
+ *    Fun:   cmUnPkUeInfo
  *
- *    Desc:    unpack the primitive UeIpAddr 
+ *    Desc:    unpack the primitive UeIpAddr
  *
  *    Ret:    ROK  -ok
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 
 #ifdef ANSI
-PRIVATE S16 cmUnPkUeInfo 
+PRIVATE S16 cmUnPkUeInfo
 (
  UeIpAddr *req,
  Buffer *mBuf
@@ -255,17 +255,17 @@ Buffer *mBuf;
    RETVALUE(ROK);
 }
 /*
- * 
+ *
  *     Fun:     cmPkUeInfo
- * 
- *     Desc:    pack the structure NbuUeAttachReq 
- * 
+ *
+ *     Desc:    pack the structure NbuUeAttachReq
+ *
  *     Ret:    ROK  -ok
- * 
+ *
  *     Notes:    None
- * 
- *     File:     
- * 
+ *
+ *     File:
+ *
  */
 
 PRIVATE S16 cmPkUeInfo
@@ -283,7 +283,7 @@ PRIVATE S16 cmPkUeInfo
 #endif
 /*
  *
- *    Fun:    cmPkNbuUeAttachReq 
+ *    Fun:    cmPkNbuUeAttachReq
  *
  *    Desc:    pack the ue attach req
  *
@@ -291,7 +291,7 @@ PRIVATE S16 cmPkUeInfo
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 #ifdef ANSI
@@ -326,7 +326,7 @@ NbuInitialUeMsg *req;
    switch(pst->selector)
    {
       case NBU_SEL_LC:
-#ifdef LCNBU 
+#ifdef LCNBU
          ret1 = cmPkInitialUeMsg(req, EVTNBUINITIALUEMSG ,mBuf);
 #if(ERRCLASS & ERRCLS_ADD_RES)
          if(ret1 != ROK)
@@ -347,24 +347,24 @@ NbuInitialUeMsg *req;
 #endif
      default:
          break;
-   } 
+   }
    pst->event = (Event)EVTNBUINITIALUEMSG;
    RETVALUE(SPstTsk(pst,mBuf));
-} 
+}
 
-#ifdef LCNBU 
+#ifdef LCNBU
 /*
- * 
+ *
  *     Fun:     cmPkInitialUeMsg
- * 
- *     Desc:    pack the structure NbuInitialUeMsg 
- * 
+ *
+ *     Desc:    pack the structure NbuInitialUeMsg
+ *
  *     Ret:    ROK  -ok
- * 
+ *
  *     Notes:    None
- * 
- *     File:     
- * 
+ *
+ *     File:
+ *
  */
 
 PRIVATE S16 cmPkInitialUeMsg
@@ -388,12 +388,12 @@ PRIVATE S16 cmPkInitialUeMsg
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 
 #ifdef ANSI
-PUBLIC S16 cmUnPkNbuInitialUeMsg 
+PUBLIC S16 cmUnPkNbuInitialUeMsg
 (
  NbuInitialUeMsgHdl func,
  Pst *pst,
@@ -416,7 +416,7 @@ Buffer *mBuf;
    TRC3(cmUnPkNbuInitialUeMsg)
       switch(pst->selector)
       {
-#ifdef LCNBU 
+#ifdef LCNBU
          case NBU_SEL_LC:
             ret1 = cmUnPkInitialUeMsg((NbuInitialUeMsg *)&req,mBuf);
 #if(ERRCLASS & ERRCLS_DEBUG)
@@ -435,7 +435,7 @@ Buffer *mBuf;
          case  NBU_SEL_LWLC:
             CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &req, mBuf, (ErrVal)ENBU025, pst);
             break;
-#endif 
+#endif
          default:
             break;
       }
@@ -447,15 +447,15 @@ Buffer *mBuf;
    RETVALUE(ret1);
 #else
    RETVALUE((*func)(pst, &req));
-#endif 
+#endif
 }
 
-#ifdef LCNBU 
+#ifdef LCNBU
 /*
  *
- *    Fun:   cmUnPkIntialUeMsg 
+ *    Fun:   cmUnPkIntialUeMsg
  *
- *    Desc:    unpack the primitive NbuInitialUeMsg 
+ *    Desc:    unpack the primitive NbuInitialUeMsg
  *
  *    Ret:    ROK  -ok
  *
@@ -466,7 +466,7 @@ Buffer *mBuf;
  */
 
 #ifdef ANSI
-PRIVATE S16 cmUnPkIntialUeMsg 
+PRIVATE S16 cmUnPkIntialUeMsg
 (
  NbuInitialUeMsg *req,
  Buffer *mBuf
@@ -483,7 +483,7 @@ Buffer *mBuf;
 #endif
 /*
  *
- *    Fun:    cmPkNbuErabRelInd 
+ *    Fun:    cmPkNbuErabRelInd
  *
  *    Desc:    pack the Erab Rel Ind
  *
@@ -491,11 +491,11 @@ Buffer *mBuf;
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 #ifdef ANSI
-PUBLIC S16 cmPkNbuErabRelInd 
+PUBLIC S16 cmPkNbuErabRelInd
 (
  Pst *pst,
  NbuErabRelIndList *req
@@ -526,7 +526,7 @@ NbuErabRelIndList *req;
    switch(pst->selector)
    {
       case NBU_SEL_LC:
-#ifdef LCNBU 
+#ifdef LCNBU
          ret1 = cmPkErabRelInd(req, EVTNBUERABRELIND ,mBuf);
 #if(ERRCLASS & ERRCLS_ADD_RES)
          if(ret1 != ROK)
@@ -547,24 +547,24 @@ NbuErabRelIndList *req;
 #endif
      default:
          break;
-   } 
+   }
    pst->event = (Event)EVTNBUERABRELIND;
    RETVALUE(SPstTsk(pst,mBuf));
-} 
+}
 
-#ifdef LCNBU 
+#ifdef LCNBU
 /*
- * 
+ *
  *     Fun:     cmPkErabRelInd
- * 
- *     Desc:    pack the structure NbuErabRelIndList  
- * 
+ *
+ *     Desc:    pack the structure NbuErabRelIndList
+ *
  *     Ret:    ROK  -ok
- * 
+ *
  *     Notes:    None
- * 
- *     File:     
- * 
+ *
+ *     File:
+ *
  */
 
 PRIVATE S16 cmPkErabRelInd
@@ -588,12 +588,12 @@ PRIVATE S16 cmPkErabRelInd
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 
 #ifdef ANSI
-PUBLIC S16 cmUnPkNbuErabRelInd  
+PUBLIC S16 cmUnPkNbuErabRelInd
 (
  NbuErabRelIndHdl func,
  Pst *pst,
@@ -616,7 +616,7 @@ Buffer *mBuf;
    TRC3(cmUnPkNbuErabRelInd)
       switch(pst->selector)
       {
-#ifdef LCNBU 
+#ifdef LCNBU
          case NBU_SEL_LC:
             ret1 = cmUnPkErabRelInd((NbuErabRelIndList *)&req,mBuf);
 #if(ERRCLASS & ERRCLS_DEBUG)
@@ -635,7 +635,7 @@ Buffer *mBuf;
          case  NBU_SEL_LWLC:
             CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &req, mBuf, (ErrVal)ENBU025, pst);
             break;
-#endif 
+#endif
          default:
             break;
       }
@@ -647,15 +647,15 @@ Buffer *mBuf;
    RETVALUE(ret1);
 #else
    RETVALUE((*func)(pst, &req));
-#endif 
+#endif
 }
 
-#ifdef LCNBU 
+#ifdef LCNBU
 /*
  *
- *    Fun:   cmUnPkErabRelInd  
+ *    Fun:   cmUnPkErabRelInd
  *
- *    Desc:    unpack the primitive NbuErabRelIndList  
+ *    Desc:    unpack the primitive NbuErabRelIndList
  *
  *    Ret:    ROK  -ok
  *
@@ -666,7 +666,7 @@ Buffer *mBuf;
  */
 
 #ifdef ANSI
-PRIVATE S16 cmUnPkErabRelInd  
+PRIVATE S16 cmUnPkErabRelInd
 (
  NbuErabRelIndList *req,
  Buffer *mBuf
@@ -684,7 +684,7 @@ Buffer *mBuf;
 
 /*
  *
- *    Fun:    cmPkNbuUlNasMsg 
+ *    Fun:    cmPkNbuUlNasMsg
  *
  *    Desc:    pack the UL NAS TRANSPORT MSG
  *
@@ -692,7 +692,7 @@ Buffer *mBuf;
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 #ifdef ANSI
@@ -726,7 +726,7 @@ NbuUlNasMsg *msg;
    switch(pst->selector)
    {
       case NBU_SEL_LC:
-#ifdef LCNBU 
+#ifdef LCNBU
          ret1 = cmPkUlNasMsg(msg, EVTNBUULNASMSG ,mBuf);
 #if(ERRCLASS & ERRCLS_ADD_RES)
          if(ret1 != ROK)
@@ -747,13 +747,13 @@ NbuUlNasMsg *msg;
 #endif
      default:
          break;
-   } 
+   }
    pst->event = (Event)EVTNBUULNASMSG;
    RETVALUE(SPstTsk(pst,mBuf));
-} 
+}
 /*
  *
- *    Fun:    cmPkNbuUlRrcMsg 
+ *    Fun:    cmPkNbuUlRrcMsg
  *
  *    Desc:    pack the UL RRC MSG
  *
@@ -761,7 +761,7 @@ NbuUlNasMsg *msg;
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 #ifdef ANSI
@@ -796,7 +796,7 @@ NbuUlRrcMsg *msg;
    switch(pst->selector)
    {
       case NBU_SEL_LC:
-#ifdef LCNBU 
+#ifdef LCNBU
          ret1 = cmPkUlRrcMsg(msg, EVTNBUUERADCAPIND ,mBuf);
 #if(ERRCLASS & ERRCLS_ADD_RES)
          if(ret1 != ROK)
@@ -817,24 +817,24 @@ NbuUlRrcMsg *msg;
 #endif
      default:
          break;
-   } 
+   }
    pst->event = (Event)EVTNBUUERADCAPIND;
    RETVALUE(SPstTsk(pst,mBuf));
-} 
+}
 
-#ifdef LCNBU 
+#ifdef LCNBU
 /*
- * 
+ *
  *     Fun:     cmPkUlNasMsg
- * 
+ *
  *     Desc:    pack the structure NbuUlNasMsg
- * 
+ *
  *     Ret:    ROK  -ok
- * 
+ *
  *     Notes:    None
- * 
- *     File:     
- * 
+ *
+ *     File:
+ *
  */
 
 PRIVATE S16 cmPkUlNasMsg
@@ -848,17 +848,17 @@ PRIVATE S16 cmPkUlNasMsg
 } /*end of function cmPkUlNasMsg */
 
 /*
- * 
+ *
  *     Fun:     cmPkUlRrcMsg
- * 
+ *
  *     Desc:    pack the structure NbuUlNasMsg
- * 
+ *
  *     Ret:    ROK  -ok
- * 
+ *
  *     Notes:    None
- * 
- *     File:     
- * 
+ *
+ *     File:
+ *
  */
 
 PRIVATE S16 cmPkUlRrcMsg
@@ -883,7 +883,7 @@ PRIVATE S16 cmPkUlRrcMsg
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 
@@ -911,7 +911,7 @@ Buffer *mBuf;
    TRC3(cmUnPkNbuUlNasMsg)
       switch(pst->selector)
       {
-#ifdef LCNBU 
+#ifdef LCNBU
          case NBU_SEL_LC:
             ret1 = cmUnPkUlNasMsg((NbuUlNasMsg *)&msg,mBuf);
 #if(ERRCLASS & ERRCLS_DEBUG)
@@ -930,7 +930,7 @@ Buffer *mBuf;
          case  NBU_SEL_LWLC:
             CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &msg, mBuf, (ErrVal)ENBU025, pst);
             break;
-#endif 
+#endif
          default:
             break;
       }
@@ -942,7 +942,7 @@ Buffer *mBuf;
    RETVALUE(ret1);
 #else
    RETVALUE((*func)(pst, &msg));
-#endif 
+#endif
 }
 
 /*
@@ -955,7 +955,7 @@ Buffer *mBuf;
  *
  *	  Notes:	None
  *
- *	  File:    
+ *	  File:
  *
  */
 #ifdef ANS
@@ -982,7 +982,7 @@ PUBLIC S16 cmUnPkNbuUlRrcMsg(func, pst, mBuf)
    TRC3(cmUnPkNbuUlRrcMsg)
       switch(pst->selector)
       {
-#ifdef LCNBU 
+#ifdef LCNBU
          case NBU_SEL_LC:
             ret1 = cmUnPkUlRrcMsg((NbuUlRrcMsg *)&msg,mBuf);
 #if(ERRCLASS & ERRCLS_DEBUG)
@@ -1001,7 +1001,7 @@ PUBLIC S16 cmUnPkNbuUlRrcMsg(func, pst, mBuf)
          case  NBU_SEL_LWLC:
             CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &msg, mBuf, (ErrVal)ENBU025, pst);
             break;
-#endif 
+#endif
          default:
             break;
       }
@@ -1013,25 +1013,25 @@ PUBLIC S16 cmUnPkNbuUlRrcMsg(func, pst, mBuf)
    RETVALUE(ret1);
 #else
    RETVALUE((*func)(pst, &msg));
-#endif 
+#endif
 }
 
-#ifdef LCNBU 
+#ifdef LCNBU
 /*
  *
- *    Fun:     cmUnPkUlRrcMsg 
+ *    Fun:     cmUnPkUlRrcMsg
  *
- *    Desc:    unpack the primitive NbuUlNasMsg 
+ *    Desc:    unpack the primitive NbuUlNasMsg
  *
  *    Ret:    ROK  -ok
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 #ifdef ANSI
-PRIVATE S16 cmUnPkUlRrcMsg 
+PRIVATE S16 cmUnPkUlRrcMsg
 (
  NbuUlRrcMsg *msg,
  Buffer *mBuf
@@ -1047,23 +1047,23 @@ Buffer *mBuf;
 }
 #endif
 
-#ifdef LCNBU 
+#ifdef LCNBU
 /*
  *
- *    Fun:     cmUnPkUlNasMsg 
+ *    Fun:     cmUnPkUlNasMsg
  *
- *    Desc:    unpack the primitive NbuUlNasMsg 
+ *    Desc:    unpack the primitive NbuUlNasMsg
  *
  *    Ret:    ROK  -ok
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 
 #ifdef ANSI
-PRIVATE S16 cmUnPkUlNasMsg 
+PRIVATE S16 cmUnPkUlNasMsg
 (
  NbuUlNasMsg *msg,
  Buffer *mBuf
@@ -1088,11 +1088,11 @@ Buffer *mBuf;
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 #ifdef ANSI
-PUBLIC S16 cmPkNbuDlNasMsg 
+PUBLIC S16 cmPkNbuDlNasMsg
 (
  Pst *pst,
  NbuDlNasMsg *msg
@@ -1123,7 +1123,7 @@ NbuDlNasMsg *msg;
    switch(pst->selector)
    {
       case NBU_SEL_LC:
-#ifdef LCNBU 
+#ifdef LCNBU
          ret1 = cmPkDlNasMsg(msg, EVTNBUDLNASMSG,mBuf);
 #if(ERRCLASS & ERRCLS_ADD_RES)
          if(ret1 != ROK)
@@ -1144,24 +1144,24 @@ NbuDlNasMsg *msg;
 #endif
      default:
          break;
-   } 
+   }
    pst->event = (Event)EVTNBUDLNASMSG;
    RETVALUE(SPstTsk(pst,mBuf));
-} 
+}
 
-#ifdef LCNBU 
+#ifdef LCNBU
 /*
- * 
+ *
  *     Fun:     cmPkDlNasMsg
- * 
- *     Desc:    pack the structure NbuDlNasMsg 
- * 
+ *
+ *     Desc:    pack the structure NbuDlNasMsg
+ *
  *     Ret:    ROK  -ok
- * 
+ *
  *     Notes:    None
- * 
- *     File:     
- * 
+ *
+ *     File:
+ *
  */
 
 PRIVATE S16 cmPkDlNasMsg
@@ -1174,19 +1174,19 @@ PRIVATE S16 cmPkDlNasMsg
    RETVALUE(ROK);
 } /*end of function cmPkDlNasMsg */
 #endif
-#ifdef LCNBU 
+#ifdef LCNBU
 /*
- * 
+ *
  *     Fun:     cmPkDlNasMsg
- * 
- *     Desc:    pack the structure NbuDlNasMsg 
- * 
+ *
+ *     Desc:    pack the structure NbuDlNasMsg
+ *
  *     Ret:    ROK  -ok
- * 
+ *
  *     Notes:    None
- * 
- *     File:     
- * 
+ *
+ *     File:
+ *
  */
 
 PRIVATE S16 cmPkPagingMsg
@@ -1211,7 +1211,7 @@ PRIVATE S16 cmPkPagingMsg
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 #ifdef ANSI
@@ -1246,7 +1246,7 @@ UePagingMsg *msg;
    switch(pst->selector)
    {
       case NBU_SEL_LC:
-#ifdef LCNBU 
+#ifdef LCNBU
          ret1 = cmPkPagingMsg(msg, EVTNBUPAGINGMSG,mBuf);
 #if(ERRCLASS & ERRCLS_ADD_RES)
          if(ret1 != ROK)
@@ -1267,10 +1267,10 @@ UePagingMsg *msg;
 #endif
      default:
          break;
-   } 
+   }
    pst->event = (Event)EVTNBUPAGINGMSG;
    RETVALUE(SPstTsk(pst,mBuf));
-} 
+}
 
 /*
  *
@@ -1282,12 +1282,12 @@ UePagingMsg *msg;
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 
 #ifdef ANSI
-PUBLIC S16 cmUnPkNbuPagingMsg 
+PUBLIC S16 cmUnPkNbuPagingMsg
 (
  NbuPagingMsgHdl func,
  Pst *pst,
@@ -1310,7 +1310,7 @@ Buffer *mBuf;
    TRC3(cmUnPkNbuPagingMsg)
    switch(pst->selector)
    {
-#ifdef LCNBU 
+#ifdef LCNBU
       case NBU_SEL_LC:
             ret1 = cmUnPkPagingMsg((UePagingMsg *)&msg,mBuf);
 #if(ERRCLASS & ERRCLS_DEBUG)
@@ -1329,7 +1329,7 @@ Buffer *mBuf;
       case  NBU_SEL_LWLC:
             CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &msg, mBuf, (ErrVal)ENBU025, pst);
          break;
-#endif 
+#endif
       default:
          break;
    }
@@ -1341,7 +1341,7 @@ Buffer *mBuf;
    RETVALUE(ret1);
 #else
    RETVALUE((*func)(pst, &msg));
-#endif 
+#endif
 }
 
 
@@ -1355,12 +1355,12 @@ Buffer *mBuf;
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 
 #ifdef ANSI
-PUBLIC S16 cmUnPkNbuDlNasMsg 
+PUBLIC S16 cmUnPkNbuDlNasMsg
 (
  NbuDlNasMsgHdl func,
  Pst *pst,
@@ -1383,7 +1383,7 @@ Buffer *mBuf;
    TRC3(cmUnPkNbuDlNasMsg)
    switch(pst->selector)
    {
-#ifdef LCNBU 
+#ifdef LCNBU
       case NBU_SEL_LC:
             ret1 = cmUnPkDlNasMsg((NbuDlNasMsg *)&msg,mBuf);
 #if(ERRCLASS & ERRCLS_DEBUG)
@@ -1402,7 +1402,7 @@ Buffer *mBuf;
       case  NBU_SEL_LWLC:
             CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &msg, mBuf, (ErrVal)ENBU025, pst);
          break;
-#endif 
+#endif
       default:
          break;
    }
@@ -1414,26 +1414,26 @@ Buffer *mBuf;
    RETVALUE(ret1);
 #else
    RETVALUE((*func)(pst, &msg));
-#endif 
+#endif
 }
 
-#ifdef LCNBU 
+#ifdef LCNBU
 /*
  *
  *    Fun:   cmUnPkDlNasMsg
  *
- *    Desc:    unpack the primitive NbuDlNasMsg 
+ *    Desc:    unpack the primitive NbuDlNasMsg
 *
  *    Ret:    ROK  -ok
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 
 #ifdef ANSI
-PRIVATE S16 cmUnPkDlNasMsg 
+PRIVATE S16 cmUnPkDlNasMsg
 (
  NbuDlNasMsg *msg,
  Buffer *mBuf
@@ -1449,18 +1449,18 @@ Buffer *mBuf;
 }
 
 #endif
-#ifdef LCNBU 
+#ifdef LCNBU
 /*
  *
  *    Fun:   cmUnPkPagingMsg
  *
- *    Desc:    unpack the primitive NbuDlNasMsg 
+ *    Desc:    unpack the primitive NbuDlNasMsg
 *
  *    Ret:    ROK  -ok
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 
@@ -1484,15 +1484,15 @@ Buffer *mBuf;
 
 /*
  *
- *    Fun:     cmPkNbuErabsRelInfo 
+ *    Fun:     cmPkNbuErabsRelInfo
  *
- *    Desc:    pack the Erab Release Information Ind 
+ *    Desc:    pack the Erab Release Information Ind
  *
  *    Ret:    ROK  -ok
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 #ifdef ANSI
@@ -1526,7 +1526,7 @@ NbuErabsRelInfo *msg;
    switch(pst->selector)
    {
       case NBU_SEL_LC:
-#ifdef LCNBU 
+#ifdef LCNBU
          ret1 = cmPkErabsRelInfo(msg, EVTNBUERABSRELINFO, mBuf);
 #if(ERRCLASS & ERRCLS_ADD_RES)
          if(ret1 != ROK)
@@ -1539,7 +1539,7 @@ NbuErabsRelInfo *msg;
          }
 #endif /*  ERRCLASS & ERRCLS_ADD_RES  */
          break;
-#endif 
+#endif
 #ifdef LWLCNBU
       case NBU_SEL_LWLC:
          CMCHKPKLOG(cmPkPtr, (PTR)msg, mBuf, ENBU016, pst);
@@ -1547,22 +1547,22 @@ NbuErabsRelInfo *msg;
 #endif
      default:
          break;
-   } 
+   }
    pst->event = (Event)EVTNBUERABSRELINFO;
    RETVALUE(SPstTsk(pst, mBuf));
 }
 
 /*
  *
- *    Fun:     cmPkNbuErabsInfo 
+ *    Fun:     cmPkNbuErabsInfo
  *
- *    Desc:    pack the cntxt setup Ind 
+ *    Desc:    pack the cntxt setup Ind
  *
  *    Ret:    ROK  -ok
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 #ifdef ANSI
@@ -1597,7 +1597,7 @@ NbuErabsInfo *msg;
    switch(pst->selector)
    {
       case NBU_SEL_LC:
-#ifdef LCNBU 
+#ifdef LCNBU
          ret1 = cmPkErabsInfo(msg, EVTNBUERABSINFO, mBuf);
 #if(ERRCLASS & ERRCLS_ADD_RES)
          if(ret1 != ROK)
@@ -1610,7 +1610,7 @@ NbuErabsInfo *msg;
          }
 #endif /*  ERRCLASS & ERRCLS_ADD_RES  */
          break;
-#endif 
+#endif
 #ifdef LWLCNBU
       case NBU_SEL_LWLC:
          CMCHKPKLOG(cmPkPtr, (PTR)msg, mBuf, ENBU016, pst);
@@ -1618,24 +1618,24 @@ NbuErabsInfo *msg;
 #endif
      default:
          break;
-   } 
+   }
    pst->event = (Event)EVTNBUERABSINFO;
    RETVALUE(SPstTsk(pst, mBuf));
 }
 
-#ifdef LCNBU 
+#ifdef LCNBU
 /*
  *
- *     Fun:     cmPkErabsRelInfo 
- * 
+ *     Fun:     cmPkErabsRelInfo
+ *
  *     Desc:    pack the structure NbuErabsRelInfo
- * 
+ *
  *     Ret:    ROK  -ok
- * 
+ *
  *     Notes:    None
- * 
- *     File:     
- * 
+ *
+ *     File:
+ *
  */
 
 PRIVATE S16 cmPkErabsRelInfo
@@ -1651,16 +1651,16 @@ PRIVATE S16 cmPkErabsRelInfo
 
 /*
  *
- *     Fun:     cmPkErabsInfo 
- * 
+ *     Fun:     cmPkErabsInfo
+ *
  *     Desc:    pack the structure NbuErabsInfo
- * 
+ *
  *     Ret:    ROK  -ok
- * 
+ *
  *     Notes:    None
- * 
- *     File:     
- * 
+ *
+ *     File:
+ *
  */
 
 PRIVATE S16 cmPkErabsInfo
@@ -1684,12 +1684,12 @@ PRIVATE S16 cmPkErabsInfo
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 
 #ifdef ANSI
-PUBLIC S16 cmUnPkNbuErabsRelInfo 
+PUBLIC S16 cmUnPkNbuErabsRelInfo
 (
  NbuErabsRelInfoMsgHdl func,
  Pst *pst,
@@ -1712,7 +1712,7 @@ Buffer *mBuf;
    TRC3(cmUnPkNbuErabsRelInfo)
       switch(pst->selector)
       {
-#ifdef LCNBU 
+#ifdef LCNBU
          case NBU_SEL_LC:
             ret1 = cmUnPkErabsRelInfo((NbuErabsRelInfo *)&msg,mBuf);
 #if(ERRCLASS & ERRCLS_DEBUG)
@@ -1731,7 +1731,7 @@ Buffer *mBuf;
          case  NBU_SEL_LWLC:
             CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &msg, mBuf, (ErrVal)ENBU025, pst);
             break;
-#endif 
+#endif
          default:
             break;
       }
@@ -1746,7 +1746,7 @@ Buffer *mBuf;
    RETVALUE(ret1);
 #else
    RETVALUE((*func)(pst, &msg));
-#endif 
+#endif
 }
 /*
  *
@@ -1758,12 +1758,12 @@ Buffer *mBuf;
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 
 #ifdef ANSI
-PUBLIC S16 cmUnPkNbuErabsInfo 
+PUBLIC S16 cmUnPkNbuErabsInfo
 (
  NbuErabsInfoMsgHdl func,
  Pst *pst,
@@ -1786,7 +1786,7 @@ Buffer *mBuf;
    TRC3(cmUnPkNbuErabsInfo)
       switch(pst->selector)
       {
-#ifdef LCNBU 
+#ifdef LCNBU
          case NBU_SEL_LC:
             ret1 = cmUnPkErabsInfo((NbuErabsInfo *)&msg,mBuf);
 #if(ERRCLASS & ERRCLS_DEBUG)
@@ -1805,7 +1805,7 @@ Buffer *mBuf;
          case  NBU_SEL_LWLC:
             CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &msg, mBuf, (ErrVal)ENBU025, pst);
             break;
-#endif 
+#endif
          default:
             break;
       }
@@ -1820,26 +1820,26 @@ Buffer *mBuf;
    RETVALUE(ret1);
 #else
    RETVALUE((*func)(pst, &msg));
-#endif 
+#endif
 }
 
-#ifdef LCNBU 
+#ifdef LCNBU
 /*
  *
  *    Fun:     cmUnPkErabsRelInfo
  *
- *    Desc:    unpack the primitive NbuErabsRelInfo 
+ *    Desc:    unpack the primitive NbuErabsRelInfo
 *
  *    Ret:    ROK  -ok
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 
 #ifdef ANSI
-PRIVATE S16 cmUnPkErabsRelInfo 
+PRIVATE S16 cmUnPkErabsRelInfo
 (
  NbuErabsRelInfo *msg,
  Buffer *mBuf
@@ -1859,18 +1859,18 @@ Buffer *mBuf;
  *
  *    Fun:     cmUnPkErabsInfo
  *
- *    Desc:    unpack the primitive NbuErabsInfo 
+ *    Desc:    unpack the primitive NbuErabsInfo
 *
  *    Ret:    ROK  -ok
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 
 #ifdef ANSI
-PRIVATE S16 cmUnPkErabsInfo 
+PRIVATE S16 cmUnPkErabsInfo
 (
  NbuErabsInfo *msg,
  Buffer *mBuf
@@ -1916,13 +1916,13 @@ PUBLIC S16 cmPkNbuS1RelInd
 #endif
      default:
          break;
-   } 
+   }
 
    pst->event = (Event)EVTNBUS1RELIND;
    RETVALUE(SPstTsk(pst, mBuf));
 }
 
-PUBLIC S16 cmUnPkNbuS1RelInd 
+PUBLIC S16 cmUnPkNbuS1RelInd
 (
  NbuS1RelIndMsgHdl func,
  Pst *pst,
@@ -1942,7 +1942,7 @@ PUBLIC S16 cmUnPkNbuS1RelInd
       case  NBU_SEL_LWLC:
          CMCHKUNPKLOG(cmUnpkPtr, (PTR*)&msg, mBuf, (ErrVal)ENBU025, pst);
          break;
-#endif 
+#endif
       default:
          break;
    }
@@ -1954,12 +1954,12 @@ PUBLIC S16 cmUnPkNbuS1RelInd
    RETVALUE(ret1);
 #else
    RETVALUE((*func)(pst, &msg));
-#endif 
+#endif
 }
 
 /*
  *
- *    Fun:     cmPkNbuUeInActvInd 
+ *    Fun:     cmPkNbuUeInActvInd
  *
  *    Desc:    pack the Ue Inactivity Ind msg
  *
@@ -1967,11 +1967,11 @@ PUBLIC S16 cmUnPkNbuS1RelInd
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 #ifdef ANSI
-PUBLIC S16 cmPkNbuUeInActvInd 
+PUBLIC S16 cmPkNbuUeInActvInd
 (
  Pst *pst,
  NbuUeInActvInd *msg
@@ -2002,7 +2002,7 @@ NbuUeInActvInd *msg;
    switch(pst->selector)
    {
       case NBU_SEL_LC:
-#ifdef LCNBU 
+#ifdef LCNBU
          ret1 = cmPkUeInActvInd(msg, EVTNBUUEINACTIVITYIND,mBuf);
 #if(ERRCLASS & ERRCLS_ADD_RES)
          if(ret1 != ROK)
@@ -2015,7 +2015,7 @@ NbuUeInActvInd *msg;
          }
 #endif /*  ERRCLASS & ERRCLS_ADD_RES  */
          break;
-#endif 
+#endif
 #ifdef LWLCNBU
       case NBU_SEL_LWLC:
          CMCHKPKLOG(cmPkPtr, (PTR)msg, mBuf, ENBU016, pst);
@@ -2023,27 +2023,27 @@ NbuUeInActvInd *msg;
 #endif
      default:
          break;
-   } 
+   }
    pst->event = (Event)EVTNBUUEINACTIVITYIND;
    RETVALUE(SPstTsk(pst,mBuf));
 }
 
-#ifdef LCNBU 
+#ifdef LCNBU
 /*
  *
- *     Fun:     cmPkUeInActvInd 
- * 
+ *     Fun:     cmPkUeInActvInd
+ *
  *     Desc:    pack the structure NbuErabsInfo
- * 
+ *
  *     Ret:     ROK  -ok
- * 
+ *
  *     Notes:    None
- * 
- *     File:     
- * 
+ *
+ *     File:
+ *
  */
 
-PRIVATE S16 cmPkUeInActvInd 
+PRIVATE S16 cmPkUeInActvInd
 (
 NbuUeInActvInd *param,
  Buffer *mBuf
@@ -2064,7 +2064,7 @@ NbuUeInActvInd *param,
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 
@@ -2092,7 +2092,7 @@ Buffer *mBuf;
    TRC3(cmUnPkNbuUeInActvInd)
       switch(pst->selector)
       {
-#ifdef LCNBU 
+#ifdef LCNBU
          case NBU_SEL_LC:
             ret1 = cmUnPkNbuUeInActvInd((NbuUeInActvInd *)&msg, mBuf);
 #if(ERRCLASS & ERRCLS_DEBUG)
@@ -2111,7 +2111,7 @@ Buffer *mBuf;
          case  NBU_SEL_LWLC:
             CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &msg, mBuf, (ErrVal)ENBU025, pst);
             break;
-#endif 
+#endif
          default:
             break;
       }
@@ -2123,26 +2123,26 @@ Buffer *mBuf;
    RETVALUE(ret1);
 #else
    RETVALUE((*func)(pst, &msg));
-#endif 
+#endif
 }
 
-#ifdef LCNBU 
+#ifdef LCNBU
 /*
  *
  *    Fun:     cmUnPkUeInActvInd
  *
- *    Desc:    unpack the primitive NbuUeInActvInd 
+ *    Desc:    unpack the primitive NbuUeInActvInd
 *
  *    Ret:    ROK  -ok
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 
 #ifdef ANSI
-PRIVATE S16 cmUnPkUeInActvInd 
+PRIVATE S16 cmUnPkUeInActvInd
 (
  NbuUeInActvInd *msg,
  Buffer *mBuf
@@ -2159,7 +2159,7 @@ Buffer *mBuf;
 #endif
 /*
  *
- *    Fun:     cmPkNbuUeIpInfoReq 
+ *    Fun:     cmPkNbuUeIpInfoReq
  *
  *    Desc:    pack the Ue Ip Info msg
  *
@@ -2167,11 +2167,11 @@ Buffer *mBuf;
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 #ifdef ANSI
-PUBLIC S16 cmPkNbuUeIpInfoReq 
+PUBLIC S16 cmPkNbuUeIpInfoReq
 (
  Pst *pst,
  NbuUeIpInfoReq *msg
@@ -2202,7 +2202,7 @@ NbuUeIpInfoReq *msg;
    switch(pst->selector)
    {
       case NBU_SEL_LC:
-#ifdef LCNBU 
+#ifdef LCNBU
          ret1 = cmPkUeIpInfoReq(msg, EVTNBUUEIPINFOREQ,mBuf);
 #if(ERRCLASS & ERRCLS_ADD_RES)
          if(ret1 != ROK)
@@ -2215,7 +2215,7 @@ NbuUeIpInfoReq *msg;
          }
 #endif /*  ERRCLASS & ERRCLS_ADD_RES  */
          break;
-#endif 
+#endif
 #ifdef LWLCNBU
       case NBU_SEL_LWLC:
          CMCHKPKLOG(cmPkPtr, (PTR)msg, mBuf, ENBU016, pst);
@@ -2223,27 +2223,27 @@ NbuUeIpInfoReq *msg;
 #endif
      default:
          break;
-   } 
+   }
    pst->event = (Event)EVTNBUUEIPINFOREQ;
    RETVALUE(SPstTsk(pst,mBuf));
 }
 
-#ifdef LCNBU 
+#ifdef LCNBU
 /*
  *
- *     Fun:     cmPkUeIpInfoReq 
- * 
- *     Desc:    pack the structure NbuUeIpInfoReq 
- * 
+ *     Fun:     cmPkUeIpInfoReq
+ *
+ *     Desc:    pack the structure NbuUeIpInfoReq
+ *
  *     Ret:     ROK  -ok
- * 
+ *
  *     Notes:    None
- * 
- *     File:     
- * 
+ *
+ *     File:
+ *
  */
 
-PRIVATE S16 cmPkUeIpInfoReq 
+PRIVATE S16 cmPkUeIpInfoReq
 (
 NbuUeIpInfoReq *param,
  Buffer *mBuf
@@ -2264,12 +2264,12 @@ NbuUeIpInfoReq *param,
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 
 #ifdef ANSI
-PUBLIC S16 cmUnPkNbuUeIpInfoReq 
+PUBLIC S16 cmUnPkNbuUeIpInfoReq
 (
  NbuUeIpInfoReqHdl func,
  Pst *pst,
@@ -2292,7 +2292,7 @@ Buffer *mBuf;
    TRC3(cmUnPkNbuUeIpInfoReq)
       switch(pst->selector)
       {
-#ifdef LCNBU 
+#ifdef LCNBU
          case NBU_SEL_LC:
             ret1 = cmUnPkUeIpInfoReq((NbuUeIpInfoReq *)&msg,mBuf);
 #if(ERRCLASS & ERRCLS_DEBUG)
@@ -2311,7 +2311,7 @@ Buffer *mBuf;
          case  NBU_SEL_LWLC:
             CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &msg, mBuf, (ErrVal)ENBU025, pst);
             break;
-#endif 
+#endif
          default:
             break;
       }
@@ -2323,26 +2323,26 @@ Buffer *mBuf;
    RETVALUE(ret1);
 #else
    RETVALUE((*func)(pst, &msg));
-#endif 
+#endif
 }
 
-#ifdef LCNBU 
+#ifdef LCNBU
 /*
  *
- *    Fun:     cmUnPkUeIpInfoReq 
+ *    Fun:     cmUnPkUeIpInfoReq
  *
- *    Desc:    unpack the primitive NbuUeIpInfoReq 
+ *    Desc:    unpack the primitive NbuUeIpInfoReq
 *
  *    Ret:    ROK  -ok
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 
 #ifdef ANSI
-PRIVATE S16 cmUnPkUeIpInfoReq 
+PRIVATE S16 cmUnPkUeIpInfoReq
 (
  NbuUeIpInfoReq *msg,
  Buffer *mBuf
@@ -2360,7 +2360,7 @@ Buffer *mBuf;
 
 /*
  *
- *    Fun:     cmPkNbuUeIpInfoRsp 
+ *    Fun:     cmPkNbuUeIpInfoRsp
  *
  *    Desc:    pack the Ue Ip Info msg
  *
@@ -2368,11 +2368,11 @@ Buffer *mBuf;
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 #ifdef ANSI
-PUBLIC S16 cmPkNbuUeIpInfoRsp 
+PUBLIC S16 cmPkNbuUeIpInfoRsp
 (
  Pst *pst,
  NbuUeIpInfoRsp *msg
@@ -2403,7 +2403,7 @@ NbuUeIpInfoRsp *msg;
    switch(pst->selector)
    {
       case NBU_SEL_LC:
-#ifdef LCNBU 
+#ifdef LCNBU
          ret1 = cmPkUeIpInfoRsp(msg, EVTNBUUEIPINFORSP,mBuf);
 #if(ERRCLASS & ERRCLS_ADD_RES)
          if(ret1 != ROK)
@@ -2416,7 +2416,7 @@ NbuUeIpInfoRsp *msg;
          }
 #endif /*  ERRCLASS & ERRCLS_ADD_RES  */
          break;
-#endif 
+#endif
 #ifdef LWLCNBU
       case NBU_SEL_LWLC:
          CMCHKPKLOG(cmPkPtr, (PTR)msg, mBuf, ENBU016, pst);
@@ -2424,27 +2424,27 @@ NbuUeIpInfoRsp *msg;
 #endif
      default:
          break;
-   } 
+   }
    pst->event = (Event)EVTNBUUEIPINFORSP;
    RETVALUE(SPstTsk(pst,mBuf));
 }
 
-#ifdef LCNBU 
+#ifdef LCNBU
 /*
  *
- *     Fun:     cmPkUeIpInfoRsp 
- * 
- *     Desc:    pack the structure NbuUeIpInfoRsp 
- * 
+ *     Fun:     cmPkUeIpInfoRsp
+ *
+ *     Desc:    pack the structure NbuUeIpInfoRsp
+ *
  *     Ret:     ROK  -ok
- * 
+ *
  *     Notes:    None
- * 
- *     File:     
- * 
+ *
+ *     File:
+ *
  */
 
-PRIVATE S16 cmPkUeIpInfoRsp 
+PRIVATE S16 cmPkUeIpInfoRsp
 (
 NbuUeIpInfoRsp *param,
  Buffer *mBuf
@@ -2465,12 +2465,12 @@ NbuUeIpInfoRsp *param,
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 
 #ifdef ANSI
-PUBLIC S16 cmUnPkNbuUeIpInfoRsp 
+PUBLIC S16 cmUnPkNbuUeIpInfoRsp
 (
  NbuUeIpInfoRspHdl func,
  Pst *pst,
@@ -2493,7 +2493,7 @@ Buffer *mBuf;
    TRC3(cmUnPkNbuUeIpInfoRsp)
       switch(pst->selector)
       {
-#ifdef LCNBU 
+#ifdef LCNBU
          case NBU_SEL_LC:
             ret1 = cmUnPkUeIpInfoRsp((NbuUeIpInfoRsp *)&msg,mBuf);
 #if(ERRCLASS & ERRCLS_DEBUG)
@@ -2512,7 +2512,7 @@ Buffer *mBuf;
          case  NBU_SEL_LWLC:
             CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &msg, mBuf, (ErrVal)ENBU025, pst);
             break;
-#endif 
+#endif
          default:
             break;
       }
@@ -2524,26 +2524,26 @@ Buffer *mBuf;
    RETVALUE(ret1);
 #else
    RETVALUE((*func)(pst, &msg));
-#endif 
+#endif
 }
 
-#ifdef LCNBU 
+#ifdef LCNBU
 /*
  *
- *    Fun:     cmUnPkUeIpInfoRsp 
+ *    Fun:     cmUnPkUeIpInfoRsp
  *
- *    Desc:    unpack the primitive NbuUeIpInfoRsp 
+ *    Desc:    unpack the primitive NbuUeIpInfoRsp
 *
  *    Ret:    ROK  -ok
  *
  *    Notes:    None
  *
- *    File:    
+ *    File:
  *
  */
 
 #ifdef ANSI
-PRIVATE S16 cmUnPkUeIpInfoRsp 
+PRIVATE S16 cmUnPkUeIpInfoRsp
 (
  NbuUeIpInfoRsp *msg,
  Buffer *mBuf
@@ -2558,8 +2558,203 @@ Buffer *mBuf;
    RETVALUE(ROK);
 }
 #endif
+/*
+ *
+ *     Fun:     cmPkNotifyPlmnInfo
+ *
+ *     Desc:    pack the structure NbuNotifyPlmnInfo
+ *
+ *     Ret:     ROK  -ok
+ *
+ *     Notes:    None
+ *
+ *     File:
+ *
+ */
+
+PRIVATE S16 cmPkNotifyPlmnInfo(NbuNotifyPlmnInfo* param, Buffer* mBuf)
+{
+  TRC3(cmPkNotifyPlmnInfo)
+  RETVALUE(ROK);
+} /*end of function cmPkNotifyPlmnInfo*/
+
+/*
+ *
+ *    Fun:     cmPkNbuNotifyPlmnInfo
+ *
+ *    Desc:    pack the Plmn Info msg
+ *
+ *    Ret:    ROK  -ok
+ *
+ *    Notes:    None
+ *
+ *    File:
+ *
+ */
+#ifdef ANSI
+PUBLIC S16 cmPkNbuNotifyPlmnInfo
+(
+ Pst *pst,
+ NbuNotifyPlmnInfo *msg
+)
+#else
+PUBLIC S16 cmPkNbNotifyPlmnInfo (pst, msg)
+Pst *pst;
+NbuNotifyPlmnInfo *msg;
+#endif
+{
+   S16 ret1;
+   Buffer *mBuf;
+   mBuf = NULLP;
+   TRC3(cmPkNbuNotifyPlmnInfo)
+
+      if((ret1 = SGetMsg(pst->region, pst->pool, &mBuf)) != ROK)
+      {
+#if (ERRCLASS & ERRCLS_ADD_RES)
+         if(ret1 != ROK)
+         {
+            SLogError(pst->srcEnt, pst->srcInst, pst->srcProcId,
+                  __FILE__, __LINE__, (ErrCls)ERRCLS_ADD_RES,
+                  (ErrVal)ENBU014, (ErrVal)0, "SGetMsg() failed");
+         }
+#endif /*  ERRCLASS & ERRCLS_ADD_RES  */
+         RETVALUE(ret1);
+      }
+   switch(pst->selector)
+   {
+      case NBU_SEL_LC:
+#ifdef LCNBU
+        ret1 = cmPkNotifyPlmnInfo(msg, EVTNBUUPDATEPLMNINFO, mBuf);
+#if(ERRCLASS & ERRCLS_ADD_RES)
+         if(ret1 != ROK)
+         {
+            SPutMsg(mBuf);
+            SLogError(pst->srcEnt, pst->srcInst, pst->srcProcId,
+                  __FILE__, __LINE__, (ErrCls)ERRCLS_ADD_RES,
+                  (ErrVal)ENBU015, (ErrVal)ret1, "Packing failure");
+            RETVALUE( ret1 );
+         }
+#endif /*  ERRCLASS & ERRCLS_ADD_RES  */
+         break;
+#endif
+#ifdef LWLCNBU
+      case NBU_SEL_LWLC:
+         CMCHKPKLOG(cmPkPtr, (PTR)msg, mBuf, ENBU016, pst);
+         break;
+#endif
+     default:
+         break;
+   }
+   pst->event = (Event)EVTNBUUPDATEPLMNINFO;
+   RETVALUE(SPstTsk(pst,mBuf));
+}
+
+#ifdef LCNBU
+/*
+ *
+ *    Fun:     cmUnPkNotifyPlmnInfo
+ *
+ *    Desc:    unpack the primitive NbuNotifyPlmnInfo
+*
+ *    Ret:    ROK  -ok
+ *
+ *    Notes:    None
+ *
+ *    File:
+ *
+ */
+
+#ifdef ANSI
+PRIVATE S16 cmUnPkNotifyPlmnInfo
+(
+ NbuNotifyPlmnInfo *msg,
+ Buffer *mBuf
+ )
+#else
+PRIVATE S16 cmUnPkNotifyPlmnInfo(msg, mBuf)
+NbuNotifyPlmnInfo *msg;
+Buffer *mBuf;
+#endif
+{
+   TRC3(cmUnPkNotifyPlmnInfo)
+   RETVALUE(ROK);
+}
+#endif
+
+/*
+ *
+ *    Fun:    cmUnPkNbuNotifyPlmnInfo
+ *
+ *    Desc:    unpack the NbuNotifyPlmnInfo Msg
+ *
+ *    Ret:    ROK  -ok
+ *
+ *    Notes:    None
+ *
+ *    File:
+ *
+ */
+
+#ifdef ANSI
+PUBLIC S16 cmUnPkNbuNotifyPlmnInfo
+(
+ NbuNotifyPlmnInfoHdl func,
+ Pst *pst,
+ Buffer *mBuf
+ )
+#else
+PUBLIC S16 cmUnPkNbuNotifyPlmnInfo(func, pst, mBuf)
+NbuNotifyPlmnInfoHdl  func;
+Pst *pst;
+Buffer *mBuf;
+#endif
+{
+#ifdef LWLCNBU
+   S16 ret1 = ROK;
+   NbuNotifyPlmnInfo *msg = NULLP;
+#else
+   NbuNotifyPlmnInfo msg;
+#endif
+
+   TRC3(cmUnPkNbuNotifyPlmnInfo)
+      switch(pst->selector)
+      {
+#ifdef LCNBU
+         case NBU_SEL_LC:
+            ret1 = cmUnPkNotifyPlmnInfo((NbuNotifyPlmnInfo *)&msg,mBuf);
+#if(ERRCLASS & ERRCLS_DEBUG)
+            if(ret1 != ROK)
+            {
+               SPutMsg(mBuf);
+               SLogError(pst->dstEnt, pst->dstInst, pst->dstProcId,
+                     __FILE__, __LINE__, (ErrCls)ERRCLS_DEBUG,
+                     (ErrVal)ENBU024, (ErrVal)ret1, "Unpacking failure");
+               RETVALUE( ret1 );
+            }
+#endif /*  ERRCLASS & ERRCLS_DEBUG   */
+            break;
+#endif
+#ifdef LWLCNBU
+         case  NBU_SEL_LWLC:
+            CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &msg, mBuf, (ErrVal)ENBU025, pst);
+            break;
+#endif
+         default:
+            break;
+      }
+
+   SPutMsg(mBuf);
+#ifdef LWLCNBU
+   ret1 = (*func)(pst, msg);
+   SPutSBuf(pst->region, pst->pool, (Data *) msg, sizeof(NbuNotifyPlmnInfo));
+   RETVALUE(ret1);
+#else
+   RETVALUE((*func)(pst, &msg));
+#endif
+}
+
 /********************************************************************30**
 
-         End of file:     
+         End of file:
 
 *********************************************************************31*/
