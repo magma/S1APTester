@@ -3130,7 +3130,7 @@ PRIVATE Void handleEsmInformationRsp(ueEsmInformationRsp_t* data)
    insertUeCb(data->ue_Id, 0, 0, ueIdCb);
    uetMsg->msgType = UE_ESM_INFORMATION_RSP_TYPE;
    ueEsmInfoRsp = &uetMsg->msg.ueEsmInformationRsp;
-   ueEsmInfoRsp->ueId    = data->ue_Id;
+   ueEsmInfoRsp->ueId = data->ue_Id;
    ueEsmInfoRsp->tId = data->tId;
    if(data->pdnAPN_pr.pres == TRUE)
    {
