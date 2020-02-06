@@ -1841,6 +1841,10 @@ PRIVATE S16 ueAppEsmHdlOutUeEvnt(CmNasEvnt *evnt, UeCb *ueCb)
        /*esmMsg->bearerId = 6;*/
       ret = ueAppUtlFndEsmCb(&esmCb, esmMsg->bearerId, UE_ESM_BID_KEY, ueCb);
    }
+   else if (esmMsg->msgType == CM_ESM_MSG_ESM_INFO_RSP)
+   {
+     ret = ueAppUtlFndEsmCb(&esmCb, esmMsg->prTxnId, UE_ESM_TRANS_KEY, ueCb);
+   }
    else
    {
       ret = ueAppUtlAddEsmCb(&esmCb, ueCb);
@@ -6970,8 +6974,9 @@ PRIVATE S16 ueAppEsmHndlIncEsmInfoReq
    esmCb->pState = UE_ESM_ST_PROC_TXN_INACTIVE;
    /* send ESM Information Indication to user */
    tfwMsg = (UetMessage*)ueAlloc(sizeof(UetMessage));
-   tfwMsg->msg.ueEsmInformationReq.ueId                        = ueCb->ueId;
+   tfwMsg->msg.ueEsmInformationReq.ueId = ueCb->ueId;
    tfwMsg->msgType = UE_ESM_INFORMATION_REQ_TYPE;
+   tfwMsg->msg.ueEsmInformationReq.tId = evnt->m.esmEvnt->prTxnId;
    ret = ueSendToTfwApp(tfwMsg, &ueAppCb->fwPst); 
    if (ret != ROK)
    {
@@ -8988,6 +8993,7 @@ PRIVATE S16 ueAppUtlBldEsmInformationRsp
    /*Fill mandatory IE's*/
    /* EPS barer ID IE*/
    msg->bearerId = 0;
+   msg->prTxnId = ueEsmInformationRsp->tId;
 
    /* PDN connectivity request message idenmtity*/
    msg->msgType = CM_ESM_MSG_ESM_INFO_RSP;

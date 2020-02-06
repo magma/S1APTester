@@ -2045,6 +2045,7 @@ PUBLIC S16 sendUeEsmInformationReqToTstCntlr
    FW_ALLOC_MEM(fwCb, &tfwEsmInformationReq , sizeof(ueEsmInformationReq_t));
 
    tfwEsmInformationReq->ue_Id = ueEsmInfoReq->msg.ueEsmInformationReq.ueId;
+   tfwEsmInformationReq->tId = ueEsmInfoReq->msg.ueEsmInformationReq.tId;
    (fwCb->testConrollerCallBack)(UE_ESM_INFORMATION_REQ, tfwEsmInformationReq, 
          sizeof(ueEsmInformationReq_t));
 
