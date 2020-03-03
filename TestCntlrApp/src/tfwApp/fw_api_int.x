@@ -10,14 +10,14 @@
 /**********************************************************************
 
      Name:     S1SIM TFW API Interface
-  
+
      Type:     C header file
-  
+
      Desc:     This file contains the structures for Test Framework Interface.
 
      File:     fw_api_int.x
 
-     Prg:      
+     Prg:
 
 **********************************************************************/
 
@@ -260,7 +260,7 @@ typedef enum nbCfg_FailCause
    ENBAPP_CFG_FAILED,
    LSAP_BINDING_FAILED,
    PCAP_CFG_FAILED,
-   UNKNOWN_ERR  
+   UNKNOWN_ERR
 }NbCfgFailCause;
 
 typedef struct fail_Cause
@@ -278,7 +278,7 @@ typedef struct time_ToWaitIe
 
 typedef enum S1Setup_Res
 {
-  S1_SETUP_SUCCESS, 
+  S1_SETUP_SUCCESS,
   S1_SETUP_FAILED
 }S1_setp_Result;
 
@@ -517,7 +517,7 @@ typedef struct Plmn_List
 
 /* security mode command indication optional parameters*/
 
-/* typedef struct nas_Cyph_Cfg,typedef struct nas_Int_prot_cfg and typedef struct kasme 
+/* typedef struct nas_Cyph_Cfg,typedef struct nas_Int_prot_cfg and typedef struct kasme
  * is already defined */
 
 typedef struct Knas_Enc
@@ -627,7 +627,7 @@ typedef struct Shared_Key
 
 /* ue app config typedef structure feilds optional parameters*/
 
-typedef struct Trf_Gen_Ip_Addr 
+typedef struct Trf_Gen_Ip_Addr
 {
    Bool pres;
    U32 trf_gen_ip_addr;
@@ -757,10 +757,10 @@ typedef struct ueSecModeCmdInd
    U8 ue_Id;
    U8 nas_cyp_cfg;
    U8 nas_int_prot_cfg;
-   U8 kasme[MAX_KASME_KEY];  
-   U8 knas_enc[MAX_NAS_ENC_KEY];  
-   U8 knas_int[MAX_NAS_INT_KEY];  
-   U8 knas_Vrfy_Sts;    
+   U8 kasme[MAX_KASME_KEY];
+   U8 knas_enc[MAX_NAS_ENC_KEY];
+   U8 knas_int[MAX_NAS_INT_KEY];
+   U8 knas_Vrfy_Sts;
 }ueSecModeCmdInd_t;
 
 typedef struct ueSecModeComplete
@@ -968,7 +968,7 @@ typedef struct _fwCriticalityDiag
    U32 procedureCriticality;
    FwCriticalityDiag_IE_Lst ieLst;
 }FwCriticalityDiag;
-typedef struct fwNbErrIndMsg 
+typedef struct fwNbErrIndMsg
 {
    U8   isUeAssoc;
    U8   ue_Id;
@@ -979,7 +979,7 @@ typedef struct fwNbErrIndMsg
 typedef struct _pdnConRejInfo
 {
    U8 epsBearerId;
-   U8 cause; 
+   U8 cause;
 }pdnConRejInfo_t;
 
 typedef struct _ue_Pdn_Info
@@ -990,7 +990,7 @@ typedef struct _ue_Pdn_Info
    ue_Esm_ApnAmbr apnAmbr;
 }Ue_Pdn_Info;
 
-typedef struct uepdnConRsp 
+typedef struct uepdnConRsp
 {
    U8 ue_Id;
    U8 status;
@@ -1044,7 +1044,7 @@ typedef struct ueTauReq
    U8 ue_Id;
    ueMtmsi_t ueMtmsi;
    Eps_Updt_Type type;
-   U8 Actv_flag;   
+   U8 Actv_flag;
 }ueTauReq_t;
 
 typedef struct ueTauAccept
@@ -1094,47 +1094,47 @@ typedef struct _ueEsmTftPfIpv6
 typedef struct _ueEsmTftProtIden
 {
    U8    pres;
-   U8           protType;  
+   U8           protType;
 }ue_Esm_Tft_Prot_Iden;
 
 
 typedef struct _ueEsmTftPort
 {
    U8    pres;
-   U16          port;  
+   U16          port;
 }ue_Esm_Tft_Port;
 
 typedef struct _ueEsmTftPortRange
 {
    U8           pres;
-   U16          rangeLow;  
-   U16          rangeHigh;  
+   U16          rangeLow;
+   U16          rangeHigh;
 }ue_Esm_Tft_Port_Range;
 
 typedef struct _ueEsmTftSecParam
 {
    U8          pres;
-   U8          params[UE_ESM_IP_SEC_SIZE];  
+   U8          params[UE_ESM_IP_SEC_SIZE];
 }ue_Esm_Tft_Sec_Param;
 
 typedef struct _ueEsmTftTos
 {
    U8   pres;
-   U8          tos;  
-   U8          mask;  
+   U8          tos;
+   U8          mask;
 }ue_Esm_Tft_Tos;
 
 typedef struct _ueEsmTftIpv6FlowLbl
 {
    U8          pres;
-   U8          buf[UE_ESM_IPV6_FLOW_LABEL_SIZE];  
+   U8          buf[UE_ESM_IPV6_FLOW_LABEL_SIZE];
 }ue_Esm_Tft_Ipv6_FlowLbl;
 
 typedef struct _ueEsmTftPf
 {
-   U8            pres;         /* present or Not*/ 
-   U8                   id;           /* Packet Filter idenntifier*/   
-   U8                   dir;          /* Direction */ 
+   U8            pres;         /* present or Not*/
+   U8                   id;           /* Packet Filter idenntifier*/
+   U8                   dir;          /* Direction */
    U8                   preced;       /* Precedence */
    U8                  len;          /* Length */
    U32                 ipv4Mask;
@@ -1161,18 +1161,18 @@ typedef struct _ueEsmTftParam
 {
    ue_Esm_Tft_Param_Type      paramType;
    U8                     len;
-   U8                     buf [UE_ESM_TFT_MAX_PARAM_BUF]; 
+   U8                     buf [UE_ESM_TFT_MAX_PARAM_BUF];
 }ue_Esm_Tft_Param;
 typedef struct _ueEsmTft
 {
-   U8    pres;                                           /* Present or not */  
-   U8    len;  
+   U8    pres;                                           /* Present or not */
+   U8    len;
    U8    opCode;                             /* TFT Operation Code*/
    U8    eBit ;                                        /* param List presnt */
    U8    noOfPfs;                                      /* No  Of packet Filters */
    U8    noOfParams;                                   /* No Of packet Filters */
    ue_Esm_Tft_Pf  *pfList;  /* Pf List */
-   ue_Esm_Tft_Param      *params;       /* Tft Params */  
+   ue_Esm_Tft_Param      *params;       /* Tft Params */
 }ue_Esm_Tft;
 
 typedef struct ueBearerAllocReq
@@ -1220,7 +1220,7 @@ typedef struct _EsmTxnId
 typedef struct ueActDedBearCtxtReq
 {
    U8                   ue_Id;
-   U8                   bearerId;  
+   U8                   bearerId;
    ue_Esm_Eps_Qos       epsQos;
    ue_Esm_Tft           tft;
    ue_Esm_TxnId         txnId;
@@ -1235,27 +1235,27 @@ typedef struct ueActDedBearCtxtReq
 typedef struct ueActDedBearCtxtAcc
 {
    U8                   ue_Id;
-   U8                   bearerId;  
+   U8                   bearerId;
 }UeActDedBearCtxtAcc_t;
 
 typedef struct ueActDedBearCtxtRej
 {
    U8                   ue_Id;
    U8                   bearerId;
-   U8                   esmCause;  
+   U8                   esmCause;
 }UeActDedBearCtxtRej_t;
 
 typedef struct ueDeActvBearCtxtReq
 {
    U8 ue_Id;
-   U8 bearerId; 
+   U8 bearerId;
    U8 esmCause;
 }UeDeActvBearCtxtReq_t;
 
 typedef struct ueDeActvBearCtxtAcc
 {
    U8 ue_Id;
-   U8 bearerId; 
+   U8 bearerId;
 }UeDeActvBearCtxtAcc_t;
 
 typedef enum
@@ -1267,7 +1267,7 @@ typedef enum
    TFW_CAUSE_MISC
 }NasNonDelCauseType;
 
-typedef enum 
+typedef enum
 {
    TfwCauseRadioNwunspecifiedEnum,
    TfwCauseRadioNwtx2relocoverall_expiryEnum,
@@ -1282,7 +1282,7 @@ typedef enum
    TfwCauseRadioNwcell_not_availableEnum
 }NasNonDelCauseValRadioNw;
 
-typedef enum 
+typedef enum
 {
         SztCauseNasnormal_releaseEnum,
         SztCauseNasauthentication_failureEnum,
@@ -1300,14 +1300,14 @@ typedef struct ueNasNonDel
 {
    U8 ue_Id;
    Bool flag;
-   NasNonDelCauseType causeType;       
+   NasNonDelCauseType causeType;
    U32 causeVal;
 }UeNasNonDel;
 typedef struct ueInitCtxtSetupFail
 {
    U8 ue_Id;
    Bool flag;
-   U8 causeType;       
+   U8 causeType;
    U32 causeVal;
 }ueInitCtxtSetupFail;
 typedef struct ueDropInitCtxtSetup
@@ -1331,7 +1331,7 @@ typedef struct ueDelayUeCtxtRelCmp
 typedef struct ueSetCtxtRelForInitCtxtSetup
 {
    U8 ue_Id;
-   U8 causeType;       
+   U8 causeType;
    U32 causeVal;
    Bool flag;
 }UeSetCtxtRelForInitCtxtSetup;
@@ -1342,7 +1342,7 @@ typedef struct ueNasNonDelRsp
 
 typedef struct _num_Of_Enbs
 {
-   Bool pres; 
+   Bool pres;
    U8   numOfEnb;
 }num_Of_Enbs_t;
 
@@ -1495,7 +1495,7 @@ typedef struct UeAuthRejInd
 typedef struct UeEmmStatus
 {
    U8 ue_Id;
-   U8 cause;   
+   U8 cause;
 }ueEmmStatus_t;
 
 typedef struct UeEsmInformationReq
@@ -1516,7 +1516,9 @@ typedef struct multiEnbCfgParam
    U32 tac;
    U8 plmn_id[MAX_PLMN_ID];
    U32 enbType;
+   U8  plmn_length;
 }multiEnbCfgParam_t;
+
 typedef struct MultiEnbConfigReq
 {
    U32 numOfEnbs;
