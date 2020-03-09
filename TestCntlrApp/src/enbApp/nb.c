@@ -679,7 +679,7 @@ NbConfigReq   *cfg
    U16 smEvent;
    U32 plmnVal;
    U8  plmnLen;
-   U8  tmpPlmn[NB_THREE];
+   U8  tmpPlmn[NB_THREE] = {0};
    SztPLMNidentity pLMNidentity;
 
    NB_LOG_ENTERFN(&nbCb);
