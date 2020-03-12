@@ -8,7 +8,7 @@
 
 /**********************************************************************
 
-    Name:  LTE S1SIM - ENODEB Application Module 
+    Name:  LTE S1SIM - ENODEB Application Module
 
      Type:     C include file
 
@@ -16,9 +16,9 @@
 
     File:  nb.h
 
-    Sid:   
+    Sid:
 
-    Prg:   
+    Prg:
 
 **********************************************************************/
 
@@ -92,7 +92,7 @@ extern "C" {
 #if (defined(NB_DBG_CIRLOG) || defined(SS_SEGV_SIG_HDLR))
 #include "wr_dbg_log.h"
 #endif /* WR_DBG_LOGS */
-#ifdef RLOG_REDIRECT 
+#ifdef RLOG_REDIRECT
 #define NB_REDIRECT_RLOGS 1
 #endif /* NB_DBG_LOGS */
 typedef U32                  NbMmeId;
@@ -105,12 +105,12 @@ typedef U32                  NbMmeId;
 #define NB_SRC_PROC_ID                 1
 #define NB_DST_PROC_ID                 0
 #define NB_MAX_PLMNS_PER_MME 32
-#define NB_MAX_GRPS_PER_MME  256  
-#define NB_MAX_CODES_PER_MME 256 
+#define NB_MAX_GRPS_PER_MME  256
+#define NB_MAX_CODES_PER_MME 256
 
 #define NB_MAX_GUMMEI_PER_MME 256
 #define NB_PLMNID_IE_LEN     3          /* Octets */
-#define NB_LAC_IE_LEN        2    
+#define NB_LAC_IE_LEN        2
 #define NB_NUM_TQENTRY                 100
 #define NB_MAX_SAPS                    10
 #define NB_MEM_REGION                  0
@@ -185,8 +185,8 @@ typedef U32                  NbMmeId;
 #define NB_200   200
 
 /* Maximum PAGING tti reference time. This is used when difference is taken
- * between the current time and the time in which paging message has been 
- * received. Once we reach this value, will be starting from zero. 
+ * between the current time and the time in which paging message has been
+ * received. Once we reach this value, will be starting from zero.
  * */
 #define NB_PAGING_TTI_TIME        10240
 #define NB_DEFAULT_PAGING_PRI        255
@@ -249,11 +249,11 @@ typedef struct _nbDelayUeCtxtRelCmpCb
  CmTimer   timer;
 }NbDelayUeCtxtRelCmpCb;
 
-typedef enum nbTmr 
+typedef enum nbTmr
 {
    NB_TMR_SZT_SAP_BND = 1,
    NB_TMR_EGT_SAP_BND,
-   NB_TMR_INACTIVITY, 
+   NB_TMR_INACTIVITY,
    NB_TMR_S1_RELOC_TMR,
    NB_TMR_S1_OVRL_TMR,
    NB_TMR_MME_SETUP_RSP,
@@ -287,7 +287,7 @@ typedef struct _nbUeTunInfo
    CmTptAddr sgwAddr;
 }NbUeTunInfo;
 
-struct _nbUeCb 
+struct _nbUeCb
 {
    CmHashListEnt ueHashEnt;
    U32 ueId;
@@ -332,7 +332,7 @@ typedef struct NbLiSapCb
    CmTimer                   timer;
    U8                        bndRetryCnt;
    U8                        maxBndRetry;
-   TmrCfg                    bndTmr;    
+   TmrCfg                    bndTmr;
 } NbLiSapCb;
 typedef struct _nbPlmnId
 {
@@ -425,7 +425,8 @@ typedef struct _EnbCb
    U32 tac;
    NbPlmnId plmnId;
    U32 enbType;
-}EnbCb; 
+   U8 plmn_length;
+} EnbCb;
 typedef struct _mutilEnbCfgInfo
 {
    Bool pres;
@@ -470,16 +471,16 @@ typedef struct _nbCb
    Bool                      x2HoDone;
 #endif
 }NbCb;
-/** @brief This structure is temparerly store on stack which contains 
+/** @brief This structure is temparerly store on stack which contains
  * UE specific Paging Message information.
  */
 typedef struct _nbPagingMsgInfo
 {
-   U8      ueIdenType;    /*!< UE-identity in paging record is 
+   U8      ueIdenType;    /*!< UE-identity in paging record is
                                either IMSI type or S-TMSI type */
    union
    {
-      NbuSTmsi  sTMSI;      /*!< S-TMSI of the UE*/ 
+      NbuSTmsi  sTMSI;      /*!< S-TMSI of the UE*/
       U8       imsi[22];   /*!< IMSI of the UE. IMSI size is
                              min-6 Integer digits and
                              max-21 Integer Digits.As we are using
@@ -490,7 +491,7 @@ typedef struct _nbPagingMsgInfo
    Bool    pagingDrxPres;   /*!< set to TRUE, if UE specific DRX cycle present,
                                  otherwise set to FALSE */
    U8      ueSpcPagDrx; /* UE specific DRX Cycle */
-   U8      domIndType;   /*!< Domain indication is either PS or CS 
+   U8      domIndType;   /*!< Domain indication is either PS or CS
                               which is received thru S1-AP paging message*/
    U8      pagPriority;  /*!< Priority of paging Message */
 } NbPagingMsgInfo;
@@ -515,7 +516,7 @@ typedef struct _nbResetAck
 #define NB_GET_S1AP_CON_ID(_suConId,_ptr) {\
        _suConId = ((nbCb.cellId & 0xFFFF) << 16)\
                   |(_ptr->ueId & 0xFFFF);\
-} 
+}
 
 #define NB_FREE(_buf, _size)          \
 {\
@@ -534,10 +535,10 @@ typedef struct _nbResetAck
 #ifndef NB_DBG_CIRLOG
 #define NB_PRNT_BUF                    nbCb.init.prntBuf
 #else
-/* Currently passing index as zero, when multiple system tasks are used then 
+/* Currently passing index as zero, when multiple system tasks are used then
  * retrieve the corresponding circular buffer for that system task.
  */
-#define NB_PRNT_BUF                    nbCb.init.prntCirBuf, MAX_LOG_BUF_SIZE 
+#define NB_PRNT_BUF                    nbCb.init.prntCirBuf, MAX_LOG_BUF_SIZE
 #endif /* NB_DBG_CIRLOG */
 #define DBGMASK_SM                     1
 #define NB_EVEBASE                     0
@@ -551,7 +552,7 @@ typedef struct _nbResetAck
 #define NB_DFLT_K_VAL_FOR_SCH 1
 
 /* ccpu00133012:The UL Carrier Frequency is derived for DL Carrier Frequency. The
-   difference is sepc defined gievn in 36.101. But this specific requirement is to 
+   difference is sepc defined gievn in 36.101. But this specific requirement is to
    cater the KT requirement.
 */
 #define NB_SET_ZERO(_buf, _size) \
@@ -564,7 +565,7 @@ typedef struct _nbResetAck
       {                                                         \
                NB_SET_ZERO((*_buf), _size);                           \
       } \
-} 
+}
 #define NB_FREEMBUF(_mBuf)                            \
    do{                                                   \
       if (_mBuf != NULLP)                                \
@@ -597,7 +598,7 @@ typedef struct _nbResetAck
 *************************************************************************/
 #define NB_ERROR 1
 
-#ifdef NB_DBG_CIRLOG 
+#ifdef NB_DBG_CIRLOG
 #define NB_DBGP(_msgClass, _arg) \
 {\
    DBGP_CIRLOG(&(nbCb.init), NBLAYERNAME": ", _msgClass, _arg); \
@@ -637,7 +638,7 @@ typedef struct _nbResetAck
    }
 #endif /* (NB_SM_LOG_TO_FILE && DEBUGP) */
 #else
-#define NB_DBGP(_msgClass, _arg) 
+#define NB_DBGP(_msgClass, _arg)
 #endif
 #endif /* NB_DBG_CIRLOG */
 /* initialize the memCp & allocate memory for the event structure */
@@ -854,7 +855,7 @@ typedef enum
    NB_DIAG_NA
 } NbDiagSplArg;
 
-/** 
+/**
  * @details Macro definition for WR level 0 logs
 */
 #define NB_DIAG_LVL0(_tknId, _splArgEnum, _splArg, _string, _arg1, _arg2, _arg3, _arg4)                                                         \
@@ -865,7 +866,7 @@ typedef enum
    }                                                                                                                                            \
 }
 
-/** 
+/**
  * @details Macro definition for WR level 1 logs
 */
 #define NB_DIAG_LVL1(_tknId, _splArgEnum, _splArg, _string, _arg1, _arg2, _arg3, _arg4)                                                         \
@@ -876,7 +877,7 @@ typedef enum
    }                                                                                                                                            \
 }
 
-/** 
+/**
  * @details Macro definition for WR level 2 logs
 */
 #define NB_DIAG_LVL2(_tknId, _splArgEnum, _splArg, _string, _arg1, _arg2, _arg3, _arg4)                                                         \
@@ -887,8 +888,8 @@ typedef enum
    }                                                                                                                                            \
 }
 
-/** 
- * @details Macro definition for WR  level 3 logs 
+/**
+ * @details Macro definition for WR  level 3 logs
 */
 #define NB_DIAG_LVL3(_tknId, _splArgEnum, _splArg, _string, _arg1, _arg2, _arg3, _arg4)                                                         \
 {                                                                                                                                               \
@@ -898,7 +899,7 @@ typedef enum
    }                                                                                                                                            \
 }
 
-/** 
+/**
  * @details Macro definition for WR  level 4 logs
 */
 #define NB_DIAG_LVL4(_tknId, _splArgEnum, _splArg, _string, _arg1, _arg2, _arg3, _arg4)                                                         \
@@ -909,7 +910,7 @@ typedef enum
    }                                                                                                                                            \
 }
 
-/** 
+/**
  * @details Macro definition for TeNB APP Varible length logs
 */
 #define NB_DIAG_VAR(_tknId, _splArgEnum, _splArg, _string, _stringPtr)                                                         \

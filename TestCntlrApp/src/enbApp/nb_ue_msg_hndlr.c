@@ -144,7 +144,7 @@ PUBLIC S16 NbHandleInitialUeMsg
 
    establishCause = initialUeMsg->rrcCause;
 
-   stmsi.pres  = initialUeMsg->stmsi.pres; 
+   stmsi.pres  = initialUeMsg->stmsi.pres;
    stmsi.mmec  = initialUeMsg->stmsi.mmec;
    stmsi.mTMSI = initialUeMsg->stmsi.mTMSI;
 
@@ -171,7 +171,7 @@ PUBLIC S16 NbHandleInitialUeMsg
 #ifdef MULTI_ENB_SUPPORT
    datEvt.enbId = ueCb->enbId;
 #endif
- 
+
    if (ROK != cmHashListInsert(&(nbCb.ueCbLst),(PTR)ueCb,
                      (U8 *) &ueCb->ueId,sizeof(U8)))
    {
@@ -233,7 +233,7 @@ PRIVATE S16 nbS1apBldInitUePdu
 
    NB_LOG_DEBUG(&nbCb, "Building Initial UE Message");
 
-   if (cmAllocEvnt(sizeof(S1apPdu), SZ_MEM_SDU_SIZE, &nbCb.mem, 
+   if (cmAllocEvnt(sizeof(S1apPdu), SZ_MEM_SDU_SIZE, &nbCb.mem,
             (Ptr *)&initUePdu) != ROK)
    {
       NB_LOG_ERROR(&nbCb, "Failed to allocate memory. cmAllocEvnt Failed");
@@ -260,15 +260,15 @@ PRIVATE S16 nbS1apBldInitUePdu
    }
    /* IE1 - Filling enb s1ap id */
    ie = &initUeMsg->protocolIEs.member[ieIdx++];
-   nbFillTknU8(&(ie->pres), PRSNT_NODEF);     
+   nbFillTknU8(&(ie->pres), PRSNT_NODEF);
    nbFillTknU32(&(ie->id), Sztid_eNB_UE_S1AP_ID);
    nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);
-   nbFillTknU32(&(ie->value.u.sztENB_UE_S1AP_ID), 
+   nbFillTknU32(&(ie->value.u.sztENB_UE_S1AP_ID),
          ueCb->s1ConCb->enb_ue_s1ap_id);
 
    /* IE2 - Filling nas pdu */
    ie = &initUeMsg->protocolIEs.member[ieIdx++];
-   nbFillTknU8(&(ie->pres), PRSNT_NODEF);     
+   nbFillTknU8(&(ie->pres), PRSNT_NODEF);
    nbFillTknU32(&(ie->id), Sztid_NAS_PDU);
    nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);
    nbFillTknStrOSXL(&(ie->value.u.sztNAS_PDU), nasPdu->len, nasPdu->val,
@@ -276,10 +276,10 @@ PRIVATE S16 nbS1apBldInitUePdu
 
    /* IE3 - Filling TAI */
    ie = &initUeMsg->protocolIEs.member[ieIdx++];
-   nbFillTknU8(&(ie->pres), PRSNT_NODEF);     
+   nbFillTknU8(&(ie->pres), PRSNT_NODEF);
    nbFillTknU32(&(ie->id), Sztid_TAI);
    nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);
-   nbFillTknU8(&(ie->value.u.sztTAI.pres), PRSNT_NODEF);     
+   nbFillTknU8(&(ie->value.u.sztTAI.pres), PRSNT_NODEF);
    nbSztFillPLMNId(initUePdu, &tai->plmnId, &(ie->value.u.sztTAI.pLMNidentity));
    nbSztFillTAC(tai->tac, initUePdu, &(ie->value.u.sztTAI.tAC));
 
@@ -301,7 +301,7 @@ PRIVATE S16 nbS1apBldInitUePdu
    nbFillTknU8(&(ie->pres), PRSNT_NODEF);
    nbFillTknU32(&(ie->id), Sztid_RRC_Establishment_Cause);
    nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum );
-   nbFillTknU32(&(ie->value.u.sztRRC_Establishment_Cause), 
+   nbFillTknU32(&(ie->value.u.sztRRC_Establishment_Cause),
          establishCause);
 
    /*IE6 - Filling STMSI */
@@ -314,7 +314,7 @@ PRIVATE S16 nbS1apBldInitUePdu
 
       nbFillTknU8(&(ie->value.u.sztS_TMSI.pres), PRSNT_NODEF);
       nbFill2TknStr4(&(ie->value.u.sztS_TMSI.mMEC), 1, (U8 *)&sTMSI.mmec);
-      nbFillTknStrOSXL1(&(ie->value.u.sztS_TMSI.m_TMSI), 4, sTMSI.mTMSI, 
+      nbFillTknStrOSXL1(&(ie->value.u.sztS_TMSI.m_TMSI), 4, sTMSI.mTMSI,
                                                              &initUePdu->memCp);
       ie->value.u.sztS_TMSI.iE_Extns.noComp.pres = NOTPRSNT;
    }
@@ -325,7 +325,7 @@ PRIVATE S16 nbS1apBldInitUePdu
    RETVALUE(ROK);
 }
 
-PUBLIC S16 nbSendErabsRelInfo 
+PUBLIC S16 nbSendErabsRelInfo
 (
  NbErabRelLst *erabInfo
 )
@@ -337,7 +337,7 @@ PUBLIC S16 nbSendErabsRelInfo
    msg->ueId = erabInfo->enbUeS1apId;
    /* pack and send to ue */
    NB_ALLOC(&msg->erabInfo, sizeof(NbuErabRelLst));
-   msg->erabInfo->numOfErab = erabInfo->numOfErabIds; 
+   msg->erabInfo->numOfErab = erabInfo->numOfErabIds;
    NB_ALLOC(&msg->erabInfo->rabCbs, (erabInfo->numOfErabIds * sizeof(NbuErabRelCb)));
 
    for(idx = 0; idx < erabInfo->numOfErabIds; idx++)
@@ -371,7 +371,7 @@ PUBLIC S16 nbSendErabsRelInfo
    RETVALUE(ROK);
 }
 
-PUBLIC S16 nbSendErabsInfo 
+PUBLIC S16 nbSendErabsInfo
 (
  NbUeCb *ueCb,
  NbErabLst *erabInfo,
@@ -388,7 +388,7 @@ PUBLIC S16 nbSendErabsInfo
    msg->ueRadCapRcvd = ueRadCapRcvd;
    /* pack and send to ue */
    NB_ALLOC(&msg->erabInfo, sizeof(NbuErabLst));
-   msg->erabInfo->numOfErab = erabInfo->noOfComp; 
+   msg->erabInfo->numOfErab = erabInfo->noOfComp;
    NB_ALLOC(&msg->erabInfo->rabCbs, (erabInfo->noOfComp * sizeof(NbuErabCb)));
 
    for(idx = 0; idx < erabInfo->noOfComp; idx++)
@@ -492,7 +492,7 @@ PUBLIC S16 NbHandleUeIpInfoRsp(NbuUeIpInfoRsp *rsp)
    }
    /* set the datrcvd flag for ue */
    nbDamSetDatFlag(ueId);
-   RETVALUE(nbCreateUeTunnReq(ueId, ueIpAddr,bearerId)); 
+   RETVALUE(nbCreateUeTunnReq(ueId, ueIpAddr,bearerId));
 }
 
 PUBLIC Void nbHandleUeIpInfoReq(U8 ueId,U8 bearerId)
@@ -529,8 +529,8 @@ PUBLIC S16 nbNotifyPlmnInfo(U8 ueId, NbPlmnId plmnId )
   }
   else
   {
-     msg->plmnId[1] =(((plmnId.mnc[0])<<4) | (plmnId.mcc[2]));
-     msg->plmnId[2] =(((plmnId.mnc[2])<<4) | (plmnId.mnc[1]));
+    msg->plmnId[1] = (((plmnId.mnc[2]) << 4) | (plmnId.mcc[2]));
+    msg->plmnId[2] = (((plmnId.mnc[1]) << 4) | (plmnId.mnc[0]));
   }
   /* Send the PLMN Info to UEAPP */
   ret = cmPkNbuNotifyPlmnInfo(&nbCb.ueAppPst, msg);
