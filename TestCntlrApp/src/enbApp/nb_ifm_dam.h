@@ -137,7 +137,7 @@ typedef struct NbDamTunInfo
    NbEgtpTeid                lclTeid;
    U32                       pdnAddr;
    U8                        num_pf;
-   UlTft                     tft[MAX_TFT_PF];
+   TftPfs                    pfList[CM_MAX_PKT_FILTERS];
 } NbDamTnlInfo;
 
 /**

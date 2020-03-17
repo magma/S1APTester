@@ -205,9 +205,39 @@ typedef struct nbIpInfo
    CmHashListEnt             ueHashEnt;
    U8    drbId;
    U32   pdnAddr;
-   U8    num_pf;
-   UlTft tft[MAX_TFT_PF];
 }NbIpInfo;
+
+typedef struct {
+  U32 ipv4_addr;
+  U32 ipv4_addr_mask;
+} NbTftIpv4Addr;
+
+typedef struct nbPktFilterList
+{
+   CmLList       link;
+   U8            drbId;
+   U8            dir;             
+   U8            preced;          
+   NbTftIpv4Addr remIpv4Addr;
+   U16           locPort;
+   U16           locPortRangeLow;
+   U16           locPortRangeHigh;
+   U16           remPort;
+   U16           remPortRangeLow;
+   U16           remPortRangeHigh;
+   U8            proto_id;
+   U32           ipsecParamInd;
+   U8            srvClass;
+   // Component presence mask
+   U16           presence_mask;
+} NbPktFilterList; 
+
+typedef struct nbPdnCb
+{
+  U32       pdnAddr;
+  // List of TFT Packet Filters
+  CmLListCp tftPfList;
+} NbPdnCb; 
 
 typedef struct nbDamUeCb
 {
@@ -219,15 +249,10 @@ typedef struct nbDamUeCb
    U8                        dataRcvd;
    U32                       numTunnels;
    U32                       numDrbs;
-#if 0
-   NbDamDrbCb                *drbs[NB_DAM_MAX_DRBS];
-   NbIpInfo                  ipInfo[11];
-   U8                        numIps;
-   U16                       ueIdx;
-#else
-   CmHashListCp               drbs;
-   CmHashListCp               ipInfo;
-#endif
+   CmHashListCp              drbs;
+   CmHashListCp              ipInfo;
+   /*PDN Hash List*/
+   CmHashListCp              pdnCb;
 } NbDamUeCb;
 
 /** 

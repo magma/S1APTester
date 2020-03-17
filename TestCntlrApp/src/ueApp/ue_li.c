@@ -102,35 +102,21 @@ EXTERN S16 ueUiProcIpInfoReqMsg(UeCb * p_ueCb, U8 bearerId);
 EXTERN S16 ueAppBldAndSndIpInfoRspToNb(UeCb *ueCb,U8 bearerId, Pst *pst);
 EXTERN S16 UeLiNbuUeIpInfoReq(Pst *pst,NbuUeIpInfoReq  *p_ueMsg);
 EXTERN S16 ueSendUeIpInfoRsp(U8 ueId,U8 bearedId, S8 * ipAddr);
-EXTERN Void populateIpAddrStrFromUeCb(U8 *temp_ip, UeCb *ueCb,U8 bearerId,
-        BearType *bearerType, NbuUeIpInfoRsp*);
+EXTERN Void populateIpInfo(UeCb *ueCb,U8 bearerId, NbuUeIpInfoRsp*);
 
-PUBLIC S16 ueAppBldAndSndIpInfoRspToNb(UeCb *ueCb,U8 bearerId, Pst *pst);
 EXTERN S16 UeLiNbuPagingMsg(Pst *pst, UePagingMsg  *p_ueMsg);
 EXTERN S16 ueUiProcPagingMsg(UePagingMsg *p_ueMsg, Pst *pst);
 EXTERN S16 UeLiNbuUlRrcMsgDatRsp(Pst *pst, NbuUlRrcMsg *msg);
 EXTERN S16 ueSendUeRadCapInd(UeCb *ueCb);
 EXTERN S16 ueSendErabRelInd(NbuErabRelIndList *pErabRel, Pst *pst);
 PUBLIC S16 UeLiNbuErabRelInd(Pst *pst,NbuErabRelIndList *msg);
+
 PUBLIC S16 ueAppBldAndSndIpInfoRspToNb(UeCb *ueCb, U8 bearerId, Pst *pst)
 {
    S16 ret = ROK;
-   U8 ipAddrStr[20] = {0};
-   BearType bearerType = 0;
    NbuUeIpInfoRsp  *ueIpInfoRsp = NULLP;
-   U16 destPort = 0;
-   //populateIpAddrStrFromUeCb(ipAddrStr,ueCb,bearerId,&bearerType, &destPort);
    ueIpInfoRsp = (NbuUeIpInfoRsp *)ueAlloc(sizeof(NbuUeIpInfoRsp));  
-   populateIpAddrStrFromUeCb(ipAddrStr,ueCb,bearerId,&bearerType, ueIpInfoRsp);
-   ueIpInfoRsp->ueId = ueCb->ueId;
-   ueIpInfoRsp->bearerId = bearerId;
-   ueIpInfoRsp->berType =  bearerType;
-/*   if (destPort)
-   {
-     ueIpInfoRsp->tft.remotePort = destPort;
-   }
-*/
-   strcpy(ueIpInfoRsp->IpAddr, (S8*)ipAddrStr);
+   populateIpInfo(ueCb, bearerId, ueIpInfoRsp);
 
    ret = UeLiNbuSendUeIpInfo(pst,ueIpInfoRsp);
    RETVALUE(ret);

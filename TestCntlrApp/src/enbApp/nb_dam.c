@@ -34,6 +34,7 @@
 #include "nb_utils.h"
 #include "nb_log.h"
 #include "nb_traffic_handler.x" 
+#include "tft.h" 
 
 EXTERN S16 cmPkUeDelCfm(Pst*, U8);
 PRIVATE S16 nbDamLSapCfg(LnbMngmt *cfg, CmStatus *status);
@@ -443,6 +444,155 @@ U8                           ueId
    RETVALUE(ROK);
 }
 
+PRIVATE S16 nbSortAndAddPf
+(
+  NbPdnCb         *pdnCb,
+  NbPktFilterList *tftPf
+)
+{
+  NbPktFilterList *temp_pf = NULL;
+
+  tftPf->link.node = (PTR)tftPf; 
+  CmLList  *current = NULL; 
+  /* If tftPfList is empty, add the new tftPf
+   * else find the node(current) with precedence > than the new node
+   * and add the new node before the current*/
+  if ((CM_LLIST_FIRST_NODE(&pdnCb->tftPfList, current)) == NULLP)
+  {
+    cmLListAdd2Tail(&pdnCb->tftPfList, &tftPf->link);
+  }
+  else
+  {
+    while (current !=NULL)
+    {
+      temp_pf = (NbPktFilterList*)current->node;
+      if (temp_pf->preced < tftPf->preced)
+      { 
+        current = current->next;
+      } 
+    }
+    cmLListInsCrnt(&pdnCb->tftPfList, &tftPf->link); 
+  }
+  
+  RETVALUE(ROK);
+}
+
+PRIVATE S16 nbAddPfs
+(
+  NbPdnCb       *pdnCb,
+  NbDamTnlInfo  *tnlInfo
+)
+{    
+  U8 presence_mask = 0;
+  NbPktFilterList *tftPf = NULL;
+    
+  cmLListInit(&pdnCb->tftPfList);
+ 
+  for(U8 itrn = 0; itrn < tnlInfo->num_pf ; itrn++)
+  {
+    NB_ALLOC(&tftPf, sizeof(NbPktFilterList))
+    if (tftPf == NULLP) 
+    {
+      NB_LOG_ERROR(&nbCb, "Failed to allocate memory for NbPktFilterList");
+      RETVALUE(RFAILED);
+    }
+    tftPf->drbId = tnlInfo->tnlId.drbId;
+    tftPf->dir = tnlInfo->pfList[itrn].dir;
+    tftPf->preced = tnlInfo->pfList[itrn].preced;
+    presence_mask = tnlInfo->pfList[itrn].presenceMask;
+    if (presence_mask & IPV4_REM_ADDR_PKT_FLTR_MASK)
+    {
+      tftPf->remIpv4Addr.ipv4_addr_mask = tnlInfo->pfList[itrn].ipv4Mask;
+      tftPf->remIpv4Addr.ipv4_addr = tnlInfo->pfList[itrn].remoteIpv4;
+    }
+    if (presence_mask & PROTO_ID_PKT_FLTR_MASK)
+    {
+      tftPf->proto_id = tnlInfo->pfList[itrn].protId;
+    }
+    if (presence_mask & SNGL_LOC_PORT_PKT_FLTR_MASK)
+    {
+      tftPf->locPort = tnlInfo->pfList[itrn].localPort;
+    }
+    if (presence_mask & LOC_PORT_RNG_PKT_FLTR_MASK)
+    {
+      tftPf->locPortRangeLow = tnlInfo->pfList[itrn].locPortRangeLow;    
+      tftPf->locPortRangeHigh = tnlInfo->pfList[itrn].locPortRangeHigh;
+    }
+    if (presence_mask & SNGL_REM_PORT_PKT_FLTR_MASK)
+    {
+      tftPf->remPort = tnlInfo->pfList[itrn].remotePort;
+    }
+    if (presence_mask & REM_PORT_RNG_PKT_FLTR_MASK)
+    {
+      tftPf->remPortRangeLow = tnlInfo->pfList[itrn].remPortRangeLow;
+      tftPf->remPortRangeHigh = tnlInfo->pfList[itrn].remPortRangeHigh;
+    }
+    if (presence_mask & SECURITY_PARAM_PKT_FLTR_MASK)
+    {
+      tftPf->ipsecParamInd = tnlInfo->pfList[itrn].secParam;
+    }
+    if (presence_mask & SERV_N_CLASS_PKT_FLTR_MASK)
+    {
+      tftPf->srvClass = tnlInfo->pfList[itrn].tos;
+    }
+    tftPf->presence_mask = tnlInfo->pfList[itrn].presenceMask;
+
+    tftPf->link.node = (PTR)tftPf;
+
+    if (ROK != (nbSortAndAddPf(pdnCb,tftPf)))
+    {
+      NB_LOG_ERROR(&nbCb, "Failed to sort and add Packet Filters");
+      RETVALUE(RFAILED);
+    }
+    //cmLListAdd2Tail(&pdnCb->tftPfList, &tftPf->lnk);
+    //tftPf->lnk.node = (PTR)tftPf;
+  }
+  RETVALUE(ROK);
+}
+ 
+PRIVATE S16 nbAddPdnCb
+(
+  NbDamUeCb       *ueCb,
+  NbDamTnlInfo    *tnlInfo
+)
+{           
+  NbPdnCb *pdnCb = NULL;
+  NbPktFilterList *NbPf = NULL;
+ 
+  if ( ROK != (cmHashListFind(&((ueCb)->pdnCb), (U32 *)&(tnlInfo->pdnAddr),
+                   sizeof(U32),0,(PTR *)&pdnCb)))
+  {
+    /* Sort and add Packet Filter/s for a new bearer*/
+
+    if (ROK != (nbAddPfs(pdnCb, tnlInfo)))
+    {
+      NB_LOG_ERROR(&nbCb, "Failed to add Packet Filters");
+      RETVALUE(RFAILED);
+    }
+  }
+ 
+  /* Create a new hash list entry*/
+  else
+  { 
+    NB_ALLOC(&(pdnCb), sizeof(NbPdnCb));
+    pdnCb->pdnAddr = tnlInfo->pdnAddr;
+
+    if (ROK != (nbAddPfs(pdnCb, tnlInfo)))
+    {
+      NB_LOG_ERROR(&nbCb, "Failed to add Packet Filters");
+      RETVALUE(RFAILED);
+    }
+    /* Populate pdncb and packet filters*/
+    if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCb,
+                     (U8 *)&tnlInfo->pdnAddr, sizeof(U32)))
+    {   
+      NB_FREE(ueCb, sizeof(NbIpInfo))
+      NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for pdnCb");
+      RETVALUE(RFAILED);
+    }
+  } 
+  RETVALUE(ROK);
+}
 /** @brief This function is reponsible to add a new tunnel to DAM for a 
  *         particular UE.
  *
@@ -545,17 +695,17 @@ NbDamTnlInfo                 *tnlInfo
        }
        RETVALUE(RFAILED);
    }
-
+   /* Add TFT packet filters to ueCb */
+   if(ROK != nbAddPdnCb(ueCb, tnlInfo))
+   {
+      NB_LOG_ERROR(&nbCb, "Failed to add packet filters to ueCb");
+      RETVALUE(RFAILED);
+   }
    /* Create the tunnel */
    NB_ALLOC(&(ipInfo), sizeof(NbIpInfo));
    ipInfo->pdnAddr = tnlInfo->pdnAddr;
    ipInfo->drbId = rbId;
 
-   ipInfo->num_pf = tnlInfo->num_pf;
-   for(idx=0; idx<tnlInfo->num_pf; idx++ )
-   {
-     ipInfo->tft[idx].remotePort = tnlInfo->tft[idx].remotePort;
-   }
    if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ipInfo,
                      (U8 *)&ipInfo->pdnAddr, sizeof(U32)))
    {   
@@ -1586,6 +1736,7 @@ PRIVATE  NbDamUeCb * nbDamGetueCbkeyUeIp(U32 ueIpAddr,U8 *drbId, U16 remotePort)
          if(ipInfo->pdnAddr == ueIpAddr)
          {
             ueIpMatchFound = TRUE;
+# if 0
             for (idx=0; idx<ipInfo->num_pf; idx++)
             {
             printf("**** TFT remote port %d remote port%d\n",ipInfo->tft[idx].remotePort, remotePort);
@@ -1595,6 +1746,7 @@ PRIVATE  NbDamUeCb * nbDamGetueCbkeyUeIp(U32 ueIpAddr,U8 *drbId, U16 remotePort)
                  RETVALUE(ueCb);
               }
             }
+#endif
             //printf("Going to else\n");
              prevIpInfo = ipInfo;
              if ( ROK == (cmHashListFind(&(ueCb->ipInfo), (U8 *)&(ueIpAddr),

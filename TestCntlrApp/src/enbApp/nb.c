@@ -471,11 +471,7 @@ PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U32 ueIpAddr,U8 bearerId, NbuUeIpInfoRsp *
                tnlInfo->pdnAddr          = ueIpAddr;
                nbCpyCmTptAddr(&tnlInfo->dstAddr, &(tunInfo->sgwAddr));
                nbCpyCmTptAddr(&tnlInfo->srcAddr, &(nbCb.datAppAddr));
-               tnlInfo->num_pf = rsp->num_pf;
-               for(num_tft=0; num_tft<tnlInfo->num_pf; num_tft++)
-               {
-	         tnlInfo->tft[num_tft].remotePort = rsp->tft[num_tft].remotePort;
-               }
+               cmMemcpy(tnlInfo->pfList, rsp->pfList, sizeof(rsp->pfList));
                RETVALUE(nbIfmDamTnlCreatReq(tnlInfo));
             }
       }
