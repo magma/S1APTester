@@ -6146,6 +6146,7 @@ PUBLIC Void populateIpInfo
        {
           pdn_addr = &ueCb->ueRabCb[idx-1].pAddr;
           ueIpInfoRsp->berType = ueCb->ueRabCb[idx-1].bearerType;
+          ueIpInfoRsp->lnkEpsBearId = ueCb->ueRabCb[idx-1].lnkEpsBearId;
           _fill_pf_comp(idx, ueCb, ueIpInfoRsp);
 
           break;

@@ -114,6 +114,12 @@ typedef struct nbDamTnlId
    NbDamTnlType              tnlType;
 } NbDamTnlId;
 
+typedef struct nbTft
+{
+  U32    lnkEpsBearId;
+  U8     num_pf;
+  TftPfs pfList[CM_MAX_PKT_FILTERS];
+}NbTft;
 /**
  *@brief This structure contains the DAM Tunnel Information. 
  *
@@ -136,8 +142,7 @@ typedef struct NbDamTunInfo
    NbEgtpTeid                remTeid;
    NbEgtpTeid                lclTeid;
    U32                       pdnAddr;
-   U8                        num_pf;
-   TftPfs                    pfList[CM_MAX_PKT_FILTERS];
+   NbTft                     tft;  
 } NbDamTnlInfo;
 
 /**

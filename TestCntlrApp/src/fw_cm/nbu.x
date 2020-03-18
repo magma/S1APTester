@@ -202,6 +202,7 @@ typedef struct _nbuUeIpInfoRsp
    U8 bearerId;
    S8 IpAddr[20];
    BearerType berType;
+   U32     lnkEpsBearId;
    U8      noOfPfs;
    TftPfs  pfList[CM_MAX_PKT_FILTERS];
 }NbuUeIpInfoRsp;

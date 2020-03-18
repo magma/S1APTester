@@ -212,6 +212,17 @@ typedef struct {
   U32 ipv4_addr_mask;
 } NbTftIpv4Addr;
 
+typedef struct nbIpPktFields
+{
+   U32           locIpv4Addr;
+   U32           remIpv4Addr;
+   U16           locPort;
+   U16           remPort;
+   U8            proto_id;
+//   U32           ipsecParamInd;
+   U8            srvClass;
+} NbIpPktFields; 
+
 typedef struct nbPktFilterList
 {
    CmLList       link;
@@ -234,7 +245,9 @@ typedef struct nbPktFilterList
 
 typedef struct nbPdnCb
 {
-  U32       pdnAddr;
+  CmHashListEnt   ueHashEnt;
+  U32             pdnAddr;
+  U32             lnkEpsBearId;
   // List of TFT Packet Filters
   CmLListCp tftPfList;
 } NbPdnCb; 
