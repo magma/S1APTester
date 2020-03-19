@@ -1813,9 +1813,13 @@ Buffer *mBuf;
    SPutMsg(mBuf);
 #ifdef LWLCNBU
    ret1 = (*func)(pst, msg);
-   SPutSBuf(pst->region, pst->pool, (Data *)msg->erabInfo->rabCbs,
-            (msg->erabInfo->numOfErab * sizeof(NbuErabCb)));
-   SPutSBuf(pst->region, pst->pool, (Data *)msg->erabInfo, sizeof(NbuErabLst));
+   if (msg->erabInfo) {
+     if ((Data *)msg->erabInfo->numOfErab) { 
+       SPutSBuf(pst->region, pst->pool, (Data *)msg->erabInfo->rabCbs,
+                (msg->erabInfo->numOfErab * sizeof(NbuErabCb)));
+     }
+     SPutSBuf(pst->region, pst->pool, (Data *)msg->erabInfo, sizeof(NbuErabLst));
+   }
    SPutSBuf(pst->region, pst->pool, (Data *)msg, sizeof(NbuErabsInfo));
    RETVALUE(ret1);
 #else
