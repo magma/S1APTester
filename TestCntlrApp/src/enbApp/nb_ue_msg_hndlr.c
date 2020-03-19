@@ -371,61 +371,77 @@ PUBLIC S16 nbSendErabsRelInfo
    RETVALUE(ROK);
 }
 
-PUBLIC S16 nbSendErabsInfo
-(
- NbUeCb *ueCb,
- NbErabLst *erabInfo,
- Bool ueRadCapRcvd
-)
-{
-   U8 idx  = 0;
-   S16 ret = ROK;
-   NbuErabsInfo *msg = NULLP;
-   U8 nasPduPres = FALSE;
+PUBLIC S16 nbSendErabsInfo(NbUeCb *ueCb, NbErabLst *erabInfo,
+                           NbFailedErabLst *failedErabInfo, Bool ueRadCapRcvd) {
+  U8 idx = 0;
+  S16 ret = ROK;
+  NbuErabsInfo *msg = NULLP;
+  U8 nasPduPres = FALSE;
+  U8 sendErabFailedNotification = FALSE;
 
-   NB_ALLOC(&msg, sizeof(NbuErabsInfo));
-   msg->ueId = ueCb->ueId;
-   msg->ueRadCapRcvd = ueRadCapRcvd;
-   /* pack and send to ue */
-   NB_ALLOC(&msg->erabInfo, sizeof(NbuErabLst));
-   msg->erabInfo->numOfErab = erabInfo->noOfComp;
-   NB_ALLOC(&msg->erabInfo->rabCbs, (erabInfo->noOfComp * sizeof(NbuErabCb)));
+  NB_ALLOC(&msg, sizeof(NbuErabsInfo));
+  msg->ueId = ueCb->ueId;
+  msg->ueRadCapRcvd = ueRadCapRcvd;
+  /* pack and send to ue */
+  if (erabInfo->noOfComp > 0) {
+    NB_ALLOC(&msg->erabInfo, sizeof(NbuErabLst));
+    msg->erabInfo->numOfErab = erabInfo->noOfComp;
+    NB_ALLOC(&msg->erabInfo->rabCbs, (erabInfo->noOfComp * sizeof(NbuErabCb)));
+  }
 
-   for(idx = 0; idx < erabInfo->noOfComp; idx++)
-   {
-      msg->erabInfo->rabCbs[idx].erabId = erabInfo->erabs[idx].erabId;
-      if(erabInfo->erabs[idx].nasPdu)
-      {
-         nasPduPres = TRUE;
-         NB_ALLOC(&msg->erabInfo->rabCbs[idx].nasPdu.val,
-               ((erabInfo->erabs[idx].nasPdu->len + 1 ) * sizeof(U8)));
-         msg->erabInfo->rabCbs[idx].nasPdu.pres = TRUE;
-         msg->erabInfo->rabCbs[idx].nasPdu.len = erabInfo->erabs[idx].\
-                                                 nasPdu->len;
-         cmMemcpy((U8 *)msg->erabInfo->rabCbs[idx].nasPdu.val, (U8 *)erabInfo->\
-               erabs[idx].nasPdu->val, erabInfo->erabs[idx].nasPdu->len);
+  for (idx = 0; idx < erabInfo->noOfComp; idx++) {
+    msg->erabInfo->rabCbs[idx].erabId = erabInfo->erabs[idx].erabId;
+    if (erabInfo->erabs[idx].nasPdu) {
+      nasPduPres = TRUE;
+      NB_ALLOC(&msg->erabInfo->rabCbs[idx].nasPdu.val,
+               ((erabInfo->erabs[idx].nasPdu->len + 1) * sizeof(U8)));
+      msg->erabInfo->rabCbs[idx].nasPdu.pres = TRUE;
+      msg->erabInfo->rabCbs[idx].nasPdu.len = erabInfo->erabs[idx].nasPdu->len;
+      cmMemcpy((U8 *)msg->erabInfo->rabCbs[idx].nasPdu.val,
+               (U8 *)erabInfo->erabs[idx].nasPdu->val,
+               erabInfo->erabs[idx].nasPdu->len);
+    }
+  }
+  /* set the datrcvd flag for ue */
+  nbDamSetDatFlag(ueCb->ueId);
+  if (failedErabInfo && (failedErabInfo->noOfComp > 0)) {
+    sendErabFailedNotification = TRUE;
+    NB_ALLOC(&msg->failedErabList, sizeof(NbuFailedErabLst));
+    msg->failedErabList->noOfFailedErabs = failedErabInfo->noOfComp;
+    NB_ALLOC(&msg->failedErabList->failedErabs,
+             (failedErabInfo->noOfComp * sizeof(NbuFailedErab)));
+    for (idx = 0; idx < failedErabInfo->noOfComp; idx++) {
+      msg->failedErabList->failedErabs[idx].erabId =
+          failedErabInfo->failedErabs[idx].erabId;
+      msg->failedErabList->failedErabs[idx].cause.choice =
+          failedErabInfo->failedErabs[idx].cause.causeTyp;
+      if (failedErabInfo->failedErabs[idx].cause.causeVal ==
+          CAUSE_RADIONW_QCI_UNSUPPORTED) {
+        msg->failedErabList->failedErabs[idx].cause.val.radioNw =
+            NBU_CAUSE_RADIONW_UNSUPPORTED_QCI;
       }
-   }
-   /* set the datrcvd flag for ue */
-   nbDamSetDatFlag(ueCb->ueId);
-
-   /* Send the Erab Info Indication to UEAPP */
-   if(nasPduPres)
-   {
-      ret = cmPkNbuErabsInfo(&nbCb.ueAppPst, msg);
-      if(ret != ROK)
-      {
-         printf("Failed to send Initial Context Setup Indication to UeApp\n");
-         RETVALUE(RFAILED);
-      }
-   }
-   else
-   {
-       NB_FREE(msg->erabInfo->rabCbs, (erabInfo->noOfComp * sizeof(NbuErabCb)));
-       NB_FREE(msg->erabInfo, sizeof(NbuErabLst));
-       NB_FREE(msg, sizeof(NbuErabsInfo));
-   }
-   RETVALUE(ROK);
+    }
+  }
+  /* Send the Erab Info Indication to UEAPP */
+  if (nasPduPres || sendErabFailedNotification) {
+    ret = cmPkNbuErabsInfo(&nbCb.ueAppPst, msg);
+    if (ret != ROK) {
+      printf("Failed to send Initial Context Setup Indication to UeApp\n");
+      RETVALUE(RFAILED);
+    }
+  } else {
+    if (erabInfo->noOfComp) {
+      NB_FREE(msg->erabInfo->rabCbs, (erabInfo->noOfComp * sizeof(NbuErabCb)));
+      NB_FREE(msg->erabInfo, sizeof(NbuErabLst));
+    }
+    if (msg->failedErabList) {
+      NB_FREE(msg->failedErabList->failedErabs,
+              (failedErabInfo->noOfComp * sizeof(NbuFailedErab)));
+      NB_FREE(msg->failedErabList, sizeof(NbuFailedErabLst));
+    }
+    NB_FREE(msg, sizeof(NbuErabsInfo));
+  }
+  RETVALUE(ROK);
 }
 
 PUBLIC S16 nbSendS1RelIndToUeApp
