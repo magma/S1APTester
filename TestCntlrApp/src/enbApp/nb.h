@@ -226,6 +226,18 @@ typedef struct _nbErabLst
    NbErabCb *erabs;
 }NbErabLst;
 
+typedef struct NbFailedErab {
+  U8 erabId;
+  U8 qci;
+#define CAUSE_RADIONW_QCI_UNSUPPORTED 37
+  NbUeMsgCause cause;
+} NbFailedErab;
+
+typedef struct _nbFailedErabLst {
+  U8 noOfComp;
+  NbFailedErab *failedErabs;
+} NbFailedErabLst;
+
 typedef struct _nbErabRelLst
 {
    U8 ueId;
@@ -756,7 +768,7 @@ EXTERN S16 nbS1apFillEutranCgi(S1apPdu *pdu, SztEUTRAN_CGI *cgiIe, EnbCb*);
 EXTERN S16 nbS1apFillEutranCgi(S1apPdu *pdu, SztEUTRAN_CGI *cgiIe);
 #endif
 EXTERN S16 nbSendErabsInfo(NbUeCb *ueCb, NbErabLst *erabInfo,
-      Bool ueRadCapRcvd);
+                           NbFailedErabLst *failedErabInfo, Bool ueRadCapRcvd);
 
 EXTERN Void nbUiNbuHandleUeInactivity(U8 ueId);
 

@@ -8,18 +8,18 @@
 
 /**********************************************************************
 
-    Name:  LTE S1SIM - ENODEB Application Module 
- 
+    Name:  LTE S1SIM - ENODEB Application Module
+
     Type:  C include file
- 
+
     Desc:  C source code for UE Application
- 
+
     File:  nb_ifm_egtp.c
- 
-    Sid:   
- 
-    Prg:   
- 
+
+    Sid:
+
+    Prg:
+
 **********************************************************************/
 #include "nb.h"
 #include "rl_interface.h"
@@ -30,7 +30,7 @@
 #include "nbt.h"
 #include "nbt.x"
 
-EXTERN U8 uesLocalRel; 
+EXTERN U8 uesLocalRel;
 EXTERN S16 nbUiSendIntCtxtSetupDrpdIndToUser(U8 ueId);
 PUBLIC S16 nbCtxtRelSndRlsCmpl(NbUeCb*);
 PUBLIC S16 nbProcessDlNasMsg(NbUeCb*, S1apPdu*, U8);
@@ -60,16 +60,17 @@ PRIVATE S16 nbBuildIntCtxtSetupRsp(NbUeCb*, NbErabLst*, S1apPdu**);
 PUBLIC S16 nbHandleS1UeReleaseCmd(NbUeCb *ueCb);
 PRIVATE S16 nbPrcSuccPdu(U32, S1apPdu*);
 PRIVATE S16 nbPrcUnsuccPdu(U32, S1apPdu*);
-PRIVATE S16 nbRabSetupSndS1apRsp(NbUeCb *ueCb,NbErabLst *erabInfo);
-PUBLIC S16 nbS1apFillCtxtRelCmpl(NbS1ConCb*, S1apPdu**);
+PRIVATE S16 nbRabSetupSndS1apRsp(NbUeCb *ueCb, NbErabLst *erabInfo,
+                                 NbFailedErabLst *failedErabInfo);
+PUBLIC S16 nbS1apFillCtxtRelCmpl(NbS1ConCb *, S1apPdu **);
 S16 nbIfmDamUeDelReq(U8);
 PUBLIC S16 nbS1apFillCause(SztCause *ie, NbUeMsgCause *cause);
-PUBLIC S16 nbGetErabInfoFrmErabSetup (NbUeCb*, SztE_RABToBeSetupLstBrSUReq*,
-      NbErabLst**);
-PRIVATE S16 nbFillErrIndMsg( NbErrIndMsg *s1ErrInd,S1apPdu   **errIndPdu);
+PUBLIC S16 nbGetErabInfoFrmErabSetup(NbUeCb *, SztE_RABToBeSetupLstBrSUReq *,
+                                     NbErabLst **, NbFailedErabLst **);
+PRIVATE S16 nbFillErrIndMsg(NbErrIndMsg *s1ErrInd, S1apPdu **errIndPdu);
 PUBLIC S16  NbBuildAndSndErrIndMsg(NbErrIndMsg *s1ErrInd);
 PUBLIC S16 sendNonDelFlag(NbUeCb *ueCb, SztNAS_PDU *pdu, NbUeMsgCause *cause);
-PUBLIC S16 sendInitCtxtSetupFailRsp(NbUeCb *ueCb, NbUeMsgCause *cause); 
+PUBLIC S16 sendInitCtxtSetupFailRsp(NbUeCb *ueCb, NbUeMsgCause *cause);
 PRIVATE S16 nbSendUeCtxtRelReqAsICSRsp(NbUeCb *ueCb);
 PRIVATE S16 nbStartDelayTimerForICSRsp(U8 ueId,NbErabLst *erabInfo);
 PRIVATE S16 nbStartDelayTimerForUeCtxRel(U8 ueId);
@@ -78,14 +79,14 @@ PUBLIC S16 nbPrcPathSwReqAck(NbUeCb *ueCb,S1apPdu *pdu);
 EXTERN S16 nbUiSendPathSwReqAckToUser(NbPathSwReqAck *nbpathSwReqAck);
 
 /*
- *    @brief This function is used to build and send the S1 Setup Request 
- *    to the MME. 
- *   
- *    @details This function is used to build and send the S1 Setup Request 
+ *    @brief This function is used to build and send the S1 Setup Request
  *    to the MME.
- * 
- * Function:nbBuildAndSendS1SetupReq 
- * 
+ *
+ *    @details This function is used to build and send the S1 Setup Request
+ *    to the MME.
+ *
+ * Function:nbBuildAndSendS1SetupReq
+ *
  *       Processing steps:
  *        - Build and send S1 Setup Request to the MME.
  *        - Move the MME control block state to WR_MME_IN_PROG.
@@ -93,14 +94,14 @@ EXTERN S16 nbUiSendPathSwReqAckToUser(NbPathSwReqAck *nbpathSwReqAck);
  *          incase of reponse is not received with in the time.
  *        - This function is invoked EMM module when EMM Module ges trigger
  *          from Management intrerface ie., during cell config/setup.
- * 
+ *
  * @param[in] mmeId: MME Id.
  *
  *  @return  S16
  * -# Success : ROKi
  * -# Failure : RFAILED
  */
-PUBLIC S16 nbBuildAndSendS1SetupReq 
+PUBLIC S16 nbBuildAndSendS1SetupReq
 (
  NbMmeId mmeId
 )
@@ -125,8 +126,8 @@ PUBLIC S16 nbBuildAndSendS1SetupReq
    if ( ROK != (cmHashListFind(&(nbCb.eNBCbLst), (U32 *)&(enbId),
       sizeof(U32),0,(PTR *)&enbCb)))
    {
-      if (nbCb.multiEnbCfgInfo.pres == FALSE) 
-      { 
+      if (nbCb.multiEnbCfgInfo.pres == FALSE)
+      {
         /* Allocate memory */
         NB_ALLOC(&enbCb, sizeof(EnbCb));
         enbCb->enbId = 0;
@@ -149,7 +150,7 @@ PUBLIC S16 nbBuildAndSendS1SetupReq
            RETVALUE(RFAILED);
         }
       }
-      else 
+      else
       {
         NB_LOG_ERROR(&nbCb, "enbCb not found for enbId %d", uDatEvnt.enbId);
         RETVALUE(RFAILED);
@@ -159,9 +160,9 @@ PUBLIC S16 nbBuildAndSendS1SetupReq
       NB_LOG_ERROR(&nbCb, "enbCb is NULL!!");
    }
 #endif
-#ifdef MULTI_ENB_SUPPORT 
+#ifdef MULTI_ENB_SUPPORT
    if (nbBldS1SetupReq(&(uDatEvnt.pdu), enbCb) != ROK)
-#else 
+#else
    if (nbBldS1SetupReq(&(uDatEvnt.pdu)) != ROK)
 #endif
    {
@@ -284,7 +285,7 @@ PUBLIC S16 nbBuildAndSendErabRelRsp
    }
 
    if(nbBldErabRelRsp(&(erabRelPdu), enbUeS1apId, mmeUeS1apId,
-            numOfErabIdsRlsd, rlsdErabIdLst, numOfErabIdsRlsFld, 
+            numOfErabIdsRlsd, rlsdErabIdLst, numOfErabIdsRlsFld,
             rlsFldErabLst) != ROK)
    {
       RETVALUE(RFAILED);
@@ -297,7 +298,7 @@ PUBLIC S16 nbBuildAndSendErabRelRsp
 	   NB_LOG_ERROR(&nbCb, "Failed to Find UeCb");
 	   RETVALUE(RFAILED);
    }
-    
+
    NbS1ConCb                 *s1apCon = ueCb->s1ConCb;
    erabRelRsp.spConnId = s1apCon->spConnId;
    erabRelRsp.pdu      = erabRelPdu;
@@ -314,21 +315,21 @@ PUBLIC S16 nbBuildAndSendErabRelRsp
 
 /*
  *    @brief Build and send the S1 Abort Request.
- *   
- *    @details This function is used to build and send the S1 Abort Request 
- * 
- *    Function: nbBuildAndSendS1AbortReq 
- * 
+ *
+ *    @details This function is used to build and send the S1 Abort Request
+ *
+ *    Function: nbBuildAndSendS1AbortReq
+ *
  *       Processing steps:
  *        - Build and send S1 Abort Request to S1AP.
- * 
+ *
  *    @param[in] cause: cause/reason for abort
  *
  *    @return  S16
  *       -# Success : ROK
  *       -# Failure : RFAILED
  */
-PUBLIC S16 nbBuildAndSendS1AbortReq 
+PUBLIC S16 nbBuildAndSendS1AbortReq
 (
  NbMmeId mmeId,
  U8 cause
@@ -404,22 +405,22 @@ PUBLIC S16 nbBuildAndSendS1AbortReq
 
 /*
  *    @brief Build and send the S1 Shutdown Request.
- *   
- *    @details This function is used to build and send the S1 Shutdown Request 
- * 
- *    Function: nbBuildAndSendS1AbortReq 
- * 
+ *
+ *    @details This function is used to build and send the S1 Shutdown Request
+ *
+ *    Function: nbBuildAndSendS1AbortReq
+ *
  *       Processing steps:
  *        - Build and send S1 Shutdown Request to S1AP.
- * 
- *    @param[in] : none 
+ *
+ *    @param[in] : none
  *
  *    @return  S16
  *       -# Success : ROK
  *       -# Failure : RFAILED
  */
 
-PUBLIC S16 nbBuildAndSendS1ShutdownReq 
+PUBLIC S16 nbBuildAndSendS1ShutdownReq
 (
  NbMmeId mmeId
 )
@@ -449,13 +450,13 @@ PUBLIC S16 nbBuildAndSendS1ShutdownReq
 #ifdef MULTI_ENB_SUPPORT
    for(enbIdx = 0; enbIdx < smCfgCb.numOfEnbs; enbIdx++)
    {
-      abortS1.enbId = enbIdx;   
+      abortS1.enbId = enbIdx;
       if ((NbIfmS1apSndAbortMsg(&abortS1)) != ROK)
       {
          RETVALUE(RFAILED);
       }
    }
-#else 
+#else
    if ((NbIfmS1apSndAbortMsg(&abortS1)) != ROK)
    {
       RETVALUE(RFAILED);
@@ -499,24 +500,24 @@ PUBLIC S16 nbBuildAndSendS1ShutdownReq
 /* ======================================= */
 /* S1AP S1 SETUP REQUEST MESSAGE BUILDING  */
 /* ======================================= */
-/** @brief This function will allocate memory and build the 
+/** @brief This function will allocate memory and build the
  *       S1AP:S1 Setup Request Message.
  *
  * @details This function allocates the memory for S1AP: S1 Setup Request
  *    Message PDU and fills the PDU with proper values.
  *
- * Function: nbBldSetupReq 
+ * Function: nbBldSetupReq
  *
  *       Processing steps:
  *        - Allocate Memory for S1-AP: EnodeB S1 Setup Request Message PDU.
  *         - Fill the PDU with proper values.
  *
- *@param[out] pdu: S1-AP: S1 Setup Request PDU. 
+ *@param[out] pdu: S1-AP: S1 Setup Request PDU.
  * @return  S16
  *      -# Success : ROK
  *       -# Failure : RFAILED
  */
-#ifdef MULTI_ENB_SUPPORT 
+#ifdef MULTI_ENB_SUPPORT
 PRIVATE S16 nbBldS1SetupReq
 (
  S1apPdu                           **pdu,
@@ -542,14 +543,14 @@ PRIVATE S16 nbBldS1SetupReq
 
    TRC2(nbtBldS1etupReq);
    /* Initialize memory control point */
-   ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem, 
+   ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem,
          (Ptr *)&setupReqPdu);
    if(ret != ROK)
    {
       NB_LOG_ERROR(&nbCb, "cmAllocEvnt failed");
       RETVALUE(RFAILED);
    }
-#ifdef MULTI_ENB_SUPPORT 
+#ifdef MULTI_ENB_SUPPORT
    if (enbCb == NULLP)
    {
       NB_LOG_ERROR(&nbCb, "enbCb is NULL!!\n");
@@ -566,11 +567,11 @@ PRIVATE S16 nbBldS1SetupReq
 
    numComp = 5;
 
-   if ((cmGetMem(setupReqPdu, 
+   if ((cmGetMem(setupReqPdu,
                  numComp * sizeof(SztProtIE_Field_S1SetupRqstIEs),
                  (Ptr*)&initMsg->value.u.sztS1SetupRqst.protocolIEs.\
                  member)) !=ROK)
-   { 
+   {
       NB_LOG_ERROR(&nbCb, "BldS1SetupReq: cmGetMem failed");
       NB_FREE_EVNT(setupReqPdu);
       RETVALUE(RFAILED);
@@ -620,12 +621,12 @@ PRIVATE S16 nbBldS1SetupReq
    ie->value.u.sztENBname.len  = smCfgCb.enbNameLen;
    if(smCfgCb.enbNameLen <= NB_ENB_NAME) /*KW Fix */
    {
-      nbFillTknStrOSXL(&(ie->value.u.sztENBname), smCfgCb.enbNameLen, 
+      nbFillTknStrOSXL(&(ie->value.u.sztENBname), smCfgCb.enbNameLen,
             smCfgCb.enbName, &(setupReqPdu->memCp));
    }
    else
    {
-      nbFillTknStrOSXL(&(ie->value.u.sztENBname), NB_ENB_NAME, 
+      nbFillTknStrOSXL(&(ie->value.u.sztENBname), NB_ENB_NAME,
             smCfgCb.enbName, &(setupReqPdu->memCp));
    }
 
@@ -641,7 +642,7 @@ PRIVATE S16 nbBldS1SetupReq
       /* Handle the case of multiple TAs/cells                        */
       numTAs = smCfgCb.suppTAs.numTAs;
       nbFillTknU16(&(ie->value.u.sztSuppTAs.noComp), numTAs);
-      if ((cmGetMem(setupReqPdu, numTAs * sizeof(SztSuppTAs_Item), 
+      if ((cmGetMem(setupReqPdu, numTAs * sizeof(SztSuppTAs_Item),
            (Ptr*)&(ie->value.u.sztSuppTAs.member))) != ROK)
       {
          NB_LOG_ERROR(&nbCb, "SztBldSetupReq: cmGetMem failed");
@@ -652,8 +653,8 @@ PRIVATE S16 nbBldS1SetupReq
       {
          tACItem = &ie->value.u.sztSuppTAs.member[taIdx];
          nbFillTknU8(&(tACItem->pres), PRSNT_NODEF);
-        
-         #ifdef MULTI_ENB_SUPPORT 
+
+         #ifdef MULTI_ENB_SUPPORT
          nbSztFillTAC(enbCb->tac, setupReqPdu,
                       &tACItem->tAC);
          #else
@@ -672,7 +673,7 @@ PRIVATE S16 nbBldS1SetupReq
          nbFillTknU16(&(tACItem->broadcastPLMNs.noComp), numComp);
          for (idx = 0; idx < numComp; idx++)
          {
-         #ifdef MULTI_ENB_SUPPORT 
+         #ifdef MULTI_ENB_SUPPORT
             nbSztFillPLMNId(setupReqPdu,
                            &(enbCb->plmnId),
                            &(tACItem->broadcastPLMNs.member[idx]));
@@ -693,7 +694,7 @@ PRIVATE S16 nbBldS1SetupReq
       nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);
       numTAs = 1;
       nbFillTknU16(&(ie->value.u.sztSuppTAs.noComp), numTAs);
-      if ((cmGetMem(setupReqPdu, numTAs * sizeof(SztSuppTAs_Item), 
+      if ((cmGetMem(setupReqPdu, numTAs * sizeof(SztSuppTAs_Item),
                   (Ptr*)&(ie->value.u.sztSuppTAs.member))) !=ROK)
       {
          NB_LOG_ERROR(&nbCb, "SztBldSetupReq: cmGetMem failed");
@@ -704,7 +705,7 @@ PRIVATE S16 nbBldS1SetupReq
       {
          tACItem = &ie->value.u.sztSuppTAs.member[taIdx];
          nbFillTknU8(&(tACItem->pres), PRSNT_NODEF);
-         #ifdef MULTI_ENB_SUPPORT 
+         #ifdef MULTI_ENB_SUPPORT
          nbSztFillTAC(enbCb->tac, setupReqPdu, &tACItem->tAC);
          #else
          nbSztFillTAC(smCfgCb.trackAreaCode, setupReqPdu, &tACItem->tAC);
@@ -721,7 +722,7 @@ PRIVATE S16 nbBldS1SetupReq
          nbFillTknU16(&(tACItem->broadcastPLMNs.noComp), numComp);
          for(idx = 0; idx < numComp; idx++)
          {
-            #ifdef MULTI_ENB_SUPPORT 
+            #ifdef MULTI_ENB_SUPPORT
             nbSztFillPLMNId(setupReqPdu, &(enbCb->plmnId),
                   &(tACItem->broadcastPLMNs.member[idx]));
             #else
@@ -751,7 +752,7 @@ PRIVATE S16 nbBldS1SetupReq
       numCsgIds = smCfgCb.csgIdList.pres;
       numCsgIds = smCfgCb.csgIdList.numCsgIds;
       nbFillTknU16(&(ie->value.u.sztCSG_IdLst.noComp), numCsgIds);
-      if ((cmGetMem(setupReqPdu, numCsgIds * sizeof(SztCSG_IdLst_Item), 
+      if ((cmGetMem(setupReqPdu, numCsgIds * sizeof(SztCSG_IdLst_Item),
            (Ptr*)&(ie->value.u.sztCSG_IdLst.member))) != ROK)
       {
          NB_LOG_ERROR(&nbCb, "SztBldSetupReq: cmGetMem failed");
@@ -797,7 +798,7 @@ PRIVATE S16 nbBldResetReq
    NbUeMsgCause                   cause = {0};
 
    /* Initialize memory control point */
-   ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem, 
+   ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem,
          (Ptr *)&resetReqPdu);
    if(ret != ROK)
    {
@@ -805,7 +806,7 @@ PRIVATE S16 nbBldResetReq
       RETVALUE(RFAILED);
    }
    /* assin the cause values */
-   cause.causeTyp = resetMsgInfo->cause.causeTyp;  
+   cause.causeTyp = resetMsgInfo->cause.causeTyp;
    cause.causeVal = resetMsgInfo->cause.causeVal;
 
    nbFillTknU8(&(resetReqPdu->pdu.choice), SZT_TRGR_INTI_MSG);
@@ -820,7 +821,7 @@ PRIVATE S16 nbBldResetReq
 
    if ((cmGetMem(resetReqPdu, numComp * sizeof(SztProtIE_Cont_ResetIEs),
                (Ptr*)&initMsg->value.u.sztReset.protocolIEs.member)) != ROK)
-   { 
+   {
       NB_LOG_ERROR(&nbCb, "cmGetMem failed");
       NB_FREE_EVNT(resetReqPdu);
       RETVALUE(RFAILED);
@@ -848,7 +849,7 @@ PRIVATE S16 nbBldResetReq
    }
    else if(resetMsgInfo->type == NB_PARTIAL_RESET)
    {
-      ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem, 
+      ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem,
             (Ptr *)&resetReqPdu1);
       if((cmGetMem(resetReqPdu1, resetMsgInfo->s1apIdCnt * \
                   sizeof(SztProtIE_SingleCont_UE_assocLogS1_ConItemRes),
@@ -876,7 +877,7 @@ PRIVATE S16 nbBldResetReq
             nbFillTknU32(&(resetIe->value.u.sztUE_assocLogS1_ConItem.\
                   mME_UE_S1AP_ID), resetMsgInfo->mmeUeS1apIdLst[cnt]);
 	 }
-	 else 
+	 else
          {
             resetIe->value.u.sztUE_assocLogS1_ConItem.mME_UE_S1AP_ID.pres =
 	           NOTPRSNT;
@@ -928,7 +929,7 @@ PRIVATE S16 nbBldErabRelInd
    NbUeMsgCause                   cause = {0};
 
    /* Initialize memory control point */
-   ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem, 
+   ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem,
          (Ptr *)&erabRelIndPdu);
    if(ret != ROK)
    {
@@ -950,7 +951,7 @@ PRIVATE S16 nbBldErabRelInd
                numComp * sizeof(SztProtIE_Field_E_RABRlsIndIEs),
                (Ptr*)&initMsg->value.u.sztE_RABRlsInd.protocolIEs.\
                member)) != ROK)
-   { 
+   {
       NB_LOG_ERROR(&nbCb, "cmGetMem failed");
       NB_FREE_EVNT(erabRelIndPdu);
       RETVALUE(RFAILED);
@@ -979,7 +980,7 @@ PRIVATE S16 nbBldErabRelInd
    nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
    ieIdx++;
 
-   ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem, 
+   ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem,
          (Ptr *)&erabRelIndPdu1);
 
    if((cmGetMem(erabRelIndPdu1, numOfErabIds * \
@@ -1037,7 +1038,7 @@ PRIVATE S16 nbBldErabRelRsp
    SztSuccessfulOutcome           *succOut;
 
    /* Initialize memory control point */
-   ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem, 
+   ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem,
          (Ptr *)&erabRelRspPdu);
    if(ret != ROK)
    {
@@ -1059,7 +1060,7 @@ PRIVATE S16 nbBldErabRelRsp
                numComp * sizeof(SztProtIE_Field_E_RABRlsRespIEs),
                (Ptr*)&succOut->value.u.sztE_RABRlsResp.protocolIEs.\
                member)) != ROK)
-   { 
+   {
       NB_LOG_ERROR(&nbCb, "cmGetMem failed");
       NB_FREE_EVNT(erabRelRspPdu);
       RETVALUE(RFAILED);
@@ -1088,7 +1089,7 @@ PRIVATE S16 nbBldErabRelRsp
    nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
    ieIdx++;
 
-   ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem, 
+   ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem,
          (Ptr *)&erabRelRspPdu1);
 
    if((cmGetMem(erabRelRspPdu1, numOfErabIdsRlsd * \
@@ -1134,8 +1135,8 @@ PRIVATE S16 nbBldErabRelRsp
  *       PDU, Successful outcome and Unsuccessful outcome messages.
  *
  *
- * @param[in] peerId: Peer ID. 
- * @param[in]    pdu: S1AP PDU 
+ * @param[in] peerId: Peer ID.
+ * @param[in]    pdu: S1AP PDU
  *  @return  S16
  *        -# Success : ROK
  *        -# Failure : RFAILED
@@ -1168,12 +1169,12 @@ PUBLIC S16 nbPrcRcvdPdu
 } /* end of nbPrcRcvdPdu */
 
 /** @brief This function process the MME initiated messages which are belongs to
- *         EMM specific module. 
+ *         EMM specific module.
  *
  * @details This function process the MME initiated messags like S1AP: MME
  *          Configuration Update Messages, MME initiated RESET message,
  *          PAging message, Overload Start message, Write Replacement warning
- *          message etc., 
+ *          message etc.,
  *
  *     Function: nbPrcInitPdu
  *
@@ -1182,7 +1183,7 @@ PUBLIC S16 nbPrcRcvdPdu
  *           call the respective function to process the received PDU.
  *
  * @param[in] peerId: Peer ID from which S1AP PDU received.
- * @param[in]    pdu: S1-AP MME initiated PDU. 
+ * @param[in]    pdu: S1-AP MME initiated PDU.
  * @return  S16
  *       -# Success : ROK
  */
@@ -1211,7 +1212,7 @@ S1apPdu                      *pdu
 #endif
       default:
          NB_LOG_ERROR(&nbCb,"Err: Msg not handled");
-         break; 
+         break;
    }
    UNUSED(peerId);
    RETVALUE(ret);
@@ -1222,13 +1223,13 @@ S1apPdu                      *pdu
  *
  * @details
  *
- *     Function:nbProcPagingMsg 
+ *     Function:nbProcPagingMsg
  *
  *         Processing steps:
- *         - This function is called EMM module on reception trigger from the 
+ *         - This function is called EMM module on reception trigger from the
  *           S1-AP IM module upon receiving S1-AP:Paging Message from MME.
- *         - Identify in which Cells the RRC:Paging message needs to triger 
- *           based on TAI and or CSGID for each cell and received List in 
+ *         - Identify in which Cells the RRC:Paging message needs to triger
+ *           based on TAI and or CSGID for each cell and received List in
  *           S1-AP Pagigng Message.
  *         - Update the UePagingInfo(which includes all information to
  *           calculate PF and PO and paging record) from S1-AP:Paging Message.
@@ -1238,7 +1239,7 @@ S1apPdu                      *pdu
  *           Request TAI list.Then trigger the RRC:Paging message in this
  *           Cell.
  *         - Otherwise Validate the CSG id of the cell is present or not
- *           in the received S1-AP paging Req csg id list.If CSG ID is 
+ *           in the received S1-AP paging Req csg id list.If CSG ID is
  *           present then trgger the RRC:paging message in the current cell.
  *           Otherwise skip cell to process the paging request.
  *
@@ -1249,8 +1250,8 @@ S1apPdu                      *pdu
  */
 PUBLIC S16 nbProcPagingMsg
 (
- S1apPdu *s1apPagMsg 
-) 
+ S1apPdu *s1apPagMsg
+)
 {
    SztTAILst *taiLst = NULLP;
    SztCSG_IdLst *csgIdLst = NULLP;
@@ -1260,8 +1261,8 @@ PUBLIC S16 nbProcPagingMsg
 
    TRC2(nbProcPagingMsg);
 
-   /* Initialize the default paging priority to 255 and the same will be 
-    * updated if it is received from MME. 
+   /* Initialize the default paging priority to 255 and the same will be
+    * updated if it is received from MME.
     */
    uePagingInfo.pagPriority = NB_DEFAULT_PAGING_PRI;
 
@@ -1279,7 +1280,7 @@ PUBLIC S16 nbProcPagingMsg
      /* if ((NULLP != taiLst) &&
             (TRUE == nbIsTaiPresent(taiLst)))*/
       {
-         retVal = nbUiBuildAndSendPagingMsg(&uePagingInfo); 
+         retVal = nbUiBuildAndSendPagingMsg(&uePagingInfo);
       }
 
    } /* end of for to traverse all the cells in ENB */
@@ -1343,7 +1344,7 @@ PUBLIC S16 nbProcErabRelCmd
             break;
          case Sztid_downlinkNASTport:
             break;
-         case Sztid_NAS_PDU: 
+         case Sztid_NAS_PDU:
 	    if(ie->value.u.sztNAS_PDU.pres == PRSNT_NODEF){
 
          erabRelCmd.nasPdu.pres = TRUE;
@@ -1363,7 +1364,7 @@ PUBLIC S16 nbProcErabRelCmd
    enbUeS1apId = erabRelCmd.enbUeS1apId;
    mmeUeS1apId = erabRelCmd.mmeUeS1apId;
    numOfErabIdsRlsd = erabRelCmd.numOfErabIds;
-   
+
    /* Get UeCb using enb/mme ue s1ap Ids */
    /*for(cnt = 0; cnt < nbCb.crntUeIdx; cnt++)
    {
@@ -1393,7 +1394,7 @@ PUBLIC S16 nbProcErabRelCmd
     retVal = nbBuildAndSendErabRelRsp(enbUeS1apId, mmeUeS1apId, numOfErabIdsRlsd, erabRelCmd.erabIdLst, 0, NULL);
    } else {
    /* Indicate the TFW about the recieved E-RAB Release command. */
-    nbUiSendErabRelCmdInfoToUser(&erabRelCmd); 
+    nbUiSendErabRelCmdInfoToUser(&erabRelCmd);
    }
 
    RETVALUE(retVal);
@@ -1405,19 +1406,19 @@ PUBLIC S16 nbProcErabRelCmd
  *
  * @details
  *
- *     Function: nbIsTaiPresent 
+ *     Function: nbIsTaiPresent
  *
  *     Processing steps:
  *     - Get the Tracking Area Code, num of PLMNs and PLMN IDs from NbCb.
  *     - Traverse all TAIs in S1-AP paging msg and compare with cell TAI.
  *     - First compare the TAC in TAI of the cell is matched with the
- *       received TAC in TAI.Then compare the received PLMN with the 
+ *       received TAC in TAI.Then compare the received PLMN with the
  *       cell PLMN list.If there is any match found then returns TRUE.
  *       Otherwise returns FALSE.
  *
  * @param [in] cellCb : cell control block
- * @param [in] taiLst : TAI list 
- * @return Bool 
+ * @param [in] taiLst : TAI list
+ * @return Bool
  *         TRUE  : If cell TAI is matched with at least one TAI in the received
  *                 TAI list.
  *         FALSE : cell TAI is not present in the received TAI list.
@@ -1542,16 +1543,16 @@ PUBLIC Bool nbPlmnPlmnsEqual
  *     Function: wrPbmUpdateUePagInfo
  *
  *         Processing steps:
- *         - Update all the parameters of UePagingInfo which we received from 
+ *         - Update all the parameters of UePagingInfo which we received from
  *           S1-AP:Paging message.
- *         - Update the output parameters pagMsgTAILst, pagMsgCSG_IdLst if the 
+ *         - Update the output parameters pagMsgTAILst, pagMsgCSG_IdLst if the
  *           TAI and CSG IDs are present in the received S1-AP paging message.
  *           If any list is not present set the oupur parameter to NULLP.
  *
  * @param [in]       s1apPagMsg : S1-AP paging message PDU
  * @param [out]    uePagingInfo : UE specific paging info updated based on S1-AP PDU.
- * @param [out]    pagMsgTAILst : TAI list if TAI Lst present in Paging Msg or NULLP.  
- * @param [out] pagMsgCSG_IdLst : CSG ID List if CSG Lst present in paging msg or NULLP 
+ * @param [out]    pagMsgTAILst : TAI list if TAI Lst present in Paging Msg or NULLP.
+ * @param [out] pagMsgCSG_IdLst : CSG ID List if CSG Lst present in paging msg or NULLP
  * @return S16
  *    -# Success : ROK
  *    -# Failure : RFAILED
@@ -1612,7 +1613,7 @@ PUBLIC S16 nbUpdateUePagInfo
                if(pagMember->value.u.sztUEPagID.choice.val == UEPAGID_IMSI)
                {
                   uePagingInfo->ueIdenType = UEPAGID_IMSI;
-                  /* Number of IMSI Digits(0-9 digits are 
+                  /* Number of IMSI Digits(0-9 digits are
                      only valid) = 2 * IMSI legth in bytes                   */
                   uePagingInfo->ueIden.imsi[0] =
                      2*(pagMember->value.u.sztUEPagID.val.iMSI.len);
@@ -1721,8 +1722,8 @@ PRIVATE S16 nbPrcSuccPdu
 PUBLIC S16 nbPrcS1SetupFail(U16 peerId, S1apPdu *pdu)
 {
    NbMmeCb      *mmeCb = NULLP;
-   TknU32       *s1TimeToWait = NULLP;  
-   TknU8        *ie = NULLP;            
+   TknU32       *s1TimeToWait = NULLP;
+   TknU8        *ie = NULLP;
    U32          wait = 0;
    S16          ret = ROK;
    SztCause     *cause = NULLP;
@@ -1739,7 +1740,7 @@ PUBLIC S16 nbPrcS1SetupFail(U16 peerId, S1apPdu *pdu)
    nbSzGetIE(&(pdu->pdu), Sztid_Cause, &ie);
 
    if(ie == NULLP)
-   { 
+   {
       NB_LOG_ERROR(&nbCb, "Failed to retrive cause");
       RETVALUE(RFAILED);
    }
@@ -1792,13 +1793,13 @@ PUBLIC S16 nbPrcS1SetupFail(U16 peerId, S1apPdu *pdu)
          break;
    }
    nbSzGetIE(&(pdu->pdu), Sztid_TimeToWait, &ie);
-   s1TimeToWait = (TknU32 *)ie;       
+   s1TimeToWait = (TknU32 *)ie;
    if(s1TimeToWait != NULLP)
    {
       wait = s1TimeToWait->val;
    }
    /* send s1-setup response to user */
-     
+
    nbUiSendS1SetupFailInd(causeType, causeVal, wait);
    UNUSED(peerId);
    RETVALUE(ret);
@@ -1806,7 +1807,7 @@ PUBLIC S16 nbPrcS1SetupFail(U16 peerId, S1apPdu *pdu)
 
 /* @brief This function process the S1AP Unsuccessful Outcome messages.
  *
- * @details This function process the S1AP Unsuccessful Outcome messages like 
+ * @details This function process the S1AP Unsuccessful Outcome messages like
  *          S1-Setup Response Fail, EnodeB Configuration Update failure meesages.
  *
  * Function: nbPrcUnsuccPdu
@@ -1816,7 +1817,7 @@ PUBLIC S16 nbPrcS1SetupFail(U16 peerId, S1apPdu *pdu)
  * calls the respective functions to process the failure messages.
  *
  * @param[in] peerId: Peer ID.
- * @param[in]    pdu: S1-AP PDU 
+ * @param[in]    pdu: S1-AP PDU
  *@return    -# Success: ROK
  *-# Failure: RFAILED
  */
@@ -1995,9 +1996,9 @@ PUBLIC S16 nbS1apBldUlNasPdu
 *  @param [out] pdu      : double pointer to return the UE RADIO CAPABILITY IND PDU
 *  @return S16
   -# Success : ROK
-  -# Failure : RFAILED 
+  -# Failure : RFAILED
 */
-                       
+
 PUBLIC S16 nbS1apBldUeCapIndPdu
 (
  NbUeCb         *ueCb,
@@ -2046,7 +2047,7 @@ PUBLIC S16 nbS1apBldUeCapIndPdu
 
    /* IE2 - Filling enb s1ap id */
    ie = &ueCapInfo->protocolIEs.member[ieIdx];
-   nbFillTknU8(&(ie->pres),PRSNT_NODEF);     
+   nbFillTknU8(&(ie->pres),PRSNT_NODEF);
    nbFillTknU32(&(ie->id),Sztid_eNB_UE_S1AP_ID);
    nbFillTknU32(&(ie->criticality),SztCriticalityrejectEnum);
    nbFillTknU32(&(ie->value.u.sztENB_UE_S1AP_ID), s1apCon->enb_ue_s1ap_id);
@@ -2054,10 +2055,10 @@ PUBLIC S16 nbS1apBldUeCapIndPdu
 
    /* IE3 - Filling UE Radio Capability */
    ie = &ueCapInfo->protocolIEs.member[ieIdx];
-   nbFillTknU8(&(ie->pres),PRSNT_NODEF);     
+   nbFillTknU8(&(ie->pres),PRSNT_NODEF);
    nbFillTknU32(&(ie->id),Sztid_UERadioCapblty);
    nbFillTknU32(&(ie->criticality),SztCriticalityignoreEnum);
-   nbFillTknStrOSXL(&(ie->value.u.sztUERadioCapblty), capInfo->len, capInfo->val, 
+   nbFillTknStrOSXL(&(ie->value.u.sztUERadioCapblty), capInfo->len, capInfo->val,
          &(ulCapIndPdu->memCp));
    ieIdx++;
 
@@ -2090,7 +2091,7 @@ PUBLIC S16 nbS1apBldUeCapIndPdu
 PRIVATE S16 nbHandleInitCtxtPrcSetup
 (
  NbUeCb *ueCb,
- S1apPdu *pdu 
+ S1apPdu *pdu
 )
 {
    NbErabLst                             *erabInfo = NULLP;
@@ -2111,7 +2112,7 @@ PRIVATE S16 nbHandleInitCtxtPrcSetup
    for (cnt = 0; cnt < protIes->noComp.val; cnt++)
    {
       ie = &(protIes->member[cnt]);
-      switch(ie->id.val) 
+      switch(ie->id.val)
       {
          case Sztid_MME_UE_S1AP_ID:
             {
@@ -2188,7 +2189,7 @@ PRIVATE S16 nbHandleInitCtxtPrcSetup
                break;
             }
          case Sztid_HovrRestrnLst:
-            {   
+            {
                break;
             }
          case Sztid_ManagementBasedMDTAllowed:
@@ -2209,11 +2210,11 @@ PRIVATE S16 nbHandleInitCtxtPrcSetup
    {
       if(nbCb.initCtxtSetupFail[(ueCb->ueId) - 1].initCtxtSetupFailInd == TRUE)
       {
-         cause.causeTyp = nbCb.initCtxtSetupFail[(ueCb->ueId) - 1].causeType; 
+         cause.causeTyp = nbCb.initCtxtSetupFail[(ueCb->ueId) - 1].causeType;
          cause.causeVal = nbCb.initCtxtSetupFail[(ueCb->ueId) - 1].causeVal;
          if(ROK != sendInitCtxtSetupFailRsp(ueCb, &cause))
          {
-            NB_LOG_DEBUG(&nbCb,"Failed to Sending Initial Context Setup Failure message to MME");  
+            NB_LOG_DEBUG(&nbCb,"Failed to Sending Initial Context Setup Failure message to MME");
          }
          NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
          NB_FREE(erabInfo, sizeof(NbErabLst));
@@ -2231,7 +2232,7 @@ PRIVATE S16 nbHandleInitCtxtPrcSetup
                RETVALUE(retVal);
             }
             /* send indication to tfwApp for dropping the Initial Context Setup Req */
-            retVal = nbUiSendIntCtxtSetupDrpdIndToUser(ueCb->ueId); 
+            retVal = nbUiSendIntCtxtSetupDrpdIndToUser(ueCb->ueId);
             if(retVal != ROK)
             {
                NB_LOG_ERROR(&nbCb, "Failed to Send Initial Context Setup"\
@@ -2247,10 +2248,10 @@ PRIVATE S16 nbHandleInitCtxtPrcSetup
          NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
          NB_FREE(erabInfo, sizeof(NbErabLst));
       }
-      else 
+      else
       {
          if( nbCb.delayInitCtxtSetupRsp[(ueCb->ueId) - 1].delayICSRsp != TRUE)
-         { 
+         {
             /* send the s1-context resp to mme and nas pdu to ue */
             retVal = nbBuildAndSendIntCtxtSetupRsp(ueCb, erabInfo);
             if(retVal != ROK)
@@ -2259,7 +2260,7 @@ PRIVATE S16 nbHandleInitCtxtPrcSetup
                NB_FREE(erabInfo, sizeof(NbErabLst));
                RETVALUE(RFAILED);
             }
-            retVal = nbSendErabsInfo(ueCb, erabInfo,ueRadCapRcvd);
+            retVal = nbSendErabsInfo(ueCb, erabInfo, NULL, ueRadCapRcvd);
             /* do the ip-query  ueapp for received bearers */
             for(idx = 0; idx < erabInfo->noOfComp; idx++)
             {
@@ -2270,7 +2271,7 @@ PRIVATE S16 nbHandleInitCtxtPrcSetup
          }
          else
          {
-            retVal = nbSendErabsInfo(ueCb, erabInfo,ueRadCapRcvd);
+            retVal = nbSendErabsInfo(ueCb, erabInfo, NULL, ueRadCapRcvd);
             /* do the ip-query  ueapp for received bearers */
             for(idx = 0; idx < erabInfo->noOfComp; idx++)
             {
@@ -2284,60 +2285,57 @@ PRIVATE S16 nbHandleInitCtxtPrcSetup
    RETVALUE(retVal);
 }
 
-PRIVATE S16 nbHandleRabSetupMsg
-(
- NbUeCb *ueCb,
- S1apPdu   *pdu 
-)
-{
-   U8 idx;
-   SztInitiatingMsg   *initMsg = &pdu->pdu.val.initiatingMsg;
-   SztE_RABSetupRqst  *rabSetupIE = &initMsg->value.u.sztE_RABSetupRqst;
-   SztProtIE_Field_E_RABSetupRqstIEs *ie;
-   NbErabLst                             *erabInfo = NULLP;
-   S16 retVal = RFAILED; 
-   SztE_RABToBeSetupLstBrSUReq *s1ErabLst;
-   for(idx = 0;idx < rabSetupIE->protocolIEs.noComp.val; idx++)
-   {
-      ie = &rabSetupIE->protocolIEs.member[idx];
-      switch(ie->id.val)
-      {
-         case Sztid_E_RABToBeSetupLstBrSUReq:
-            {
-               s1ErabLst  = &ie->value.u.sztE_RABToBeSetupLstBrSUReq;
-               if((retVal = nbGetErabInfoFrmErabSetup(ueCb, s1ErabLst,
-                           &erabInfo)) != ROK)
-               {
-                  NB_LOG_ERROR(&nbCb, "processing ERABs failed");
-                  RETVALUE(RFAILED);
-               }
-#if 0
-               ret = nbPrcRabSetupLst(rabSetup, 
-                     &ie->value.u.sztE_RABToBeSetupLstBrSUReq);
-#endif
-               break;
-            }
+PRIVATE S16 nbHandleRabSetupMsg(NbUeCb *ueCb, S1apPdu *pdu) {
+  U8 idx;
+  SztInitiatingMsg *initMsg = &pdu->pdu.val.initiatingMsg;
+  SztE_RABSetupRqst *rabSetupIE = &initMsg->value.u.sztE_RABSetupRqst;
+  SztProtIE_Field_E_RABSetupRqstIEs *ie;
+  NbErabLst *erabInfo = NULLP;
+  NbFailedErabLst *failedErabInfo = NULLP;
+  S16 retVal = RFAILED;
+  SztE_RABToBeSetupLstBrSUReq *s1ErabLst;
+  for (idx = 0; idx < rabSetupIE->protocolIEs.noComp.val; idx++) {
+    ie = &rabSetupIE->protocolIEs.member[idx];
+    switch (ie->id.val) {
+      case Sztid_E_RABToBeSetupLstBrSUReq: {
+        s1ErabLst = &ie->value.u.sztE_RABToBeSetupLstBrSUReq;
+        if ((retVal = nbGetErabInfoFrmErabSetup(ueCb, s1ErabLst, &erabInfo,
+                                                &failedErabInfo)) != ROK) {
+          NB_LOG_ERROR(&nbCb, "processing ERABs failed");
+          RETVALUE(RFAILED);
+        }
+        break;
       }
-   }
-   if(erabInfo != NULLP)
-   {
-      retVal = nbRabSetupSndS1apRsp(ueCb, erabInfo);
-      if(retVal != ROK)
-      {
-         NB_FREE(erabInfo->erabs,(erabInfo->noOfComp * sizeof(NbErabCb)));
-         NB_FREE(erabInfo,sizeof(NbErabLst));
-         RETVALUE(RFAILED);
-      }
-      retVal = nbSendErabsInfo(ueCb, erabInfo, FALSE);
-      /* do the ip-query  ueapp for received bearers */
-      for(idx =0; idx < erabInfo->noOfComp; idx++)
-      {
-         nbHandleUeIpInfoReq(ueCb->ueId,erabInfo->erabs[idx].erabId);
-      }
+    }
+  }
+  if (erabInfo != NULLP || failedErabInfo != NULLP) {
+    retVal = nbRabSetupSndS1apRsp(ueCb, erabInfo, failedErabInfo);
+    if (retVal != ROK) {
       NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
       NB_FREE(erabInfo, sizeof(NbErabLst));
-   }
-   RETVALUE(retVal);
+      if (failedErabInfo) {
+        NB_FREE(failedErabInfo->failedErabs,
+                (failedErabInfo->noOfComp * sizeof(NbFailedErab)));
+        NB_FREE(failedErabInfo, sizeof(NbFailedErabLst));
+      }
+      RETVALUE(RFAILED);
+    }
+    retVal = nbSendErabsInfo(ueCb, erabInfo, failedErabInfo, TRUE);
+    /* do the ip-query  ueapp for received bearers */
+    if (erabInfo->noOfComp > 0) {
+      for (idx = 0; idx < erabInfo->noOfComp; idx++) {
+        nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId);
+      }
+    }
+    NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
+    NB_FREE(erabInfo, sizeof(NbErabLst));
+    if (failedErabInfo) {
+      NB_FREE(failedErabInfo->failedErabs,
+              (failedErabInfo->noOfComp * sizeof(NbFailedErab)));
+      NB_FREE(failedErabInfo, sizeof(NbFailedErabLst));
+    }
+  }
+  RETVALUE(retVal);
 }
 
 /** @brief  This function is called by IFM module to pass the received S1AP
@@ -2345,7 +2343,7 @@ PRIVATE S16 nbHandleRabSetupMsg
 *
 * @details
 *
-*     Function: 
+*     Function:
 *
 *         Processing steps:
 *           This function is receives procedure initiaing messages from UE. It
@@ -2384,7 +2382,7 @@ PUBLIC S16 nbPrcIncS1apMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType)
       /* Inform the Tfw about Initial Context Setup */
       if((nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isDropICSEnable != TRUE) &&\
              (nbCb.dropICSSndCtxtRel[(ueCb->ueId) - 1].sndICSRspUeCtxtRel != TRUE))
-      {       
+      {
          ret = nbUiSendIntCtxtSetupIndToUser(ueCb->ueId,\
                nbCb.initCtxtSetupFail[(ueCb->ueId) - 1].initCtxtSetupFailInd);
          if(ret != ROK)
@@ -2444,7 +2442,7 @@ PUBLIC S16 nbPrcIncS1apMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType)
 
    cmFreeMem((Ptr *)(pdu));
 
-   RETVALUE(ret); 
+   RETVALUE(ret);
 }
 
 PUBLIC S16 nbPrcS1apRelInd
@@ -2469,7 +2467,7 @@ PUBLIC S16 nbPrcS1apRelInd
    ueCb->s1ConCb->spConnId = relInd->spConnId;
    retVal = nbPrcIncS1apMsg(ueCb, relInd->pdu, msgType);
 
-   RETVALUE(retVal); 
+   RETVALUE(retVal);
 }
 
 PUBLIC S16 nbPrcS1apConCfm
@@ -2494,7 +2492,7 @@ PUBLIC S16 nbPrcS1apConCfm
    ueCb->s1ConCb->spConnId = conCfm->spConnId;
    retVal = nbPrcIncS1apMsg(ueCb, conCfm->pdu, msgType);
 
-   RETVALUE(retVal); 
+   RETVALUE(retVal);
 }
 
 PUBLIC S16 nbPrcS1DatInd
@@ -2518,7 +2516,7 @@ PUBLIC S16 nbPrcS1DatInd
    }
    retVal = nbPrcIncS1apMsg(ueCb, s1DatInd->pdu, msgType);
 
-   RETVALUE(retVal); 
+   RETVALUE(retVal);
 }
 
 PUBLIC S16 sendNonDelFlag(NbUeCb *ueCb, SztNAS_PDU *pdu, NbUeMsgCause *cause)
@@ -2535,12 +2533,12 @@ PUBLIC S16 sendNonDelFlag(NbUeCb *ueCb, SztNAS_PDU *pdu, NbUeMsgCause *cause)
    s1NasNonDel.spConnId = s1apCon->spConnId;
       /* Initialize memory control point */
    if (cmAllocEvnt(sizeof(S1apPdu), SZ_MEM_SDU_SIZE, &nbCb.mem,
-            (Ptr *)&nasNonDel) != ROK) 
+            (Ptr *)&nasNonDel) != ROK)
    {
       NB_LOG_ERROR(&nbCb, "Failed to allocate memory. cmAllocEvnt failed");
       RETVALUE(RFAILED);
    }
-   
+
    nbFillTknU8(&(nasNonDel->pdu.choice), S1AP_PDU_INITIATINGMSG);
    initMsg = &nasNonDel->pdu.val.initiatingMsg;
    nbFillTknU8(&(initMsg->pres), PRSNT_NODEF);
@@ -2548,7 +2546,7 @@ PUBLIC S16 sendNonDelFlag(NbUeCb *ueCb, SztNAS_PDU *pdu, NbUeMsgCause *cause)
    nbFillTknU32(&(initMsg->procedureCode), Sztid_NASNonDlvryInd);
    nasNonDlvryInd = &(initMsg->value.u.sztNASNonDlvryInd);
    nbFillTknU8(&(nasNonDlvryInd->pres), PRSNT_NODEF);
-   
+
    /* Allocate memory for 4 IEs */
    if ((cmGetMem(nasNonDel, 4 * sizeof(SztProtIE_Field_NASNonDlvryInd_IEs),
                (Ptr*)&nasNonDlvryInd->protocolIEs.member)) !=ROK)
@@ -2594,12 +2592,12 @@ PUBLIC S16 sendNonDelFlag(NbUeCb *ueCb, SztNAS_PDU *pdu, NbUeMsgCause *cause)
    s1NasNonDel.pdu = nasNonDel;
    /* Dispatch the message using S1 interface to the selected MME         */
    if (ROK != NbIfmS1apDatReq(&s1NasNonDel))
-   {   
+   {
       NB_LOG_ERROR(&nbCb,"NbIfmS1apDatReq failed");
       NB_FREE(pdu->val, pdu->len);
       NB_FREE(pdu, sizeof(SztNAS_PDU));
       RETVALUE(RFAILED);
-   }   
+   }
 #if 0
    NB_FREE(pdu->val, pdu->len);
    NB_FREE(pdu, sizeof(SztNAS_PDU));
@@ -2647,19 +2645,19 @@ PUBLIC S16 sendInitCtxtSetupFailRsp(NbUeCb *ueCb, NbUeMsgCause *cause)
 
    /* Filling MME UE ID */
    ie = &initCtxtSetupFail->protocolIEs.member[crntIe++];
-   nbFillTknU8(&(ie->pres), PRSNT_NODEF);   
-   nbFillTknU32(&(ie->id), Sztid_MME_UE_S1AP_ID);   
-   nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);   
-   nbFillTknU32(&(ie->value.u.sztMME_UE_S1AP_ID), s1ConCb->mme_ue_s1ap_id);  
+   nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+   nbFillTknU32(&(ie->id), Sztid_MME_UE_S1AP_ID);
+   nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+   nbFillTknU32(&(ie->value.u.sztMME_UE_S1AP_ID), s1ConCb->mme_ue_s1ap_id);
 
 
    /* Filling ENB UE ID */
-   ie = &initCtxtSetupFail->protocolIEs.member[crntIe++];    
-   nbFillTknU8(&(ie->pres), PRSNT_NODEF);  
-   nbFillTknU32(&(ie->id), Sztid_eNB_UE_S1AP_ID);   
-   nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum); 
-   nbFillTknU32(&(ie->value.u.sztENB_UE_S1AP_ID), s1ConCb->enb_ue_s1ap_id); 
-   
+   ie = &initCtxtSetupFail->protocolIEs.member[crntIe++];
+   nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+   nbFillTknU32(&(ie->id), Sztid_eNB_UE_S1AP_ID);
+   nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+   nbFillTknU32(&(ie->value.u.sztENB_UE_S1AP_ID), s1ConCb->enb_ue_s1ap_id);
+
    /* IE4 - Filling  Cause */
    ie = &initCtxtSetupFail->protocolIEs.member[crntIe++];
    nbFillTknU8(&(ie->pres), PRSNT_NODEF);
@@ -2676,9 +2674,9 @@ PUBLIC S16 sendInitCtxtSetupFailRsp(NbUeCb *ueCb, NbUeMsgCause *cause)
 #ifdef MULTI_ENB_SUPPORT
    datEvt.enbId    = ueCb->enbId;
 #endif
-  
+
    if (ROK != NbIfmS1apDatReq(&datEvt))
-   {   
+   {
       NB_LOG_ERROR(&nbCb,"NbIfmS1apDatReq failed");
       RETVALUE(RFAILED);
    }
@@ -2691,8 +2689,8 @@ PUBLIC S16 nbProcessDlNasMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType)
    SztInitiatingMsg     *initMsg = NULLP;
    SztNAS_PDU           *nasPdu = NULLP;
    U32                  idx = 0;
-   TknU8                *mmeIdTkn = NULLP; 
-   TknU8                *enbIdTkn = NULLP; 
+   TknU8                *mmeIdTkn = NULLP;
+   TknU8                *enbIdTkn = NULLP;
    SztProtIE_Field_DlnkNASTport_IEs *ie = NULLP;
    NbUeMsgCause         cause;
 
@@ -2756,69 +2754,84 @@ PUBLIC S16 nbProcessDlNasMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType)
    RETVALUE(ROK);
 }
 
-PUBLIC S16 nbGetErabInfoFrmErabSetup 
-(
- NbUeCb                           *ueCb,
- SztE_RABToBeSetupLstBrSUReq      *s1ErabLst,
- NbErabLst                        **erabInfo
-)
-{
-   U32                            addrMask = 0;
-   U8                             rbIdx = 0;
-   U8                             shiftBits = 0;
-   U8                             indx = 0;
-   U8                             idx = 0;
-   SztGTP_TEID                    *remTeIdStr = NULLP;
-   SztE_RABToBeSetupItemBrSUReq *erabItem = NULLP;
-   NbUeTunInfo                    *tunInfo;
+PUBLIC S16 nbGetErabInfoFrmErabSetup(NbUeCb *ueCb,
+                                     SztE_RABToBeSetupLstBrSUReq *s1ErabLst,
+                                     NbErabLst **erabInfo,
+                                     NbFailedErabLst **failedErabInfo) {
+  U32 addrMask = 0;
+  U8 rbIdx = 0;
+  U8 failedRbIdx = 0;
+  U8 shiftBits = 0;
+  U8 indx = 0;
+  U8 idx = 0;
+  SztGTP_TEID *remTeIdStr = NULLP;
+  SztE_RABToBeSetupItemBrSUReq *erabItem = NULLP;
+  NbUeTunInfo *tunInfo;
+#define MAX_QCI_VAL 9
+#define MIN_QCI_VAL 1
 
-   U8   numErabs = 0;
-   numErabs      = s1ErabLst->noComp.val;
+  U8 numErabs = 0;
+  numErabs = s1ErabLst->noComp.val;
 
-   NB_ALLOC(erabInfo, sizeof(NbErabLst));
-   if(erabInfo == NULLP)
-   {
-      NB_LOG_ERROR(&nbCb, "MEMORY ALLOCATION FAILED");
-      RETVALUE(RFAILED);
-   }
-   NB_ALLOC(&(*erabInfo)->erabs, (numErabs * sizeof(NbErabCb)));
-   if((*erabInfo)->erabs == NULLP)
-   {
-      NB_LOG_ERROR(&nbCb, "MEMORY ALLOCATION FAILED");
-      NB_FREE(*erabInfo, sizeof(NbErabLst));
-      RETVALUE(RFAILED);
-   }
-#if 0
-   NB_ALLOC(&(ueCb->tunnInfo),(numErabs * sizeof(NbUeTunInfo)));
-   if(ueCb->tunnInfo == NULLP)
-   {
-      NB_LOG_ERROR(&nbCb, "MEMORY ALLOCATION FAILED");
-      NB_FREE((*erabInfo)->erabs, (numErabs * sizeof(NbErabCb)));
-      NB_FREE(*erabInfo, sizeof(NbErabLst));
-      RETVALUE(RFAILED);
-   }
-#endif
-   for(idx = 0; idx < numErabs; idx++)
-   {
-      erabItem = &s1ErabLst->member[idx].value.u.sztE_RABToBeSetupItemBrSUReq;
-      /* Store the remote tunnel information */
-      /* Retrieve the remote S-GW's EGTP-U tunnel Id */
+  NB_ALLOC(erabInfo, sizeof(NbErabLst));
+  if (erabInfo == NULLP) {
+    NB_LOG_ERROR(&nbCb, "MEMORY ALLOCATION FAILED");
+    RETVALUE(RFAILED);
+  }
+  NB_ALLOC(&(*erabInfo)->erabs, (numErabs * sizeof(NbErabCb)));
+  if ((*erabInfo)->erabs == NULLP) {
+    NB_LOG_ERROR(&nbCb, "MEMORY ALLOCATION FAILED");
+    NB_FREE(*erabInfo, sizeof(NbErabLst));
+    RETVALUE(RFAILED);
+  }
 
+  NB_ALLOC(failedErabInfo, sizeof(NbFailedErabLst));
+  if (failedErabInfo == NULLP) {
+    NB_LOG_ERROR(&nbCb, "MEMORY ALLOCATION FAILED");
+    RETVALUE(RFAILED);
+  }
+  NB_ALLOC(&(*failedErabInfo)->failedErabs, (numErabs * sizeof(NbFailedErab)));
+  if ((*failedErabInfo)->failedErabs == NULLP) {
+    NB_LOG_ERROR(&nbCb, "MEMORY ALLOCATION FAILED");
+    NB_FREE(*failedErabInfo, sizeof(NbFailedErabLst));
+    RETVALUE(RFAILED);
+  }
+  for (idx = 0; idx < numErabs; idx++) {
+    erabItem = &s1ErabLst->member[idx].value.u.sztE_RABToBeSetupItemBrSUReq;
+    /* Store the remote tunnel information */
+    /* Retrieve the remote S-GW's EGTP-U tunnel Id */
 
-      remTeIdStr = &(erabItem->gTP_TEID);
-      shiftBits = (remTeIdStr->len);
-      addrMask = 0xFF000000;
-      NB_ALLOC(&(tunInfo),(sizeof(NbUeTunInfo)));
+    if (erabItem->e_RABlevelQoSParams.qCI.pres &&
+        (erabItem->e_RABlevelQoSParams.qCI.val < MIN_QCI_VAL ||
+         erabItem->e_RABlevelQoSParams.qCI.val > MAX_QCI_VAL)) {
+      NB_LOG_ERROR(&nbCb, "Received invalid qci:%d for bearer_id:%u \n",
+                   erabItem->e_RABlevelQoSParams.qCI.val,
+                   erabItem->e_RAB_ID.val);
+      (*failedErabInfo)->noOfComp += 1;
+      (*failedErabInfo)->failedErabs[failedRbIdx].qci =
+          erabItem->e_RABlevelQoSParams.qCI.val;
+      (*failedErabInfo)->failedErabs[failedRbIdx].erabId =
+          erabItem->e_RAB_ID.val;
+      (*failedErabInfo)->failedErabs[failedRbIdx].cause.causeTyp =
+          NB_CAUSE_RADIONW;
+      (*failedErabInfo)->failedErabs[failedRbIdx].cause.causeVal =
+          CAUSE_RADIONW_QCI_UNSUPPORTED;
+      failedRbIdx += 1;
+      continue;
+    }
+    remTeIdStr = &(erabItem->gTP_TEID);
+    shiftBits = (remTeIdStr->len);
+    addrMask = 0xFF000000;
+    NB_ALLOC(&(tunInfo), (sizeof(NbUeTunInfo)));
 
-      for(indx = 0;indx < remTeIdStr->len;indx++)
-      {
-         shiftBits--;
-         tunInfo->remTeId |= 
-            ((U32)(remTeIdStr->val[indx] << (8*shiftBits)) & addrMask);
-         addrMask = addrMask>>8;
-      }
-      tunInfo->bearerId = erabItem->e_RAB_ID.val;
-      /* assinging received ueid as lclTeid */
+    for (indx = 0; indx < remTeIdStr->len; indx++) {
+      shiftBits--;
+      tunInfo->remTeId |=
+          ((U32)(remTeIdStr->val[indx] << (8 * shiftBits)) & addrMask);
+      addrMask = addrMask >> 8;
+    }
+    tunInfo->bearerId = erabItem->e_RAB_ID.val;
+    /* assinging received ueid as lclTeid */
 #ifdef MULTI_ENB_SUPPORT
       tunInfo->lclTeId = nbGetUeLclTeid(ueCb->ueId,
             erabItem->e_RAB_ID.val,ueCb->enbId);
@@ -2832,8 +2845,7 @@ PUBLIC S16 nbGetErabInfoFrmErabSetup
          case 32:
             {
                tunInfo->sgwAddr.type = CM_TPTADDR_IPV4;
-               tunInfo->sgwAddr.u.ipv4TptAddr.\
-                  port = NB_DFLT_EGTP_PORT; 
+               tunInfo->sgwAddr.u.ipv4TptAddr.port = NB_DFLT_EGTP_PORT;
 
                /* copy 4bytes into the U32 */
                shiftBits = erabItem->transportLyrAddr.len / 8;
@@ -2842,7 +2854,7 @@ PUBLIC S16 nbGetErabInfoFrmErabSetup
                {
                   shiftBits--;
                   tunInfo->sgwAddr.u.ipv4TptAddr.address |=
-                     ((U32)(erabItem->transportLyrAddr.val[indx] 
+                     ((U32)(erabItem->transportLyrAddr.val[indx]
                         << (8 * shiftBits)) & addrMask);
                   addrMask = addrMask >> 8;
                }
@@ -2864,16 +2876,15 @@ PUBLIC S16 nbGetErabInfoFrmErabSetup
             {
                /* This means both IPv4 and IPv6 addresses are present. We are */
                /* yet to support this option                                  */
-               RETVALUE(RFAILED);  
+               RETVALUE(RFAILED);
             }
       }
-      if (ROK != cmHashListInsert(&(ueCb->tunnInfo),(PTR)tunInfo,
-               (U8 *) &tunInfo->bearerId,sizeof(U32)))
-      {   
-         NB_FREE(tunInfo, sizeof(NbUeTunInfo))
-         NB_LOG_ERROR(&nbCb, "Failed to Insert tunnel info ");
-         RETVALUE(RFAILED);
-      }   
+      if (ROK != cmHashListInsert(&(ueCb->tunnInfo), (PTR)tunInfo,
+                                  (U8 *)&tunInfo->bearerId, sizeof(U32))) {
+        NB_FREE(tunInfo, sizeof(NbUeTunInfo))
+        NB_LOG_ERROR(&nbCb, "Failed to Insert tunnel info ");
+        RETVALUE(RFAILED);
+      }
       /* store the NAS PDU */
       if(erabItem->nAS_PDU.pres == PRSNT_NODEF)
       {
@@ -2888,8 +2899,8 @@ PUBLIC S16 nbGetErabInfoFrmErabSetup
       (*erabInfo)->erabs[rbIdx].lclTeid =tunInfo->lclTeId;
       rbIdx++;
       tunInfo = NULLP;
-   }
-   (*erabInfo)->noOfComp = numErabs;
+  }
+   (*erabInfo)->noOfComp = rbIdx;
 
    RETVALUE(ROK);
 }
@@ -2908,7 +2919,7 @@ PUBLIC S16 nbGetErabInfoFrmIntCnxt
    U8                             idx = 0;
    SztGTP_TEID                    *remTeIdStr = NULLP;
    SztE_RABToBeSetupItemCtxtSUReq *erabItem = NULLP;
-   NbUeTunInfo                    *tunInfo = NULLP; 
+   NbUeTunInfo                    *tunInfo = NULLP;
 
    U8   numErabs = 0;
    numErabs      = s1ErabLst->noComp.val;
@@ -2927,7 +2938,7 @@ PUBLIC S16 nbGetErabInfoFrmIntCnxt
       NB_FREE(*erabInfo, sizeof(NbErabLst));
       RETVALUE(RFAILED);
    }
-   
+
    ueCb->tunnIdx = 0;
    for(idx = 0; idx < numErabs; idx++)
    {
@@ -2942,7 +2953,7 @@ PUBLIC S16 nbGetErabInfoFrmIntCnxt
       for(indx = 0;indx < remTeIdStr->len; indx++)
       {
          shiftBits--;
-         tunInfo->remTeId |= 
+         tunInfo->remTeId |=
             ((U32)(remTeIdStr->val[indx] << (8*shiftBits)) & addrMask);
          addrMask = addrMask >> 8;
       }
@@ -2962,7 +2973,7 @@ PUBLIC S16 nbGetErabInfoFrmIntCnxt
             {
                tunInfo->sgwAddr.type = CM_TPTADDR_IPV4;
                tunInfo->sgwAddr.u.ipv4TptAddr.\
-                  port = NB_DFLT_EGTP_PORT; 
+                  port = NB_DFLT_EGTP_PORT;
 
                /* copy 4bytes into the U32 */
                shiftBits = erabItem->transportLyrAddr.len / 8;
@@ -2971,7 +2982,7 @@ PUBLIC S16 nbGetErabInfoFrmIntCnxt
                {
                   shiftBits--;
                   tunInfo->sgwAddr.u.ipv4TptAddr.address |=
-                     ((U32)(erabItem->transportLyrAddr.val[indx] 
+                     ((U32)(erabItem->transportLyrAddr.val[indx]
                         << (8 * shiftBits)) & addrMask);
                   addrMask = addrMask >> 8;
                }
@@ -2993,7 +3004,7 @@ PUBLIC S16 nbGetErabInfoFrmIntCnxt
             {
                /* This means both IPv4 and IPv6 addresses are present. We are */
                /* yet to support this option                                  */
-               RETVALUE(RFAILED);  
+               RETVALUE(RFAILED);
             }
       }
       if (ROK != cmHashListInsert(&(ueCb->tunnInfo),(PTR)tunInfo,
@@ -3022,108 +3033,105 @@ PUBLIC S16 nbGetErabInfoFrmIntCnxt
    RETVALUE(ROK);
 }
 
-PRIVATE S16 nbFillS1apRabSetupRsp
-(
- NbUeCb   *ueCb,
- NbErabLst *erabInfo,
- S1apPdu   **s1apPdu
-)
-{
-   NbErabCb      *rab;
-   S1apPdu                   *szERABRspPdu = NULLP;
-   SztSuccessfulOutcome      *succOut;
-   SztE_RABSetupResp         *rabSetupRsp;
-   S16                       ret = ROK;
-   NbS1ConCb                 *s1apCon;
-   U16                       idx;
-   U16                       crntIe = 0; 
-   U8                       numRabsAllowed = 0;
-   SztProtIE_Field_E_RABSetupRespIEs             *ie = NULLP;
-   SztProtIE_SingleCont_E_RABSetupItemBrSUResIEs *rspMember = NULLP;
-   U8                        cnt = 0;
-   U8                        len = 0;
-   U8                        noComp = 0;
-   U8 ieIdx;
-   U8                                               offSet;
+PRIVATE S16 nbFillS1apRabSetupRsp(NbUeCb *ueCb, NbErabLst *erabInfo,
+                                  S1apPdu **s1apPdu,
+                                  NbFailedErabLst *failedErabInfo) {
+  NbErabCb *rab;
+  S1apPdu *szERABRspPdu = NULLP;
+  SztSuccessfulOutcome *succOut;
+  SztE_RABSetupResp *rabSetupRsp;
+  S16 ret = ROK;
+  NbS1ConCb *s1apCon;
+  U16 idx;
+  U16 crntIe = 0;
+  U8 numRabsAllowed = 0;
+  SztProtIE_Field_E_RABSetupRespIEs *ie = NULLP;
+  SztProtIE_SingleCont_E_RABSetupItemBrSUResIEs *rspMember = NULLP;
+  U8 cnt = 0;
+  U8 len = 0;
+  U8 noComp = 0;
+  U8 ieIdx;
+  U8 offSet;
 
-   NB_LOG_DEBUG(&nbCb,"Filling E-RAB Setup Response");
-   numRabsAllowed = erabInfo->noOfComp;
+  NB_LOG_DEBUG(&nbCb, "Filling E-RAB Setup Response");
+  numRabsAllowed = erabInfo->noOfComp;
 
-   noComp = 3;
+  noComp = 2;
+  if (erabInfo->noOfComp > 0) {
+    ++noComp;
+  }
+  if (failedErabInfo->noOfComp > 0) {
+    ++noComp;
+  }
+  s1apCon = ueCb->s1ConCb;
+  if (cmAllocEvnt(sizeof(S1apPdu), SZ_MEM_SDU_SIZE, &nbCb.mem,
+                  (Ptr *)&szERABRspPdu) != ROK) {
+    NB_LOG_ERROR(&nbCb, "Failed to allocate memory for s1apPdu.");
+    RETVALUE(RFAILED);
+  }
 
-   s1apCon = ueCb->s1ConCb;
-   if (cmAllocEvnt(sizeof(S1apPdu), SZ_MEM_SDU_SIZE, &nbCb.mem,
-            (Ptr *)&szERABRspPdu) != ROK)
-   {
-      NB_LOG_ERROR(&nbCb,"Failed to allocate memory for s1apPdu.");
+  nbFillTknU8(&(szERABRspPdu->pdu.choice), SZT_TRGR_SUCCESS_OUTCOME);
+  succOut = &(szERABRspPdu->pdu.val.successfulOutcome);
+  nbFillTknU8(&(succOut->pres), PRSNT_NODEF);
+  nbFillTknU32(&(succOut->procedureCode), Sztid_E_RABSetup);
+  nbFillTknU32(&(succOut->criticality), SztCriticalityrejectEnum);
+  rabSetupRsp = &(succOut->value.u.sztE_RABSetupResp);
+  nbFillTknU8(&(rabSetupRsp->pres), PRSNT_NODEF);
+
+  /*List of IEs Filled
+   * 1. UE ENB S1AP Id
+   * 2. UE MME S1AP Id
+   * 3. E-RAB Setup List
+   * 4. E-RAB failed to Setup List
+   * */
+  if (cmGetMem(szERABRspPdu,
+               (noComp * sizeof(SztProtIE_Field_E_RABSetupRespIEs)),
+               (Ptr *)&rabSetupRsp->protocolIEs.member) != ROK) {
+    NB_LOG_ERROR(&nbCb, "Failed to allocate memory. cmGetMem failed.");
+    RETVALUE(RFAILED);
+  }
+
+  /* Filling MME ID */
+  ie = &rabSetupRsp->protocolIEs.member[crntIe++];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_MME_UE_S1AP_ID);
+  nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+  nbFillTknU32(&(ie->value.u.sztMME_UE_S1AP_ID), s1apCon->mme_ue_s1ap_id);
+
+  /* Filling ENB ID */
+  ie = &rabSetupRsp->protocolIEs.member[crntIe++];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_eNB_UE_S1AP_ID);
+  nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+  nbFillTknU32(&(ie->value.u.sztENB_UE_S1AP_ID), s1apCon->enb_ue_s1ap_id);
+
+  if (numRabsAllowed > 0) {
+    /* ERAB Setup List  */
+    ie = &rabSetupRsp->protocolIEs.member[crntIe++];
+    nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+    nbFillTknU32(&(ie->id), Sztid_E_RABSetupLstBrSURes);
+    nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+    if ((cmGetMem(szERABRspPdu,
+                  (numRabsAllowed *
+                   sizeof(SztProtIE_SingleCont_E_RABSetupItemBrSUResIEs)),
+                  (Ptr *)&ie->value.u.sztE_RABSetupLstBrSURes.member)) != ROK) {
+      NB_LOG_ERROR(&nbCb, "Failed to allocate memory. cmGetMem failed");
       RETVALUE(RFAILED);
-   }
+    }
 
-   nbFillTknU8(&(szERABRspPdu->pdu.choice), SZT_TRGR_SUCCESS_OUTCOME);
-   succOut = &(szERABRspPdu->pdu.val.successfulOutcome);
-   nbFillTknU8(&(succOut->pres), PRSNT_NODEF);
-   nbFillTknU32(&(succOut->procedureCode), Sztid_E_RABSetup);
-   nbFillTknU32(&(succOut->criticality), SztCriticalityrejectEnum);
-   rabSetupRsp = &(succOut->value.u.sztE_RABSetupResp);
-   nbFillTknU8(&(rabSetupRsp->pres),PRSNT_NODEF);
+    /* Locate ERAB to be setup List IE  */
+    ieIdx = 0;
+    for (idx = 0; idx < erabInfo->noOfComp; idx++) {
+      SztE_RABSetupItemBrSURes *rabIE;
 
-
-   /*List of IEs Filled
-    * 1. UE ENB S1AP Id
-    * 2. UE MME S1AP Id
-    * 3. E-RAB Setup List
-    * */
-   if (cmGetMem(szERABRspPdu, (noComp * sizeof(SztProtIE_Field_E_RABSetupRespIEs)),
-            (Ptr *)&rabSetupRsp->protocolIEs.member) !=ROK)
-   {
-      NB_LOG_ERROR(&nbCb,"Failed to allocate memory. cmGetMem failed.");
-      RETVALUE(RFAILED);
-   }
-
-   /* Filling MME ID */
-   ie = &rabSetupRsp->protocolIEs.member[crntIe++];
-   nbFillTknU8(&(ie->pres), PRSNT_NODEF);   
-   nbFillTknU32(&(ie->id), Sztid_MME_UE_S1AP_ID);   
-   nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);   
-   nbFillTknU32(&(ie->value.u.sztMME_UE_S1AP_ID), s1apCon->mme_ue_s1ap_id);  
-
-   /* Filling ENB ID */
-   ie = &rabSetupRsp->protocolIEs.member[crntIe++];
-   nbFillTknU8(&(ie->pres), PRSNT_NODEF);  
-   nbFillTknU32(&(ie->id), Sztid_eNB_UE_S1AP_ID);   
-   nbFillTknU32(&(ie->criticality),SztCriticalityignoreEnum); 
-   nbFillTknU32(&(ie->value.u.sztENB_UE_S1AP_ID), s1apCon->enb_ue_s1ap_id);
-
-
-   if (numRabsAllowed > 0)
-   {
-      /* ERAB Setup List  */
-      ie = &rabSetupRsp->protocolIEs.member[crntIe++];
-      nbFillTknU8(&(ie->pres), PRSNT_NODEF);  
-      nbFillTknU32(&(ie->id), Sztid_E_RABSetupLstBrSURes);   
-      nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum); 
-      if ((cmGetMem(szERABRspPdu,
-                  (numRabsAllowed * sizeof(SztProtIE_SingleCont_E_RABSetupItemBrSUResIEs)),
-                  (Ptr *)&ie->value.u.sztE_RABSetupLstBrSURes.member)) != ROK)
-      {
-         NB_LOG_ERROR(&nbCb,"Failed to allocate memory. cmGetMem failed");
-         RETVALUE(RFAILED);
-      }
-
-      /* Locate ERAB to be setup List IE  */
-      ieIdx = 0;
-      for (idx = 0; idx < erabInfo->noOfComp; idx++)
-      {
-         SztE_RABSetupItemBrSURes *rabIE;
-
-         rspMember = &(ie->value.u.sztE_RABSetupLstBrSURes.member[ieIdx++]);
-         nbFillTknU8(&(rspMember->pres), PRSNT_NODEF);  
-         nbFillTknU32(&(rspMember->id), Sztid_E_RABSetupItemBrSURes);   
-         nbFillTknU32(&(rspMember->criticality), SztCriticalityignoreEnum); 
-         rab = &(erabInfo->erabs[idx]);
-         rabIE = &(rspMember->value.u.sztE_RABSetupItemBrSURes);
-         nbFillTknU8(&(rabIE->pres), PRSNT_NODEF); 
-         nbFillTknU32(&rabIE->e_RAB_ID, rab->erabId);
+      rspMember = &(ie->value.u.sztE_RABSetupLstBrSURes.member[ieIdx++]);
+      nbFillTknU8(&(rspMember->pres), PRSNT_NODEF);
+      nbFillTknU32(&(rspMember->id), Sztid_E_RABSetupItemBrSURes);
+      nbFillTknU32(&(rspMember->criticality), SztCriticalityignoreEnum);
+      rab = &(erabInfo->erabs[idx]);
+      rabIE = &(rspMember->value.u.sztE_RABSetupItemBrSURes);
+      nbFillTknU8(&(rabIE->pres), PRSNT_NODEF);
+      nbFillTknU32(&rabIE->e_RAB_ID, rab->erabId);
 #if 1
          if (nbCb.datAppAddr.type == CM_TPTADDR_IPV4)
 #endif
@@ -3140,7 +3148,7 @@ PRIVATE S16 nbFillS1apRabSetupRsp
                   (U8)(nbCb.datAppAddr.u.ipv4TptAddr.address >> offSet);
 #endif
             }
-         }   
+         }
 
          nbFillTknStrOSXL1(&rabIE->gTP_TEID, 4, rab->lclTeid, &(szERABRspPdu->memCp));
          rabIE->iE_Extns.noComp.pres = NOTPRSNT;
@@ -3151,26 +3159,54 @@ PRIVATE S16 nbFillS1apRabSetupRsp
       }
       nbFillTknU16(&(ie->value.u.sztE_RABSetupLstBrSURes.noComp), ieIdx);
    }
+   NB_LOG_ERROR(&nbCb, "failedErabInfo->noOfComp :%d \n",
+                failedErabInfo->noOfComp);
+   if (failedErabInfo->noOfComp > 0) {
+     SztProtIE_SingleCont_E_RABItemIEs *failedErabItem;
+     NbFailedErab failedRab = {0};
+     // E-RAB failed to Setup List
+     ie = &rabSetupRsp->protocolIEs.member[crntIe++];
+     nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+     nbFillTknU32(&(ie->id), Sztid_E_RABFailedToSetupLstBrSURes);
+     nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+     if ((cmGetMem(szERABRspPdu,
+                   ((failedErabInfo->noOfComp) *
+                    sizeof(SztProtIE_SingleCont_E_RABItemIEs)),
+                   (Ptr *)&ie->value.u.sztE_RABLst.member)) != ROK) {
+       NB_LOG_ERROR(&nbCb, "Failed to allocate memory. cmGetMem failed");
+       RETVALUE(RFAILED);
+     }
+
+     ieIdx = 0;
+     for (idx = 0; idx < failedErabInfo->noOfComp; idx++) {
+       SztE_RABItem *rabIE;
+       failedErabItem = &(ie->value.u.sztE_RABLst.member[ieIdx++]);
+       nbFillTknU8(&(failedErabItem->pres), PRSNT_NODEF);
+       nbFillTknU32(&(failedErabItem->id), Sztid_E_RABItem);
+       nbFillTknU32(&(failedErabItem->criticality), SztCriticalityignoreEnum);
+       failedRab = failedErabInfo->failedErabs[idx];
+       rabIE = &(failedErabItem->value.u.sztE_RABItem);
+       nbFillTknU8(&(rabIE->pres), PRSNT_NODEF);
+       nbFillTknU32(&(rabIE->e_RAB_ID), failedRab.erabId);
+       nbS1apFillCause(&(rabIE->cause), &failedRab.cause);
+     }
+     nbFillTknU16(&(ie->value.u.sztE_RABLst.noComp), failedErabInfo->noOfComp);
+   }
    nbFillTknU16(&(rabSetupRsp->protocolIEs.noComp), crntIe);
 
    *s1apPdu = szERABRspPdu;
    RETVALUE(ret);
 }
 
-PRIVATE S16 nbRabSetupSndS1apRsp
-(
- NbUeCb *ueCb,
- NbErabLst *erabInfo
-)
-{
-   S1apPdu   *s1apPdu = NULLP;
-   S16 ret = ROK;
+PRIVATE S16 nbRabSetupSndS1apRsp(NbUeCb *ueCb, NbErabLst *erabInfo,
+                                 NbFailedErabLst *failedErabInfo) {
+  S1apPdu *s1apPdu = NULLP;
+  S16 ret = ROK;
 
-   ret = nbFillS1apRabSetupRsp(ueCb,erabInfo,&s1apPdu);
-   if(ret != ROK)
-   {
-      RETVALUE(RFAILED);
-   }
+  ret = nbFillS1apRabSetupRsp(ueCb, erabInfo, &s1apPdu, failedErabInfo);
+  if (ret != ROK) {
+    RETVALUE(RFAILED);
+  }
 #ifdef MULTI_ENB_SUPPORT
    if (nbIfmS1apSndUeMsg(ueCb->s1ConCb->spConnId, s1apPdu, ueCb->enbId) != ROK)
 #else
@@ -3255,17 +3291,16 @@ PRIVATE S16 nbBuildIntCtxtSetupRsp
 
    /* Filling MME UE ID */
    ie = &initCtxtRsp->protocolIEs.member[crntIe++];
-   nbFillTknU8(&(ie->pres), PRSNT_NODEF);   
-   nbFillTknU32(&(ie->id), Sztid_MME_UE_S1AP_ID);   
-   nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);   
-   nbFillTknU32(&(ie->value.u.sztMME_UE_S1AP_ID), s1ConCb->mme_ue_s1ap_id);  
-
+   nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+   nbFillTknU32(&(ie->id), Sztid_MME_UE_S1AP_ID);
+   nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+   nbFillTknU32(&(ie->value.u.sztMME_UE_S1AP_ID), s1ConCb->mme_ue_s1ap_id);
 
    /* Filling ENB UE ID */
-   ie = &initCtxtRsp->protocolIEs.member[crntIe++];    
-   nbFillTknU8(&(ie->pres), PRSNT_NODEF);  
-   nbFillTknU32(&(ie->id), Sztid_eNB_UE_S1AP_ID);   
-   nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum); 
+   ie = &initCtxtRsp->protocolIEs.member[crntIe++];
+   nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+   nbFillTknU32(&(ie->id), Sztid_eNB_UE_S1AP_ID);
+   nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
    nbFillTknU32(&(ie->value.u.sztENB_UE_S1AP_ID), s1ConCb->enb_ue_s1ap_id);
 
    /* Filling ERAB Setup List */
@@ -3307,8 +3342,8 @@ PRIVATE S16 nbBuildIntCtxtSetupRsp
          for (cnt = 0; cnt < len; cnt++)
          {
             offSet =(U8)((len - (cnt + 1)) * 8);
-            erabIe->transportLyrAddr.val[cnt] = 
-               (U8)(nbCb.datAppAddr.u.ipv4TptAddr.address >> offSet);
+            erabIe->transportLyrAddr.val[cnt] =
+                (U8)(nbCb.datAppAddr.u.ipv4TptAddr.address >> offSet);
          }
       }
       len = 4;
@@ -3323,7 +3358,7 @@ PRIVATE S16 nbBuildIntCtxtSetupRsp
       erabIe->iE_Extns.noComp.pres = NOTPRSNT;
    }
    nbFillTknU16(&(initCtxtRsp->protocolIEs.noComp), crntIe);
-   *s1apPdu = initCtxtRspPdu; 
+   *s1apPdu = initCtxtRspPdu;
 
    RETVALUE(ROK);
 }
@@ -3405,7 +3440,7 @@ PUBLIC S16 nbS1apFillCtxtRelCmpl
    numComp     = 2;
    ctxtRelComp = &succMsg->value.u.sztUECntxtRlsComplete;
    nbFillTknU8(&(ctxtRelComp->pres), PRSNT_NODEF);
-   if ((cmGetMem(szUeCxtRlsCmplPdu, 
+   if ((cmGetMem(szUeCxtRlsCmplPdu,
                (numComp * sizeof(SztProtIE_Field_UECntxtRlsComplete_IEs)),
                (Ptr *)&ctxtRelComp->protocolIEs.member)) != ROK)
    {
@@ -3415,10 +3450,10 @@ PUBLIC S16 nbS1apFillCtxtRelCmpl
 
    /* IE1 - Filling MME ID */
    ie = &ctxtRelComp->protocolIEs.member[ieIdx];
-   nbFillTknU8(&(ie->pres), PRSNT_NODEF);   
-   nbFillTknU32(&(ie->id), Sztid_MME_UE_S1AP_ID);   
-   nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);   
-   nbFillTknU32(&(ie->value.u.sztMME_UE_S1AP_ID), s1Con->mme_ue_s1ap_id);  
+   nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+   nbFillTknU32(&(ie->id), Sztid_MME_UE_S1AP_ID);
+   nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+   nbFillTknU32(&(ie->value.u.sztMME_UE_S1AP_ID), s1Con->mme_ue_s1ap_id);
    ieIdx++;
 
    /* IE2 - Filling ENB ID */
@@ -3476,7 +3511,7 @@ PRIVATE S16 nbS1apFillTAI
    nbSztFillTAC(tai.tac, pdu, &(taiIe->tAC));
 #endif
    RETVALUE(ROK);
-} /* end of nbS1apFillTAI */ 
+} /* end of nbS1apFillTAI */
 
 PUBLIC S16 nbGetTai
 (
@@ -3566,7 +3601,7 @@ PUBLIC S16 nbS1apFillCtxtRelReq
    nbFillTknU8(&(ctxtRel->pres), PRSNT_NODEF);
    numComp = 3;
 
-   if ((cmGetMem(szUeCxtRlsPdu, 
+   if ((cmGetMem(szUeCxtRlsPdu,
                (numComp * sizeof(SztProtIE_Field_UECntxtRlsRqst_IEs)),
                (Ptr *)&ctxtRel->protocolIEs.member)) != ROK)
    {
@@ -3576,35 +3611,35 @@ PUBLIC S16 nbS1apFillCtxtRelReq
 
    /* IE1 - Filling MME ID */
    ie = &ctxtRel->protocolIEs.member[ieIdx];
-   nbFillTknU8(&(ie->pres), PRSNT_NODEF);   
-   nbFillTknU32(&(ie->id), Sztid_MME_UE_S1AP_ID);   
-   nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);   
-   nbFillTknU32(&(ie->value.u.sztMME_UE_S1AP_ID), s1Con->mme_ue_s1ap_id);  
+   nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+   nbFillTknU32(&(ie->id), Sztid_MME_UE_S1AP_ID);
+   nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);
+   nbFillTknU32(&(ie->value.u.sztMME_UE_S1AP_ID), s1Con->mme_ue_s1ap_id);
    ieIdx++;
 
    /* IE2 - Filling ENB ID */
    ie = &ctxtRel->protocolIEs.member[ieIdx];
-   nbFillTknU8(&(ie->pres), PRSNT_NODEF);  
-   nbFillTknU32(&(ie->id), Sztid_eNB_UE_S1AP_ID);   
-   nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum); 
+   nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+   nbFillTknU32(&(ie->id), Sztid_eNB_UE_S1AP_ID);
+   nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);
    nbFillTknU32(&(ie->value.u.sztENB_UE_S1AP_ID), s1Con->enb_ue_s1ap_id);
    ieIdx++;
 
    /* IE3 - Filling Cause */
    ie = &ctxtRel->protocolIEs.member[ieIdx];
-   nbFillTknU8(&(ie->pres), PRSNT_NODEF);  
-   nbFillTknU32(&(ie->id), Sztid_Cause);   
-   nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum); 
+   nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+   nbFillTknU32(&(ie->id), Sztid_Cause);
+   nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
    nbS1apFillCause(&ie->value.u.sztCause, cause);
    ieIdx++;
 
    nbFillTknU16(&(ctxtRel->protocolIEs.noComp), ieIdx);
 
-   *pdu = szUeCxtRlsPdu; 
+   *pdu = szUeCxtRlsPdu;
    RETVALUE(ROK);
 }
 
-/** @brief This function fills the S1-AP Cause IE. 
+/** @brief This function fills the S1-AP Cause IE.
  *
  * @details This function fills the S1AP: Cause IE with the
  *          cause type and cause value.
@@ -3612,7 +3647,7 @@ PUBLIC S16 nbS1apFillCtxtRelReq
  *     Function: nbS1apFillCause
  *
  * @param[out]            ie: S1AP Cause IE.
- * @param[in]          cause: cause type and cause value. 
+ * @param[in]          cause: cause type and cause value.
  * @return  S16
  *        -# Success : ROK
  */
@@ -3704,7 +3739,7 @@ PRIVATE S16 nbFillErrIndMsg(NbErrIndMsg *s1ErrInd,S1apPdu **errIndPdu)
    nbFillTknU8(&((*errIndPdu)->pdu.val.initiatingMsg.pres), PRSNT_NODEF);
    nbFillTknU32(&((*errIndPdu)->pdu.val.initiatingMsg.procedureCode), Sztid_ErrInd);
    nbFillTknU32(&((*errIndPdu)->pdu.val.initiatingMsg.criticality), SztCriticalityignoreEnum);
-   
+
    /* Filling of ErrInd structure */
    if(s1ErrInd->causePres == TRUE)
    {
@@ -3721,7 +3756,7 @@ PRIVATE S16 nbFillErrIndMsg(NbErrIndMsg *s1ErrInd,S1apPdu **errIndPdu)
          RETVALUE(RFAILED);
       }
       s1apConCb = ueCb->s1ConCb;
-      if(s1apConCb == NULLP || ((s1apConCb != NULLP) && 
+      if(s1apConCb == NULLP || ((s1apConCb != NULLP) &&
             (s1apConCb->s1apConnState != NB_S1AP_CONNECTED)))
       {
          RETVALUE(RFAILED);
@@ -3737,7 +3772,7 @@ PRIVATE S16 nbFillErrIndMsg(NbErrIndMsg *s1ErrInd,S1apPdu **errIndPdu)
    /* check if critically diagnosys is present: increment number of components */
     if ((cmGetMem((*errIndPdu), (numComp * sizeof(SztProtIE_Field_ErrIndIEs)),
                (Ptr *)&((*errIndPdu)->pdu.val.initiatingMsg.value.u.sztErrInd.protocolIEs.member))) !=ROK)
-      {  
+      {
          NB_FREE((*errIndPdu),sizeof(S1apPdu));
          RETVALUE(RFAILED);
       }
@@ -3750,7 +3785,7 @@ PRIVATE S16 nbFillErrIndMsg(NbErrIndMsg *s1ErrInd,S1apPdu **errIndPdu)
        nbFillTknU32(&(ie->id),Sztid_MME_UE_S1AP_ID);
        nbFillTknU32(&(ie->criticality),SztCriticalityignoreEnum);
        nbFillTknU32(&(ie->value.u.sztMME_UE_S1AP_ID),s1apConCb->mme_ue_s1ap_id);
-  
+
       ie = &((*errIndPdu)->pdu.val.initiatingMsg.value.u.sztErrInd.protocolIEs.member[numComp++]);
       nbFillTknU8(&(ie->pres),PRSNT_NODEF);
       nbFillTknU32(&(ie->id),Sztid_eNB_UE_S1AP_ID);
@@ -3868,7 +3903,7 @@ PRIVATE S16 nbStartDelayTimerForICSRsp(U8 ueId,NbErabLst *erabInfo)
 
 PUBLIC S16 nbHandleDelayTimerForICSExpiry(NbDelayICSRspCb *icsRspCb)
 {
-  
+
    S16 retVal = RFAILED;
    NbUeCb *ueCb = NULLP;
    NbErabLst *erabInfo = NULLP;
@@ -3895,14 +3930,14 @@ PRIVATE S16 nbSendUeCtxtRelReqAsICSRsp(NbUeCb *ueCb)
    S16 retVal = ROK;
    S1apPdu   *ctxtRelReqPdu = NULLP;
    NbUeMsgCause   cause;
-  
+
 
    cause.causeTyp = \
          nbCb.dropICSSndCtxtRel[(ueCb->ueId) - 1].causeType;
    cause.causeVal = \
         nbCb.dropICSSndCtxtRel[(ueCb->ueId) - 1].causeVal;
 
-  
+
    /* Check for s1ConCb before sending Connection release to MME */
    if(NULLP != ueCb->s1ConCb)
    {
@@ -3963,7 +3998,7 @@ PUBLIC S16 nbHandleDelayTimerForUeCtxRelComplExpiry(NbDelayUeCtxtRelCmpCb *ueCtx
  *  @param [in]  s1Con : pointer to S1Ap connection CB
  *  @param [out] pdu   : double pointer to reurn the Path Switch request message
  *  @param [in]  erabId : ERAB ID
- *  @param [in]  gtpTeId : eNB GTP TEID 
+ *  @param [in]  gtpTeId : eNB GTP TEID
  *  @return S16
     -# Success : ROK
     -# Failure : RFAILED
@@ -4023,7 +4058,7 @@ PUBLIC S16 nbS1apFillPathSwReq
    nbFillTknU8(&(pathSwReq->pres), PRSNT_NODEF);
    nbFillTknU16(&(initMsg->value.u.sztPathSwRqst.protocolIEs.noComp), numComp);
 
-   if ((cmGetMem(szPathSwReqPdu, 
+   if ((cmGetMem(szPathSwReqPdu,
                (numComp * sizeof(SztProtIE_Field_PathSwRqstIEs )),
                (Ptr *)&pathSwReq->protocolIEs.member)) != ROK)
    {
@@ -4032,7 +4067,7 @@ PUBLIC S16 nbS1apFillPathSwReq
    }
    /* IE1 - Filling ENB ID */
    ie = &pathSwReq->protocolIEs.member[ieIdx];
-   nbFillTknU8(&(ie->pres), PRSNT_NODEF);  
+   nbFillTknU8(&(ie->pres), PRSNT_NODEF);
    nbFillTknU32(&(ie->id), Sztid_eNB_UE_S1AP_ID);
    nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);
    nbFillTknU32(&(ie->value.u.sztENB_UE_S1AP_ID), s1Con->enb_ue_s1ap_id);
@@ -4160,10 +4195,10 @@ PUBLIC S16 nbS1apFillPathSwReq
 /* ================================================= */
 /* S1AP ENB CONFIGURATION TRANSFER MESSAGE BUILDING  */
 /* ================================================= */
-/** @brief This function will allocate memory and build the 
+/** @brief This function will allocate memory and build the
  *       S1AP:ENB Configuration Transfer message .
  *
- * @details This function allocates the memory for S1AP: 
+ * @details This function allocates the memory for S1AP:
  *    ENB CONFIGURATION TRANSFER
  *    Message PDU and fills the PDU with proper values.
  *
@@ -4366,8 +4401,8 @@ PUBLIC S16 nbBldENbConfigTransfer
 /* ================================================= */
 /* S1AP ENB CONFIGURATION TRANSFER RSP MESSAGE BUILDING  */
 /* ================================================= */
-/** @brief This function will allocate memory and build the 
- *       S1AP:ENB Configuration Transfer message in response 
+/** @brief This function will allocate memory and build the
+ *       S1AP:ENB Configuration Transfer message in response
  *       to MME COnfiguration Transfer .
  *
  * @details This function allocates the memory for S1AP:ENB CONFIGURATION TRANSFER

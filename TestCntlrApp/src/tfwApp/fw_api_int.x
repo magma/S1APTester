@@ -118,7 +118,8 @@ typedef enum {
    MME_CONFIGURATION_TRANSFER = 81,
   UE_PDN_DISCONNECT_REQ,
   UE_PDN_DISCONNECT_TIMEOUT_IND,
-  UE_PDN_DISCONNECT_REJ
+  UE_PDN_DISCONNECT_REJ,
+  UE_FW_ERAB_SETUP_REQ_FAILED_FOR_ERABS
 }tfwCmd;
 
 typedef enum
@@ -1543,6 +1544,18 @@ typedef struct uePdnDisconnFail
 {
    U8 ueId;
 }uePdnDisconnFail_t;
+
+typedef struct _FwFailedErablist {
+  U8 erabId;
+  U8 qci;
+  U8 cause;
+} FwFailedErablist;
+
+typedef struct _FwErabSetupFailedTosetup {
+  U8 ueId;
+  U8 noOfFailedErabs;
+  FwFailedErablist failedErablist[MAX_FAILED_ERABS];
+} FwErabSetupFailedTosetup;
 
 typedef FwErabRelCmd_t FwErabRelRsp_t;
 
