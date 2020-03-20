@@ -411,6 +411,8 @@ PUBLIC S16 nbSendErabsInfo(NbUeCb *ueCb, NbErabLst *erabInfo,
     NB_ALLOC(&msg->failedErabList->failedErabs,
              (failedErabInfo->noOfComp * sizeof(NbuFailedErab)));
     for (idx = 0; idx < failedErabInfo->noOfComp; idx++) {
+      msg->failedErabList->failedErabs[idx].qci =
+          failedErabInfo->failedErabs[idx].qci;
       msg->failedErabList->failedErabs[idx].erabId =
           failedErabInfo->failedErabs[idx].erabId;
       msg->failedErabList->failedErabs[idx].cause.choice =

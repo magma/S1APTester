@@ -106,6 +106,7 @@ typedef struct _nbuErabRelCb
 
 typedef struct _nbuFailedErab {
   U8 erabId;
+  U8 qci;
   NbuErabRelCause cause;
 } NbuFailedErab;
 

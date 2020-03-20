@@ -1547,12 +1547,12 @@ typedef struct uePdnDisconnFail
 
 typedef struct _FwFailedErablist {
   U8 erabId;
+  U8 qci;
   U8 cause;
 } FwFailedErablist;
 
 typedef struct _FwErabSetupFailedTosetup {
   U8 ueId;
-#define MAX_FAILED_ERABS 11
   U8 noOfFailedErabs;
   FwFailedErablist failedErablist[MAX_FAILED_ERABS];
 } FwErabSetupFailedTosetup;
