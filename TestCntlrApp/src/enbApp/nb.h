@@ -228,6 +228,7 @@ typedef struct _nbErabLst
 
 typedef struct NbFailedErab {
   U8 erabId;
+  U8 qci;
 #define CAUSE_RADIONW_QCI_UNSUPPORTED 37
   NbUeMsgCause cause;
 } NbFailedErab;

@@ -7775,63 +7775,62 @@ PUBLIC S16 ueUiProcErabsInfoMsg(Pst *pst, NbuErabsInfo *pNbuErabsInfo)
    {
      ret = ueSendUeRadCapInd(ueCb);
    }
-
-   for (i = 0;
-     i < (pNbuErabsInfo->erabInfo && pNbuErabsInfo->erabInfo->numOfErab);
-     i++) {
-     nasPdu = &pNbuErabsInfo->erabInfo->rabCbs[i].nasPdu;
-     /* Decoding the PDU */
-     ret = ueAppEdmDecode(nasPdu, &ueEvnt);
-     if (ret != ROK) {
-       UE_LOG_ERROR(ueAppCb, "NAS pdu decoding failed");
-       ret = RFAILED;
-       RETVALUE(ret);
-     }
-     if (ueEvnt == NULLP) {
-       UE_LOG_ERROR(ueAppCb, "ueEvnt is NULL");
-       RETVALUE(RFAILED);
-     }
-     if ((CM_NAS_SEC_HDR_TYPE_INT_PRTD_ENC == ueEvnt->secHT) ||
-         (CM_NAS_SEC_HDR_TYPE_INT_PRTD_ENC_NEW_SEC_CTXT == ueEvnt->secHT)) {
-       srcMsg.val = nasPdu->val;
-       srcMsg.len = nasPdu->len;
-       ret = ueAppVldDwnlnkSec(&ueCb->secCtxt, &srcMsg, &dstMsg);
-       if (ROK != ret) {
-         UE_LOG_ERROR(ueAppCb, "Uplink security validation failed \n");
-         /*Ignore the event*/
-         ueEvnt->pdu = NULLP;
-         CM_FREE_NASEVNT(&ueEvnt);
-         RETVALUE(RFAILED);
-       }
-
-       cmMemcpy((U8 *)&nasMsg, (CONSTANT U8 *)nasPdu,
-                sizeof(NhuDedicatedInfoNAS));
-       nasMsg.val = dstMsg.val;
-       nasMsg.len = dstMsg.len;
-       ret = ueAppEdmDecode(&nasMsg, &ueEvnt);
-       if (ROK != ret) {
-         UE_LOG_ERROR(ueAppCb, "Uplink NAS message decode failed\n");
-         RETVALUE(ret); /* Should we send Failure back to eNB */
+   if (pNbuErabsInfo->erabInfo) {
+     for (i = 0; i < pNbuErabsInfo->erabInfo->numOfErab; i++) {
+       nasPdu = &pNbuErabsInfo->erabInfo->rabCbs[i].nasPdu;
+       /* Decoding the PDU */
+       ret = ueAppEdmDecode(nasPdu, &ueEvnt);
+       if (ret != ROK) {
+         UE_LOG_ERROR(ueAppCb, "NAS pdu decoding failed");
+         ret = RFAILED;
+         RETVALUE(ret);
        }
        if (ueEvnt == NULLP) {
          UE_LOG_ERROR(ueAppCb, "ueEvnt is NULL");
          RETVALUE(RFAILED);
        }
-     }
+       if ((CM_NAS_SEC_HDR_TYPE_INT_PRTD_ENC == ueEvnt->secHT) ||
+           (CM_NAS_SEC_HDR_TYPE_INT_PRTD_ENC_NEW_SEC_CTXT == ueEvnt->secHT)) {
+         srcMsg.val = nasPdu->val;
+         srcMsg.len = nasPdu->len;
+         ret = ueAppVldDwnlnkSec(&ueCb->secCtxt, &srcMsg, &dstMsg);
+         if (ROK != ret) {
+           UE_LOG_ERROR(ueAppCb, "Uplink security validation failed \n");
+           /*Ignore the event*/
+           ueEvnt->pdu = NULLP;
+           CM_FREE_NASEVNT(&ueEvnt);
+           RETVALUE(RFAILED);
+         }
 
-     /* Handle the incoming events */
-     if (ueEvnt->protDisc == CM_EMM_PD) {
-       ret = ueAppEmmHdlIncUeEvnt(ueEvnt, ueCb);
-     } else if (ueEvnt->protDisc == CM_ESM_PD) {
-       ret = ueAppEsmHdlIncUeEvnt(ueEvnt, ueCb, FALSE);
-     }
-     if (ret != ROK) {
-       UE_LOG_ERROR(ueAppCb, "Handling Initial UE Event failed");
-       ret = RFAILED;
-     }
+         cmMemcpy((U8 *)&nasMsg, (CONSTANT U8 *)nasPdu,
+                  sizeof(NhuDedicatedInfoNAS));
+         nasMsg.val = dstMsg.val;
+         nasMsg.len = dstMsg.len;
+         ret = ueAppEdmDecode(&nasMsg, &ueEvnt);
+         if (ROK != ret) {
+           UE_LOG_ERROR(ueAppCb, "Uplink NAS message decode failed\n");
+           RETVALUE(ret); /* Should we send Failure back to eNB */
+         }
+         if (ueEvnt == NULLP) {
+           UE_LOG_ERROR(ueAppCb, "ueEvnt is NULL");
+           RETVALUE(RFAILED);
+         }
+       }
 
-     ueFree((U8 *)nasPdu->val, nasPdu->len * sizeof(U8));
-     CM_FREE_NASEVNT(&ueEvnt);
+       /* Handle the incoming events */
+       if (ueEvnt->protDisc == CM_EMM_PD) {
+         ret = ueAppEmmHdlIncUeEvnt(ueEvnt, ueCb);
+       } else if (ueEvnt->protDisc == CM_ESM_PD) {
+         ret = ueAppEsmHdlIncUeEvnt(ueEvnt, ueCb, FALSE);
+       }
+       if (ret != ROK) {
+         UE_LOG_ERROR(ueAppCb, "Handling Initial UE Event failed");
+         ret = RFAILED;
+       }
+
+       ueFree((U8 *)nasPdu->val, nasPdu->len * sizeof(U8));
+       CM_FREE_NASEVNT(&ueEvnt);
+     }
    }
    if (pNbuErabsInfo->failedErabList &&
        pNbuErabsInfo->failedErabList->noOfFailedErabs > 0) {
@@ -9356,6 +9355,8 @@ void ueSendErabSetupRspForFailedBearers(NbuErabsInfo *pNbuErabsInfo) {
       pNbuErabsInfo->failedErabList->noOfFailedErabs;
   for (int indx = 0; indx < pNbuErabsInfo->failedErabList->noOfFailedErabs;
        indx++) {
+    tfwMsg->msg.ueErabsFailedToSetup.failedErablist[indx].qci =
+        pNbuErabsInfo->failedErabList->failedErabs[indx].qci;
     tfwMsg->msg.ueErabsFailedToSetup.failedErablist[indx].erabId =
         pNbuErabsInfo->failedErabList->failedErabs[indx].erabId;
     tfwMsg->msg.ueErabsFailedToSetup.failedErablist[indx].cause =

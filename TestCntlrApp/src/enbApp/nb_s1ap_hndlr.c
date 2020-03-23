@@ -2808,6 +2808,8 @@ PUBLIC S16 nbGetErabInfoFrmErabSetup(NbUeCb *ueCb,
                    erabItem->e_RABlevelQoSParams.qCI.val,
                    erabItem->e_RAB_ID.val);
       (*failedErabInfo)->noOfComp += 1;
+      (*failedErabInfo)->failedErabs[failedRbIdx].qci =
+          erabItem->e_RABlevelQoSParams.qCI.val;
       (*failedErabInfo)->failedErabs[failedRbIdx].erabId =
           erabItem->e_RAB_ID.val;
       (*failedErabInfo)->failedErabs[failedRbIdx].cause.causeTyp =

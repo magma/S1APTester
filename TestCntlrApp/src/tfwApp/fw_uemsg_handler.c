@@ -2203,6 +2203,8 @@ PRIVATE Void sendUeErabSetupReqFailedForBearers(
   erabSetupFailedTosetup->noOfFailedErabs =
       uetErabSetupFailedTosetup.noOfFailedErabs;
   for (int indx = 0; indx < erabSetupFailedTosetup->noOfFailedErabs; indx++) {
+    erabSetupFailedTosetup->failedErablist[indx].qci =
+        uetErabSetupFailedTosetup.failedErablist[indx].qci;
     erabSetupFailedTosetup->failedErablist[indx].erabId =
         uetErabSetupFailedTosetup.failedErablist[indx].erabId;
     erabSetupFailedTosetup->failedErablist[indx].cause =

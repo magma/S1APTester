@@ -875,6 +875,7 @@ typedef struct _ueUetPdnDisconnectRej
 typedef struct _uetFailedErablist {
   U8 erabId;
   U8 cause;
+  U8 qci;
 } UetFailedErablist;
 
 typedef struct _ueUetErabSetupFailedTosetup {
