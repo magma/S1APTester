@@ -249,7 +249,7 @@ typedef struct nbPdnCb
   U32             pdnAddr;
   U32             lnkEpsBearId;
   // List of TFT Packet Filters
-  CmLListCp tftPfList;
+  CmLListCp       tftPfList;
 } NbPdnCb; 
 
 typedef struct nbDamUeCb

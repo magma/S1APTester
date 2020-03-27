@@ -479,7 +479,7 @@ PUBLIC S16 NbHandleUeIpInfoRsp(NbuUeIpInfoRsp *rsp)
    ueIpAddr = CM_INET_NTOH_U32(ueIpAddr);
    if(rsp->berType == DEFAULT_BER)
    {
-   nbAppCfgrPdnAssignedAddr(ueId, ueIpAddr);
+     nbAppCfgrPdnAssignedAddr(ueId, ueIpAddr);
    }
    /* set the datrcvd flag for ue */
    nbDamSetDatFlag(ueId);

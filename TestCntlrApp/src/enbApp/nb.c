@@ -471,10 +471,10 @@ PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U32 ueIpAddr,U8 bearerId, NbuUeIpInfoRsp *
                tnlInfo->pdnAddr          = ueIpAddr;
                nbCpyCmTptAddr(&tnlInfo->dstAddr, &(tunInfo->sgwAddr));
                nbCpyCmTptAddr(&tnlInfo->srcAddr, &(nbCb.datAppAddr));
+               tnlInfo->tft.lnkEpsBearId = rsp->lnkEpsBearId;
                // Fill TFT info
                if (rsp->noOfPfs)
                {
-                 tnlInfo->tft.lnkEpsBearId = rsp->lnkEpsBearId;
                  tnlInfo->tft.num_pf = rsp->noOfPfs;
                  cmMemcpy(tnlInfo->tft.pfList, rsp->pfList, sizeof(rsp->pfList));
                }
