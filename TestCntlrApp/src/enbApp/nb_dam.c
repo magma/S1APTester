@@ -474,7 +474,6 @@ PRIVATE S16 nbSortAndAddPf
   /* If tftPfList is empty, add the new tftPf
    * else find the node(current) with precedence > than the new node
    * and add the new node before the current*/
-  //if ((CM_LLIST_FIRST_NODE(&pdnCb->tftPfList, current)) == NULLP)
   CM_LLIST_FIRST_NODE(&pdnCb->tftPfList, current);
   if (current == NULLP)
   {
@@ -586,7 +585,7 @@ PRIVATE S16 nbAddPdnCb
   if ( ROK == (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnAddr),
                    sizeof(U32),0,(PTR *)&pdnCb)))
   {
-    /* Sort and add Packet Filter/s for a new bearer*/
+    /* Sort and add Packet Filter/s*/
     if (tnlInfo->tft.num_pf)
     {
       if (ROK != (nbAddPfs(pdnCb, tnlInfo)))
@@ -727,7 +726,6 @@ NbDamTnlInfo                 *tnlInfo
        RETVALUE(RFAILED);
    }
    /* Add TFT packet filters to ueCb */
-   //if (tnlInfo->tft.num_pf)
    {
      if(ROK != nbAddPdnCb(ueCb, tnlInfo))
      {
@@ -739,6 +737,7 @@ NbDamTnlInfo                 *tnlInfo
    NB_ALLOC(&(ipInfo), sizeof(NbIpInfo));
    ipInfo->pdnAddr = tnlInfo->pdnAddr;
    ipInfo->drbId = rbId;
+   NB_LOG_DEBUG(&nbCb, "Successfully created PdnCb\n"); 
 
    if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ipInfo,
                      (U8 *)&ipInfo->pdnAddr, sizeof(U32)))
@@ -748,7 +747,6 @@ NbDamTnlInfo                 *tnlInfo
       RETVALUE(RFAILED);
    }
 
-   NB_LOG_DEBUG(&nbCb, "Successfully created PdnCb\n"); 
    tnlCb->locTeId = tnlInfo->lclTeid; 
    tnlCb->remTeid = tnlInfo->remTeid;
    nbCpyCmTptAddr(&(tnlCb->dstAddr), &tnlInfo->dstAddr);
@@ -923,6 +921,7 @@ PUBLIC S16 nbDamPcapDatInd
       RETVALUE(ROK);
    }
 
+   /* Fetch ToS or DSCP*/
    for(idx = 0; idx < 1; idx++)
    {
       if((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK))
@@ -937,6 +936,7 @@ PUBLIC S16 nbDamPcapDatInd
    ipPktFields.srvClass = ipPkt[0];
    /* Skip 9 bytes to fetch the protocol ID*/
    ipIdx = 9;
+   /* Fetch protocol Id*/
    for(idx = 0; idx < 1; idx++)
    {
       if((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK))
@@ -951,6 +951,7 @@ PUBLIC S16 nbDamPcapDatInd
  
    /* Skip 12 bytes for Local IPv4 address*/
    ipIdx = 12;
+   /* Fetch IPv4 local address*/
    for(idx = 0; idx < 4; idx++)
    {
       if((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK))
@@ -966,8 +967,9 @@ PUBLIC S16 nbDamPcapDatInd
    ipPktFields.locIpv4Addr = (ipPkt[0] << 24) + (ipPkt[1] << 16) +
       (ipPkt[2] << 8 ) + ipPkt[3];
 
-   /* Remote IPv4 address*/
+   /* Skip 16 bytes for Local IPv4 address*/
    ipIdx = 16;
+   /* Remote IPv4 address*/
    for(idx = 0; idx < 4; idx++)
    {
       if((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK))
@@ -1783,8 +1785,6 @@ PRIVATE S16 nbDamBndLSap
 /** @brief This function matches the Packet filters with the ip fileds of the 
  *  rcvd packet
  *
- * @details
- *
  * Function: isMatchesPf
  *
  * @param[in]  Pointer to NbPktFilterList structure
@@ -1836,7 +1836,7 @@ PRIVATE S16 isMatchesPf
      if ((ipPktFields->locPort < tftPf->locPortRangeLow) || 
            (ipPktFields->locPort > tftPf->locPortRangeHigh))
      {
-       NB_LOG_DEBUG(&nbCb, "local port range did not match\n"); 
+       NB_LOG_DEBUG(&nbCb, "Local port range did not match\n"); 
        RETVALUE (RFAILED);
      }
   }
@@ -1919,17 +1919,20 @@ PRIVATE  NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId)
    NbPktFilterList *temp_pf = NULLP;
    NbPdnCb *pdnCb = NULLP;
 
+   /* Fetch the ueCb*/
    for(;((cmHashListGetNext(&(nbDamCb.ueCbs), (PTR)prevUeCb, (PTR*)&ueCb)) == ROK);)
    {
+      /* Fetch the pdnCb*/
       if ( ROK == (cmHashListFind(&((ueCb)->pdnCb), (U8 *)&(ipPktFields->locIpv4Addr),
                     sizeof(U32),0,(PTR *)&pdnCb)))
       {
         NB_LOG_DEBUG(&nbCb,"pdncb found\n");
         ueIpMatchFound = TRUE;
+        /* Fetch TFT Packet Filter list*/
         CM_LLIST_FIRST_NODE(&pdnCb->tftPfList, temp_node);
         if (temp_node == NULLP)
         {
-          //Since no matching TFT found send packet on default bearer
+          //Since packet filter list is empty, send data on default bearer
           *drbId = pdnCb->lnkEpsBearId;
           NB_LOG_DEBUG(&nbCb,"Sending data on default bearer %d\n", *drbId);
           RETVALUE(ueCb);
@@ -1950,7 +1953,9 @@ PRIVATE  NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId)
 
         //Since no matching TFT found send packet on default bearer
         *drbId = pdnCb->lnkEpsBearId;
-        NB_LOG_DEBUG(&nbCb, "Sending data on default bearer %d as no matching TFT found\n", *drbId);
+        NB_LOG_DEBUG(&nbCb,
+            "Sending data on default bearer %d as no matching TFT found\n",
+            *drbId);
         RETVALUE(ueCb);
      }
      if (ueIpMatchFound)

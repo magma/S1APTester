@@ -6028,7 +6028,7 @@ PRIVATE U8* itoa(int num, U8* str, int base)
  *
  *       Fun: _fill_pf_comp
  *
- *       Desc: 
+ *       Desc: Fill Packet filters 
  * 
  *       Ret:  ROK - ok; RFAILED - failed
  *
@@ -6114,7 +6114,7 @@ PRIVATE Void _fill_pf_comp
  *
  *       Fun: populateIpInfo
  *
- *       Desc: 
+ *       Desc: Populates NbuUeIpInfoRsp structure 
  * 
  *       Ret:  ROK - ok; RFAILED - failed
  *
@@ -6131,13 +6131,10 @@ PUBLIC Void populateIpInfo
 )
 {
    CmEsmPdnAdd *pdn_addr = NULLP;
-   U8 temp[20] = {0}, i = 0, j = 0;
+   U8 temp[20] = {0}, itrn = 0, cnt = 0;
    U8 ip_addr[20] = {0};
    U32 counter = 0;
    U8 idx = 0;
-   U8 tft_idx = 0;
-   /*pdn_addr = &evnt->m.emmEvnt->u.atchAcc.esmEvnt->m.esmEvnt->u.actReq.\
-    * pAddr; */
    ueIpInfoRsp->ueId = ueCb->ueId;
    ueIpInfoRsp->bearerId = bearerId;
 
@@ -6160,16 +6157,13 @@ PUBLIC Void populateIpInfo
       for(counter = 0; counter < (pdn_addr->len - 1) ; counter++)
       {
          itoa(pdn_addr->addrInfo[counter], temp, 10);
-         for(j = 0; (i < 20) && (temp[j] != '\0') && (j < 19); i++, j++)
-            ip_addr[i] = temp[j];
-         /*strcat((U8*)ip_addr,(U8*)temp);*/
-         if(counter != (pdn_addr->len - 2) && (i < 20))
-            ip_addr[i++] = '.';
-         /* strcat((U8*)ip_addr,(U8*)".");*/
-         if(counter == (pdn_addr->len - 2) && (i < 20))
-            ip_addr[i] = '\0';
+         for(cnt = 0; (itrn < 20) && (temp[cnt] != '\0') && (cnt < 19); itrn++, cnt++)
+            ip_addr[itrn] = temp[cnt];
+         if(counter != (pdn_addr->len - 2) && (itrn < 20))
+            ip_addr[itrn++] = '.';
+         if(counter == (pdn_addr->len - 2) && (itrn < 20))
+            ip_addr[itrn] = '\0';
       }
-      //strcpy((char*)temp_ip, (char *)ip_addr);
       strcpy(ueIpInfoRsp->IpAddr, ip_addr);
    }
 }

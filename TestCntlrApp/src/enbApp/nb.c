@@ -432,16 +432,6 @@ PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U32 ueIpAddr,U8 bearerId, NbuUeIpInfoRsp *
    NbUeTunInfo    *tunInfo = NULLP;
 
    NB_LOG_ENTERFN(&nbCb);
-   #if 0 
-   for(idx = 0; nbCb.ueCbLst[idx] != NULLP ; idx++)
-   {
-      if(nbCb.ueCbLst[idx]->ueId == ueId)
-      {
-         ueCb = nbCb.ueCbLst[idx];
-         break;
-      }
-   }
-   #endif
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueId),
       sizeof(U8),0,(PTR *)&ueCb)))
    {
@@ -453,15 +443,11 @@ PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U32 ueIpAddr,U8 bearerId, NbuUeIpInfoRsp *
    {
       for(idx = 0 ; idx < ueCb->tunnIdx; idx ++)
       {
-#if 0
-         if(bearerId == ueCb->tunnInfo[idx]->bearerId)
-#else
             if ( ROK != (cmHashListFind(&(ueCb->tunnInfo), (U8 *)&(berId),
                         sizeof(U32),0,(PTR *)&tunInfo)))
             {    
                RETVALUE(RFAILED);
             }    
-#endif
             else
             {
                tnlInfo->tnlId.drbId      = tunInfo->bearerId;
