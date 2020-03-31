@@ -56,6 +56,8 @@ PUBLIC S16 nbDamEgtpDatInd(Pst*, EgtUEvnt*);
 #define NB_DAM_EGTP_MSG_SZ   1024
 /* Default Interface type while adding the tunnel at GTP*/
 #define NB_DAM_MAX_DRB_TNLS  3
+/* Incoming packet size to be read 20 bytes IP hdr + src port + dest port*/
+#define NB_PACKET_SIZE  24
 
 PUBLIC NbDamCb   nbDamCb;
 /** @brief This function is responsible for starting the inactivity timer.
@@ -432,92 +434,99 @@ U8                           ueId
       NB_FREE(*ueCb, sizeof(NbDamUeCb))
       RETVALUE(RFAILED);
    }
- 
-   offset = (U8) ((PTR)&tmpPdnCb.ueHashEnt - (PTR)&tmpPdnCb);
-   if( ROK != (cmHashListInit(&((*ueCb)->pdnCb), /* messages */
-                        NB_MAX_HASH_SIZE,     /* HL bins for the msgs */
-                        offset,               /* Offset of HL Entry */
-                        FALSE,                /* Donot allow dup. keys ? */
-                        CM_HASH_KEYTYPE_ANY,  /* HL key type */
-                        nbCb.init.region,     /* Mem region for HL */
-                        nbCb.init.pool)))      /* Mem pool for HL */
-   {
-      NB_LOG_ERROR(&nbCb,"Failed to initialized PdnCb List");
-      NB_FREE(*ueCb, sizeof(NbDamUeCb))
-      RETVALUE(RFAILED);
-   }
- 
-   cmLListInit(&(pdnCb.tftPfList));
-   if (ROK != cmHashListInsert(&(nbDamCb.ueCbs),(PTR)*(ueCb),
-                     (U8 *) &(*ueCb)->ueId,sizeof(U8)))
-   {   
-      /* deinit the ip list and drblist */
-      NB_FREE(*ueCb, sizeof(NbDamUeCb))
-      NB_LOG_ERROR(&nbCb, "Failed to Insert UE into UeDamCbLst");
-      RETVALUE(RFAILED);
-   }   
+
+  offset = (U8)((PTR)&tmpPdnCb.ueHashEnt - (PTR)&tmpPdnCb);
+  if (ROK != (cmHashListInit(&((*ueCb)->pdnCb),   /* messages */
+                             NB_MAX_HASH_SIZE,    /* HL bins for the msgs */
+                             offset,              /* Offset of HL Entry */
+                             FALSE,               /* Donot allow dup. keys ? */
+                             CM_HASH_KEYTYPE_ANY, /* HL key type */
+                             nbCb.init.region,    /* Mem region for HL */
+                             nbCb.init.pool)))    /* Mem pool for HL */
+  {
+    NB_LOG_ERROR(&nbCb, "Failed to initialized PdnCb List");
+    NB_FREE(*ueCb, sizeof(NbDamUeCb))
+    RETVALUE(RFAILED);
+  }   
+
+  cmLListInit(&(pdnCb.tftPfList));
+  if (ROK != cmHashListInsert(&(nbDamCb.ueCbs), (PTR) * (ueCb),
+                              (U8 *)&(*ueCb)->ueId, sizeof(U8))) {
+    /* deinit the ip list and drblist */
+    NB_FREE(*ueCb, sizeof(NbDamUeCb))
+    NB_LOG_ERROR(&nbCb, "Failed to Insert UE into UeDamCbLst");
+    RETVALUE(RFAILED);
+  } 
 
    cmInitTimers(&(*ueCb)->inactivityTmr, 1);
    nbDamStartUeInactvTmr(*ueCb);
    RETVALUE(ROK);
 }
 
-PRIVATE S16 nbSortAndAddPf
-(
-  NbPdnCb         *pdnCb,
-  NbPktFilterList *tftPf
-)
+/** @brief This function is responsible for adding the Packet Filters
+ *
+ * @details This function sorts the packet filters in the order of
+ *          precedence and adds them to the list
+ *
+ * Function: nbSortAndAddPf
+ *
+ * @param[in] pdnCb  : Pointer to NbPdnCb
+ * @param[in] tftPf  : Pointer to NbPktFilterList
+ * @return S16
+ *    -#Success : ROK
+ *    -#Failure : RFAILED
+ */
+PRIVATE S16 nbSortAndAddPf(NbPdnCb *pdnCb, NbPktFilterList *tftPf) 
 {
   NbPktFilterList *temp_pf = NULLP;
-  CmLList  *current = NULLP; 
+  CmLList *current = NULLP;
 
   /* If tftPfList is empty, add the new tftPf
    * else find the node(current) with precedence > than the new node
    * and add the new node before the current*/
   CM_LLIST_FIRST_NODE(&pdnCb->tftPfList, current);
-  if (current == NULLP)
-  {
+  if (current == NULLP) {
     NB_LOG_DEBUG(&nbCb, "List is empty adding new tft list\n");
     cmLListAdd2Tail(&pdnCb->tftPfList, &tftPf->link);
-  }
-  else
-  {
+  } else {
     NB_LOG_DEBUG(&nbCb, "List is not empty adding new tft list\n");
-    while (current != NULLP)
-    {
-      temp_pf = (NbPktFilterList*)current->node;
-      if (temp_pf->preced <= tftPf->preced)
-      { 
+    while (current != NULLP) {
+      temp_pf = (NbPktFilterList *)current->node;
+      if (temp_pf->preced <= tftPf->preced) {
         CM_LLIST_NEXT_NODE(&pdnCb->tftPfList, current);
-      }
-      else
-      {
+      } else {
         cmLListInsCrnt(&pdnCb->tftPfList, &tftPf->link);
         break;
       }
     }
-    if (current == NULL)
-    {
+    if (current == NULL) {
       cmLListAdd2Tail(&pdnCb->tftPfList, &tftPf->link);
     }
   }
   RETVALUE(ROK);
 }
 
-PRIVATE S16 nbAddPfs
-(
-  NbPdnCb       *pdnCb,
-  NbDamTnlInfo  *tnlInfo
-)
-{    
+/** @brief This function is responsible for adding the Packet Filters
+ *
+ * @details This function populates the packet filters
+ *          adds them to the list
+ *
+ * Function: nbAddPfs
+ *
+ * @param[in] pdnCb    : Pointer to NbPdnCb
+ * @param[in] tnlInfo  : Pointer to NbDamTnlInfo
+ * @return S16
+ *    -#Success : ROK
+ *    -#Failure : RFAILED
+ */
+PRIVATE S16 nbAddPfs(NbPdnCb *pdnCb, NbDamTnlInfo *tnlInfo) 
+{
   U8 presence_mask = 0;
   NbPktFilterList *tftPf = NULL;
- 
-  for(U8 itrn = 0; itrn < tnlInfo->tft.num_pf ; itrn++)
-  {
+
+  for (U8 itrn = 0; itrn < tnlInfo->tft.num_pf; itrn++) {
     NB_ALLOC(&tftPf, sizeof(NbPktFilterList))
-    if (tftPf == NULLP) 
-    {
+    if (tftPf == NULLP) {
       NB_LOG_ERROR(&nbCb, "Failed to allocate memory for NbPktFilterList");
       RETVALUE(RFAILED);
     }
@@ -525,104 +534,97 @@ PRIVATE S16 nbAddPfs
     tftPf->dir = tnlInfo->tft.pfList[itrn].dir;
     tftPf->preced = tnlInfo->tft.pfList[itrn].preced;
     presence_mask = tnlInfo->tft.pfList[itrn].presenceMask;
-    if (presence_mask & IPV4_REM_ADDR_PKT_FLTR_MASK)
-    {
+    if (presence_mask & IPV4_REM_ADDR_PKT_FLTR_MASK) {
       tftPf->remIpv4Addr.ipv4_addr_mask = tnlInfo->tft.pfList[itrn].ipv4Mask;
       tftPf->remIpv4Addr.ipv4_addr = tnlInfo->tft.pfList[itrn].remoteIpv4;
     }
-    if (presence_mask & PROTO_ID_PKT_FLTR_MASK)
-    {
+    if (presence_mask & PROTO_ID_PKT_FLTR_MASK) {
       tftPf->proto_id = tnlInfo->tft.pfList[itrn].protId;
     }
-    if (presence_mask & SNGL_LOC_PORT_PKT_FLTR_MASK)
-    {
+    if (presence_mask & SNGL_LOC_PORT_PKT_FLTR_MASK) {
       tftPf->locPort = tnlInfo->tft.pfList[itrn].localPort;
     }
-    if (presence_mask & LOC_PORT_RNG_PKT_FLTR_MASK)
-    {
-      tftPf->locPortRangeLow = tnlInfo->tft.pfList[itrn].locPortRangeLow;    
+    if (presence_mask & LOC_PORT_RNG_PKT_FLTR_MASK) {
+      tftPf->locPortRangeLow = tnlInfo->tft.pfList[itrn].locPortRangeLow;
       tftPf->locPortRangeHigh = tnlInfo->tft.pfList[itrn].locPortRangeHigh;
     }
-    if (presence_mask & SNGL_REM_PORT_PKT_FLTR_MASK)
-    {
+    if (presence_mask & SNGL_REM_PORT_PKT_FLTR_MASK) {
       tftPf->remPort = tnlInfo->tft.pfList[itrn].remotePort;
     }
-    if (presence_mask & REM_PORT_RNG_PKT_FLTR_MASK)
-    {
+    if (presence_mask & REM_PORT_RNG_PKT_FLTR_MASK) {
       tftPf->remPortRangeLow = tnlInfo->tft.pfList[itrn].remPortRangeLow;
       tftPf->remPortRangeHigh = tnlInfo->tft.pfList[itrn].remPortRangeHigh;
     }
-    if (presence_mask & SECURITY_PARAM_PKT_FLTR_MASK)
-    {
+    if (presence_mask & SECURITY_PARAM_PKT_FLTR_MASK) {
       tftPf->ipsecParamInd = tnlInfo->tft.pfList[itrn].secParam;
     }
-    if (presence_mask & SERV_N_CLASS_PKT_FLTR_MASK)
-    {
+    if (presence_mask & SERV_N_CLASS_PKT_FLTR_MASK) {
       tftPf->srvClass = tnlInfo->tft.pfList[itrn].tos;
     }
     tftPf->presence_mask = tnlInfo->tft.pfList[itrn].presenceMask;
 
     tftPf->link.node = (PTR)tftPf;
 
-    if (ROK != (nbSortAndAddPf(pdnCb,tftPf)))
-    {
+    if (ROK != (nbSortAndAddPf(pdnCb, tftPf))) {
       NB_LOG_ERROR(&nbCb, "Failed to sort and add Packet Filters");
       RETVALUE(RFAILED);
     }
   }
   RETVALUE(ROK);
 }
- 
-PRIVATE S16 nbAddPdnCb
-(
-  NbDamUeCb       *ueCb,
-  NbDamTnlInfo    *tnlInfo
-)
-{           
+
+/** @brief This function is responsible for adding the Pdncb
+ *
+ * @details This function adds the pdncb
+ *
+ * Function: nbAddPdnCb
+ *
+ * @param[in] ueCb    : Pointer to NbDamUeCb
+ * @param[in] tnlInfo : Pointer to NbDamTnlInfo
+ * @return S16
+ *    -#Success : ROK
+ *    -#Failure : RFAILED
+ */
+PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo) 
+{
   NbPdnCb *pdnCb = NULL;
   NbPktFilterList *NbPf = NULL;
- 
-  if ( ROK == (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnAddr),
-                   sizeof(U32),0,(PTR *)&pdnCb)))
-  {
+
+  if (ROK == (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnAddr),
+                             sizeof(U32), 0, (PTR *)&pdnCb))) {
     /* Sort and add Packet Filter/s*/
-    if (tnlInfo->tft.num_pf)
-    {
-      if (ROK != (nbAddPfs(pdnCb, tnlInfo)))
-      {
+    if (tnlInfo->tft.num_pf) {
+      if (ROK != (nbAddPfs(pdnCb, tnlInfo))) {
         NB_LOG_ERROR(&nbCb, "Failed to add Packet Filters");
         RETVALUE(RFAILED);
       }
     }
   }
- 
+
   /* Create a new hash list entry*/
-  else
-  { 
+  else {
     NB_ALLOC(&(pdnCb), sizeof(NbPdnCb));
     pdnCb->pdnAddr = tnlInfo->pdnAddr;
     pdnCb->lnkEpsBearId = tnlInfo->tft.lnkEpsBearId;
 
-    if (tnlInfo->tft.num_pf)
-    {
+    if (tnlInfo->tft.num_pf) {
       cmLListInit(&pdnCb->tftPfList);
-      if (ROK != (nbAddPfs(pdnCb, tnlInfo)))
-      {
+      if (ROK != (nbAddPfs(pdnCb, tnlInfo))) {
         NB_LOG_ERROR(&nbCb, "Failed to add Packet Filters");
         RETVALUE(RFAILED);
       }
     }
     /* Populate pdncb and packet filters*/
     if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCb,
-                     (U8 *)&tnlInfo->pdnAddr, sizeof(U32)))
-    {   
+                                (U8 *)&tnlInfo->pdnAddr, sizeof(U32))) {
       NB_FREE(ueCb, sizeof(NbIpInfo))
       NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for pdnCb");
       RETVALUE(RFAILED);
     }
-  } 
+  }
   RETVALUE(ROK);
 }
+
 /** @brief This function is reponsible to add a new tunnel to DAM for a 
  *         particular UE.
  *
@@ -726,12 +728,9 @@ NbDamTnlInfo                 *tnlInfo
        RETVALUE(RFAILED);
    }
    /* Add TFT packet filters to ueCb */
-   {
-     if(ROK != nbAddPdnCb(ueCb, tnlInfo))
-     {
-       NB_LOG_ERROR(&nbCb, "Failed to create pdncb");
-       RETVALUE(RFAILED);
-     }
+   if (ROK != nbAddPdnCb(ueCb, tnlInfo)) {
+     NB_LOG_ERROR(&nbCb, "Failed to create pdncb");
+     RETVALUE(RFAILED);
    }
    /* Create the tunnel */
    NB_ALLOC(&(ipInfo), sizeof(NbIpInfo));
@@ -895,142 +894,122 @@ U8                           msgType
  *    -#Success : ROK
  *    -#Failure : RFAILED
  */
-PUBLIC S16 nbDamPcapDatInd
-(
- Buffer                       *mBuf
-)
+PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf) 
 {
-   MsgLen                    len = 0;
-   NbDamTnlCb                *tnl;
-   NbDamUeCb                 *ueCb = NULLP;
-   U8  ipPkt[25] = {0}; 
-   U8  idx = 0; 
-   U8 drbId; 
-   MsgLen ipIdx = 1; // Start from 1st index-DSCP
-   NbIpPktFields ipPktFields = {0};
+  MsgLen len = 0;
+  NbDamTnlCb *tnl;
+  NbDamUeCb *ueCb = NULLP;
+  U8 ipPkt[NB_PACKET_SIZE] = {0};
+  U8 idx = 0;
+  U8 drbId;
+  MsgLen ipIdx = 1; // Start from 1st index-DSCP
+  NbIpPktFields ipPktFields = {0};
 
-   EgtUEvnt                  *eguEvtMsg;
-   EgUMsg                    *egMsg;
-   NbDamDrbCb                *drbCb;
+  EgtUEvnt *eguEvtMsg;
+  EgUMsg *egMsg;
+  NbDamDrbCb *drbCb;
 
-   SFndLenMsg(mBuf, &len);
-   if(len == 0)
-   {
-      NB_LOG_ERROR(&nbCb,"Empty Buffer recieved");
+  SFndLenMsg(mBuf, &len);
+  if (len == 0) {
+    NB_LOG_ERROR(&nbCb, "Empty Buffer recieved");
+    SPutMsg(mBuf);
+    RETVALUE(ROK);
+  }
+
+  /* Fetch ToS or DSCP*/
+  for (idx = 0; idx < 1; idx++) {
+    if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
+      NB_LOG_ERROR(&nbCb, "Failed to get message type");
       SPutMsg(mBuf);
-      RETVALUE(ROK);
-   }
-
-   /* Fetch ToS or DSCP*/
-   for(idx = 0; idx < 1; idx++)
-   {
-      if((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK))
-      {    
-         NB_LOG_ERROR(&nbCb,"Failed to get message type");
-         SPutMsg(mBuf);
-         RETVALUE(RFAILED);
-      }
-      ipIdx++;
-   }
-   /* Tos or DSCP*/
-   ipPktFields.srvClass = ipPkt[0];
-   /* Skip 9 bytes to fetch the protocol ID*/
-   ipIdx = 9;
-   /* Fetch protocol Id*/
-   for(idx = 0; idx < 1; idx++)
-   {
-      if((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK))
-      {    
-         NB_LOG_ERROR(&nbCb,"Failed to get message type");
-         SPutMsg(mBuf);
-         RETVALUE(RFAILED);
-      }
-      ipIdx++;
-   }
-   ipPktFields.proto_id = ipPkt[0];
- 
-   /* Skip 12 bytes for Local IPv4 address*/
-   ipIdx = 12;
-   /* Fetch IPv4 local address*/
-   for(idx = 0; idx < 4; idx++)
-   {
-      if((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK))
-      {    
-         NB_LOG_ERROR(&nbCb,"Failed to get message type");
-         SPutMsg(mBuf);
-         RETVALUE(RFAILED);
-      }
-      ipIdx++;
-   }
- 
-   /* Local IPv4 address*/
-   ipPktFields.locIpv4Addr = (ipPkt[0] << 24) + (ipPkt[1] << 16) +
-      (ipPkt[2] << 8 ) + ipPkt[3];
-
-   /* Skip 16 bytes for Local IPv4 address*/
-   ipIdx = 16;
-   /* Remote IPv4 address*/
-   for(idx = 0; idx < 4; idx++)
-   {
-      if((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK))
-      {    
-         NB_LOG_ERROR(&nbCb,"Failed to get message type");
-         SPutMsg(mBuf);
-         RETVALUE(RFAILED);
-      }
-      ipIdx++;
-   }
- 
-   ipPktFields.remIpv4Addr = (ipPkt[0] << 24) + (ipPkt[1] << 16) +
-      (ipPkt[2] << 8 ) + ipPkt[3];
-
-   /* Local port*/
-   ipIdx = 20; 
-   for(idx = 0; idx < 2; idx++)
-   {
-      if((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK))
-      {    
-         NB_LOG_ERROR(&nbCb,"Failed to get message type");
-         SPutMsg(mBuf);
-         RETVALUE(RFAILED);
-      }
-      ipIdx++;
-   }  
-   ipPktFields.locPort = (ipPkt[0] << 8) + ipPkt[1];
-
-   /* Remote port*/
-   ipIdx = 22;
-   for(idx = 0; idx < 2; idx++)
-   {
-      if((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK))
-      {    
-         NB_LOG_ERROR(&nbCb,"Failed to get message type");
-         SPutMsg(mBuf);
-         RETVALUE(RFAILED);
-      }
-      ipIdx++;
-   }   
-   ipPktFields.remPort = (ipPkt[0] << 8) + ipPkt[1];
-   /* get the ueCb */
-   ueCb = nbDamGetueCbkeyUeIp(&ipPktFields, &drbId);
-   if(ueCb == NULLP)
-   {
-      NB_FREEMBUF(mBuf);
       RETVALUE(RFAILED);
-   }
-
-   /* mark for ue data received */
-   ueCb->dataRcvd = TRUE;   
-   /* get the tunnel Cb */
-   if ( ROK != (cmHashListFind(&(ueCb->drbs), (U8 *)&(drbId),
-               sizeof(U8), 0, (PTR *)&drbCb)))
-   {    
+    }
+    ipIdx++;
+  }
+  /* Tos or DSCP*/
+  ipPktFields.srvClass = ipPkt[0];
+  /* Skip 9 bytes to fetch the protocol ID*/
+  ipIdx = 9;
+  /* Fetch protocol Id*/
+  for (idx = 0; idx < 1; idx++) {
+    if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
+      NB_LOG_ERROR(&nbCb, "Failed to get message type");
+      SPutMsg(mBuf);
       RETVALUE(RFAILED);
-   }    
-   else 
-   {    
-      tnl = drbCb->tnlInfo;   
-   }    
+    }
+    ipIdx++;
+  }
+  ipPktFields.proto_id = ipPkt[0];
+
+  /* Skip 12 bytes for Local IPv4 address*/
+  ipIdx = 12;
+  /* Fetch IPv4 local address*/
+  for (idx = 0; idx < 4; idx++) {
+    if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
+      NB_LOG_ERROR(&nbCb, "Failed to get message type");
+      SPutMsg(mBuf);
+      RETVALUE(RFAILED);
+    }
+    ipIdx++;
+  }
+
+  /* Local IPv4 address*/
+  ipPktFields.locIpv4Addr =
+      (ipPkt[0] << 24) + (ipPkt[1] << 16) + (ipPkt[2] << 8) + ipPkt[3];
+
+  /* Skip 16 bytes for Local IPv4 address*/
+  ipIdx = 16;
+  /* Remote IPv4 address*/
+  for (idx = 0; idx < 4; idx++) {
+    if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
+      NB_LOG_ERROR(&nbCb, "Failed to get message type");
+      SPutMsg(mBuf);
+      RETVALUE(RFAILED);
+    }
+    ipIdx++;
+  }
+
+  ipPktFields.remIpv4Addr =
+      (ipPkt[0] << 24) + (ipPkt[1] << 16) + (ipPkt[2] << 8) + ipPkt[3];
+
+  /* Local port*/
+  ipIdx = 20;
+  for (idx = 0; idx < 2; idx++) {
+    if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
+      NB_LOG_ERROR(&nbCb, "Failed to get message type");
+      SPutMsg(mBuf);
+      RETVALUE(RFAILED);
+    }
+    ipIdx++;
+  }
+  ipPktFields.locPort = (ipPkt[0] << 8) + ipPkt[1];
+
+  /* Remote port*/
+  ipIdx = 22;
+  for (idx = 0; idx < 2; idx++) {
+    if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
+      NB_LOG_ERROR(&nbCb, "Failed to get message type");
+      SPutMsg(mBuf);
+      RETVALUE(RFAILED);
+    }
+    ipIdx++;
+  }
+  ipPktFields.remPort = (ipPkt[0] << 8) + ipPkt[1];
+  /* get the ueCb */
+  ueCb = nbDamGetueCbkeyUeIp(&ipPktFields, &drbId);
+  if (ueCb == NULLP) {
+    NB_FREEMBUF(mBuf);
+    RETVALUE(RFAILED);
+  }
+
+  /* mark for ue data received */
+  ueCb->dataRcvd = TRUE;
+  /* get the tunnel Cb */
+  if (ROK != (cmHashListFind(&(ueCb->drbs), (U8 *)&(drbId), sizeof(U8), 0,
+                             (PTR *)&drbCb))) {
+    RETVALUE(RFAILED);
+  } else {
+    tnl = drbCb->tnlInfo;
+  }
 
    if(ROK != nbFillEgtpDatMsg(tnl, &eguEvtMsg, EGT_GTPU_MSG_GPDU))
    {
@@ -1782,10 +1761,10 @@ PRIVATE S16 nbDamBndLSap
    RETVALUE (ROK);
 } /* nbBndLSap */
 
-/** @brief This function matches the Packet filters with the ip fileds of the 
+/** @brief This function matches the Packet filters with the ip fileds of the
  *  rcvd packet
  *
- * Function: isMatchesPf
+ * Function: nbMatchPf
  *
  * @param[in]  Pointer to NbPktFilterList structure
  *             Pointer to NbIpPktFields structure
@@ -1793,86 +1772,67 @@ PRIVATE S16 nbDamBndLSap
  *    -#Success : ROK
  *    -#Failure : RFAILED
  */
-PRIVATE S16 isMatchesPf
-(
-  NbPktFilterList *tftPf, 
-  NbIpPktFields *ipPktFields
-)                       
+PRIVATE S16 nbMatchPf(NbPktFilterList *tftPf, NbIpPktFields *ipPktFields) 
 {
-  /* IPv4 remote address*/ 
-  if (tftPf->presence_mask & IPV4_REM_ADDR_PKT_FLTR_MASK)
-  {
-    if (tftPf->remIpv4Addr.ipv4_addr != ipPktFields->remIpv4Addr)
-    {                 
-      NB_LOG_DEBUG(&nbCb, "IPv4 remote address did not match\n"); 
-      RETVALUE (RFAILED);
+  /* IPv4 remote address*/
+  if (tftPf->presence_mask & IPV4_REM_ADDR_PKT_FLTR_MASK) {
+    if (tftPf->remIpv4Addr.ipv4_addr != ipPktFields->remIpv4Addr) {
+      NB_LOG_DEBUG(&nbCb, "IPv4 remote address did not match\n");
+      RETVALUE(RFAILED);
     }
-
-  } 
-  
-  /* Protocol ID*/ 
-  if (tftPf->presence_mask & PROTO_ID_PKT_FLTR_MASK)
-  {
-     if (tftPf->proto_id != ipPktFields->proto_id)
-     {
-       NB_LOG_DEBUG(&nbCb, "Protocol ID did not match\n"); 
-       RETVALUE (RFAILED);
-     }
-  }
- 
-  /* Single local port*/ 
-  if (tftPf->presence_mask & SNGL_LOC_PORT_PKT_FLTR_MASK)
-  {
-     if (tftPf->locPort != ipPktFields->locPort)
-     {
-       NB_LOG_DEBUG(&nbCb, "Single local port did not match\n"); 
-       RETVALUE (RFAILED);
-     }
   }
 
-  /* Local port range*/ 
-  if (tftPf->presence_mask & LOC_PORT_RNG_PKT_FLTR_MASK)
-  {
-     if ((ipPktFields->locPort < tftPf->locPortRangeLow) || 
-           (ipPktFields->locPort > tftPf->locPortRangeHigh))
-     {
-       NB_LOG_DEBUG(&nbCb, "Local port range did not match\n"); 
-       RETVALUE (RFAILED);
-     }
-  }
- 
-  /* Single remote port*/ 
-  if (tftPf->presence_mask & SNGL_REM_PORT_PKT_FLTR_MASK)
-  {
-     if (tftPf->remPort != ipPktFields->remPort)
-     {
-       NB_LOG_DEBUG(&nbCb, "Remote port did not match\n"); 
-       RETVALUE (RFAILED);
-     }
+  /* Protocol ID*/
+  if (tftPf->presence_mask & PROTO_ID_PKT_FLTR_MASK) {
+    if (tftPf->proto_id != ipPktFields->proto_id) {
+      NB_LOG_DEBUG(&nbCb, "Protocol ID did not match\n");
+      RETVALUE(RFAILED);
+    }
   }
 
-  /* Remote port range*/ 
-  if (tftPf->presence_mask & REM_PORT_RNG_PKT_FLTR_MASK)
-  {
-     if ((ipPktFields->remPort < tftPf->remPortRangeLow) || 
-           (ipPktFields->remPort > tftPf->remPortRangeHigh))
-     {
-       NB_LOG_DEBUG(&nbCb, "Remote port range did not match\n"); 
-       RETVALUE (RFAILED);
-     }
-  } 
- 
-  /* ToS*/ 
-  if (tftPf->presence_mask & SERV_N_CLASS_PKT_FLTR_MASK)
-  {
-     if (tftPf->srvClass != ipPktFields->srvClass)
-     {
-       NB_LOG_DEBUG(&nbCb, "ToS did not match\n"); 
-       RETVALUE (RFAILED);
-     }
+  /* Single local port*/
+  if (tftPf->presence_mask & SNGL_LOC_PORT_PKT_FLTR_MASK) {
+    if (tftPf->locPort != ipPktFields->locPort) {
+      NB_LOG_DEBUG(&nbCb, "Single local port did not match\n");
+      RETVALUE(RFAILED);
+    }
   }
- 
-  RETVALUE (ROK);
+
+  /* Local port range*/
+  if (tftPf->presence_mask & LOC_PORT_RNG_PKT_FLTR_MASK) {
+    if ((ipPktFields->locPort < tftPf->locPortRangeLow) ||
+        (ipPktFields->locPort > tftPf->locPortRangeHigh)) {
+      NB_LOG_DEBUG(&nbCb, "Local port range did not match\n");
+      RETVALUE(RFAILED);
+    }
+  }
+
+  /* Single remote port*/
+  if (tftPf->presence_mask & SNGL_REM_PORT_PKT_FLTR_MASK) {
+    if (tftPf->remPort != ipPktFields->remPort) {
+      NB_LOG_DEBUG(&nbCb, "Remote port did not match\n");
+      RETVALUE(RFAILED);
+    }
+  }
+
+  /* Remote port range*/
+  if (tftPf->presence_mask & REM_PORT_RNG_PKT_FLTR_MASK) {
+    if ((ipPktFields->remPort < tftPf->remPortRangeLow) ||
+        (ipPktFields->remPort > tftPf->remPortRangeHigh)) {
+      NB_LOG_DEBUG(&nbCb, "Remote port range did not match\n");
+      RETVALUE(RFAILED);
+    }
+  }
+
+  /* ToS*/
+  if (tftPf->presence_mask & SERV_N_CLASS_PKT_FLTR_MASK) {
+    if (tftPf->srvClass != ipPktFields->srvClass) {
+      NB_LOG_DEBUG(&nbCb, "ToS did not match\n");
+      RETVALUE(RFAILED);
+    }
+  }
+
+  RETVALUE(ROK);
 }
 
 /** @brief This function is responsible for deinitialization of Dam Function.
@@ -1909,61 +1869,58 @@ PUBLIC S16 nbDamDeInit
    RETVALUE(nbDamDeRegTmr());
 }
 
-PRIVATE  NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId)
+PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId) 
 {
-   NbDamUeCb   *ueCb = NULLP;
-   NbDamUeCb   *prevUeCb = NULLP;
-   NbIpInfo    *ipInfo = NULLP;
-   U8           ueIpMatchFound = 0;
-   CmLList      *temp_node = NULLP;
-   NbPktFilterList *temp_pf = NULLP;
-   NbPdnCb *pdnCb = NULLP;
+  NbDamUeCb *ueCb = NULLP;
+  NbDamUeCb *prevUeCb = NULLP;
+  NbIpInfo *ipInfo = NULLP;
+  U8 ueIpMatchFound = 0;
+  CmLList *temp_node = NULLP;
+  NbPktFilterList *temp_pf = NULLP;
+  NbPdnCb *pdnCb = NULLP;
 
-   /* Fetch the ueCb*/
-   for(;((cmHashListGetNext(&(nbDamCb.ueCbs), (PTR)prevUeCb, (PTR*)&ueCb)) == ROK);)
-   {
-      /* Fetch the pdnCb*/
-      if ( ROK == (cmHashListFind(&((ueCb)->pdnCb), (U8 *)&(ipPktFields->locIpv4Addr),
-                    sizeof(U32),0,(PTR *)&pdnCb)))
-      {
-        NB_LOG_DEBUG(&nbCb,"pdncb found\n");
-        ueIpMatchFound = TRUE;
-        /* Fetch TFT Packet Filter list*/
-        CM_LLIST_FIRST_NODE(&pdnCb->tftPfList, temp_node);
-        if (temp_node == NULLP)
-        {
-          //Since packet filter list is empty, send data on default bearer
-          *drbId = pdnCb->lnkEpsBearId;
-          NB_LOG_DEBUG(&nbCb,"Sending data on default bearer %d\n", *drbId);
+  /* Fetch the ueCb*/
+  for (; ((cmHashListGetNext(&(nbDamCb.ueCbs), (PTR)prevUeCb, (PTR *)&ueCb)) ==
+          ROK);) {
+    /* Fetch the pdnCb*/
+    if (ROK ==
+        (cmHashListFind(&((ueCb)->pdnCb), (U8 *)&(ipPktFields->locIpv4Addr),
+                        sizeof(U32), 0, (PTR *)&pdnCb))) {
+      NB_LOG_DEBUG(&nbCb, "pdncb found\n");
+      ueIpMatchFound = TRUE;
+      /* Fetch TFT Packet Filter list*/
+      CM_LLIST_FIRST_NODE(&pdnCb->tftPfList, temp_node);
+      if (temp_node == NULLP) {
+        // Since packet filter list is empty, send data on default bearer
+        *drbId = pdnCb->lnkEpsBearId;
+        NB_LOG_DEBUG(&nbCb, "Sending data on default bearer %d\n", *drbId);
+        RETVALUE(ueCb);
+      }
+
+      while (temp_node != NULLP) {
+        temp_pf = (NbPktFilterList *)temp_node->node;
+        if (ROK == (nbMatchPf(temp_pf, ipPktFields))) {
+          *drbId = temp_pf->drbId;
+          NB_LOG_DEBUG(&nbCb, "Matching bearer id found. ", *drbId);
+          NB_LOG_DEBUG(&nbCb, "Sending data on dedicated bearer %d\n", *drbId);
           RETVALUE(ueCb);
         }
-                  
-        while (temp_node != NULLP)
-        {
-          temp_pf = (NbPktFilterList*)temp_node->node;
-          if (ROK == (isMatchesPf(temp_pf, ipPktFields)))
-          { 
-            *drbId = temp_pf->drbId;
-            NB_LOG_DEBUG(&nbCb, "Matching bearer id found. ", *drbId);
-            NB_LOG_DEBUG(&nbCb, "Sending data on dedicated bearer %d\n", *drbId);
-            RETVALUE(ueCb);
-          } 
-          CM_LLIST_NEXT_NODE(&pdnCb->tftPfList,temp_node);
-        }
+        CM_LLIST_NEXT_NODE(&pdnCb->tftPfList, temp_node);
+      }
 
-        //Since no matching TFT found send packet on default bearer
-        *drbId = pdnCb->lnkEpsBearId;
-        NB_LOG_DEBUG(&nbCb,
-            "Sending data on default bearer %d as no matching TFT found\n",
-            *drbId);
-        RETVALUE(ueCb);
-     }
-     if (ueIpMatchFound)
-       break;
-     prevUeCb = ueCb;
-     ueCb = NULLP;
-   }
-   RETVALUE(ueCb);
+      // Since no matching TFT found send packet on default bearer
+      *drbId = pdnCb->lnkEpsBearId;
+      NB_LOG_DEBUG(
+          &nbCb, "Sending data on default bearer %d as no matching TFT found\n",
+          *drbId);
+      RETVALUE(ueCb);
+    }
+    if (ueIpMatchFound)
+      break;
+    prevUeCb = ueCb;
+    ueCb = NULLP;
+  }
+  RETVALUE(ueCb);
 }
 
 PUBLIC NbDamUeCb* nbDamGetUe(U8 ueId)
@@ -2021,4 +1978,3 @@ PUBLIC Void nbDamNbTunDelReq
      drbCb = NULLP;
    }
 }
-

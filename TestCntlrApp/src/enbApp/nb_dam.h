@@ -212,45 +212,41 @@ typedef struct {
   U32 ipv4_addr_mask;
 } NbTftIpv4Addr;
 
-typedef struct nbIpPktFields
-{
-   U32           locIpv4Addr;
-   U32           remIpv4Addr;
-   U16           locPort;
-   U16           remPort;
-   U8            proto_id;
-//   U32           ipsecParamInd;
-   U8            srvClass;
-} NbIpPktFields; 
+typedef struct nbIpPktFields {
+  U32 locIpv4Addr;
+  U32 remIpv4Addr;
+  U16 locPort;
+  U16 remPort;
+  U8 proto_id;
+  U8 srvClass;
+} NbIpPktFields;
 
-typedef struct nbPktFilterList
-{
-   CmLList       link;
-   U8            drbId;
-   U8            dir;             
-   U8            preced;          
-   NbTftIpv4Addr remIpv4Addr;
-   U16           locPort;
-   U16           locPortRangeLow;
-   U16           locPortRangeHigh;
-   U16           remPort;
-   U16           remPortRangeLow;
-   U16           remPortRangeHigh;
-   U8            proto_id;
-   U32           ipsecParamInd;
-   U8            srvClass;
-   // Component presence mask
-   U16           presence_mask;
-} NbPktFilterList; 
+typedef struct nbPktFilterList {
+  CmLList link;
+  U8 drbId;
+  U8 dir;
+  U8 preced;
+  NbTftIpv4Addr remIpv4Addr;
+  U16 locPort;
+  U16 locPortRangeLow;
+  U16 locPortRangeHigh;
+  U16 remPort;
+  U16 remPortRangeLow;
+  U16 remPortRangeHigh;
+  U8 proto_id;
+  U32 ipsecParamInd;
+  U8 srvClass;
+  // Component presence mask
+  U16 presence_mask;
+} NbPktFilterList;
 
-typedef struct nbPdnCb
-{
-  CmHashListEnt   ueHashEnt;
-  U32             pdnAddr;
-  U32             lnkEpsBearId;
+typedef struct nbPdnCb {
+  CmHashListEnt ueHashEnt;
+  U32 pdnAddr;
+  U32 lnkEpsBearId;
   // List of TFT Packet Filters
-  CmLListCp       tftPfList;
-} NbPdnCb; 
+  CmLListCp tftPfList;
+} NbPdnCb;
 
 typedef struct nbDamUeCb
 {

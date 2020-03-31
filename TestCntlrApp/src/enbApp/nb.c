@@ -43,7 +43,7 @@ PUBLIC S16 NbEnbDropInitCtxtSetup(NbDropInitCtxtSetup *dropInitCtxtSetup);
 PUBLIC S16 nbDelUeCb(U8 ueId);
 PUBLIC S16 nbUeTnlCreatCfm(U8, U32);
 PUBLIC S16 nbPrcDamUeDelCfm(U8);
-PUBLIC S16 nbCreateUeTunnReq(U8, U32,U8, NbuUeIpInfoRsp*);
+PUBLIC S16 nbCreateUeTunnReq(U8, U32, U8, NbuUeIpInfoRsp *);
 PUBLIC S16 NbEnbUeRelReqHdl(NbUeCntxtRelReq*);
 PUBLIC S16 NbEnbResetReqHdl(NbResetRequest *resetReq);
 /*PUBLIC S16 NbEnbErabRelIndHdl(NbErabRelInd *erabRelInd);*/
@@ -459,10 +459,10 @@ PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U32 ueIpAddr,U8 bearerId, NbuUeIpInfoRsp *
                nbCpyCmTptAddr(&tnlInfo->srcAddr, &(nbCb.datAppAddr));
                tnlInfo->tft.lnkEpsBearId = rsp->lnkEpsBearId;
                // Fill TFT info
-               if (rsp->noOfPfs)
-               {
+               if (rsp->noOfPfs) {
                  tnlInfo->tft.num_pf = rsp->noOfPfs;
-                 cmMemcpy(tnlInfo->tft.pfList, rsp->pfList, sizeof(rsp->pfList));
+                 cmMemcpy(tnlInfo->tft.pfList, rsp->pfList,
+                       sizeof(rsp->pfList));
                }
                RETVALUE(nbIfmDamTnlCreatReq(tnlInfo));
             }

@@ -176,7 +176,7 @@ PRIVATE Void updateGutiInUeCb(UeCb *ueCb, CmEmmEpsMI *guti);
 PRIVATE S16 compareGutiInUeCb(UeCb *ueCb, CmEmmEpsMI *epsMi);
 PRIVATE Void reverse(U8* str);
 PRIVATE U8* itoa(int num, U8* str, int base);
-PUBLIC Void populateIpInfo(UeCb *ueCb,U8 bearerId, NbuUeIpInfoRsp*);
+PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId, NbuUeIpInfoRsp *);
 PRIVATE S16 ueAppRcvEmmMsg(CmNasEvnt *evnt, U8 emmMsgType, UeCb *ueCb);
 PRIVATE S16 ueAppUtlMovEsmCbTransToBid(UeEsmCb *esmCb, UeCb *ueCb);
 PRIVATE S16 uefillDefEsmInfoToUeCb(UeCb *ueCb, CmNasEvnt*, U8, U8);
@@ -6028,8 +6028,8 @@ PRIVATE U8* itoa(int num, U8* str, int base)
  *
  *       Fun: _fill_pf_comp
  *
- *       Desc: Fill Packet filters 
- * 
+ *       Desc: Fill Packet filters
+ *
  *       Ret:  ROK - ok; RFAILED - failed
  *
  *       Notes: none
@@ -6038,84 +6038,73 @@ PRIVATE U8* itoa(int num, U8* str, int base)
  *
  */
 
-PRIVATE Void _fill_pf_comp 
-(
- U8 idx,
- UeCb *ueCb,
- NbuUeIpInfoRsp  *ueIpInfoRsp
-)
+PRIVATE Void _fill_pf_comp(U8 idx, UeCb *ueCb, NbuUeIpInfoRsp *ueIpInfoRsp) 
 {
-  ueIpInfoRsp->noOfPfs = ueCb->ueRabCb[idx-1].tft.noOfPfs;
-  for(U8 pf_idx = 0; pf_idx < ueCb->ueRabCb[idx-1].tft.noOfPfs; pf_idx++) {
-    ueIpInfoRsp->pfList[pf_idx].id = ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].id;
-    ueIpInfoRsp->pfList[pf_idx].dir = ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].dir;    
-    ueIpInfoRsp->pfList[pf_idx].preced = ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].preced;     
-         if(ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].ipv4.pres) {
-           ueIpInfoRsp->pfList[pf_idx].presenceMask |= \
-             IPV4_REM_ADDR_PKT_FLTR_MASK;
-           ueIpInfoRsp->pfList[pf_idx].remoteIpv4 = \
-             (ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].ipv4.ip4[0] << 24) + \
-             (ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].ipv4.ip4[1] << 16) + \
-             (ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].ipv4.ip4[2] << 8) + \
-             (ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].ipv4.ip4[3]);
-         }
-         if(ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].protId.pres) {
-            ueIpInfoRsp->pfList[pf_idx].presenceMask |= \
-              PROTO_ID_PKT_FLTR_MASK;
-            ueIpInfoRsp->pfList[pf_idx].protId = \
-              ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].protId.protType;
-         }
-         if(ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].localPort.pres)
-         {
-            ueIpInfoRsp->pfList[pf_idx].presenceMask |= \
-              SNGL_LOC_PORT_PKT_FLTR_MASK;
-            ueIpInfoRsp->pfList[pf_idx].localPort  = ntohs(ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].localPort.port);
-         }
-         if(ueCb->ueRabCb[idx-1].tft.pfList[idx].remotePort.pres)
-         { 
-            ueIpInfoRsp->pfList[pf_idx].presenceMask |= \
-              SNGL_REM_PORT_PKT_FLTR_MASK;
-            ueIpInfoRsp->pfList[pf_idx].remotePort = ntohs(ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].remotePort.port);
-         }
-         if(ueCb->ueRabCb[idx-1].tft.pfList[idx].locPortRange.pres)
-         {
-            ueIpInfoRsp->pfList[pf_idx].presenceMask |= \
-              LOC_PORT_RNG_PKT_FLTR_MASK;
-            ueIpInfoRsp->pfList[pf_idx].locPortRangeLow =
-               ntohs(ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].locPortRange.rangeLow);
-            ueIpInfoRsp->pfList[pf_idx].locPortRangeHigh =  \
-               ntohs(ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].locPortRange.rangeHigh);
-         }
-         if(ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].remPortRange.pres)
-         {
-            ueIpInfoRsp->pfList[pf_idx].presenceMask |= \
-              REM_PORT_RNG_PKT_FLTR_MASK;
-             ueIpInfoRsp->pfList[pf_idx].remPortRangeLow = \
-               ntohs(ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].remPortRange.rangeLow); 
-             ueIpInfoRsp->pfList[pf_idx].remPortRangeLow =  \
-               ntohs(ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].remPortRange.rangeHigh);
-         } 
-         if(ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].secParam.pres)
-         {
-            ueIpInfoRsp->pfList[pf_idx].presenceMask |= \
-              SECURITY_PARAM_PKT_FLTR_MASK;
-            cmMemcpy((U8 *)&ueIpInfoRsp->pfList[pf_idx].secParam, \
-               (U8 *)ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].secParam.params, CM_ESM_IP_SEC_SIZE);
-         }
-         if(ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].tos.pres)
-         {
-            ueIpInfoRsp->pfList[pf_idx].presenceMask |= \
-              SERV_N_CLASS_PKT_FLTR_MASK;
-            ueIpInfoRsp->pfList[pf_idx].tos  = ueCb->ueRabCb[idx-1].tft.pfList[pf_idx].tos.tos; 
-         }  
+  ueIpInfoRsp->noOfPfs = ueCb->ueRabCb[idx - 1].tft.noOfPfs;
+  for (U8 pf_idx = 0; pf_idx < ueCb->ueRabCb[idx - 1].tft.noOfPfs; pf_idx++) {
+    ueIpInfoRsp->pfList[pf_idx].id =
+        ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].id;
+    ueIpInfoRsp->pfList[pf_idx].dir =
+        ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].dir;
+    ueIpInfoRsp->pfList[pf_idx].preced =
+        ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].preced;
+    if (ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].ipv4.pres) {
+      ueIpInfoRsp->pfList[pf_idx].presenceMask |= IPV4_REM_ADDR_PKT_FLTR_MASK;
+      ueIpInfoRsp->pfList[pf_idx].remoteIpv4 =
+          (ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].ipv4.ip4[0] << 24) +
+          (ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].ipv4.ip4[1] << 16) +
+          (ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].ipv4.ip4[2] << 8) +
+          (ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].ipv4.ip4[3]);
     }
+    if (ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].protId.pres) {
+      ueIpInfoRsp->pfList[pf_idx].presenceMask |= PROTO_ID_PKT_FLTR_MASK;
+      ueIpInfoRsp->pfList[pf_idx].protId =
+          ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].protId.protType;
+    }
+    if (ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].localPort.pres) {
+      ueIpInfoRsp->pfList[pf_idx].presenceMask |= SNGL_LOC_PORT_PKT_FLTR_MASK;
+      ueIpInfoRsp->pfList[pf_idx].localPort =
+          ntohs(ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].localPort.port);
+    }
+    if (ueCb->ueRabCb[idx - 1].tft.pfList[idx].remotePort.pres) {
+      ueIpInfoRsp->pfList[pf_idx].presenceMask |= SNGL_REM_PORT_PKT_FLTR_MASK;
+      ueIpInfoRsp->pfList[pf_idx].remotePort =
+          ntohs(ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].remotePort.port);
+    }
+    if (ueCb->ueRabCb[idx - 1].tft.pfList[idx].locPortRange.pres) {
+      ueIpInfoRsp->pfList[pf_idx].presenceMask |= LOC_PORT_RNG_PKT_FLTR_MASK;
+      ueIpInfoRsp->pfList[pf_idx].locPortRangeLow = ntohs(
+          ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].locPortRange.rangeLow);
+      ueIpInfoRsp->pfList[pf_idx].locPortRangeHigh = ntohs(
+          ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].locPortRange.rangeHigh);
+    }
+    if (ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].remPortRange.pres) {
+      ueIpInfoRsp->pfList[pf_idx].presenceMask |= REM_PORT_RNG_PKT_FLTR_MASK;
+      ueIpInfoRsp->pfList[pf_idx].remPortRangeLow = ntohs(
+          ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].remPortRange.rangeLow);
+      ueIpInfoRsp->pfList[pf_idx].remPortRangeLow = ntohs(
+          ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].remPortRange.rangeHigh);
+    }
+    if (ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].secParam.pres) {
+      ueIpInfoRsp->pfList[pf_idx].presenceMask |= SECURITY_PARAM_PKT_FLTR_MASK;
+      cmMemcpy((U8 *)&ueIpInfoRsp->pfList[pf_idx].secParam,
+               (U8 *)ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].secParam.params,
+               CM_ESM_IP_SEC_SIZE);
+    }
+    if (ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].tos.pres) {
+      ueIpInfoRsp->pfList[pf_idx].presenceMask |= SERV_N_CLASS_PKT_FLTR_MASK;
+      ueIpInfoRsp->pfList[pf_idx].tos =
+          ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].tos.tos;
+    }
+  }
 }
+
 /*
  *
  *       Fun: populateIpInfo
  *
- *       Desc: Populates NbuUeIpInfoRsp structure 
- * 
+ *       Desc: Populates NbuUeIpInfoRsp structure
+ *
  *       Ret:  ROK - ok; RFAILED - failed
  *
  *       Notes: none
@@ -6123,49 +6112,41 @@ PRIVATE Void _fill_pf_comp
  *       File:  ue_app.c
  *
  */
-PUBLIC Void populateIpInfo
-(
- UeCb *ueCb,
- U8  bearerId,
- NbuUeIpInfoRsp  *ueIpInfoRsp
-)
+PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId,
+                           NbuUeIpInfoRsp *ueIpInfoRsp) 
 {
-   CmEsmPdnAdd *pdn_addr = NULLP;
-   U8 temp[20] = {0}, itrn = 0, cnt = 0;
-   U8 ip_addr[20] = {0};
-   U32 counter = 0;
-   U8 idx = 0;
-   ueIpInfoRsp->ueId = ueCb->ueId;
-   ueIpInfoRsp->bearerId = bearerId;
+  CmEsmPdnAdd *pdn_addr = NULLP;
+  U8 temp[20] = {0}, itrn = 0, cnt = 0;
+  U8 ip_addr[20] = {0};
+  U32 counter = 0;
+  U8 idx = 0;
+  ueIpInfoRsp->ueId = ueCb->ueId;
+  ueIpInfoRsp->bearerId = bearerId;
 
-   for(idx = 1; idx < UE_APP_MAX_DRBS; idx++)
-   {
-     if (ueCb->drbs[idx] == UE_APP_DRB_INUSE)
-     {
-       if(ueCb->ueRabCb[idx-1].epsBearerId == bearerId)
-       {
-          pdn_addr = &ueCb->ueRabCb[idx-1].pAddr;
-          ueIpInfoRsp->berType = ueCb->ueRabCb[idx-1].bearerType;
-          ueIpInfoRsp->lnkEpsBearId = bearerId;
-          _fill_pf_comp(idx, ueCb, ueIpInfoRsp);
-          break;
-        }
+  for (idx = 1; idx < UE_APP_MAX_DRBS; idx++) {
+    if (ueCb->drbs[idx] == UE_APP_DRB_INUSE) {
+      if (ueCb->ueRabCb[idx - 1].epsBearerId == bearerId) {
+        pdn_addr = &ueCb->ueRabCb[idx - 1].pAddr;
+        ueIpInfoRsp->berType = ueCb->ueRabCb[idx - 1].bearerType;
+        ueIpInfoRsp->lnkEpsBearId = bearerId;
+        _fill_pf_comp(idx, ueCb, ueIpInfoRsp);
+        break;
       }
-   }
-   if((pdn_addr != NULLP) && pdn_addr->pres)
-   {
-      for(counter = 0; counter < (pdn_addr->len - 1) ; counter++)
-      {
-         itoa(pdn_addr->addrInfo[counter], temp, 10);
-         for(cnt = 0; (itrn < 20) && (temp[cnt] != '\0') && (cnt < 19); itrn++, cnt++)
-            ip_addr[itrn] = temp[cnt];
-         if(counter != (pdn_addr->len - 2) && (itrn < 20))
-            ip_addr[itrn++] = '.';
-         if(counter == (pdn_addr->len - 2) && (itrn < 20))
-            ip_addr[itrn] = '\0';
-      }
-      strcpy(ueIpInfoRsp->IpAddr, ip_addr);
-   }
+    }
+  }
+  if ((pdn_addr != NULLP) && pdn_addr->pres) {
+    for (counter = 0; counter < (pdn_addr->len - 1); counter++) {
+      itoa(pdn_addr->addrInfo[counter], temp, 10);
+      for (cnt = 0; (itrn < 20) && (temp[cnt] != '\0') && (cnt < 19);
+           itrn++, cnt++)
+        ip_addr[itrn] = temp[cnt];
+      if (counter != (pdn_addr->len - 2) && (itrn < 20))
+        ip_addr[itrn++] = '.';
+      if (counter == (pdn_addr->len - 2) && (itrn < 20))
+        ip_addr[itrn] = '\0';
+    }
+    strcpy(ueIpInfoRsp->IpAddr, ip_addr);
+  }
 }
 
 /*

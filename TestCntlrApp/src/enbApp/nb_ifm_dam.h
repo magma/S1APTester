@@ -114,12 +114,11 @@ typedef struct nbDamTnlId
    NbDamTnlType              tnlType;
 } NbDamTnlId;
 
-typedef struct nbTft
-{
-  U32    lnkEpsBearId;
-  U8     num_pf;
+typedef struct nbTft {
+  U32 lnkEpsBearId;
+  U8 num_pf;
   TftPfs pfList[CM_MAX_PKT_FILTERS];
-}NbTft;
+} NbTft;
 /**
  *@brief This structure contains the DAM Tunnel Information. 
  *
@@ -133,16 +132,15 @@ typedef struct nbTft
  * - WrEgtpTeid     remTeid      Remote TEID.
  * - Bool           isFullCfg    indicate the need for full configuration during HO
  */
-typedef struct NbDamTunInfo
-{
-   NbDamTnlId                tnlId;
-   NbDamTnlType              tnlType;
-   CmTptAddr                 dstAddr;
-   CmTptAddr                 srcAddr;
-   NbEgtpTeid                remTeid;
-   NbEgtpTeid                lclTeid;
-   U32                       pdnAddr;
-   NbTft                     tft;  
+typedef struct NbDamTunInfo {
+  NbDamTnlId tnlId;
+  NbDamTnlType tnlType;
+  CmTptAddr dstAddr;
+  CmTptAddr srcAddr;
+  NbEgtpTeid remTeid;
+  NbEgtpTeid lclTeid;
+  U32 pdnAddr;
+  NbTft tft;
 } NbDamTnlInfo;
 
 /**

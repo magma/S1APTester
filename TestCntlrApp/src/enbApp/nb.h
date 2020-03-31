@@ -284,7 +284,6 @@ typedef struct _nbUeTunInfo
    U32       lclTeId;
    U32       remTeId;
    U32       bearerId;
-   U16       remotePort;
    CmTptAddr sgwAddr;
 }NbUeTunInfo;
 
