@@ -41,7 +41,7 @@ PRIVATE S16 nbDamLSapCfg(LnbMngmt *cfg, CmStatus *status);
 PRIVATE S16 nbDamLSapCntrl(LnbCntrl *sapCntrl,CmStatus *status,Elmnt elmnt);
 PRIVATE S16 nbDamBndLSap (NbLiSapCb *sapCb,CmStatus  *status,Elmnt elmnt);
 PRIVATE S16 nbDamUbndLSap (NbLiSapCb  *sapCb);
-PRIVATE  NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *, U8 *);
+PRIVATE  NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId);
 PUBLIC  NbDamUeCb *nbDamGetUe(U8 ueId);
 PUBLIC S16 nbDamEgtpDatInd(Pst*, EgtUEvnt*);
 
@@ -56,7 +56,7 @@ PUBLIC S16 nbDamEgtpDatInd(Pst*, EgtUEvnt*);
 #define NB_DAM_EGTP_MSG_SZ   1024
 /* Default Interface type while adding the tunnel at GTP*/
 #define NB_DAM_MAX_DRB_TNLS  3
-/* Incoming packet size to be read 20 bytes IP hdr + src port + dest port*/
+/* Incoming packet size to be read 20 bytes IP hdr + src port + dest port */
 #define NB_PACKET_SIZE  24
 
 PUBLIC NbDamCb   nbDamCb;
@@ -483,7 +483,7 @@ PRIVATE S16 nbSortAndAddPf(NbPdnCb *pdnCb, NbPktFilterList *tftPf)
 
   /* If tftPfList is empty, add the new tftPf
    * else find the node(current) with precedence > than the new node
-   * and add the new node before the current*/
+   * and add the new node before the current */
   CM_LLIST_FIRST_NODE(&pdnCb->tftPfList, current);
   if (current == NULLP) {
     NB_LOG_DEBUG(&nbCb, "List is empty adding new tft list\n");
@@ -592,16 +592,17 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
 
   if (ROK == (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnAddr),
                              sizeof(U32), 0, (PTR *)&pdnCb))) {
-    /* Sort and add Packet Filter/s*/
+    /* Sort and add Packet Filter/s */
     if (tnlInfo->tft.num_pf) {
       if (ROK != (nbAddPfs(pdnCb, tnlInfo))) {
-        NB_LOG_ERROR(&nbCb, "Failed to add Packet Filters");
+        NB_LOG_ERROR(&nbCb, "Failed to add Packet Filters for pdn addr %s",
+              tnlInfo->pdnAddr);
         RETVALUE(RFAILED);
       }
     }
   }
 
-  /* Create a new hash list entry*/
+  /* Create a new hash list entry */
   else {
     NB_ALLOC(&(pdnCb), sizeof(NbPdnCb));
     pdnCb->pdnAddr = tnlInfo->pdnAddr;
@@ -614,10 +615,10 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
         RETVALUE(RFAILED);
       }
     }
-    /* Populate pdncb and packet filters*/
+    /* Insert pdncb*/
     if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCb,
                                 (U8 *)&tnlInfo->pdnAddr, sizeof(U32))) {
-      NB_FREE(ueCb, sizeof(NbIpInfo))
+      NB_FREE(pdnCb, sizeof(NbPdnCb))
       NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for pdnCb");
       RETVALUE(RFAILED);
     }

@@ -6040,61 +6040,62 @@ PRIVATE U8* itoa(int num, U8* str, int base)
 
 PRIVATE Void _fill_pf_comp(U8 idx, UeCb *ueCb, NbuUeIpInfoRsp *ueIpInfoRsp) 
 {
-  ueIpInfoRsp->noOfPfs = ueCb->ueRabCb[idx - 1].tft.noOfPfs;
-  for (U8 pf_idx = 0; pf_idx < ueCb->ueRabCb[idx - 1].tft.noOfPfs; pf_idx++) {
+  U8 itrn = idx - 1; 
+  ueIpInfoRsp->noOfPfs = ueCb->ueRabCb[itrn].tft.noOfPfs;
+  for (U8 pf_idx = 0; pf_idx < ueCb->ueRabCb[itrn].tft.noOfPfs; pf_idx++) {
     ueIpInfoRsp->pfList[pf_idx].id =
-        ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].id;
+        ueCb->ueRabCb[itrn].tft.pfList[pf_idx].id;
     ueIpInfoRsp->pfList[pf_idx].dir =
-        ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].dir;
+        ueCb->ueRabCb[itrn].tft.pfList[pf_idx].dir;
     ueIpInfoRsp->pfList[pf_idx].preced =
-        ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].preced;
-    if (ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].ipv4.pres) {
+        ueCb->ueRabCb[itrn].tft.pfList[pf_idx].preced;
+    if (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].ipv4.pres) {
       ueIpInfoRsp->pfList[pf_idx].presenceMask |= IPV4_REM_ADDR_PKT_FLTR_MASK;
       ueIpInfoRsp->pfList[pf_idx].remoteIpv4 =
-          (ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].ipv4.ip4[0] << 24) +
-          (ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].ipv4.ip4[1] << 16) +
-          (ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].ipv4.ip4[2] << 8) +
-          (ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].ipv4.ip4[3]);
+          (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].ipv4.ip4[0] << 24) +
+          (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].ipv4.ip4[1] << 16) +
+          (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].ipv4.ip4[2] << 8) +
+          (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].ipv4.ip4[3]);
     }
-    if (ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].protId.pres) {
+    if (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].protId.pres) {
       ueIpInfoRsp->pfList[pf_idx].presenceMask |= PROTO_ID_PKT_FLTR_MASK;
       ueIpInfoRsp->pfList[pf_idx].protId =
-          ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].protId.protType;
+          ueCb->ueRabCb[itrn].tft.pfList[pf_idx].protId.protType;
     }
-    if (ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].localPort.pres) {
+    if (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].localPort.pres) {
       ueIpInfoRsp->pfList[pf_idx].presenceMask |= SNGL_LOC_PORT_PKT_FLTR_MASK;
       ueIpInfoRsp->pfList[pf_idx].localPort =
-          ntohs(ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].localPort.port);
+          ntohs(ueCb->ueRabCb[itrn].tft.pfList[pf_idx].localPort.port);
     }
-    if (ueCb->ueRabCb[idx - 1].tft.pfList[idx].remotePort.pres) {
+    if (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].remotePort.pres) {
       ueIpInfoRsp->pfList[pf_idx].presenceMask |= SNGL_REM_PORT_PKT_FLTR_MASK;
       ueIpInfoRsp->pfList[pf_idx].remotePort =
-          ntohs(ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].remotePort.port);
+          ntohs(ueCb->ueRabCb[itrn].tft.pfList[pf_idx].remotePort.port);
     }
-    if (ueCb->ueRabCb[idx - 1].tft.pfList[idx].locPortRange.pres) {
+    if (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].locPortRange.pres) {
       ueIpInfoRsp->pfList[pf_idx].presenceMask |= LOC_PORT_RNG_PKT_FLTR_MASK;
       ueIpInfoRsp->pfList[pf_idx].locPortRangeLow = ntohs(
-          ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].locPortRange.rangeLow);
+          ueCb->ueRabCb[itrn].tft.pfList[pf_idx].locPortRange.rangeLow);
       ueIpInfoRsp->pfList[pf_idx].locPortRangeHigh = ntohs(
-          ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].locPortRange.rangeHigh);
+          ueCb->ueRabCb[itrn].tft.pfList[pf_idx].locPortRange.rangeHigh);
     }
-    if (ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].remPortRange.pres) {
+    if (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].remPortRange.pres) {
       ueIpInfoRsp->pfList[pf_idx].presenceMask |= REM_PORT_RNG_PKT_FLTR_MASK;
       ueIpInfoRsp->pfList[pf_idx].remPortRangeLow = ntohs(
-          ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].remPortRange.rangeLow);
+          ueCb->ueRabCb[itrn].tft.pfList[pf_idx].remPortRange.rangeLow);
       ueIpInfoRsp->pfList[pf_idx].remPortRangeLow = ntohs(
-          ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].remPortRange.rangeHigh);
+          ueCb->ueRabCb[itrn].tft.pfList[pf_idx].remPortRange.rangeHigh);
     }
-    if (ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].secParam.pres) {
+    if (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].secParam.pres) {
       ueIpInfoRsp->pfList[pf_idx].presenceMask |= SECURITY_PARAM_PKT_FLTR_MASK;
       cmMemcpy((U8 *)&ueIpInfoRsp->pfList[pf_idx].secParam,
-               (U8 *)ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].secParam.params,
+               (U8 *)ueCb->ueRabCb[itrn].tft.pfList[pf_idx].secParam.params,
                CM_ESM_IP_SEC_SIZE);
     }
-    if (ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].tos.pres) {
+    if (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].tos.pres) {
       ueIpInfoRsp->pfList[pf_idx].presenceMask |= SERV_N_CLASS_PKT_FLTR_MASK;
       ueIpInfoRsp->pfList[pf_idx].tos =
-          ueCb->ueRabCb[idx - 1].tft.pfList[pf_idx].tos.tos;
+          ueCb->ueRabCb[itrn].tft.pfList[pf_idx].tos.tos;
     }
   }
 }
