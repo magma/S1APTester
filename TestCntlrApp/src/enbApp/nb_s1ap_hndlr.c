@@ -1313,6 +1313,7 @@ PUBLIC S16 nbProcErabRelCmd
    SztNAS_PDU           *nasPdu = NULLP;
    NbUeCb *ueCb = NULLP;
    NbUeTunInfo *tunInfo = NULLP;
+   NbErabRelReq *erabRelReq = NULLP;
 
    TRC2(nbProcErabRelCmd);
    erabRlsCmd = &s1apErabRlsCmd->pdu.val.initiatingMsg.value.u.sztE_RABRlsCmmd;
@@ -1384,6 +1385,16 @@ PUBLIC S16 nbProcErabRelCmd
        NB_LOG_DEBUG(&nbCb, "Deleted tun info for bearer %d\n", erabRelCmd.erabIdLst[cnt]);
      }
    }
+
+   /* Send message to nb dam to delete the packet filters */
+   NB_ALLOC(&erabRelReq, sizeof(NbErabRelReq));
+   erabRelReq->ueId = ueCb->ueId;
+   erabRelReq->numOfErabIds = numOfErabIdsRlsd;
+
+   NB_ALLOC(&erabRelReq->erabIdLst, erabRelReq->numOfErabIds * sizeof(U8));
+   cmMemcpy(erabRelReq->erabIdLst, erabRelCmd.erabIdLst,
+         erabRelReq->numOfErabIds * sizeof(U8));
+   nbIfmDamErabDelReq((Void *)erabRelReq);
 
    if (erabRelCmd.nasPdu.pres == TRUE) {
    /* Need to send to UeApp */

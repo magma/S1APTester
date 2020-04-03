@@ -34,14 +34,14 @@
 #include "nb_utils.h"
 #include "nb_log.h"
 #include "nb_traffic_handler.x" 
-#include "tft.h" 
+#include "tft.h"
 
 EXTERN S16 cmPkUeDelCfm(Pst*, U8);
 PRIVATE S16 nbDamLSapCfg(LnbMngmt *cfg, CmStatus *status);
 PRIVATE S16 nbDamLSapCntrl(LnbCntrl *sapCntrl,CmStatus *status,Elmnt elmnt);
 PRIVATE S16 nbDamBndLSap (NbLiSapCb *sapCb,CmStatus  *status,Elmnt elmnt);
 PRIVATE S16 nbDamUbndLSap (NbLiSapCb  *sapCb);
-PRIVATE  NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId);
+PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId);
 PUBLIC  NbDamUeCb *nbDamGetUe(U8 ueId);
 PUBLIC S16 nbDamEgtpDatInd(Pst*, EgtUEvnt*);
 
@@ -57,7 +57,7 @@ PUBLIC S16 nbDamEgtpDatInd(Pst*, EgtUEvnt*);
 /* Default Interface type while adding the tunnel at GTP*/
 #define NB_DAM_MAX_DRB_TNLS  3
 /* Incoming packet size to be read 20 bytes IP hdr + src port + dest port */
-#define NB_PACKET_SIZE  24
+#define NB_PACKET_SIZE 24
 
 PUBLIC NbDamCb   nbDamCb;
 /** @brief This function is responsible for starting the inactivity timer.
@@ -387,53 +387,47 @@ PUBLIC S16 nbDamDelUe
  *    -#Success : ROK
  *    -#Failure : RFAILED
  */
-PRIVATE S16 nbDamAddUe
-(
-NbDamUeCb                    **ueCb,
-U8                           ueId
-)
+PRIVATE S16 nbDamAddUe(NbDamUeCb **ueCb, U8 ueId)
 {
-   NbDamDrbCb tmpDamDrbCb;
-   NbIpInfo tmpDamIpInfo;
-   NbPdnCb tmpPdnCb;
-   NbPdnCb pdnCb;
-   U8 offset  = 0;
-   NB_ALLOC(ueCb, sizeof(NbDamUeCb ));
-   if ((*ueCb) == NULLP)
-   {
-      RETVALUE(RFAILED);
-   }
-   (*ueCb)->ueId       = ueId;
-   (*ueCb)->numDrbs    = 0;
-   (*ueCb)->numTunnels = 0;
+  NbDamDrbCb tmpDamDrbCb;
+  NbIpInfo tmpDamIpInfo;
+  NbPdnCb tmpPdnCb;
+  NbPdnCb pdnCb;
+  U8 offset = 0;
+  NB_ALLOC(ueCb, sizeof(NbDamUeCb));
+  if ((*ueCb) == NULLP) {
+    RETVALUE(RFAILED);
+  }
+  (*ueCb)->ueId = ueId;
+  (*ueCb)->numDrbs = 0;
+  (*ueCb)->numTunnels = 0;
 
-   offset = (U8) ((PTR)&tmpDamDrbCb.ueHashEnt - (PTR)&tmpDamDrbCb);
-   if( ROK != (cmHashListInit(&((*ueCb)->drbs), /* messages */
-                        NB_MAX_HASH_SIZE,     /* HL bins for the msgs */
-                        offset,               /* Offset of HL Entry */
-                        FALSE,                /* Allow dup. keys ? */
-                        CM_HASH_KEYTYPE_ANY,  /* HL key type */
-                        nbCb.init.region,     /* Mem region for HL */
-                        nbCb.init.pool)))      /* Mem pool for HL */
-   {
-      NB_LOG_ERROR(&nbCb,"Failed to initialized DamDrbCb List");
-      NB_FREE(ueCb, sizeof(NbDamUeCb))
-      RETVALUE(RFAILED);
-
-   }
-   offset = (U8) ((PTR)&tmpDamIpInfo.ueHashEnt - (PTR)&tmpDamIpInfo);
-   if( ROK != (cmHashListInit(&((*ueCb)->ipInfo), /* messages */
-                        NB_MAX_HASH_SIZE,     /* HL bins for the msgs */
-                        offset,               /* Offset of HL Entry */
-                        TRUE,                /* Allow dup. keys ? */
-                        CM_HASH_KEYTYPE_ANY,  /* HL key type */
-                        nbCb.init.region,     /* Mem region for HL */
-                        nbCb.init.pool)))      /* Mem pool for HL */
-   {
-      NB_LOG_ERROR(&nbCb,"Failed to initialized IpInfo List");
-      NB_FREE(*ueCb, sizeof(NbDamUeCb))
-      RETVALUE(RFAILED);
-   }
+  offset = (U8)((PTR)&tmpDamDrbCb.ueHashEnt - (PTR)&tmpDamDrbCb);
+  if (ROK != (cmHashListInit(&((*ueCb)->drbs),    /* messages */
+                             NB_MAX_HASH_SIZE,    /* HL bins for the msgs */
+                             offset,              /* Offset of HL Entry */
+                             FALSE,               /* Allow dup. keys ? */
+                             CM_HASH_KEYTYPE_ANY, /* HL key type */
+                             nbCb.init.region,    /* Mem region for HL */
+                             nbCb.init.pool)))    /* Mem pool for HL */
+  {
+    NB_LOG_ERROR(&nbCb, "Failed to initialized DamDrbCb List");
+    NB_FREE(ueCb, sizeof(NbDamUeCb))
+    RETVALUE(RFAILED);
+  }
+  offset = (U8)((PTR)&tmpDamIpInfo.ueHashEnt - (PTR)&tmpDamIpInfo);
+  if (ROK != (cmHashListInit(&((*ueCb)->ipInfo),  /* messages */
+                             NB_MAX_HASH_SIZE,    /* HL bins for the msgs */
+                             offset,              /* Offset of HL Entry */
+                             TRUE,                /* Allow dup. keys ? */
+                             CM_HASH_KEYTYPE_ANY, /* HL key type */
+                             nbCb.init.region,    /* Mem region for HL */
+                             nbCb.init.pool)))    /* Mem pool for HL */
+  {
+    NB_LOG_ERROR(&nbCb, "Failed to initialized IpInfo List");
+    NB_FREE(*ueCb, sizeof(NbDamUeCb))
+    RETVALUE(RFAILED);
+  }
 
   offset = (U8)((PTR)&tmpPdnCb.ueHashEnt - (PTR)&tmpPdnCb);
   if (ROK != (cmHashListInit(&((*ueCb)->pdnCb),   /* messages */
@@ -447,7 +441,7 @@ U8                           ueId
     NB_LOG_ERROR(&nbCb, "Failed to initialized PdnCb List");
     NB_FREE(*ueCb, sizeof(NbDamUeCb))
     RETVALUE(RFAILED);
-  }   
+  }
 
   cmLListInit(&(pdnCb.tftPfList));
   if (ROK != cmHashListInsert(&(nbDamCb.ueCbs), (PTR) * (ueCb),
@@ -456,11 +450,11 @@ U8                           ueId
     NB_FREE(*ueCb, sizeof(NbDamUeCb))
     NB_LOG_ERROR(&nbCb, "Failed to Insert UE into UeDamCbLst");
     RETVALUE(RFAILED);
-  } 
+  }
 
-   cmInitTimers(&(*ueCb)->inactivityTmr, 1);
-   nbDamStartUeInactvTmr(*ueCb);
-   RETVALUE(ROK);
+  cmInitTimers(&(*ueCb)->inactivityTmr, 1);
+  nbDamStartUeInactvTmr(*ueCb);
+  RETVALUE(ROK);
 }
 
 /** @brief This function is responsible for adding the Packet Filters
@@ -812,7 +806,7 @@ NbDamDrbCb                  *drbCb
 )
 {
    NbDamTnlCb *tnlCb = NULLP;
-
+   NB_LOG_ERROR(&nbCb, "*** nbDamDelDrbCb before nbDamDelTunnelAtGtp\n");
    tnlCb = drbCb->tnlInfo;
    nbDamDelTunnelAtGtp(tnlCb);
    NB_FREE_DATA_APP(tnlCb, sizeof(NbDamTnlCb));
@@ -1209,7 +1203,45 @@ PUBLIC Void nbDamUeDelReq
       RETVOID;
    }
 }
+ /** @brief This function is resposible for deleting the packet filter/s for a
+  * bearer. *
+ * @details
+ *
+ * Function: nbDeletePf
+ *
+ * @param[in]  ueCb : Pointer to NbDamUeCb
+ * @param[in]  bearerId  : Bearer Id
+ * @return S16
+ *    -#Success : ROK
+ */
+PUBLIC Void nbDeletePf(NbDamUeCb *ueCb, U8 bearerId)
+{
+  NbPdnCb *pdnCb = NULLP;;
+  NbPdnCb *prevPdnCb = NULLP;;
+  CmLList *temp_node = NULLP;
+  NbPktFilterList *temp_pf = NULLP;
+  U8 bearer_found = FALSE;
 
+  for (; ((cmHashListGetNext(&(ueCb->pdnCb), (PTR)prevPdnCb, (PTR *)&pdnCb)) ==
+         ROK);) {
+    CM_LLIST_FIRST_NODE(&pdnCb->tftPfList, temp_node);
+    while (temp_node != NULLP) {
+      temp_pf = (NbPktFilterList *)temp_node->node;
+      if (temp_pf->drbId == bearerId) {
+        bearer_found = TRUE; 
+        cmLListDelFrm(&pdnCb->tftPfList, temp_node); 
+        NB_LOG_DEBUG(&nbCb, "Deleted packet filter for bearer %d", bearerId);
+      }
+      CM_LLIST_NEXT_NODE(&pdnCb->tftPfList, temp_node);
+    }
+    if (bearer_found) {
+      break;
+    }
+    prevPdnCb = pdnCb;
+    pdnCb = NULLP;
+  }
+}
+ 
 /** @brief This function is resposible for deleting all the Erab info for the particular ue. *
  * @details
  *
@@ -1263,6 +1295,8 @@ PUBLIC Void nbDamNbErabDelReq
          nbDamDelDrbCb(ueCb, drbCb);
          /* NB_FREE_DATA_APP(drbCb, sizeof(NbDamDrbCb));*/ 
          drbCb = NULLP;
+         /* Remove the corresponding packet filter from the list*/
+         nbDeletePf(ueCb,erabRelReq->erabIdLst[count]);
       }
    }
    else  /* DAM-UE CB is not present */
@@ -1952,6 +1986,7 @@ PUBLIC Void nbDamNbTunDelReq
  NbuTunDelReq  *tunDelReq
 )
 {
+   NB_LOG_ERROR(&nbCb,"********** nbDamNbTunDelReq %d\n", tunDelReq->erabId);
    NbDamUeCb *ueCb = NULLP;
    NbDamDrbCb *drbCb = NULLP;
    U8 count = 0;

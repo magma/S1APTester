@@ -467,7 +467,7 @@ PUBLIC S16 nbS1apFillEutranCgi
    RETVALUE(ROK);
 }
 
-PUBLIC S16 NbHandleUeIpInfoRsp(NbuUeIpInfoRsp *rsp) 
+PUBLIC S16 NbHandleUeIpInfoRsp(NbuUeIpInfoRsp *rsp)
 {
   U32 ueIpAddr = 0;
   U8 ueId;
