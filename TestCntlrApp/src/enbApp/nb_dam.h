@@ -213,13 +213,13 @@ typedef struct nbIpInfo
  * @details These are the structure members
  * - U32        ipv4_addr      IPv4 address
  * - U32        ipv4_addr_mask IPv4 address mask
- */ 
+ */
 typedef struct {
   U32 ipv4_addr;
   U32 ipv4_addr_mask;
 } NbTftIpv4Addr;
 
-/** 
+/**
  * @brief This structure contains IP packet information
  *
  * @details These are the structure members
@@ -229,7 +229,7 @@ typedef struct {
  * - U16           remPort          Single remote port
  * - U8            proto_id         Protocol type(TCP/UDP)
  * - U8            srvClass         Type Of service(ToS)
- */ 
+ */
 typedef struct nbIpPktFields {
   U32 locIpv4Addr;
   U32 remIpv4Addr;
@@ -238,8 +238,8 @@ typedef struct nbIpPktFields {
   U8 proto_id;
   U8 srvClass;
 } NbIpPktFields;
- 
-/** 
+
+/**
  * @brief This structure contains Packet filter info
  *
  * @details These are the structure members
@@ -257,7 +257,7 @@ typedef struct nbIpPktFields {
  * - U32           ipsecParamInd    IP security parameter Indication
  * - U8            srvClass         Type Of service(ToS)
  * - U16           presence_mask;   Component precence mask
- */ 
+ */
 typedef struct nbPktFilterList {
   CmLList link;
   U8 drbId;
@@ -275,15 +275,15 @@ typedef struct nbPktFilterList {
   U8 srvClass;
   U16 presence_mask;
 } NbPktFilterList;
- 
-/** 
+
+/**
  * @brief This structure contains PDN information
  *
  * @details These are the structure members
  * - U32          pdnAddr        PDN Address
  * - U32          lnkEpsBearId   default bearer id
  * - CmLListCp    tftPfList      List of packet filters
- */     
+ */
 typedef struct nbPdnCb {
   CmHashListEnt ueHashEnt;
   U32 pdnAddr;
@@ -291,20 +291,19 @@ typedef struct nbPdnCb {
   CmLListCp tftPfList;
 } NbPdnCb;
 
-typedef struct nbDamUeCb
-{
-   CmHashListEnt             ueHashEnt;
-   CmTimer                   inactivityTmr;
-   U16                       ueId;
-   U16                       expiryCnt;
-   U8                        ueState;
-   U8                        dataRcvd;
-   U32                       numTunnels;
-   U32                       numDrbs;
-   CmHashListCp              drbs;
-   CmHashListCp              ipInfo;
-   /*PDN Hash List*/
-   CmHashListCp              pdnCb;
+typedef struct nbDamUeCb {
+  CmHashListEnt ueHashEnt;
+  CmTimer inactivityTmr;
+  U16 ueId;
+  U16 expiryCnt;
+  U8 ueState;
+  U8 dataRcvd;
+  U32 numTunnels;
+  U32 numDrbs;
+  CmHashListCp drbs;
+  CmHashListCp ipInfo;
+  /*PDN Hash List*/
+  CmHashListCp pdnCb;
 } NbDamUeCb;
 
 /** 

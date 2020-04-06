@@ -23,7 +23,7 @@ EXTERN S16 nbS1apFillEutranCgi(S1apPdu*, SztEUTRAN_CGI*, EnbCb*);
 EXTERN S16 nbS1apFillEutranCgi(S1apPdu*, SztEUTRAN_CGI*);
 #endif
 EXTERN S16 NbHandleInitialUeMsg(NbuInitialUeMsg*);
-EXTERN S16 nbCreateUeTunnReq(U8, U32,U8, NbuUeIpInfoRsp*);
+EXTERN S16 nbCreateUeTunnReq(U8, U32, U8, NbuUeIpInfoRsp *);
 #ifdef MULTI_ENB_SUPPORT
 PRIVATE S16 nbS1apBldInitUePdu(NbUeCb*, NbTai*, TknStrOSXL*, S1apPdu**, U32,
       NbuSTmsi, EnbCb*);

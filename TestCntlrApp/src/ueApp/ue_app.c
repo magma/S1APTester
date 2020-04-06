@@ -6024,7 +6024,7 @@ PRIVATE U8* itoa(int num, U8* str, int base)
    return str;
 }
 
- /*
+/*
  *
  *       Fun: _fill_pf_comp
  *
@@ -6038,13 +6038,12 @@ PRIVATE U8* itoa(int num, U8* str, int base)
  *
  */
 
-PRIVATE Void _fill_pf_comp(U8 idx, UeCb *ueCb, NbuUeIpInfoRsp *ueIpInfoRsp) 
+PRIVATE Void _fill_pf_comp(U8 idx, UeCb *ueCb, NbuUeIpInfoRsp *ueIpInfoRsp)
 {
-  U8 itrn = idx - 1; 
+  U8 itrn = idx - 1;
   ueIpInfoRsp->noOfPfs = ueCb->ueRabCb[itrn].tft.noOfPfs;
   for (U8 pf_idx = 0; pf_idx < ueCb->ueRabCb[itrn].tft.noOfPfs; pf_idx++) {
-    ueIpInfoRsp->pfList[pf_idx].id =
-        ueCb->ueRabCb[itrn].tft.pfList[pf_idx].id;
+    ueIpInfoRsp->pfList[pf_idx].id = ueCb->ueRabCb[itrn].tft.pfList[pf_idx].id;
     ueIpInfoRsp->pfList[pf_idx].dir =
         ueCb->ueRabCb[itrn].tft.pfList[pf_idx].dir;
     ueIpInfoRsp->pfList[pf_idx].preced =
@@ -6074,17 +6073,17 @@ PRIVATE Void _fill_pf_comp(U8 idx, UeCb *ueCb, NbuUeIpInfoRsp *ueIpInfoRsp)
     }
     if (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].locPortRange.pres) {
       ueIpInfoRsp->pfList[pf_idx].presenceMask |= LOC_PORT_RNG_PKT_FLTR_MASK;
-      ueIpInfoRsp->pfList[pf_idx].locPortRangeLow = ntohs(
-          ueCb->ueRabCb[itrn].tft.pfList[pf_idx].locPortRange.rangeLow);
-      ueIpInfoRsp->pfList[pf_idx].locPortRangeHigh = ntohs(
-          ueCb->ueRabCb[itrn].tft.pfList[pf_idx].locPortRange.rangeHigh);
+      ueIpInfoRsp->pfList[pf_idx].locPortRangeLow =
+          ntohs(ueCb->ueRabCb[itrn].tft.pfList[pf_idx].locPortRange.rangeLow);
+      ueIpInfoRsp->pfList[pf_idx].locPortRangeHigh =
+          ntohs(ueCb->ueRabCb[itrn].tft.pfList[pf_idx].locPortRange.rangeHigh);
     }
     if (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].remPortRange.pres) {
       ueIpInfoRsp->pfList[pf_idx].presenceMask |= REM_PORT_RNG_PKT_FLTR_MASK;
-      ueIpInfoRsp->pfList[pf_idx].remPortRangeLow = ntohs(
-          ueCb->ueRabCb[itrn].tft.pfList[pf_idx].remPortRange.rangeLow);
-      ueIpInfoRsp->pfList[pf_idx].remPortRangeLow = ntohs(
-          ueCb->ueRabCb[itrn].tft.pfList[pf_idx].remPortRange.rangeHigh);
+      ueIpInfoRsp->pfList[pf_idx].remPortRangeLow =
+          ntohs(ueCb->ueRabCb[itrn].tft.pfList[pf_idx].remPortRange.rangeLow);
+      ueIpInfoRsp->pfList[pf_idx].remPortRangeLow =
+          ntohs(ueCb->ueRabCb[itrn].tft.pfList[pf_idx].remPortRange.rangeHigh);
     }
     if (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].secParam.pres) {
       ueIpInfoRsp->pfList[pf_idx].presenceMask |= SECURITY_PARAM_PKT_FLTR_MASK;

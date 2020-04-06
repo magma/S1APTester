@@ -590,7 +590,7 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
     if (tnlInfo->tft.num_pf) {
       if (ROK != (nbAddPfs(pdnCb, tnlInfo))) {
         NB_LOG_ERROR(&nbCb, "Failed to add Packet Filters for pdn addr %s",
-              tnlInfo->pdnAddr);
+                     tnlInfo->pdnAddr);
         RETVALUE(RFAILED);
       }
     }
@@ -1202,8 +1202,8 @@ PUBLIC Void nbDamUeDelReq
       RETVOID;
    }
 }
- /** @brief This function is resposible for deleting the packet filter/s for a
-  * bearer. *
+/** @brief This function is resposible for deleting the packet filter/s for a
+ * bearer. *
  * @details
  *
  * Function: nbDeletePf
@@ -1213,22 +1213,24 @@ PUBLIC Void nbDamUeDelReq
  * @return S16
  *    -#Success : ROK
  */
-PUBLIC Void nbDeletePf(NbDamUeCb *ueCb, U8 bearerId)
+PUBLIC Void nbDeletePf(NbDamUeCb *ueCb, U8 bearerId) 
 {
-  NbPdnCb *pdnCb = NULLP;;
-  NbPdnCb *prevPdnCb = NULLP;;
+  NbPdnCb *pdnCb = NULLP;
+  ;
+  NbPdnCb *prevPdnCb = NULLP;
+  ;
   CmLList *temp_node = NULLP;
   NbPktFilterList *temp_pf = NULLP;
   U8 bearer_found = FALSE;
 
   for (; ((cmHashListGetNext(&(ueCb->pdnCb), (PTR)prevPdnCb, (PTR *)&pdnCb)) ==
-         ROK);) {
+          ROK);) {
     CM_LLIST_FIRST_NODE(&pdnCb->tftPfList, temp_node);
     while (temp_node != NULLP) {
       temp_pf = (NbPktFilterList *)temp_node->node;
       if (temp_pf->drbId == bearerId) {
-        bearer_found = TRUE; 
-        cmLListDelFrm(&pdnCb->tftPfList, temp_node); 
+        bearer_found = TRUE;
+        cmLListDelFrm(&pdnCb->tftPfList, temp_node);
         NB_LOG_DEBUG(&nbCb, "Deleted packet filter for bearer %d", bearerId);
       }
       CM_LLIST_NEXT_NODE(&pdnCb->tftPfList, temp_node);
@@ -1240,7 +1242,7 @@ PUBLIC Void nbDeletePf(NbDamUeCb *ueCb, U8 bearerId)
     pdnCb = NULLP;
   }
 }
- 
+
 /** @brief This function is resposible for deleting all the Erab info for the particular ue. *
  * @details
  *
@@ -1294,8 +1296,8 @@ PUBLIC Void nbDamNbErabDelReq
          nbDamDelDrbCb(ueCb, drbCb);
          /* NB_FREE_DATA_APP(drbCb, sizeof(NbDamDrbCb));*/ 
          drbCb = NULLP;
-         /* Remove the corresponding packet filter from the list*/
-         nbDeletePf(ueCb,erabRelReq->erabIdLst[count]);
+         /* Remove the corresponding packet filter from the list */
+         nbDeletePf(ueCb, erabRelReq->erabIdLst[count]);
       }
    }
    else  /* DAM-UE CB is not present */
@@ -1948,8 +1950,8 @@ PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId)
           &nbCb, "Sending data on default bearer %d as no matching TFT found\n",
           *drbId);
       RETVALUE(ueCb);
-    }                       
-    if (ueIpMatchFound) 
+    }
+    if (ueIpMatchFound)
       break;
     prevUeCb = ueCb;
     ueCb = NULLP;
@@ -1985,7 +1987,6 @@ PUBLIC Void nbDamNbTunDelReq
  NbuTunDelReq  *tunDelReq
 )
 {
-   NB_LOG_ERROR(&nbCb,"********** nbDamNbTunDelReq %d\n", tunDelReq->erabId);
    NbDamUeCb *ueCb = NULLP;
    NbDamDrbCb *drbCb = NULLP;
    U8 count = 0;
