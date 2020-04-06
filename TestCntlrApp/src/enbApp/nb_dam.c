@@ -806,7 +806,6 @@ NbDamDrbCb                  *drbCb
 )
 {
    NbDamTnlCb *tnlCb = NULLP;
-   NB_LOG_ERROR(&nbCb, "*** nbDamDelDrbCb before nbDamDelTunnelAtGtp\n");
    tnlCb = drbCb->tnlInfo;
    nbDamDelTunnelAtGtp(tnlCb);
    NB_FREE_DATA_APP(tnlCb, sizeof(NbDamTnlCb));
@@ -1921,7 +1920,7 @@ PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId)
     if (ROK ==
         (cmHashListFind(&((ueCb)->pdnCb), (U8 *)&(ipPktFields->locIpv4Addr),
                         sizeof(U32), 0, (PTR *)&pdnCb))) {
-      NB_LOG_DEBUG(&nbCb, "pdncb found for ip %s\n", ipPktFields->locIpv4Addr);
+      NB_LOG_DEBUG(&nbCb, "pdncb found\n");
       ueIpMatchFound = TRUE;
       /* Fetch TFT Packet Filter list*/
       CM_LLIST_FIRST_NODE(&pdnCb->tftPfList, temp_node);
