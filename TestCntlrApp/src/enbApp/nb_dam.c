@@ -918,7 +918,7 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
       SPutMsg(mBuf);
       RETVALUE(RFAILED);
     }
-    //ipIdx++;
+    ipIdx++;
   }
   /* Tos or DSCP*/
   ipPktFields.srvClass = ipPkt[0];
@@ -931,7 +931,7 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
       SPutMsg(mBuf);
       RETVALUE(RFAILED);
     }
-    //ipIdx++;
+    ipIdx++;
   }
   ipPktFields.proto_id = ipPkt[0];
 
@@ -1909,6 +1909,7 @@ PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId)
   NbDamUeCb *ueCb = NULLP;
   NbDamUeCb *prevUeCb = NULLP;
   NbIpInfo *ipInfo = NULLP;
+  U8 ueIpMatchFound = 0;
   CmLList *temp_node = NULLP;
   NbPktFilterList *temp_pf = NULLP;
   NbPdnCb *pdnCb = NULLP;
@@ -1921,6 +1922,7 @@ PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId)
         (cmHashListFind(&((ueCb)->pdnCb), (U8 *)&(ipPktFields->locIpv4Addr),
                         sizeof(U32), 0, (PTR *)&pdnCb))) {
       NB_LOG_DEBUG(&nbCb, "pdncb found for ip %s\n", ipPktFields->locIpv4Addr);
+      ueIpMatchFound = TRUE;
       /* Fetch TFT Packet Filter list*/
       CM_LLIST_FIRST_NODE(&pdnCb->tftPfList, temp_node);
       if (temp_node == NULLP) {
@@ -1947,7 +1949,9 @@ PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId)
           &nbCb, "Sending data on default bearer %d as no matching TFT found\n",
           *drbId);
       RETVALUE(ueCb);
-    }
+    }                       
+    if (ueIpMatchFound) 
+      break;
     prevUeCb = ueCb;
     ueCb = NULLP;
   }
