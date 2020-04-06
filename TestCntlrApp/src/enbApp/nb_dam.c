@@ -722,7 +722,7 @@ NbDamTnlInfo                 *tnlInfo
        }
        RETVALUE(RFAILED);
    }
-   /* Add TFT packet filters to ueCb */
+   /* Add TFT packet filters to pdnCb */
    if (ROK != nbAddPdnCb(ueCb, tnlInfo)) {
      NB_LOG_ERROR(&nbCb, "Failed to create pdncb");
      RETVALUE(RFAILED);
@@ -914,11 +914,11 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
   /* Fetch ToS or DSCP*/
   for (idx = 0; idx < 1; idx++) {
     if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
-      NB_LOG_ERROR(&nbCb, "Failed to get message type");
+      NB_LOG_ERROR(&nbCb, "Failed to fetch ToS");
       SPutMsg(mBuf);
       RETVALUE(RFAILED);
     }
-    ipIdx++;
+    //ipIdx++;
   }
   /* Tos or DSCP*/
   ipPktFields.srvClass = ipPkt[0];
@@ -927,11 +927,11 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
   /* Fetch protocol Id*/
   for (idx = 0; idx < 1; idx++) {
     if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
-      NB_LOG_ERROR(&nbCb, "Failed to get message type");
+      NB_LOG_ERROR(&nbCb, "Failed to fetch protocol Id");
       SPutMsg(mBuf);
       RETVALUE(RFAILED);
     }
-    ipIdx++;
+    //ipIdx++;
   }
   ipPktFields.proto_id = ipPkt[0];
 
@@ -940,7 +940,7 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
   /* Fetch IPv4 local address*/
   for (idx = 0; idx < 4; idx++) {
     if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
-      NB_LOG_ERROR(&nbCb, "Failed to get message type");
+      NB_LOG_ERROR(&nbCb, "Failed to fetch IPv4 local address");
       SPutMsg(mBuf);
       RETVALUE(RFAILED);
     }
@@ -951,12 +951,12 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
   ipPktFields.locIpv4Addr =
       (ipPkt[0] << 24) + (ipPkt[1] << 16) + (ipPkt[2] << 8) + ipPkt[3];
 
-  /* Skip 16 bytes for Local IPv4 address*/
+  /* Skip 16 bytes for remote IPv4 address*/
   ipIdx = 16;
   /* Remote IPv4 address*/
   for (idx = 0; idx < 4; idx++) {
     if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
-      NB_LOG_ERROR(&nbCb, "Failed to get message type");
+      NB_LOG_ERROR(&nbCb, "Failed to fetch remote IPv4 address");
       SPutMsg(mBuf);
       RETVALUE(RFAILED);
     }
@@ -970,7 +970,7 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
   ipIdx = 20;
   for (idx = 0; idx < 2; idx++) {
     if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
-      NB_LOG_ERROR(&nbCb, "Failed to get message type");
+      NB_LOG_ERROR(&nbCb, "Failed to fetch local port");
       SPutMsg(mBuf);
       RETVALUE(RFAILED);
     }
@@ -982,7 +982,7 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
   ipIdx = 22;
   for (idx = 0; idx < 2; idx++) {
     if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
-      NB_LOG_ERROR(&nbCb, "Failed to get message type");
+      NB_LOG_ERROR(&nbCb, "Failed to fetch remote port");
       SPutMsg(mBuf);
       RETVALUE(RFAILED);
     }
@@ -1909,7 +1909,6 @@ PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId)
   NbDamUeCb *ueCb = NULLP;
   NbDamUeCb *prevUeCb = NULLP;
   NbIpInfo *ipInfo = NULLP;
-  U8 ueIpMatchFound = 0;
   CmLList *temp_node = NULLP;
   NbPktFilterList *temp_pf = NULLP;
   NbPdnCb *pdnCb = NULLP;
@@ -1921,8 +1920,7 @@ PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId)
     if (ROK ==
         (cmHashListFind(&((ueCb)->pdnCb), (U8 *)&(ipPktFields->locIpv4Addr),
                         sizeof(U32), 0, (PTR *)&pdnCb))) {
-      NB_LOG_DEBUG(&nbCb, "pdncb found\n");
-      ueIpMatchFound = TRUE;
+      NB_LOG_DEBUG(&nbCb, "pdncb found for ip %s\n", ipPktFields->locIpv4Addr);
       /* Fetch TFT Packet Filter list*/
       CM_LLIST_FIRST_NODE(&pdnCb->tftPfList, temp_node);
       if (temp_node == NULLP) {
@@ -1950,8 +1948,6 @@ PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId)
           *drbId);
       RETVALUE(ueCb);
     }
-    if (ueIpMatchFound)
-      break;
     prevUeCb = ueCb;
     ueCb = NULLP;
   }

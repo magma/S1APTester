@@ -6135,6 +6135,7 @@ PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId,
       }
     }
   }
+  // Construct IP address
   if ((pdn_addr != NULLP) && pdn_addr->pres) {
     for (counter = 0; counter < (pdn_addr->len - 1); counter++) {
       itoa(pdn_addr->addrInfo[counter], temp, 10);
