@@ -33,7 +33,7 @@
 #include "nb_dam_ifm_app.h" 
 #include "nb_utils.h"
 #include "nb_log.h"
-#include "nb_traffic_handler.x" 
+#include "nb_traffic_handler.x"
 #include "tft.h"
 
 EXTERN S16 cmPkUeDelCfm(Pst*, U8);
@@ -57,7 +57,7 @@ PUBLIC S16 nbDamEgtpDatInd(Pst*, EgtUEvnt*);
 /* Default Interface type while adding the tunnel at GTP*/
 #define NB_DAM_MAX_DRB_TNLS  3
 /* Incoming packet size to be read 20 bytes IP hdr + src port + dest port */
-#define NB_PACKET_SIZE 24
+#define NB_PACKET_SIZE 4
 
 PUBLIC NbDamCb   nbDamCb;
 /** @brief This function is responsible for starting the inactivity timer.
@@ -470,7 +470,7 @@ PRIVATE S16 nbDamAddUe(NbDamUeCb **ueCb, U8 ueId)
  *    -#Success : ROK
  *    -#Failure : RFAILED
  */
-PRIVATE S16 nbSortAndAddPf(NbPdnCb *pdnCb, NbPktFilterList *tftPf) 
+PRIVATE S16 nbSortAndAddPf(NbPdnCb *pdnCb, NbPktFilterList *tftPf)
 {
   NbPktFilterList *temp_pf = NULLP;
   CmLList *current = NULLP;
@@ -513,7 +513,7 @@ PRIVATE S16 nbSortAndAddPf(NbPdnCb *pdnCb, NbPktFilterList *tftPf)
  *    -#Success : ROK
  *    -#Failure : RFAILED
  */
-PRIVATE S16 nbAddPfs(NbPdnCb *pdnCb, NbDamTnlInfo *tnlInfo) 
+PRIVATE S16 nbAddPfs(NbPdnCb *pdnCb, NbDamTnlInfo *tnlInfo)
 {
   U8 presence_mask = 0;
   NbPktFilterList *tftPf = NULL;
@@ -579,7 +579,7 @@ PRIVATE S16 nbAddPfs(NbPdnCb *pdnCb, NbDamTnlInfo *tnlInfo)
  *    -#Success : ROK
  *    -#Failure : RFAILED
  */
-PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo) 
+PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
 {
   NbPdnCb *pdnCb = NULL;
   NbPktFilterList *NbPf = NULL;
@@ -731,17 +731,17 @@ NbDamTnlInfo                 *tnlInfo
    NB_ALLOC(&(ipInfo), sizeof(NbIpInfo));
    ipInfo->pdnAddr = tnlInfo->pdnAddr;
    ipInfo->drbId = rbId;
-   NB_LOG_DEBUG(&nbCb, "Successfully created PdnCb\n"); 
+   NB_LOG_DEBUG(&nbCb, "Successfully created PdnCb\n");
 
    if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ipInfo,
                      (U8 *)&ipInfo->pdnAddr, sizeof(U32)))
-   {   
+   {
       NB_FREE(ueCb, sizeof(NbIpInfo))
       NB_LOG_ERROR(&nbCb, "Failed to Insert ip address into ipInfo");
       RETVALUE(RFAILED);
    }
 
-   tnlCb->locTeId = tnlInfo->lclTeid; 
+   tnlCb->locTeId = tnlInfo->lclTeid;
    tnlCb->remTeid = tnlInfo->remTeid;
    nbCpyCmTptAddr(&(tnlCb->dstAddr), &tnlInfo->dstAddr);
    nbCpyCmTptAddr(&(tnlCb->lclAddr), &tnlInfo->srcAddr);
@@ -888,7 +888,7 @@ U8                           msgType
  *    -#Success : ROK
  *    -#Failure : RFAILED
  */
-PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf) 
+PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
 {
   MsgLen len = 0;
   NbDamTnlCb *tnl;
@@ -1213,7 +1213,7 @@ PUBLIC Void nbDamUeDelReq
  * @return S16
  *    -#Success : ROK
  */
-PUBLIC Void nbDeletePf(NbDamUeCb *ueCb, U8 bearerId) 
+PUBLIC Void nbDeletePf(NbDamUeCb *ueCb, U8 bearerId)
 {
   NbPdnCb *pdnCb = NULLP;
   ;
@@ -1808,7 +1808,7 @@ PRIVATE S16 nbDamBndLSap
  *    -#Success : ROK
  *    -#Failure : RFAILED
  */
-PRIVATE S16 nbMatchPf(NbPktFilterList *tftPf, NbIpPktFields *ipPktFields) 
+PRIVATE S16 nbMatchPf(NbPktFilterList *tftPf, NbIpPktFields *ipPktFields)
 {
   /* IPv4 remote address*/
   if (tftPf->presence_mask & IPV4_REM_ADDR_PKT_FLTR_MASK) {
@@ -1905,7 +1905,7 @@ PUBLIC S16 nbDamDeInit
    RETVALUE(nbDamDeRegTmr());
 }
 
-PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId) 
+PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId)
 {
   NbDamUeCb *ueCb = NULLP;
   NbDamUeCb *prevUeCb = NULLP;
@@ -1937,17 +1937,17 @@ PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId)
         temp_pf = (NbPktFilterList *)temp_node->node;
         if (ROK == (nbMatchPf(temp_pf, ipPktFields))) {
           *drbId = temp_pf->drbId;
-          NB_LOG_DEBUG(&nbCb, "Matching bearer id found. ", *drbId);
+          NB_LOG_DEBUG(&nbCb, "Matching packet filter found.\n");
           NB_LOG_DEBUG(&nbCb, "Sending data on dedicated bearer %d\n", *drbId);
           RETVALUE(ueCb);
         }
         CM_LLIST_NEXT_NODE(&pdnCb->tftPfList, temp_node);
       }
 
-      // Since no matching TFT found send packet on default bearer
+      // Since no matching packet filter found send packet on default bearer
       *drbId = pdnCb->lnkEpsBearId;
       NB_LOG_DEBUG(
-          &nbCb, "Sending data on default bearer %d as no matching TFT found\n",
+          &nbCb, "Sending data on default bearer %d as no matching PF found\n",
           *drbId);
       RETVALUE(ueCb);
     }

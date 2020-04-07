@@ -120,7 +120,7 @@ typedef struct nbTft {
   TftPfs pfList[CM_MAX_PKT_FILTERS];
 } NbTft;
 /**
- *@brief This structure contains the DAM Tunnel Information. 
+ *@brief This structure contains the DAM Tunnel Information.
  *
  *@details These are the structure members
  * - U32            transId      Transaction ID.

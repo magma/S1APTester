@@ -6113,7 +6113,7 @@ PRIVATE Void _fill_pf_comp(U8 idx, UeCb *ueCb, NbuUeIpInfoRsp *ueIpInfoRsp)
  *
  */
 PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId,
-                           NbuUeIpInfoRsp *ueIpInfoRsp) 
+                           NbuUeIpInfoRsp *ueIpInfoRsp)
 {
   CmEsmPdnAdd *pdn_addr = NULLP;
   U8 temp[20] = {0}, itrn = 0, cnt = 0;

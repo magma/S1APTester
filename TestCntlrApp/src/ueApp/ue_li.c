@@ -111,7 +111,7 @@ EXTERN S16 ueSendUeRadCapInd(UeCb *ueCb);
 EXTERN S16 ueSendErabRelInd(NbuErabRelIndList *pErabRel, Pst *pst);
 PUBLIC S16 UeLiNbuErabRelInd(Pst *pst,NbuErabRelIndList *msg);
 
-PUBLIC S16 ueAppBldAndSndIpInfoRspToNb(UeCb *ueCb, U8 bearerId, Pst *pst) 
+PUBLIC S16 ueAppBldAndSndIpInfoRspToNb(UeCb *ueCb, U8 bearerId, Pst *pst)
 {
   S16 ret = ROK;
   NbuUeIpInfoRsp *ueIpInfoRsp = NULLP;

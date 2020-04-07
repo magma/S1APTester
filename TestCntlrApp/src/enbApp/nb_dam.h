@@ -206,8 +206,8 @@ typedef struct nbIpInfo
    U8    drbId;
    U32   pdnAddr;
 }NbIpInfo;
- 
-/** 
+
+/**
  * @brief This structure contains IPv4 address
  *
  * @details These are the structure members
