@@ -908,8 +908,7 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
   }
 
   /* Fetch ToS or DSCP*/
-  U8 idx = 0;
-  if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
+  if ((SExamMsg(&ipPkt[0], mBuf, ipIdx) != ROK)) {
     NB_LOG_ERROR(&nbCb, "Failed to fetch ToS");
     SPutMsg(mBuf);
     RETVALUE(RFAILED);
@@ -919,7 +918,7 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
   /* Skip 9 bytes to fetch the protocol ID*/
   ipIdx = 9;
   /* Fetch protocol Id*/
-  if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
+  if ((SExamMsg(&ipPkt[0], mBuf, ipIdx) != ROK)) {
     NB_LOG_ERROR(&nbCb, "Failed to fetch protocol Id");
     SPutMsg(mBuf);
     RETVALUE(RFAILED);
@@ -928,6 +927,7 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
 
   /* Skip 12 bytes for Local IPv4 address*/
   ipIdx = 12;
+  U8 idx = 0;
   /* Fetch IPv4 local address*/
   for (idx = 0; idx < 4; idx++) {
     if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
