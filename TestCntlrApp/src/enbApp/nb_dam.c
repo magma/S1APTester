@@ -582,7 +582,6 @@ PRIVATE S16 nbAddPfs(NbPdnCb *pdnCb, NbDamTnlInfo *tnlInfo)
 PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
 {
   NbPdnCb *pdnCb = NULL;
-  NbPktFilterList *NbPf = NULL;
 
   if (ROK == (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnAddr),
                              sizeof(U32), 0, (PTR *)&pdnCb))) {
@@ -658,7 +657,6 @@ NbDamTnlInfo                 *tnlInfo
    NbDamTnlType    tnlType = tnlInfo->tnlType;
    NbDamDrbCb      *drbCb  = NULLP;
    NbIpInfo        *ipInfo = NULLP;
-   U8 idx = 0;
 
    if (rbId >= NB_DAM_MAX_DRBS)
    {
@@ -894,7 +892,6 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
   NbDamTnlCb *tnl;
   NbDamUeCb *ueCb = NULLP;
   U8 ipPkt[NB_PACKET_SIZE] = {0};
-  U8 idx = 0;
   U8 drbId;
   MsgLen ipIdx = 1; // Start from 1st index-DSCP
   NbIpPktFields ipPktFields = {0};
@@ -911,26 +908,21 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
   }
 
   /* Fetch ToS or DSCP*/
-  for (idx = 0; idx < 1; idx++) {
-    if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
-      NB_LOG_ERROR(&nbCb, "Failed to fetch ToS");
-      SPutMsg(mBuf);
-      RETVALUE(RFAILED);
-    }
-    ipIdx++;
+  U8 idx = 0;
+  if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
+    NB_LOG_ERROR(&nbCb, "Failed to fetch ToS");
+    SPutMsg(mBuf);
+    RETVALUE(RFAILED);
   }
   /* Tos or DSCP*/
   ipPktFields.srvClass = ipPkt[0];
   /* Skip 9 bytes to fetch the protocol ID*/
   ipIdx = 9;
   /* Fetch protocol Id*/
-  for (idx = 0; idx < 1; idx++) {
-    if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
-      NB_LOG_ERROR(&nbCb, "Failed to fetch protocol Id");
-      SPutMsg(mBuf);
-      RETVALUE(RFAILED);
-    }
-    ipIdx++;
+  if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
+    NB_LOG_ERROR(&nbCb, "Failed to fetch protocol Id");
+    SPutMsg(mBuf);
+    RETVALUE(RFAILED);
   }
   ipPktFields.proto_id = ipPkt[0];
 
@@ -1797,7 +1789,7 @@ PRIVATE S16 nbDamBndLSap
    RETVALUE (ROK);
 } /* nbBndLSap */
 
-/** @brief This function matches the Packet filters with the ip fileds of the
+/** @brief This function matches the Packet filters with the ip fields of the
  *  rcvd packet
  *
  * Function: nbMatchPf
@@ -1909,7 +1901,6 @@ PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId)
 {
   NbDamUeCb *ueCb = NULLP;
   NbDamUeCb *prevUeCb = NULLP;
-  NbIpInfo *ipInfo = NULLP;
   U8 ueIpMatchFound = 0;
   CmLList *temp_node = NULLP;
   NbPktFilterList *temp_pf = NULLP;
