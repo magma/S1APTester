@@ -42,6 +42,7 @@
 #define EVTNBUPAGINGMSG            10 /* Paging message */
 #define EVTNBUERABRELIND           11 /* Erab Rel Indication*/
 #define EVTNBUERABSRELINFO         12 /* Erab Rel Information Indication */
+#define EVTNBUUPDATEPLMNINFO       13 /* Update Plmn Info */
 #define ERRNBU                     0
 
 #define ENBU001         (ERRNBU + 1)

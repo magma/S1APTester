@@ -8,7 +8,7 @@
 
 /*******************************************************************************
 
-     Name:   Ue Application 
+     Name:   Ue Application
 
      Type:   C Header file
 
@@ -18,12 +18,12 @@
 
      Sid:
 
-     
+
 *******************************************************************************/
 
 #ifdef __cplusplus
 extern "C" {
-#endif   /* __cplusplus  */ 
+#endif   /* __cplusplus  */
 
 #define UE_IMSI_LENGTH 15
 #define CM_EMM_MAX_MOBILE_ID_DIGS 15
@@ -44,14 +44,14 @@ extern "C" {
 #define UE_ESM_MAX_PROTO_ID 4
 #define UE_ESM_MAX_CONT_ID 10
 
-#define CM_ESM_IPV4_SIZE   4    
-#define CM_ESM_IPV6_SIZE   6 
+#define CM_ESM_IPV4_SIZE   4
+#define CM_ESM_IPV6_SIZE   6
 #define CM_ESM_IP_SEC_SIZE  4
 #define  CM_ESM_IPV6_FLOW_LABEL_SIZE 3
-#define CM_ESM_TFT_MAX_PARAM_BUF 10   
-#define CM_ESM_MAX_PKT_FILTERS 10   
-#define CM_ESM_TFT_MAX_TFT_BUF 50  
-#define CM_ESM_MAX_PARAMS   10 
+#define CM_ESM_TFT_MAX_PARAM_BUF 10
+#define CM_ESM_MAX_PKT_FILTERS 10
+#define CM_ESM_TFT_MAX_TFT_BUF 50
+#define CM_ESM_MAX_PARAMS   10
 
 typedef enum
 {
@@ -112,14 +112,14 @@ typedef struct _ueEmmNwCap
 
 typedef struct _ueUetErrInd
 {
-   U32            msgType; 
-   U32            errCode; 
-   U8             ueId[UE_IMSI_LENGTH]; 
+   U32            msgType;
+   U32            errCode;
+   U8             ueId[UE_IMSI_LENGTH];
 }UeUetErrInd;
 
 typedef struct _ueUetAppCfReq
 {
-   U32 trfGenIPAddr;      /*IP address of eth port connected to traffic 
+   U32 trfGenIPAddr;      /*IP address of eth port connected to traffic
                              generator*/
    U8 NASProcGuardTimer;   /*timer value*/
    U8 numOfUE;             /*number of ues to simulate*/
@@ -130,7 +130,7 @@ typedef struct _ueUetAppCfgCompInd
   U8 ueId;
   U8 cfgStatus;
   U8 cause;
-}UeUetAppCfgCompInd; 
+}UeUetAppCfgCompInd;
 
 typedef struct _ueUetCfgReq
 {
@@ -207,6 +207,7 @@ typedef enum _ueMsgTypes
    UE_EPS_DEACTIVATE_BER_ACC,
   UE_PDN_DISCONNECT_REQ_TYPE,
   UE_PDN_DISCONNECT_REJ_TYPE,
+  UE_ERAB_SETUP_REQ_FAILED_FOR_ERABS,
 }UeMsgTypes;
 
 typedef struct _ueEmmEpsAtchType
@@ -251,13 +252,13 @@ typedef struct _ueEmmLastTai
 
 typedef struct _ueEmmNasPdnApn
 {
-   U8 len;   
+   U8 len;
    U8 apn[MAX_APN_LEN];
 }UeEmmNasPdnApn;
 
 typedef struct _ueEmmNasAddUpdType
 {
-   Bool pres;   
+   Bool pres;
    U8 type;
 }UeEmmNasAddUpdType;
 
@@ -387,7 +388,7 @@ typedef struct _ueUetAuthRsp
    UeUetSqnRcvd sqnRcvd;
    UeUetSqnRcvd maxSqnRcvd;
    UeUetRandRcvd randRcvd;
-   Bool nonEPSAuthFail; /* Simulate Auth Resp with Cause #26 - non-EPS authentication unacceptable*/ 
+   Bool nonEPSAuthFail; /* Simulate Auth Resp with Cause #26 - non-EPS authentication unacceptable*/
 }UeUetAuthRsp;
 
 typedef struct _ueUetSecModeCmdInd
@@ -472,8 +473,8 @@ typedef struct _ueEsmInfo
 {
    U8 epsBearerId;
   UeEsmEpsQos qos;
-  UeEsmAPN apn; 
-  UeEsmPdnAdd pAddr; 
+  UeEsmAPN apn;
+  UeEsmPdnAdd pAddr;
   UeEsmApnAmbr apnAmbr;
   UeEsmProtCfgOpt protCfgOpt;
 }UeEsmInfo;
@@ -481,15 +482,15 @@ typedef struct _ueEsmInfo
 typedef struct _uePdnInfo
 {
    U8 epsBearerId;
-   UeEsmAPN apn; 
-   UeEsmPdnAdd pAddr; 
+   UeEsmAPN apn;
+   UeEsmPdnAdd pAddr;
 }UePdnInfo;
 
 typedef struct _ueUetPdnConRsp
 {
    U8             ueId;
    U8             status; /* ROK/RFAILED */
-   union 
+   union
    {
       UePdnRejectInfo pdnConRejInfo;
       UePdnInfo       pdnInfo;
@@ -632,47 +633,47 @@ typedef struct ueEsmTftPfIpv6
 typedef struct ueEsmTftProtIden
 {
    U8    pres;
-   U8           protType;  
+   U8           protType;
 }UeEsmTftProtIden;
 
 
 typedef struct ueEsmTftPort
 {
    U8    pres;
-   U16   port;  
+   U16   port;
 }UeEsmTftPort;
 
 typedef struct ueEsmTftPortRange
 {
    U8           pres;
-   U16          rangeLow;  
-   U16          rangeHigh;  
+   U16          rangeLow;
+   U16          rangeHigh;
 }UeEsmTftPortRange;
 
 typedef struct ueEsmTftSecParam
 {
    U8          pres;
-   U8          params[CM_ESM_IP_SEC_SIZE];  
+   U8          params[CM_ESM_IP_SEC_SIZE];
 }UeEsmTftSecParam;
 
 typedef struct ueEsmTftTos
 {
    U8   pres;
-   U8          tos;  
-   U8          mask;  
+   U8          tos;
+   U8          mask;
 }UeEsmTftTos;
 
 typedef struct ueEsmTftIpv6FlowLbl
 {
    U8          pres;
-   U8          buf[CM_ESM_IPV6_FLOW_LABEL_SIZE];  
+   U8          buf[CM_ESM_IPV6_FLOW_LABEL_SIZE];
 }UeEsmTftIpv6FlowLbl;
 
 typedef struct ueEsmTftPf
 {
-   U8            pres;         /* present or Not*/ 
-   U8                   id;           /* Packet Filter idenntifier*/   
-   U8                   dir;          /* Direction */ 
+   U8            pres;         /* present or Not*/
+   U8                   id;           /* Packet Filter idenntifier*/
+   U8                   dir;          /* Direction */
    U8                   preced;       /* Precedence */
    U8                  len;          /* Length */
    U32                 ipv4Mask;
@@ -700,19 +701,19 @@ typedef struct ueEsmTftParam
 {
    UeEsmTftParamType      paramType;
    U8                     len;
-   U8                     buf [CM_ESM_TFT_MAX_PARAM_BUF]; 
+   U8                     buf [CM_ESM_TFT_MAX_PARAM_BUF];
 }UeEsmTftParam;
 
 typedef struct ueEsmTft
 {
-   U8    pres;                                           /* Present or not */  
-   U8    len;  
+   U8    pres;                                           /* Present or not */
+   U8    len;
    U8    opCode;                             /* TFT Operation Code*/
    U8    eBit ;                                        /* param List presnt */
    U8    noOfPfs;                                      /* No  Of packet Filters */
    U8    noOfParams;                                   /* No Of packet Filters */
    UeEsmTftPf         pfList[CM_ESM_MAX_PKT_FILTERS];
-   UeEsmTftParam      params[CM_ESM_MAX_PARAMS];       /* Tft Params */  
+   UeEsmTftParam      params[CM_ESM_MAX_PARAMS];       /* Tft Params */
 }UeEsmTft;
 typedef struct _ueUetBearerAllocReq
 {
@@ -771,8 +772,8 @@ typedef struct _ueEsmTxnId
 typedef struct ueUetActDedBearCtxtReq
 {
    U8                ueId;
-   U8                bearerId;  
-   U8                lnkBearerId;  
+   U8                bearerId;
+   U8                lnkBearerId;
    UeEsmEpsQos       epsQos;
    UeEsmTft          tft;
    UeEsmTxnId        txnId;
@@ -808,7 +809,7 @@ typedef struct ueEsmActDedBearCtxtRej
 typedef struct ueUetDeActvBearCtxtReq
 {
    U8 ueId;
-   U8 bearerId;  
+   U8 bearerId;
    U8 esmCause;
 }UeUetDeActvBearCtxtReq;
 
@@ -816,7 +817,7 @@ typedef struct ueUetDeActvBearCtxtReq
 typedef struct ueUetDeActvBearCtxtAcc
 {
    U8 ueId;
-   U8 bearerId;  
+   U8 bearerId;
 }UeUetDeActvBearCtxtAcc;
 
 typedef struct ueEsmActDfltBearCtxtRej
@@ -848,11 +849,13 @@ typedef struct _ueUetEmmStatus
 typedef struct _ueUetEsmInformationReq
 {
    U8 ueId;
+   U8 tId;
 }UeUetEsmInformationReq;
 
 typedef struct _ueUetEsmInformationRsp
 {
    U8 ueId;
+   U8 tId;
    UeEmmNasPdnApn  nasPdnApn;
 }UeUetEsmInformationRsp;
 
@@ -869,6 +872,18 @@ typedef struct _ueUetPdnDisconnectRej
   U8 cause;
 }UeUetPdnDisconnectRej;
 
+typedef struct _uetFailedErablist {
+  U8 erabId;
+  U8 cause;
+  U8 qci;
+} UetFailedErablist;
+
+typedef struct _ueUetErabSetupFailedTosetup {
+  U8 ueId;
+#define MAX_FAILED_ERABS 11
+  U8 noOfFailedErabs;
+  UetFailedErablist failedErablist[MAX_FAILED_ERABS];
+} UeUetErabSetupFailedTosetup;
 
 typedef struct _uetMessage
 {
@@ -900,14 +915,14 @@ typedef struct _uetMessage
      UeUetTauAccept       ueUetTauAccept;
      UeUetTauComplete     ueUetTauComplete;
      UeUetTauReject       ueUetTauReject;
-     UeUetServiceReq      ueUetServiceReq; 
-     UeUetServiceRej      ueUetServiceRej; 
-     UeUetPdnConReq       ueUetPdnConReq; 
-     UeUetPdnConRsp       ueUetPdnConRsp; 
+     UeUetServiceReq      ueUetServiceReq;
+     UeUetServiceRej      ueUetServiceRej;
+     UeUetPdnConReq       ueUetPdnConReq;
+     UeUetPdnConRsp       ueUetPdnConRsp;
      UeUetPagingMsg       ueUetPagingMsg;
      UeUetRadCapUpdReq    ueUetRadCapUpdReq;
-     UeUetFlush           ueUetFlush; 
-     UeUetBearerAllocReq  ueBearerAllocReq; 
+     UeUetFlush           ueUetFlush;
+     UeUetBearerAllocReq  ueBearerAllocReq;
      UeUetActDedBearCtxtReq ueActDedBerReq;
      UeEsmActDedBearCtxtAcc ueActDedBerAcc;
      UeEsmActDedBearCtxtRej ueActDedBerRej;
@@ -916,16 +931,17 @@ typedef struct _uetMessage
      UeUetAuthRejInd         ueUetAuthRejInd;
      UeUetEmmStatus          ueUetEmmStatus;
      UeEsmActDfltBearCtxtRej ueActDfltBerRej;
-     UeUetEsmInformationReq  ueEsmInformationReq; 
+     UeUetEsmInformationReq  ueEsmInformationReq;
      UeUetEsmInformationRsp  ueEsmInformationRsp;
      UeUetDeActvBearCtxtReq ueDeActvBerReq;
      UeUetDeActvBearCtxtAcc ueDeActvBerAcc;
      UeUetPdnDisconnectReq  ueUetPdnDisconnectReq;
      UeUetPdnDisconnectRej  ueUetPdnDisconnectRej;
+     UeUetErabSetupFailedTosetup ueErabsFailedToSetup;
    }msg;
 }UetMessage;
 /* Ue Interface general Structure declerations */
-typedef UetMessage   UetRequest;      
+typedef UetMessage   UetRequest;
 
 typedef UetMessage   UetResponse;
 
@@ -1013,5 +1029,5 @@ UetConfirm    *abMsg        /* confirm message */
 ));
 
 #ifdef __cplusplus
-} 
+}
 #endif /* extern "C" */

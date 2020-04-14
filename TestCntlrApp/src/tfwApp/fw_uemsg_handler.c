@@ -9,17 +9,17 @@
 /********************************************************************20**
 
     Name:  LTE S1SIM - TFW
- 
+
     Type:  C include file
- 
+
     Desc:  C source code to handle messages coming from UeApp.
- 
+
     File:  fw_uemsg_handler.c
- 
-    Sid:   
- 
-    Prg:   
- 
+
+    Sid:
+
+    Prg:
+
 **********************************************************************/
 
 #include "envopt.h"        /* environment options */
@@ -103,7 +103,7 @@ PUBLIC S16 ueSecModCmdInd(Pst *, UetMessage *);
 PUBLIC S16 sendUeTauRejectIndToTstCntrl(UetResponse *uetMsg);
 PUBLIC S16 handleTauRejectInd(Pst *pst, UetMessage *);
 PRIVATE S16 handlePdnConRspInd (Pst *pst, UetMessage *uetPdnConRspInd);
-PRIVATE Void fwFillEsmInfo(ue_Esm_Info *fwEsmInfo,UeEsmInfo *esmInfo); 
+PRIVATE Void fwFillEsmInfo(ue_Esm_Info *fwEsmInfo,UeEsmInfo *esmInfo);
 PRIVATE S16 sendUePdnConRspIndToTstCntlr(UetResponse *uetMsg);
 PUBLIC S16 handlePagingInd( Pst *pst,  UetMessage *uetPagingtInd);
 PUBLIC S16 sendUePagingIndToTstCntlr(UetMessage *uetPagingInd);
@@ -118,6 +118,8 @@ PRIVATE S16 handleEsmInformationReq( Pst *pst, UetMessage *ueEsmInformationReq);
 PUBLIC S16 sendUeEsmInformationReqToTstCntlr( UetMessage *ueEsmInfoReq);
 PRIVATE S16 sendUePdnDisConRejIndToTstCntlr(UetResponse *uetMsg);
 PRIVATE S16 handlePdnDisConRejInd(Pst *pst, UetMessage *uetPdnDisConRejInd);
+PRIVATE Void handle_erab_setup_req_failed_for_bearers( Pst *pst, UetMessage *erab_setup_req_failed_for_bearers);
+PRIVATE Void sendUeErabSetupReqFailedForBearers( UetMessage *erab_setup_req_failed_for_bearers);
 
 
 /*
@@ -126,11 +128,11 @@ PRIVATE S16 handlePdnDisConRejInd(Pst *pst, UetMessage *uetPdnDisConRejInd);
 *        Desc:  Sends UE App Config Response to TC stub
 *
 *        Ret:   ROK
-* 
+*
 *        Notes: None
-* 
-*        File: fw_uemsg_handler.c 
-* 
+*
+*        File: fw_uemsg_handler.c
+*
 */
 PUBLIC S16 sendUeAppConfigRespToTstCntlr(UetResponse *uetMsg)
 {
@@ -152,16 +154,16 @@ PUBLIC S16 sendUeAppConfigRespToTstCntlr(UetResponse *uetMsg)
 } /* sendUeAppConfigRespToTstCntlr */
 
 /*
-*        Fun:   handleMessageFromUeApp 
+*        Fun:   handleMessageFromUeApp
 *
 *        Desc:  Handles all the messages from Ue App
 *
 *        Ret:   ROK
-* 
+*
 *        Notes: None
-* 
-*        File: fw_uemsg_handler.c 
-* 
+*
+*        File: fw_uemsg_handler.c
+*
 */
 PUBLIC S16 handleMessageFromUeApp
 (
@@ -210,7 +212,7 @@ PUBLIC S16 handleMessageFromUeApp
       {
          FW_LOG_DEBUG(fwCb, "Recieved Security Mode command Indication");
          /* Comment this section to test AttachTimer expiry */
-         ueSecModCmdInd(pst,uetRspMsg); 
+         ueSecModCmdInd(pst,uetRspMsg);
          break;
       }
       case UE_ATTACH_ACCEPT_IND_TYPE:
@@ -304,6 +306,13 @@ PUBLIC S16 handleMessageFromUeApp
          handlePdnDisConRejInd(pst, uetRspMsg);
          break;
       }
+      case UE_ERAB_SETUP_REQ_FAILED_FOR_ERABS:
+      {
+         FW_LOG_DEBUG(fwCb, "Recieved UE_ERAB_SETUP_REQ_FAILED_FOR_ERABS Indication \n");
+         handle_erab_setup_req_failed_for_bearers(pst, uetRspMsg);
+         break;
+      }
+
       default:
       {
          FW_LOG_ERROR(fwCb, "Invalid message type recieved");
@@ -318,16 +327,16 @@ PUBLIC S16 handleMessageFromUeApp
 } /* handleMessageFromUeApp */
 
 /*
-*        Fun:  sendUeConfigRespToTstCntlr 
+*        Fun:  sendUeConfigRespToTstCntlr
 *
 *        Desc:  Sends ue Config response to TC stub
 *
 *        Ret:   ROK
-* 
+*
 *        Notes: None
-* 
-*        File: fw_uemsg_handler.c 
-* 
+*
+*        File: fw_uemsg_handler.c
+*
 */
 PUBLIC S16 sendUeConfigRespToTstCntlr(UetResponse *uetMsg)
 {
@@ -355,11 +364,11 @@ PUBLIC S16 sendUeConfigRespToTstCntlr(UetResponse *uetMsg)
 *        Desc:  Sends Identity Request indication to TC stub.
 *
 *        Ret:   ROK
-* 
+*
 *        Notes: None
-* 
-*        File:  fw_uemsg_handler.c 
-* 
+*
+*        File:  fw_uemsg_handler.c
+*
 */
 PUBLIC S16 sendUeIdentReqIndToTstCntlr(UetMessage *uetMsg)
 {
@@ -369,10 +378,10 @@ PUBLIC S16 sendUeIdentReqIndToTstCntlr(UetMessage *uetMsg)
 
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
-   
+
    FW_ALLOC_MEM(fwCb, &tfwIdentReq, sizeof(ueIdentityReqInd_t));
    cmMemset((U8*)tfwIdentReq, 0, sizeof(ueIdentityReqInd_t));
-   
+
    tfwIdentReq->ue_Id = uetMsg->msg.ueUetIdentReqInd.ueId;
    tfwIdentReq->idType = uetMsg->msg.ueUetIdentReqInd.idType;
 
@@ -391,11 +400,11 @@ PUBLIC S16 sendUeIdentReqIndToTstCntlr(UetMessage *uetMsg)
 *        Desc:  Sends Auth Request indications.to TC stub
 *
 *        Ret:   ROK
-* 
+*
 *        Notes: None
-* 
-*        File: fw_uemsg_handler.c 
-* 
+*
+*        File: fw_uemsg_handler.c
+*
 */
 PUBLIC S16 sendUeAuthReqIndToTstCntlr(UetMessage *uetMsg)
 {
@@ -405,10 +414,10 @@ PUBLIC S16 sendUeAuthReqIndToTstCntlr(UetMessage *uetMsg)
 
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
-   
+
    FW_ALLOC_MEM(fwCb, &tfwAuthReq, sizeof(ueAuthReqInd_t));
    cmMemset((U8*)tfwAuthReq, 0, sizeof(ueAuthReqInd_t));
-   
+
    tfwAuthReq->ue_Id = uetMsg->msg.ueUetAuthReqInd.ueId;
    if (uetMsg->msg.ueUetAuthReqInd.KNASVrfySts == TRUE)
    {
@@ -433,16 +442,16 @@ PUBLIC S16 sendUeAuthReqIndToTstCntlr(UetMessage *uetMsg)
 } /* sendUeAuthReqIndToTstCntlr */
 
 /*
-*        Fun:   ueIdentReqInd 
+*        Fun:   ueIdentReqInd
 *
-*        Desc:  Handles Identity Request indications. 
+*        Desc:  Handles Identity Request indications.
 *
 *        Ret:   ROK
-* 
+*
 *        Notes: None
-* 
-*        File: fw_uemsg_handler.c 
-* 
+*
+*        File: fw_uemsg_handler.c
+*
 */
 PUBLIC S16 ueIdentReqInd
 (
@@ -492,7 +501,7 @@ PUBLIC S16 ueIdentReqInd
       /*else, send to test controller*/
       else
       {
-         sendUeIdentReqIndToTstCntlr(uetIdentReqInd);   
+         sendUeIdentReqIndToTstCntlr(uetIdentReqInd);
       }
    }
 
@@ -501,16 +510,16 @@ PUBLIC S16 ueIdentReqInd
 
 
 /*
-*        Fun:   ueAuthReqInd 
+*        Fun:   ueAuthReqInd
 *
-*        Desc:  Handles Auth Request indications. 
+*        Desc:  Handles Auth Request indications.
 *
 *        Ret:   ROK
-* 
+*
 *        Notes: None
-* 
-*        File: fw_uemsg_handler.c 
-* 
+*
+*        File: fw_uemsg_handler.c
+*
 */
 PUBLIC S16 ueAuthReqInd
 (
@@ -560,7 +569,7 @@ PUBLIC S16 ueAuthReqInd
       /*else, send to test controller*/
       else
       {
-         sendUeAuthReqIndToTstCntlr(uetAuthReqInd);   
+         sendUeAuthReqIndToTstCntlr(uetAuthReqInd);
       }
    }
 
@@ -569,16 +578,16 @@ PUBLIC S16 ueAuthReqInd
 
 
 /*
-*        Fun:  sendUeSecModCmdIndToTstCntlr 
+*        Fun:  sendUeSecModCmdIndToTstCntlr
 *
-*        Desc: Sends Security Mod Command Ind to TC stub 
+*        Desc: Sends Security Mod Command Ind to TC stub
 *
 *        Ret:   ROK
-* 
+*
 *        Notes: None
-* 
-*        File: fw_uemsg_handler.c 
-* 
+*
+*        File: fw_uemsg_handler.c
+*
 */
 PUBLIC S16 sendUeSecModCmdIndToTstCntlr(UetResponse *uetMsg)
 {
@@ -590,7 +599,7 @@ PUBLIC S16 sendUeSecModCmdIndToTstCntlr(UetResponse *uetMsg)
    FW_LOG_ENTERFN(fwCb);
 
    FW_ALLOC_MEM(fwCb, &tfwUeSecModCmdInd , sizeof(ueSecModeCmdInd_t));
-   cmMemset((U8*)tfwUeSecModCmdInd, 0, sizeof(ueSecModeCmdInd_t));   
+   cmMemset((U8*)tfwUeSecModCmdInd, 0, sizeof(ueSecModeCmdInd_t));
 
    tfwUeSecModCmdInd->ue_Id =uetMsg->msg.ueUetSecModeCmdInd.ueId;
    tfwUeSecModCmdInd->nas_cyp_cfg = \
@@ -614,16 +623,16 @@ PUBLIC S16 sendUeSecModCmdIndToTstCntlr(UetResponse *uetMsg)
 } /* sendUeSecModCmdIndToTstCntlr */
 
 /*
-*        Fun:  ueSecModCmdInd 
+*        Fun:  ueSecModCmdInd
 *
 *        Desc:  Handles Ue Security mode Indication
 *
 *        Ret:   ROK
-* 
+*
 *        Notes: None
-* 
-*        File: fw_uemsg_handler.c 
-* 
+*
+*        File: fw_uemsg_handler.c
+*
 */
 PUBLIC S16 ueSecModCmdInd
 (
@@ -671,24 +680,24 @@ PUBLIC S16 ueSecModCmdInd
       /*else, send to test controller*/
       else
       {
-         sendUeSecModCmdIndToTstCntlr(uetSecModCmdInd);  
-      } 
+         sendUeSecModCmdIndToTstCntlr(uetSecModCmdInd);
+      }
    }
 
    FW_LOG_EXITFN(fwCb, ret);
 } /* ueSecModCmdInd */
 
 /*
-*        Fun:  sendUeTauAcceptIndToTstCntlr 
+*        Fun:  sendUeTauAcceptIndToTstCntlr
 *
 *        Desc:  Sends TAU Accept Ind to TC stub
 *
 *        Ret:   ROK
-* 
+*
 *        Notes: None
-* 
-*        File: fw_uemsg_handler.c 
-* 
+*
+*        File: fw_uemsg_handler.c
+*
 */
 PUBLIC S16 sendUeTauAcceptIndToTstCntlr(UetResponse *uetMsg)
 {
@@ -701,7 +710,7 @@ PUBLIC S16 sendUeTauAcceptIndToTstCntlr(UetResponse *uetMsg)
 
    FW_ALLOC_MEM(fwCb, &tfwTauAccept , sizeof(ueTauAccept_t));
    cmMemset((U8*)tfwTauAccept, 0, sizeof(ueTauAccept_t));
-   
+
    tfwTauAccept->ue_Id = uetMsg->msg.ueUetTauAccept.ueId;
    tfwTauAccept->epsUpdateRes = uetMsg->msg.ueUetTauAccept.epsUpdateRes;
    tfwTauAccept->gutiChanged = uetMsg->msg.ueUetTauAccept.gutiChanged;
@@ -720,16 +729,16 @@ PUBLIC S16 sendUeTauAcceptIndToTstCntlr(UetResponse *uetMsg)
 }
 
 /*
-*        Fun:  sendUeAttachAcceptIndToTstCntlr 
+*        Fun:  sendUeAttachAcceptIndToTstCntlr
 *
 *        Desc:  Sends Attact Accept Ind To TC stub
 *
 *        Ret:   ROK
-* 
+*
 *        Notes: None
-* 
-*        File: fw_uemsg_handler.c 
-* 
+*
+*        File: fw_uemsg_handler.c
+*
 */
 PUBLIC S16 sendUeAttachAcceptIndToTstCntlr(UetResponse *uetMsg)
 {
@@ -747,7 +756,7 @@ PUBLIC S16 sendUeAttachAcceptIndToTstCntlr(UetResponse *uetMsg)
    tfwUeAttachAccept->ue_Id = uetMsg->msg.ueUetAttachAcceptInd.ueId;
    tfwUeAttachAccept->eps_Atch_resp =\
        uetMsg->msg.ueUetAttachAcceptInd.epsAtchRes;
-   
+
    if (!uetMsg->msg.ueUetAttachAcceptInd.t3412 == 0)
    {
       tfwUeAttachAccept->t3412 = uetMsg->msg.ueUetAttachAcceptInd.t3412;
@@ -763,14 +772,14 @@ PUBLIC S16 sendUeAttachAcceptIndToTstCntlr(UetResponse *uetMsg)
       mmeCode = uetMsg->msg.ueUetAttachAcceptInd.guti.mmeCode;
    tfwUeAttachAccept->guti.\
       mTmsi = uetMsg->msg.ueUetAttachAcceptInd.guti.mTMSI;
-   
+
    cmMemcpy(tfwUeAttachAccept->lai.mcc,
          uetMsg->msg.ueUetAttachAcceptInd.lai.mcc,3);
    cmMemcpy(tfwUeAttachAccept->lai.mnc,
          uetMsg->msg.ueUetAttachAcceptInd.lai.mnc,3);
    tfwUeAttachAccept->lai.\
       lac = uetMsg->msg.ueUetAttachAcceptInd.lai.lac;
-   
+
    cmMemcpy(tfwUeAttachAccept->ms_id,
          uetMsg->msg.ueUetAttachAcceptInd.msId, CM_EMM_MAX_MOBILE_ID_DIGS);
 
@@ -779,7 +788,7 @@ PUBLIC S16 sendUeAttachAcceptIndToTstCntlr(UetResponse *uetMsg)
    tfwUeAttachAccept->t3402 = uetMsg->msg.ueUetAttachAcceptInd.t3402;
 
    tfwUeAttachAccept->t3423 = uetMsg->msg.ueUetAttachAcceptInd.t3423;
-   
+
    for (i = 0; i < 6; i++)
    {
       cmMemcpy(tfwUeAttachAccept->plmn_lst[i].mcc,
@@ -834,7 +843,7 @@ PUBLIC S16 sendUeAttachAcceptIndToTstCntlr(UetResponse *uetMsg)
    FW_LOG_EXITFN(fwCb, ret);
 }
 
-PRIVATE Void fwFillEsmInfo(ue_Esm_Info *fwEsmInfo, UeEsmInfo *esmInfo) 
+PRIVATE Void fwFillEsmInfo(ue_Esm_Info *fwEsmInfo, UeEsmInfo *esmInfo)
 {
    U8 count;
 
@@ -871,7 +880,7 @@ PRIVATE Void fwFillEsmInfo(ue_Esm_Info *fwEsmInfo, UeEsmInfo *esmInfo)
       {
          fwEsmInfo->protCfgOpts_pr.p[count].\
             pid = esmInfo->protCfgOpt.p[count].pid;
-         cmMemcpy(fwEsmInfo->protCfgOpts_pr.p[count].val, 
+         cmMemcpy(fwEsmInfo->protCfgOpts_pr.p[count].val,
                esmInfo->protCfgOpt.p[count].val,
                esmInfo->protCfgOpt.p[count].len);
       }
@@ -887,16 +896,16 @@ PRIVATE Void fwFillEsmInfo(ue_Esm_Info *fwEsmInfo, UeEsmInfo *esmInfo)
 }
 
 /*
- *        Fun:  sendUeAttachFailIndToTstCntlr 
+ *        Fun:  sendUeAttachFailIndToTstCntlr
  *
  *        Desc:  Sends Attach fail indication to TC stub
  *
  *        Ret:   ROK
- * 
+ *
  *        Notes: None
- * 
- *        File: fw_uemsg_handler.c 
- * 
+ *
+ *        File: fw_uemsg_handler.c
+ *
 */
 PUBLIC S16 sendUeAttachFailIndToTstCntlr(FwCb *fwCb, UeIdCb *ueIdCb, U16 reason)
 {
@@ -913,7 +922,7 @@ PUBLIC S16 sendUeAttachFailIndToTstCntlr(FwCb *fwCb, UeIdCb *ueIdCb, U16 reason)
    tfwUeAttachFail->ueId = ueIdCb->ue_id;
    tfwUeAttachFail->ueState = ueIdCb->state;
    tfwUeAttachFail->reason = reason;
-   
+
    FW_LOG_DEBUG(fwCb, "Invoking Test Controller Callback");
    (fwCb->testConrollerCallBack)(UE_ATTACH_FAIL_IND, tfwUeAttachFail,
                                   sizeof(ueAttachFail_t));
@@ -923,16 +932,16 @@ PUBLIC S16 sendUeAttachFailIndToTstCntlr(FwCb *fwCb, UeIdCb *ueIdCb, U16 reason)
 }
 
 /*
- *        Fun:   handleTauAcceptInd 
+ *        Fun:   handleTauAcceptInd
  *
  *        Desc:  Handles the the TAU Accept indications to test controller
  *
  *        Ret:   ROK
- * 
+ *
  *        Notes: None
- * 
- *        File: fw_uemsg_handler.c 
- * 
+ *
+ *        File: fw_uemsg_handler.c
+ *
 */
 PUBLIC S16 handleTauAcceptInd
 (
@@ -945,7 +954,7 @@ PUBLIC S16 handleTauAcceptInd
    S16 flag = 0; /* flag == 0(ueid not found), flag==1(found)*/
    UeIdCb *ueIdCb  = NULLP;
    CmLList  *tmpNode = NULLP; /* Stores the Ie Node */
-   
+
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
 
@@ -985,10 +994,10 @@ PRIVATE Void delete_ue_entries(U8 ueId)
    FwCb *fwCb = NULLP;
    CmLList  *tmpNode = NULLP;
    UeIdCb *ueIdCb;
-   
+
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
-   
+
    CM_LLIST_FIRST_NODE(&fwCb->ueIdList, tmpNode);
    while(tmpNode != NULLP)
    {
@@ -1001,21 +1010,21 @@ PRIVATE Void delete_ue_entries(U8 ueId)
       }
       tmpNode = tmpNode->next;
    }
-   
+
    FW_LOG_EXITFNVOID(fwCb);
 }
 
 /*
- *        Fun:  handleAttachAcceptInd 
+ *        Fun:  handleAttachAcceptInd
  *
  *        Desc:  Handles the Attach accept indication.
  *
  *        Ret:   ROK
- * 
+ *
  *        Notes: None
- * 
- *        File: fw_uemsg_handler.c 
- * 
+ *
+ *        File: fw_uemsg_handler.c
+ *
  */
 PUBLIC S16 handleAttachAcceptInd
 (
@@ -1059,7 +1068,7 @@ PUBLIC S16 handleAttachAcceptInd
          FW_ALLOC_MEM(fwCb, &attachComp, sizeof(ueAttachComplete_t));
          attachComp->ue_Id = uetAttachAccept->msg.ueUetAttachAcceptInd.ueId;
          handlAttachComp(attachComp);
-         ueIdCb->state = UE_ATTACH_COMPLETE_DONE; 
+         ueIdCb->state = UE_ATTACH_COMPLETE_DONE;
          sendUeAttachAcceptIndToTstCntlr(uetAttachAccept);
          FW_FREE_MEM(fwCb, attachComp, sizeof(ueAttachComplete_t));
          /* Stop Attach Timer */
@@ -1079,16 +1088,16 @@ PUBLIC S16 handleAttachAcceptInd
 }
 
 /*
-*        Fun:  sendUeDetachAcceptIndToTstCntlr 
+*        Fun:  sendUeDetachAcceptIndToTstCntlr
 *
 *        Desc:  Sending the Detach accept indication to TC stub
 *
 *        Ret:   ROK
-* 
+*
 *        Notes: None
-* 
-*        File: fw_uemsg_handler.c 
-* 
+*
+*        File: fw_uemsg_handler.c
+*
 */
 PUBLIC S16 sendUeDetachAcceptIndToTstCntlr(UetResponse *uetMsg)
 {
@@ -1128,7 +1137,7 @@ PRIVATE S16 sendUePdnConRspIndToTstCntlr(UetResponse *uetMsg)
    {
       tfwPdnConRspInd->status = TRUE;
       pdnInfo = &tfwPdnConRspInd->m.pdnInfo;
-      uePdnInfo = &uetMsg->msg.ueUetPdnConRsp.m.pdnInfo; 
+      uePdnInfo = &uetMsg->msg.ueUetPdnConRsp.m.pdnInfo;
       pdnInfo->epsBearerId = uePdnInfo->epsBearerId;
       pdnInfo->apn.len = uePdnInfo->apn.len;
       cmMemcpy(pdnInfo->apn.apn, uePdnInfo->apn.apn,
@@ -1165,11 +1174,11 @@ PRIVATE S16 sendUePdnConRspIndToTstCntlr(UetResponse *uetMsg)
 *        Desc:  Sends the Attach reject indications to test controller
 *
 *        Ret:   ROK
-* 
+*
 *        Notes: None
-* 
-*        File: fw_uemsg_handler.c 
-* 
+*
+*        File: fw_uemsg_handler.c
+*
 */
 PUBLIC S16 sendUeAttachRejectIndToTstCntrl
 (
@@ -1199,16 +1208,16 @@ PUBLIC S16 sendUeAttachRejectIndToTstCntrl
 }
 
 /*
- *        Fun:  sendUeServiceRejectIndToTstCntrl 
+ *        Fun:  sendUeServiceRejectIndToTstCntrl
  *
  *        Desc:  Handles the Send Service reject indication to TC stub
  *
  *        Ret:   ROK
- * 
+ *
  *        Notes: None
- * 
- *        File: fw_uemsg_handler.c 
- * 
+ *
+ *        File: fw_uemsg_handler.c
+ *
 */
 PUBLIC S16 sendUeServiceRejectIndToTstCntrl
 (
@@ -1226,7 +1235,7 @@ PUBLIC S16 sendUeServiceRejectIndToTstCntrl
 
    tfwServiceRejInd->ue_Id = uetServiceRejInd->msg.ueUetServiceRej.ueId;
    tfwServiceRejInd->cause = uetServiceRejInd->msg.ueUetServiceRej.cause;
-   (fwCb->testConrollerCallBack)(UE_SERVICE_REJECT_IND, tfwServiceRejInd, 
+   (fwCb->testConrollerCallBack)(UE_SERVICE_REJECT_IND, tfwServiceRejInd,
          sizeof(ueServiceRejInd_t));
 
    FW_FREE_MEM(fwCb, tfwServiceRejInd, sizeof(ueServiceRejInd_t));
@@ -1234,20 +1243,20 @@ PUBLIC S16 sendUeServiceRejectIndToTstCntrl
 }
 
 /*
- *        Fun:  handleAttachRejInd 
+ *        Fun:  handleAttachRejInd
  *
  *        Desc:  Handles the Attach reject indication
  *
  *        Ret:   ROK
- * 
+ *
  *        Notes: None
- * 
- *        File: fw_uemsg_handler.c 
- * 
+ *
+ *        File: fw_uemsg_handler.c
+ *
 */
 PUBLIC S16 handleAttachRejInd
 (
- Pst *pst, 
+ Pst *pst,
  UetMessage *uetAttachRejInd
 )
 {
@@ -1266,16 +1275,16 @@ PUBLIC S16 handleAttachRejInd
 }
 
 /*
- *        Fun:  sendUeTauRejectIndToTstCntrl 
+ *        Fun:  sendUeTauRejectIndToTstCntrl
  *
  *        Desc:  Sending the TAU Reject indication to test controller stub
  *
  *        Ret:   ROK
- * 
+ *
  *        Notes: None
- * 
- *        File: fw_uemsg_handler.c 
- * 
+ *
+ *        File: fw_uemsg_handler.c
+ *
 */
 PUBLIC S16 sendUeTauRejectIndToTstCntrl
 (
@@ -1306,20 +1315,20 @@ PUBLIC S16 sendUeTauRejectIndToTstCntrl
 }
 
 /*
- *        Fun:  handleTauRejectInd 
+ *        Fun:  handleTauRejectInd
  *
  *        Desc:  Handles the TAU reject indications
  *
  *        Ret:   ROK
- * 
+ *
  *        Notes: None
- * 
- *        File: fw_uemsg_handler.c 
- * 
+ *
+ *        File: fw_uemsg_handler.c
+ *
 */
 PUBLIC S16 handleTauRejectInd
 (
- Pst *pst, 
+ Pst *pst,
  UetMessage *uetTauRejInd
 )
 {
@@ -1363,20 +1372,20 @@ PUBLIC S16 handleTauRejectInd
 }
 
 /*
- *        Fun:  handleServiceRejInd 
+ *        Fun:  handleServiceRejInd
  *
  *        Desc:  Handles the Service reject indications
  *
  *        Ret:   ROK
- * 
+ *
  *        Notes: None
- * 
- *        File: fw_uemsg_handler.c 
- * 
+ *
+ *        File: fw_uemsg_handler.c
+ *
 */
 PUBLIC S16 handleServiceRejInd
 (
- Pst *pst, 
+ Pst *pst,
  UetMessage *uetServiceRejInd
 )
 {
@@ -1395,20 +1404,20 @@ PUBLIC S16 handleServiceRejInd
 }
 
 /*
- *        Fun:  handleDetachAcceptInd 
+ *        Fun:  handleDetachAcceptInd
  *
  *        Desc:  Handles the Detach accept indication.
  *
  *        Ret:   ROK
- * 
+ *
  *        Notes: None
- * 
- *        File: fw_uemsg_handler.c 
- * 
+ *
+ *        File: fw_uemsg_handler.c
+ *
 */
 PUBLIC S16 handleDetachAcceptInd
 (
- Pst *pst, 
+ Pst *pst,
  UetMessage *uetDetachAcceptInd
 )
 {
@@ -1432,11 +1441,11 @@ PUBLIC S16 handleDetachAcceptInd
  *        Desc:  Sending the Paging indication to test controller stub
  *
  *        Ret:   ROK
- * 
+ *
  *        Notes: None
- * 
- *        File: fw_uemsg_handler.c 
- * 
+ *
+ *        File: fw_uemsg_handler.c
+ *
 */
 PUBLIC S16 sendUePagingIndToTstCntlr
 (
@@ -1465,20 +1474,20 @@ PUBLIC S16 sendUePagingIndToTstCntlr
 }
 
 /*
-*        Fun:  handlePagingInd 
+*        Fun:  handlePagingInd
 *
 *        Desc:  Handles the Paging indication.
 *
 *        Ret:   ROK
-* 
+*
 *        Notes: None
-* 
-*        File: fw_uemsg_handler.c 
-* 
+*
+*        File: fw_uemsg_handler.c
+*
 */
 PUBLIC S16 handlePagingInd
 (
- Pst *pst, 
+ Pst *pst,
  UetMessage *uetPagingInd
 )
 {
@@ -1494,9 +1503,9 @@ PUBLIC S16 handlePagingInd
    FW_LOG_EXITFN(fwCb, ret);
 }
 
-PRIVATE S16 handlePdnConRspInd 
+PRIVATE S16 handlePdnConRspInd
 (
- Pst *pst, 
+ Pst *pst,
  UetMessage *uetPdnConRspInd
 )
 {
@@ -1508,7 +1517,7 @@ PRIVATE S16 handlePdnConRspInd
 
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
-   
+
    CM_LLIST_FIRST_NODE(&fwCb->ueIdList, tmpNode);
    while (tmpNode != NULLP)
    {
@@ -1538,17 +1547,17 @@ PRIVATE S16 handlePdnConRspInd
    FW_LOG_EXITFN(fwCb, ret);
 }
 
-/* 
- *        Fun:  sendUePdnConnTimeOutIndToTstCntlr 
+/*
+ *        Fun:  sendUePdnConnTimeOutIndToTstCntlr
  *
  *        Desc:  Sends Pdn Connection Request Timeout indication to TC stub
  *
  *        Ret:   ROK
- * 
+ *
  *        Notes: None
- * 
- *        File: fw_uemsg_handler.c 
- * 
+ *
+ *        File: fw_uemsg_handler.c
+ *
 */
 PUBLIC S16 sendUePdnConnTimeOutIndToTstCntlr(FwCb *fwCb, UeIdCb *ueIdCb)
 {
@@ -1563,7 +1572,7 @@ PUBLIC S16 sendUePdnConnTimeOutIndToTstCntlr(FwCb *fwCb, UeIdCb *ueIdCb)
    cmMemset((U8*)tfwMsgTimeOutInd, 0, sizeof(uePdnConTimeOutInd_t));
 
    tfwMsgTimeOutInd->ue_Id = ueIdCb->ue_id;
-   
+
    FW_LOG_DEBUG(fwCb, "Invoking Test Controller Callback");
    (fwCb->testConrollerCallBack)(UE_PDN_CONN_REQ_TIMEOUT_IND, tfwMsgTimeOutInd,
                                   sizeof(uePdnConTimeOutInd_t));
@@ -1573,16 +1582,16 @@ PUBLIC S16 sendUePdnConnTimeOutIndToTstCntlr(FwCb *fwCb, UeIdCb *ueIdCb)
 }
 
 /*
- *        Fun:  sendUeNwInitDetachReqIndToTstCntlr 
+ *        Fun:  sendUeNwInitDetachReqIndToTstCntlr
  *
  *        Desc:  Handles the Send Nw Init Detach  indication to TC stub
  *
  *        Ret:   ROK
- * 
+ *
  *        Notes: None
- * 
- *        File: fw_uemsg_handler.c 
- * 
+ *
+ *        File: fw_uemsg_handler.c
+ *
 */
 PUBLIC S16 sendUeNwInitDetachReqIndToTstCntlr
 (
@@ -1601,7 +1610,7 @@ PUBLIC S16 sendUeNwInitDetachReqIndToTstCntlr
    tfwNwInitDetReq->ue_Id = uetNwInitDetachInd->msg.ueUetNwInitDetachReq.ueId;
    tfwNwInitDetReq->Type = uetNwInitDetachInd->msg.ueUetNwInitDetachReq.ueNwInitDetType;
    tfwNwInitDetReq->cause = uetNwInitDetachInd->msg.ueUetNwInitDetachReq.cause;
-   (fwCb->testConrollerCallBack)(UE_NW_INIT_DETACH_REQUEST, tfwNwInitDetReq, 
+   (fwCb->testConrollerCallBack)(UE_NW_INIT_DETACH_REQUEST, tfwNwInitDetReq,
          sizeof(ueNwInitdetachReq_t));
 
    FW_FREE_MEM(fwCb, tfwNwInitDetReq, sizeof(ueNwInitdetachReq_t));
@@ -1662,16 +1671,16 @@ PRIVATE S16 handleAndSendDeActvBerReqInd
    FW_LOG_EXITFN(fwCb, ret);
 }
 
-PRIVATE S16 handleAndSendActDedBerReqInd 
+PRIVATE S16 handleAndSendActDedBerReqInd
 (
- Pst *pst, 
+ Pst *pst,
  UetMessage *msgreq
 )
 {
    S16 ret = ROK;
    FwCb *fwCb = NULLP;
 
-   UeUetActDedBearCtxtReq *params  = NULLP; 
+   UeUetActDedBearCtxtReq *params  = NULLP;
    UeActDedBearCtxtReq_t *ueActDedBerReq = NULLP;
    U8 idx;
    FW_GET_CB(fwCb);
@@ -1679,95 +1688,95 @@ PRIVATE S16 handleAndSendActDedBerReqInd
 
 
   params = &msgreq->msg.ueActDedBerReq;
- 
+
    FW_ALLOC_MEM(fwCb, &ueActDedBerReq , sizeof(UeActDedBearCtxtReq_t));
 
   cmMemset((U8 *)ueActDedBerReq, 0, sizeof(UeActDedBearCtxtReq_t));
   ueActDedBerReq->ue_Id           = params->ueId;
-  ueActDedBerReq->bearerId        = params->bearerId; 
-  ueActDedBerReq->lnkBearerId     = params->lnkBearerId; 
- 
+  ueActDedBerReq->bearerId        = params->bearerId;
+  ueActDedBerReq->lnkBearerId     = params->lnkBearerId;
+
  if(params->epsQos.pres)
- { 
+ {
     ueActDedBerReq->epsQos.pres              =  params->epsQos.pres;
     ueActDedBerReq->epsQos.lenQosCont        =  params->epsQos.lenQosCont;
-    ueActDedBerReq->epsQos.qci               =  params->epsQos.qci;               
-    ueActDedBerReq->epsQos.maxBitRateUL      =  params->epsQos.maxBitRateUL;        
-    ueActDedBerReq-> epsQos.maxBitRateDL     =  params->epsQos.maxBitRateDL;        
-    ueActDedBerReq->epsQos.guaraBitRateUL    =  params->epsQos.guaraBitRateUL;      
-    ueActDedBerReq->epsQos.guaraBitRateDL    =  params->epsQos.guaraBitRateDL; 
-#if 0     
- ueActDedBerReq->epsQos.maxBitRateULExt   =  params->epsQos.maxBitRateULExt;     
- ueActDedBerReq->epsQos.maxBitRateDLExt   =  params->epsQos.maxBitRateDLExt;     
- ueActDedBerReq-> epsQos.guaraBitRateULExt =  params->epsQos.guaraBitRateULExt; 
+    ueActDedBerReq->epsQos.qci               =  params->epsQos.qci;
+    ueActDedBerReq->epsQos.maxBitRateUL      =  params->epsQos.maxBitRateUL;
+    ueActDedBerReq-> epsQos.maxBitRateDL     =  params->epsQos.maxBitRateDL;
+    ueActDedBerReq->epsQos.guaraBitRateUL    =  params->epsQos.guaraBitRateUL;
+    ueActDedBerReq->epsQos.guaraBitRateDL    =  params->epsQos.guaraBitRateDL;
+#if 0
+ ueActDedBerReq->epsQos.maxBitRateULExt   =  params->epsQos.maxBitRateULExt;
+ ueActDedBerReq->epsQos.maxBitRateDLExt   =  params->epsQos.maxBitRateDLExt;
+ ueActDedBerReq-> epsQos.guaraBitRateULExt =  params->epsQos.guaraBitRateULExt;
  ueActDedBerReq->epsQos.guaraBitRateDLExt =  params->epsQos.guaraBitRateDLExt;
-#endif 
+#endif
  }
 
  if(params->txnId.pres)
  {
-    ueActDedBerReq->txnId.pres          = params->txnId.pres; 
-    ueActDedBerReq->txnId.len           = params->txnId.len; 
+    ueActDedBerReq->txnId.pres          = params->txnId.pres;
+    ueActDedBerReq->txnId.len           = params->txnId.len;
     ueActDedBerReq->txnId.tiVal         = params->txnId.tiVal;
-    ueActDedBerReq->txnId.tiFlag        = params->txnId.tiFlag; 
+    ueActDedBerReq->txnId.tiFlag        = params->txnId.tiFlag;
     ueActDedBerReq->txnId.tie           = params->txnId.tie;
     ueActDedBerReq->txnId.tiExt         = params->txnId.tiExt;
  }
  if(params->qos.pres)
  {
     ueActDedBerReq->qos.pres            = params->qos.pres;
-    ueActDedBerReq->qos.lenQosCont      = params->qos.lenQosCont; 
-    ueActDedBerReq->qos.relClass        = params->qos.relClass;         
-    ueActDedBerReq->qos.delayClass      = params->qos.delayClass;       
-    ueActDedBerReq->qos.precClass       = params->qos.precClass;        
-    ueActDedBerReq->qos.peakTp          = params->qos.peakTp;           
-    ueActDedBerReq->qos.meanTp          = params->qos.meanTp;           
-    ueActDedBerReq->qos.deliveryErrSdu  = params->qos.deliveryErrSdu;   
-    ueActDedBerReq->qos.deliveryOrder   = params->qos.deliveryOrder;    
-    ueActDedBerReq->qos.trafficClass    = params->qos.trafficClass;     
-    ueActDedBerReq->qos.maxSdu          = params->qos.maxSdu;           
-    ueActDedBerReq->qos.maxBitRateUL    = params->qos.maxBitRateUL;     
-    ueActDedBerReq->qos.maxBitRateDL    = params->qos.maxBitRateDL;     
-    ueActDedBerReq->qos.sduErrRatio     = params->qos.sduErrRatio;      
-    ueActDedBerReq->qos.residualBer     = params->qos.residualBer;      
-    ueActDedBerReq->qos.trafHandPrio    = params->qos.trafHandPrio;     
-    ueActDedBerReq->qos.transferDelay   = params->qos.transferDelay;    
-    ueActDedBerReq->qos.guaraBitRateUL  = params->qos.guaraBitRateUL;   
-    ueActDedBerReq->qos.guaraBitRateDL  = params->qos.guaraBitRateDL;   
-    ueActDedBerReq->qos.srcStatDesc     = params->qos.srcStatDesc;      
+    ueActDedBerReq->qos.lenQosCont      = params->qos.lenQosCont;
+    ueActDedBerReq->qos.relClass        = params->qos.relClass;
+    ueActDedBerReq->qos.delayClass      = params->qos.delayClass;
+    ueActDedBerReq->qos.precClass       = params->qos.precClass;
+    ueActDedBerReq->qos.peakTp          = params->qos.peakTp;
+    ueActDedBerReq->qos.meanTp          = params->qos.meanTp;
+    ueActDedBerReq->qos.deliveryErrSdu  = params->qos.deliveryErrSdu;
+    ueActDedBerReq->qos.deliveryOrder   = params->qos.deliveryOrder;
+    ueActDedBerReq->qos.trafficClass    = params->qos.trafficClass;
+    ueActDedBerReq->qos.maxSdu          = params->qos.maxSdu;
+    ueActDedBerReq->qos.maxBitRateUL    = params->qos.maxBitRateUL;
+    ueActDedBerReq->qos.maxBitRateDL    = params->qos.maxBitRateDL;
+    ueActDedBerReq->qos.sduErrRatio     = params->qos.sduErrRatio;
+    ueActDedBerReq->qos.residualBer     = params->qos.residualBer;
+    ueActDedBerReq->qos.trafHandPrio    = params->qos.trafHandPrio;
+    ueActDedBerReq->qos.transferDelay   = params->qos.transferDelay;
+    ueActDedBerReq->qos.guaraBitRateUL  = params->qos.guaraBitRateUL;
+    ueActDedBerReq->qos.guaraBitRateDL  = params->qos.guaraBitRateDL;
+    ueActDedBerReq->qos.srcStatDesc     = params->qos.srcStatDesc;
     ueActDedBerReq->qos.signalInd       = params->qos.signalInd;
-#if 0        
- ueActDedBerReq->qos.maxBitRateDLExt = params->qos.maxBitRateDLExt;  
- ueActDedBerReq->qos.maxBitRateULExt   = params->qos.maxBitRateULExt;  
+#if 0
+ ueActDedBerReq->qos.maxBitRateDLExt = params->qos.maxBitRateDLExt;
+ ueActDedBerReq->qos.maxBitRateULExt   = params->qos.maxBitRateULExt;
  ueActDedBerReq->qos.guaraBitRateDLExt = params->qos.guaraBitRateDLExt;
  ueActDedBerReq->qos.guaraBitRateULExt = params->qos.guaraBitRateULExt;
 #endif
  }
  if(params->llc.pres)
  {
-    ueActDedBerReq->llc.pres  = params->llc.pres; 
+    ueActDedBerReq->llc.pres  = params->llc.pres;
     ueActDedBerReq->llc.ieVal = params->llc.ieVal;
  }
  if(params->radioPrio.pres)
  {
-    ueActDedBerReq->radioPrio.pres  = params->radioPrio.pres; 
+    ueActDedBerReq->radioPrio.pres  = params->radioPrio.pres;
     ueActDedBerReq->radioPrio.ieVal = params->radioPrio.ieVal;
  }
  if(params->pktFlowId.pres)
  {
-    ueActDedBerReq->pktFlowId.pres   = params->pktFlowId.pres; 
-    ueActDedBerReq->pktFlowId.len    = params->pktFlowId.len; 
+    ueActDedBerReq->pktFlowId.pres   = params->pktFlowId.pres;
+    ueActDedBerReq->pktFlowId.len    = params->pktFlowId.len;
     ueActDedBerReq->pktFlowId.ieVal  = params->pktFlowId.ieVal;
  }
 
- ueActDedBerReq->tft.pres         = params->tft.pres; 
- if(params->tft.pres )      
+ ueActDedBerReq->tft.pres         = params->tft.pres;
+ if(params->tft.pres )
  {
-    ueActDedBerReq->tft.len          = params->tft.len;        
-    ueActDedBerReq->tft.opCode       = params->tft.opCode;     
-    ueActDedBerReq->tft.noOfPfs      = params->tft.noOfPfs;    
-    ueActDedBerReq->tft.eBit         = params->tft.eBit;       
-    ueActDedBerReq->tft.noOfParams   = params->tft.noOfParams; 
+    ueActDedBerReq->tft.len          = params->tft.len;
+    ueActDedBerReq->tft.opCode       = params->tft.opCode;
+    ueActDedBerReq->tft.noOfPfs      = params->tft.noOfPfs;
+    ueActDedBerReq->tft.eBit         = params->tft.eBit;
+    ueActDedBerReq->tft.noOfParams   = params->tft.noOfParams;
 
     ueActDedBerReq->tft.noOfPfs = params->tft.noOfPfs;
     if(ueActDedBerReq->tft.noOfPfs > 0)
@@ -1775,14 +1784,14 @@ PRIVATE S16 handleAndSendActDedBerReqInd
          ,params->tft.noOfPfs *sizeof(ue_Esm_Tft_Pf));
     for( idx = 0 ; idx < ueActDedBerReq->tft.noOfPfs ; idx++)
     {
-       ueActDedBerReq->tft.pfList[idx].pres         = params->tft.pfList[idx].pres;  
-       ueActDedBerReq->tft.pfList[idx].id           = params->tft.pfList[idx].id;    
-       ueActDedBerReq->tft.pfList[idx].dir          = params->tft.pfList[idx].dir;   
-       ueActDedBerReq->tft.pfList[idx].preced       = params->tft.pfList[idx].preced;     
-       ueActDedBerReq->tft.pfList[idx].len          = params->tft.pfList[idx].len;    
+       ueActDedBerReq->tft.pfList[idx].pres         = params->tft.pfList[idx].pres;
+       ueActDedBerReq->tft.pfList[idx].id           = params->tft.pfList[idx].id;
+       ueActDedBerReq->tft.pfList[idx].dir          = params->tft.pfList[idx].dir;
+       ueActDedBerReq->tft.pfList[idx].preced       = params->tft.pfList[idx].preced;
+       ueActDedBerReq->tft.pfList[idx].len          = params->tft.pfList[idx].len;
        if(params->tft.pfList[idx].ipv4.pres)
        {
-          ueActDedBerReq->tft.pfList[idx].ipv4.pres    = params->tft.pfList[idx].ipv4.pres; 
+          ueActDedBerReq->tft.pfList[idx].ipv4.pres    = params->tft.pfList[idx].ipv4.pres;
             cmMemcpy((U8 *)&ueActDedBerReq->tft.pfList[idx].ipv4.ip4, \
                (U8 *)params->tft.pfList[idx].ipv4.ip4,CM_ESM_IPV4_SIZE);
        }
@@ -1793,33 +1802,33 @@ PRIVATE S16 handleAndSendActDedBerReqInd
                (U8 *)params->tft.pfList[idx].ipv6.ip6,CM_ESM_IPV6_SIZE);
        }
        if(params->tft.pfList[idx].protId.pres)
-       { 
-          ueActDedBerReq->tft.pfList[idx].protId.pres        = params->tft.pfList[idx].protId.pres;     
+       {
+          ueActDedBerReq->tft.pfList[idx].protId.pres        = params->tft.pfList[idx].protId.pres;
           ueActDedBerReq->tft.pfList[idx].protId.protType    = params->tft.pfList[idx].protId.protType;
-       } 
+       }
        if(params->tft.pfList[idx].localPort.pres)
        {
-          ueActDedBerReq->tft.pfList[idx].localPort.pres     = params->tft.pfList[idx].localPort.pres;  
+          ueActDedBerReq->tft.pfList[idx].localPort.pres     = params->tft.pfList[idx].localPort.pres;
           ueActDedBerReq->tft.pfList[idx].localPort.port     = params->tft.pfList[idx].localPort.port;
        }
        if(params->tft.pfList[idx].remotePort.pres)
-       {  
-          ueActDedBerReq->tft.pfList[idx].remotePort.pres    = params->tft.pfList[idx].remotePort.pres; 
-          ueActDedBerReq->tft.pfList[idx].remotePort.port    = params->tft.pfList[idx].remotePort.port; 
+       {
+          ueActDedBerReq->tft.pfList[idx].remotePort.pres    = params->tft.pfList[idx].remotePort.pres;
+          ueActDedBerReq->tft.pfList[idx].remotePort.port    = params->tft.pfList[idx].remotePort.port;
        }
        if(params->tft.pfList[idx].locPortRange.pres)
        {
           ueActDedBerReq->tft.pfList[idx].locPortRange.pres  =\
-              params->tft.pfList[idx].locPortRange.pres; 
+              params->tft.pfList[idx].locPortRange.pres;
           ueActDedBerReq->tft.pfList[idx].locPortRange.rangeLow =\
           params->tft.pfList[idx].locPortRange.rangeLow;
           ueActDedBerReq->tft.pfList[idx].locPortRange.rangeHigh   = \
-             params->tft.pfList[idx].locPortRange.rangeHigh; 
+             params->tft.pfList[idx].locPortRange.rangeHigh;
        }
        if(params->tft.pfList[idx].remPortRange.pres)
        {
           ueActDedBerReq->tft.pfList[idx].remPortRange.pres        = \
-             params->tft.pfList[idx].remPortRange.pres; 
+             params->tft.pfList[idx].remPortRange.pres;
           ueActDedBerReq->tft.pfList[idx].remPortRange.rangeLow    = \
              params->tft.pfList[idx].remPortRange.rangeLow;
           ueActDedBerReq->tft.pfList[idx].remPortRange.rangeHigh   = \
@@ -1834,12 +1843,12 @@ PRIVATE S16 handleAndSendActDedBerReqInd
        }
        if(ueActDedBerReq->tft.pfList[idx].tos.pres)
        {
-          ueActDedBerReq->tft.pfList[idx].tos.pres         = params->tft.pfList[idx].tos.pres;  
-          ueActDedBerReq->tft.pfList[idx].tos.tos          = params->tft.pfList[idx].tos.tos;   
+          ueActDedBerReq->tft.pfList[idx].tos.pres         = params->tft.pfList[idx].tos.pres;
+          ueActDedBerReq->tft.pfList[idx].tos.tos          = params->tft.pfList[idx].tos.tos;
           ueActDedBerReq->tft.pfList[idx].tos.mask         = params->tft.pfList[idx].tos.mask;
        }
        if(params->tft.pfList[idx].flowLabel.pres)
-       { 
+       {
           ueActDedBerReq->tft.pfList[idx].flowLabel.pres   = params->tft.pfList[idx].flowLabel.pres;
             cmMemcpy((U8 *)&ueActDedBerReq->tft.pfList[idx].flowLabel.buf, \
                (U8 *)params->tft.pfList[idx].flowLabel.buf,CM_ESM_IPV6_FLOW_LABEL_SIZE);
@@ -1849,13 +1858,13 @@ PRIVATE S16 handleAndSendActDedBerReqInd
       FW_ALLOC_MEM(fwCb, &ueActDedBerReq->tft.params , params->tft.noOfParams *sizeof(ue_Esm_Tft_Param));
       for( idx = 0 ; idx < params->tft.noOfParams ; idx++)
       {
-       ueActDedBerReq->tft.params[idx].len          = params->tft.params[idx].len;       
-       ueActDedBerReq->tft.params[idx].paramType    = params->tft.params[idx].paramType; 
+       ueActDedBerReq->tft.params[idx].len          = params->tft.params[idx].len;
+       ueActDedBerReq->tft.params[idx].paramType    = params->tft.params[idx].paramType;
        cmMemcpy((U8 *)&ueActDedBerReq->tft.params[idx].buf, \
             (U8 *)params->tft.params[idx].buf,CM_ESM_TFT_MAX_PARAM_BUF);
       }
    }
-   (fwCb->testConrollerCallBack)(UE_ACT_DED_BER_REQ,ueActDedBerReq, 
+   (fwCb->testConrollerCallBack)(UE_ACT_DED_BER_REQ,ueActDedBerReq,
          sizeof(UeActDedBearCtxtReq_t));
 
    FW_FREE_MEM(fwCb,ueActDedBerReq->tft.pfList, sizeof(ue_Esm_Tft_Pf));
@@ -1864,9 +1873,9 @@ PRIVATE S16 handleAndSendActDedBerReqInd
    FW_LOG_EXITFN(fwCb, ret);
 }
 
-PRIVATE S16 handleNwInitDetachReqInd 
+PRIVATE S16 handleNwInitDetachReqInd
 (
- Pst *pst, 
+ Pst *pst,
  UetMessage *uetNwinitDetachInd
 )
 {
@@ -1885,7 +1894,7 @@ PRIVATE S16 handleNwInitDetachReqInd
 
 PRIVATE S16 handleEmmInformation
 (
- Pst *pst, 
+ Pst *pst,
  UetMessage *ueEmmInformation
 )
 {
@@ -1909,11 +1918,11 @@ PRIVATE S16 handleEmmInformation
  *        Desc:  Handles the Send Nw Init Detach  indication to TC stub
  *
  *        Ret:   ROK
- * 
+ *
  *        Notes: None
- * 
+ *
  *        File: fw_uemsg_handler.c
- * 
+ *
 */
 PUBLIC S16 sendUeEmmInformationToTstCntlr
 (
@@ -1930,7 +1939,7 @@ PUBLIC S16 sendUeEmmInformationToTstCntlr
    FW_ALLOC_MEM(fwCb, &tfwEmmInformation , sizeof(ueEmmInformation_t));
 
    tfwEmmInformation->ue_Id = ueEmmInformation->msg.ueEmmInformation.ueId;
-   (fwCb->testConrollerCallBack)(UE_EMM_INFORMATION, tfwEmmInformation, 
+   (fwCb->testConrollerCallBack)(UE_EMM_INFORMATION, tfwEmmInformation,
          sizeof(ueEmmInformation_t));
 
    FW_FREE_MEM(fwCb, tfwEmmInformation, sizeof(ueEmmInformation_t));
@@ -1943,15 +1952,15 @@ PUBLIC S16 sendUeEmmInformationToTstCntlr
  *        Desc:  Handles the Send Auth-Rej indication to TC stub
  *
  *        Ret:   ROK
- * 
+ *
  *        Notes: None
- * 
+ *
  *        File: fw_uemsg_handler.c
- * 
+ *
 */
 PRIVATE S16 handleAuthRejectInd
 (
- Pst             *pst, 
+ Pst             *pst,
  UetMessage *ueUetAuthRejInd
 )
 {
@@ -1986,7 +1995,7 @@ PRIVATE S16 handleAuthRejectInd
       fwStopTmr(fwCb, ueIdCb);
       delete_ue_entries(ueIdCb->ue_id);
       FW_FREE_MEM(fwCb, ueIdCb, sizeof(UeIdCb));
-   } 
+   }
    FW_ALLOC_MEM(fwCb, &authRejInd , sizeof(ueAuthRejInd_t));
    authRejInd->ue_Id = ueUetAuthRejInd->msg.ueUetAuthRejInd.ueId;
 
@@ -2001,7 +2010,7 @@ PRIVATE S16 handleAuthRejectInd
 
 PRIVATE S16 handleEsmInformationReq
 (
- Pst *pst, 
+ Pst *pst,
  UetMessage *ueEsmInformationReq
 )
 {
@@ -2045,7 +2054,8 @@ PUBLIC S16 sendUeEsmInformationReqToTstCntlr
    FW_ALLOC_MEM(fwCb, &tfwEsmInformationReq , sizeof(ueEsmInformationReq_t));
 
    tfwEsmInformationReq->ue_Id = ueEsmInfoReq->msg.ueEsmInformationReq.ueId;
-   (fwCb->testConrollerCallBack)(UE_ESM_INFORMATION_REQ, tfwEsmInformationReq, 
+   tfwEsmInformationReq->tId = ueEsmInfoReq->msg.ueEsmInformationReq.tId;
+   (fwCb->testConrollerCallBack)(UE_ESM_INFORMATION_REQ, tfwEsmInformationReq,
          sizeof(ueEsmInformationReq_t));
 
    FW_FREE_MEM(fwCb, tfwEsmInformationReq, sizeof(ueEsmInformationReq_t));
@@ -2148,4 +2158,62 @@ PRIVATE S16 sendUePdnDisConRejIndToTstCntlr(UetResponse *uetMsg)
 
    FW_FREE_MEM(fwCb, tfwPdnDisConFail, sizeof(uePdnDisconnFail_t));
    FW_LOG_EXITFN(fwCb, ret);
+}
+
+PRIVATE Void handle_erab_setup_req_failed_for_bearers(
+    Pst *pst, UetMessage *erab_setup_req_failed_for_bearers) {
+  FwCb *fwCb = NULLP;
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+  if (erab_setup_req_failed_for_bearers->msgType ==
+      UE_ERAB_SETUP_REQ_FAILED_FOR_ERABS) {
+    sendUeErabSetupReqFailedForBearers(erab_setup_req_failed_for_bearers);
+  }
+  FW_LOG_EXITFNVOID(fwCb);
+}
+
+/*
+ *        Fun:  sendUeErabSetupReqFailedForBearers
+ *
+ *        Desc:  Send an indication that Erab setup request failed for some
+ * bearers
+ *
+ *        Ret:   ROK
+ *
+ *        Notes: None
+ *
+ *        File: fw_uemsg_handler.c
+ *
+ */
+PRIVATE Void sendUeErabSetupReqFailedForBearers(
+    UetMessage *erab_setup_req_failed_for_bearers) {
+  FwCb *fwCb = NULLP;
+  FwErabSetupFailedTosetup *erabSetupFailedTosetup = NULLP;
+  UeUetErabSetupFailedTosetup uetErabSetupFailedTosetup = {0};
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  FW_ALLOC_MEM(fwCb, &erabSetupFailedTosetup, sizeof(FwErabSetupFailedTosetup));
+
+  uetErabSetupFailedTosetup =
+      erab_setup_req_failed_for_bearers->msg.ueErabsFailedToSetup;
+  erabSetupFailedTosetup->ueId = uetErabSetupFailedTosetup.ueId;
+  erabSetupFailedTosetup->noOfFailedErabs =
+      uetErabSetupFailedTosetup.noOfFailedErabs;
+  for (int indx = 0; indx < erabSetupFailedTosetup->noOfFailedErabs; indx++) {
+    erabSetupFailedTosetup->failedErablist[indx].qci =
+        uetErabSetupFailedTosetup.failedErablist[indx].qci;
+    erabSetupFailedTosetup->failedErablist[indx].erabId =
+        uetErabSetupFailedTosetup.failedErablist[indx].erabId;
+    erabSetupFailedTosetup->failedErablist[indx].cause =
+        uetErabSetupFailedTosetup.failedErablist[indx].cause;
+  }
+  (fwCb->testConrollerCallBack)(UE_FW_ERAB_SETUP_REQ_FAILED_FOR_ERABS,
+                                erabSetupFailedTosetup,
+                                sizeof(FwErabSetupFailedTosetup));
+
+  FW_FREE_MEM(fwCb, erabSetupFailedTosetup, sizeof(FwErabSetupFailedTosetup));
+  FW_LOG_EXITFNVOID(fwCb);
 }

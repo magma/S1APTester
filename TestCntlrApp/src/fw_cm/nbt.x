@@ -9,7 +9,7 @@
 
 /********************************************************************20**
 
-     Name:     
+     Name:
 
      Type:     C source file
 
@@ -17,8 +17,8 @@
 
      File:     nbt.x
 
-     Sid:      
-     Prg:      
+     Sid:
+     Prg:
 
 
 *******************************************************************21 */
@@ -159,14 +159,14 @@ typedef struct  _nbS1SetupRsp
 
 typedef struct _nbConfigReq
 {
-   U16   cellId;                  /* cell id */            
+   U16   cellId;                  /* cell id */
    U16   tac;                     /* tracking area code*/
-   U32   enbIpAddr;               /* enodeb address */ 
+   U32   enbIpAddr;               /* enodeb address */
    U16   mmeId;                   /* mme id */
    U32   mmeAddr;                 /* mme code */
-   U32   sctpIpAddr;              /* sctp address */ 
+   U32   sctpIpAddr;              /* sctp address */
    U8    enbName[151];            /* enodeb name */
-   U8    plmnId[NBT_MAX_PLMN_ID]; /*  plmn  */ 
+   U8    plmnId[NBT_MAX_PLMN_ID]; /*  plmn  */
    U32   heartBeatInterval;       /* sctp heartbeat timer value */
    U32   rtoInitial;              /* sctp rto initial */
    U32   rtoMin;                  /* sctp rto min */
@@ -189,7 +189,7 @@ typedef struct _nbConfigReq
 typedef struct _nbConfigCfm
 {
  CfgSts       status;
- CfgFailCause cause; 
+ CfgFailCause cause;
 }NbConfigCfm;
 
 typedef struct _nbRelCause
@@ -323,7 +323,7 @@ typedef struct _nbIntCtxtSetUpInd
    U8 ueId;
    U8 status;
 }NbIntCtxtSetUpInd;
-typedef struct _nbIntCtxtSetUpDrpdInd 
+typedef struct _nbIntCtxtSetUpDrpdInd
 {
    U8 ueId;
 }NbIntCtxtSetUpDrpdInd;
@@ -379,14 +379,16 @@ typedef struct _nbmultiEnbCfgParam
    U32 tac;
    U8 plmn_id[NBT_MAX_PLMN_ID];
    U32 enbType;
+   U8 plmn_length;
 }NbmultiEnbCfgParam;
+
 typedef struct _nbMultiEnbConfigReq
 {
    U32 numOfEnbs;
    NbmultiEnbCfgParam nbMultiEnbCfgParam[NBT_MAX_NUM_OF_ENBS];
 }NbMultiEnbConfigReq;
 
-typedef struct _nbX2HOTriggerReq 
+typedef struct _nbX2HOTriggerReq
 {
    U8 ueId;
 }NbX2HOTriggerReq;
@@ -427,7 +429,7 @@ typedef struct _nbtMsg
    {
       NbConfigReq     configReq;
       NbConfigCfm     configCfm;
-      NbS1SetupRsp    s1SetupRsp; 
+      NbS1SetupRsp    s1SetupRsp;
       NbUeCntxtRelReq ueCntxtRelReq;
       NbResetRequest  resetReq;
       NbResetAckldg   resetAck;
@@ -439,13 +441,13 @@ typedef struct _nbtMsg
       NbIntCtxtSetUpDrpdInd intCtxtSetUpDrpdInd;
       NbErrIndMsg     s1ErrIndMsg;
       NbSctpAbortReqMsg  sctpAbortReqMsg;
-      NbInitCtxtSetupFail initCtxtSetupFail; 
-      NbDropInitCtxtSetup dropInitCtxtSetup; 
+      NbInitCtxtSetupFail initCtxtSetupFail;
+      NbDropInitCtxtSetup dropInitCtxtSetup;
       NbDelayICSRsp      delayInitCtxtSetupRsp;
-      NbSendUeCtxtRelForICSRsp sendUeCtxtRelForICS; 
+      NbSendUeCtxtRelForICSRsp sendUeCtxtRelForICS;
       NbNasNonDel    nasNondel;
       NbNasNonDelRsp  nasNondelRsp;
-      NbDelayUeCtxtRelCmp delayUeCtxtRelCmp; 
+      NbDelayUeCtxtRelCmp delayUeCtxtRelCmp;
       NbMultiEnbConfigReq multiEnbConfigReq;
       NbX2HOTriggerReq    x2HOTriggerReq;
       NbPathSwReqAck      pathSwReqAck;
@@ -456,7 +458,7 @@ typedef struct _nbtMsg
 }NbtMsg;
 
 /* nbt Interface general Structure declerations */
-typedef NbtMsg   NbtRequest;      
+typedef NbtMsg   NbtRequest;
 
 typedef NbtMsg   NbtResponse;
 
@@ -482,6 +484,6 @@ EXTERN S16 nbUiSendIntCtxtSetupIndToUser(U8 ueId, U8 status);
 EXTERN S16 nbUiSendErabRelCmdInfoToUser(NbErabRelCmd *erabRelInfo);
 /********************************************************************30**
 
-         End of file:     
+         End of file:
 
 *********************************************************************31*/

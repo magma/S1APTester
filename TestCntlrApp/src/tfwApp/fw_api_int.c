@@ -9,17 +9,17 @@
 /********************************************************************20**
 
     Name:  LTE S1SIM - TFW API
- 
+
     Type:  C include file
- 
+
     Desc:  C source code for Test Framework interface API with Stub.
- 
+
     File:  fw_api_int.c
- 
-    Sid:   
- 
-    Prg:   
- 
+
+    Sid:
+
+    Prg:
+
 **********************************************************************/
 
 #include "envopt.h"        /* environment options */
@@ -105,7 +105,7 @@ PRIVATE Void handlPdnDisconnectReq(uepdnDisconnectReq_t *data);
 EXTERN Void fwHndlPdnDisconnTmrExp(PTR cb);
 PUBLIC FwCb gfwCb;
 
-/* Adding UEID, epsupdate type, active flag into linked list for 
+/* Adding UEID, epsupdate type, active flag into linked list for
  * TAU request
  */
 PRIVATE Void insertUeCb(U8 ueid, U8 epsUpdType, U8 flag, UeIdCb *ueIdCb)
@@ -113,7 +113,7 @@ PRIVATE Void insertUeCb(U8 ueid, U8 epsUpdType, U8 flag, UeIdCb *ueIdCb)
    FwCb *fwCb = NULLP;
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
-   
+
    ueIdCb->ue_id = ueid;
    ueIdCb->epsUpdType = epsUpdType;
    ueIdCb->ActvFlag = flag;
@@ -124,18 +124,18 @@ PRIVATE Void insertUeCb(U8 ueid, U8 epsUpdType, U8 flag, UeIdCb *ueIdCb)
 }
 
 /*
- * 
+ *
  *   Fun:   handlTauReq
- * 
- *   Desc:  This function is used to handle Tracking area update request 
+ *
+ *   Desc:  This function is used to handle Tracking area update request
  *          from Test Controller.
- * 
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PUBLIC S16 handlTauReq(ueTauReq_t* data)
 {
@@ -159,7 +159,7 @@ PUBLIC S16 handlTauReq(ueTauReq_t* data)
    ueTauReq->epsUpdtType = data->type;
    ueTauReq->ActvFlag = data->Actv_flag;
    fwSendToUeApp(uetMsg);
-   
+
    FW_LOG_DEBUG(fwCb, "\n-------------------------------\n\
             Starting T3430\n-------------------------------\n");
    ret = fwStartTmr(fwCb, ueIdCb, fwHndlTauTmrExp, 2000000);
@@ -168,20 +168,20 @@ PUBLIC S16 handlTauReq(ueTauReq_t* data)
       FW_LOG_ERROR(fwCb, "Failed to start T3430 timer");
    }
    FW_LOG_EXITFN(fwCb, ROK);
-} 
+}
 
 /*
  *   Fun:   handlTauComp
- * 
- *   Desc:  This function is used to handle Tracking area update complete 
+ *
+ *   Desc:  This function is used to handle Tracking area update complete
  *          from Test Controller.
- * 
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PUBLIC S16 handlTauComp(ueTauComplete_t* data)
 {
@@ -202,18 +202,18 @@ PUBLIC S16 handlTauComp(ueTauComplete_t* data)
 }
 
 /*
- * 
+ *
  *   Fun:   handlServiceReq
- * 
- *   Desc:  This function is used to handle Service request 
- *          from Test Controller 
- * 
+ *
+ *   Desc:  This function is used to handle Service request
+ *          from Test Controller
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PUBLIC Void handlServiceReq(ueserviceReq_t* data)
 {
@@ -224,15 +224,15 @@ PUBLIC Void handlServiceReq(ueserviceReq_t* data)
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
 
-   if(SGetSBuf(fwCb->init.region, fwCb->init.pool, 
-       (Data **)&uetMsg, (Size) sizeof(UetMessage)) == ROK) 
-   {                                                  
-      cmMemset((U8 *)(uetMsg), 0, sizeof(UetMessage));              
+   if(SGetSBuf(fwCb->init.region, fwCb->init.pool,
+       (Data **)&uetMsg, (Size) sizeof(UetMessage)) == ROK)
+   {
+      cmMemset((U8 *)(uetMsg), 0, sizeof(UetMessage));
    }
    else
    {
       RETVOID;
-   }   
+   }
    uetMsg->msgType = UE_SERVICE_REQUEST_TYPE;
    ueServiceReq = &uetMsg->msg.ueUetServiceReq;
 
@@ -246,18 +246,18 @@ PUBLIC Void handlServiceReq(ueserviceReq_t* data)
 }
 
 /*
- * 
+ *
  *   Fun:   handlUeCntxtRelReq
- * 
- *   Desc:  This function is used to handle Service request 
- *          from Test Controller 
- * 
+ *
+ *   Desc:  This function is used to handle Service request
+ *          from Test Controller
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PUBLIC Void handlUeCntxtRelReq(ueCntxtRelReq_t* data)
 {
@@ -266,11 +266,11 @@ PUBLIC Void handlUeCntxtRelReq(ueCntxtRelReq_t* data)
 
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
-   
-   if(SGetSBuf(fwCb->init.region, fwCb->init.pool, 
-       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK) 
-   {                                                  
-      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));              
+
+   if(SGetSBuf(fwCb->init.region, fwCb->init.pool,
+       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK)
+   {
+      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
    }
    else
    {
@@ -288,18 +288,18 @@ PUBLIC Void handlUeCntxtRelReq(ueCntxtRelReq_t* data)
 }
 
 /*
- * 
+ *
  *   Fun:   handlDetachReq
- * 
- *   Desc:  This function is used to handle Detach request 
- *          from Test Controller 
- * 
+ *
+ *   Desc:  This function is used to handle Detach request
+ *          from Test Controller
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PUBLIC S16 handlDetachReq(uedetachReq_t* data)
 {
@@ -321,18 +321,18 @@ PUBLIC S16 handlDetachReq(uedetachReq_t* data)
 }
 
 /*
- * 
+ *
  *   Fun:   handlAttachComp
- * 
- *   Desc:  This function is used to handle Attach complete message 
- *          from Test Controller 
- * 
+ *
+ *   Desc:  This function is used to handle Attach complete message
+ *          from Test Controller
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PUBLIC S16 handlAttachComp(ueAttachComplete_t *data)
 {
@@ -352,18 +352,18 @@ PUBLIC S16 handlAttachComp(ueAttachComplete_t *data)
    FW_LOG_EXITFN(fwCb, ROK);
 }
 /*
- * 
+ *
  *   Fun:   handleActvDfltEpsBearerContextRej
- * 
- *   Desc:  This function is used to handle Attach complete + Activate Default Eps Bearer context reject message 
- *          from Test Controller 
- * 
+ *
+ *   Desc:  This function is used to handle Attach complete + Activate Default Eps Bearer context reject message
+ *          from Test Controller
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PUBLIC S16 handleActvDfltEpsBearerContextRej(ueActvDfltEpsBearerCtxtRej_t *data)
 {
@@ -385,18 +385,18 @@ PUBLIC S16 handleActvDfltEpsBearerContextRej(ueActvDfltEpsBearerCtxtRej_t *data)
    FW_LOG_EXITFN(fwCb, ROK);
 }
 /*
- * 
+ *
  *   Fun:   handlIdentResp
- * 
+ *
  *   Desc:  This function is used to handle Identity Response coming from
  *          Test Controller.
- * 
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PUBLIC S16 handlIdentResp(ueIdentityResp_t *data)
 {
@@ -418,18 +418,18 @@ PUBLIC S16 handlIdentResp(ueIdentityResp_t *data)
 }
 
 /*
- * 
+ *
  *   Fun:   handlSecModComp
- * 
- *   Desc:  This function is used to handle Security mode complete 
- *          from Test Controller 
- * 
+ *
+ *   Desc:  This function is used to handle Security mode complete
+ *          from Test Controller
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PUBLIC S16 handlSecModComp(ueSecModeComplete_t *data)
 {
@@ -450,18 +450,18 @@ PUBLIC S16 handlSecModComp(ueSecModeComplete_t *data)
 }
 
 /*
- * 
+ *
  *   Fun:   handlSecModRej
- * 
- *   Desc:  This function is used to handle Security mode Reject 
- *          from Test Controller 
- * 
+ *
+ *   Desc:  This function is used to handle Security mode Reject
+ *          from Test Controller
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PUBLIC S16 handlSecModRej(ueSecModeReject_t *data)
 {
@@ -483,18 +483,18 @@ PUBLIC S16 handlSecModRej(ueSecModeReject_t *data)
 }
 
 /*
- * 
+ *
  *   Fun:   handlAuthResp
- * 
+ *
  *   Desc:  This function is used to handle Auth Response
- *          from Test Controller 
- * 
+ *          from Test Controller
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PUBLIC S16 handlAuthResp(ueAuthResp_t *data)
 {
@@ -536,25 +536,25 @@ PUBLIC S16 handlAuthResp(ueAuthResp_t *data)
    {
       uetMsg->msg.ueUetAuthRsp.randRcvd.pres = FALSE;
    }
-   
+
 
    fwSendToUeApp(uetMsg);
    RETVALUE(ROK);
 }
 
 /*
- * 
+ *
  *   Fun:   handlRadCapUpd
- * 
+ *
  *   Desc:  This function is used to handle UE Radio Capability Update
- *          from Test Controller 
- * 
+ *          from Test Controller
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PUBLIC S16 handlRadCapUpd(ueRadCapUpd_t *data)
 {
@@ -585,7 +585,7 @@ PRIVATE Void insert_ue_entry(U8 ueid, UeIdCb *ueIdCb)
    FwCb *fwCb = NULLP;
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
-   
+
    ueIdCb->ue_id = ueid;
    ueIdCb->state = UE_ATTACH_REQUEST_DONE;
    ueIdCb->link.node = (PTR)ueIdCb;
@@ -598,8 +598,8 @@ PRIVATE Void insert_ue_entry(U8 ueid, UeIdCb *ueIdCb)
  *
  *   Fun:   handleEndToEndAttachReq
  *
- *   Desc:  This function is used to handle Attach request 
- *          from Test Controller 
+ *   Desc:  This function is used to handle Attach request
+ *          from Test Controller
  *
  *   Ret:   None
  *
@@ -699,16 +699,16 @@ PUBLIC S16 handleEndToEndAttachReq(ueAttachRequest_t *data)
 	  {
 	  	ueAttachReq->protCfgOpt.p[count].pid = data->protCfgOpts_pr.p[count].pid;
 	  	ueAttachReq->protCfgOpt.p[count].len = data->protCfgOpts_pr.p[count].len;
-		cmMemcpy(ueAttachReq->protCfgOpt.p[count].val, 
-			   data->protCfgOpts_pr.p[count].val, 
+		cmMemcpy(ueAttachReq->protCfgOpt.p[count].val,
+			   data->protCfgOpts_pr.p[count].val,
 			   data->protCfgOpts_pr.p[count].len);
 	  }
 	  for (count=0;count<data->protCfgOpts_pr.numContId;count ++)
 	  {
 	  	ueAttachReq->protCfgOpt.c[count].cid = data->protCfgOpts_pr.c[count].cid;
 	  	ueAttachReq->protCfgOpt.c[count].len = data->protCfgOpts_pr.c[count].len;
-		cmMemcpy(ueAttachReq->protCfgOpt.c[count].val, 
-			   data->protCfgOpts_pr.c[count].val, 
+		cmMemcpy(ueAttachReq->protCfgOpt.c[count].val,
+			   data->protCfgOpts_pr.c[count].val,
 			   data->protCfgOpts_pr.c[count].len);
 	  }
    }
@@ -741,8 +741,8 @@ PUBLIC S16 handleEndToEndAttachReq(ueAttachRequest_t *data)
  *
  *   Fun:   handleAttachReq
  *
- *   Desc:  This function is used to handle Attach request 
- *          from Test Controller 
+ *   Desc:  This function is used to handle Attach request
+ *          from Test Controller
  *
  *   Ret:   None
  *
@@ -836,18 +836,18 @@ PUBLIC S16 handleAttachReq(ueAttachRequest_t *data)
 	  for (count=0;count<data->protCfgOpts_pr.numProtId;count ++)
 	  {
 	  	ueAttachReq->protCfgOpt.p[count].len = data->protCfgOpts_pr.p[count].len;
-		cmMemcpy(ueAttachReq->protCfgOpt.p[count].val, 
-			   data->protCfgOpts_pr.p[count].val, 
+		cmMemcpy(ueAttachReq->protCfgOpt.p[count].val,
+			   data->protCfgOpts_pr.p[count].val,
 			   data->protCfgOpts_pr.p[count].len);
 	  }
 	  for (count=0;count<data->protCfgOpts_pr.numContId;count ++)
 	  {
 	  	ueAttachReq->protCfgOpt.c[count].len = data->protCfgOpts_pr.c[count].len;
-		cmMemcpy(ueAttachReq->protCfgOpt.c[count].val, 
-			   data->protCfgOpts_pr.c[count].val, 
+		cmMemcpy(ueAttachReq->protCfgOpt.c[count].val,
+			   data->protCfgOpts_pr.c[count].val,
 			   data->protCfgOpts_pr.c[count].len);
 	  }
-   }  
+   }
    if(data->drxParm_pr.pres)
    	{
    	  ueAttachReq->drxParm.pres = TRUE;
@@ -863,14 +863,14 @@ PUBLIC S16 handleAttachReq(ueAttachRequest_t *data)
    }
    fwSendToUeApp(uetMsg);
    FW_LOG_EXITFN(fwCb, ROK);
-}   
+}
 
 /*
  *
  *   Fun:   handleUeAppConfig
  *
- *   Desc:  This function is used to handle Ue App Config request 
- *          from Test Controller 
+ *   Desc:  This function is used to handle Ue App Config request
+ *          from Test Controller
  *
  *   Ret:   None
  *
@@ -918,8 +918,8 @@ PUBLIC S16 handleUeAppConfig(ueAppConfig_t *data)
  *
  *   Fun:   handleUeConfig
  *
- *   Desc:  This function is used to handle Ue config request 
- *          from Test Controller 
+ *   Desc:  This function is used to handle Ue config request
+ *          from Test Controller
  *
  *   Ret:   None
  *
@@ -937,7 +937,7 @@ PUBLIC S16 handleUeConfig(ueConfig_t *data)
 
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
-   
+
    FW_ALLOC_MEM(fwCb, &uetMsg, sizeof(UetMessage));
    cmMemset((U8 *)uetMsg, 0, sizeof(UetMessage));
 
@@ -1008,14 +1008,14 @@ PUBLIC S16 handleUeConfig(ueConfig_t *data)
    }
    else
    {
-      ueCfg->ueNwCap.eea0 = fwCb->ueCfgCb.ueNwCap.eea0; 
+      ueCfg->ueNwCap.eea0 = fwCb->ueCfgCb.ueNwCap.eea0;
       ueCfg->ueNwCap.eea1_128 = fwCb->ueCfgCb.ueNwCap.eea1_128;
       ueCfg->ueNwCap.eea2_128 = fwCb->ueCfgCb.ueNwCap.eea2_128;
       ueCfg->ueNwCap.eia0 = fwCb->ueCfgCb.ueNwCap.eia0;
       ueCfg->ueNwCap.eia1_128 = fwCb->ueCfgCb.ueNwCap.eia1_128;
       ueCfg->ueNwCap.eia2_128 = fwCb->ueCfgCb.ueNwCap.eia2_128;
    }
-      
+
 
    if (data->opKey_pr.pres == TRUE)
       cmMemcpy((U8*)ueCfg->opKey, (U8*)data->opKey_pr.op_key,
@@ -1054,8 +1054,8 @@ PUBLIC S16 handleUeConfig(ueConfig_t *data)
  *
  *   Fun:   handleUeRadCapConfig
  *
- *   Desc:  This function is used to handle Ue config request 
- *          from Test Controller 
+ *   Desc:  This function is used to handle Ue config request
+ *          from Test Controller
  *
  *   Ret:   None
  *
@@ -1073,13 +1073,13 @@ PUBLIC S16 handleUeRadCapConfig(ueRadCapUpd_t *data)
 
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
-   
+
    FW_ALLOC_MEM(fwCb, &uetMsg, sizeof(UetMessage));
    cmMemset((U8 *)uetMsg, 0, sizeof(UetMessage));
    /* copying mandatory feilds */
    uetMsg->msgType = UE_RAD_CAP_UPD_TYPE;
    ueCfg = &uetMsg->msg.ueUetRadCapUpdReq;
-  
+
    ueCfg->ueId = data->ue_Id;
    ueCfg->send_s1ap_msg = data->snd_S1AP;
    if(data->radioCap_pr.len > 0)
@@ -1105,9 +1105,9 @@ PUBLIC S16 handleUeRadCapConfig(ueRadCapUpd_t *data)
 } /* handleUeRadCapConfig */
 
 /*
- *       Fun:  handlUeTrigDetachAccept 
+ *       Fun:  handlUeTrigDetachAccept
  *
- *       Desc:  This function is used to handle Detach Accept 
+ *       Desc:  This function is used to handle Detach Accept
  *              from Test Controller and sends to ueApp
  *
  *       Ret:   None
@@ -1127,20 +1127,20 @@ PRIVATE S16 handlUeTrigDetachAccept(ueTrigDetachAcceptInd_t *data)
 
    FW_ALLOC_MEM(fwCb, &uetMsg, sizeof(UetMessage));
    cmMemset((U8 *)uetMsg, 0, sizeof(UetMessage));
-   
+
    uetMsg->msgType = UE_TRIG_DETACH_ACCEPT_TYPE;
    uetMsg->msg.ueUetUeTrigDetachAcc.ueId = data->ue_Id;
-    
+
    fwSendToUeApp(uetMsg);
 
    FW_LOG_EXITFN(fwCb, ROK);
 }
 
 /*
- * 
- *       Fun:  handlUeFlushCmnd 
  *
- *       Desc:  This function is used to handle Flush Command 
+ *       Fun:  handlUeFlushCmnd
+ *
+ *       Desc:  This function is used to handle Flush Command
  *              from Test Controller and sends to ueApp
  *
  *       Ret:   None
@@ -1160,10 +1160,10 @@ PRIVATE S16 handlUeFlushCmnd(ueFlush_t *data)
 
    FW_ALLOC_MEM(fwCb, &uetMsg, sizeof(UetMessage));
    cmMemset((U8 *)uetMsg, 0, sizeof(UetMessage));
-   
+
    uetMsg->msgType = UE_FLUSH_TYPE;
    uetMsg->msg.ueUetFlush.noOfUe = data->noOfUe;
-    
+
    fwSendToUeApp(uetMsg);
 
    FW_LOG_EXITFN(fwCb, ROK);
@@ -1173,8 +1173,8 @@ PRIVATE S16 handlUeFlushCmnd(ueFlush_t *data)
  *
  *       Fun:   handlEnbConfig
  *
- *       Desc:  This function is used to handle EnodeB config request 
- *              from Test Controller 
+ *       Desc:  This function is used to handle EnodeB config request
+ *              from Test Controller
  *
  *       Ret:   None
  *
@@ -1483,18 +1483,18 @@ PUBLIC S16 handlEnbInactvTmrCfg(FwNbConfigReq_t *data)
 }
 
 /*
- * 
- *     Fun:  handlS1SetupReq 
- * 
- *     Desc:  This function is used to handle S1-SETUP Request 
+ *
+ *     Fun:  handlS1SetupReq
+ *
+ *     Desc:  This function is used to handle S1-SETUP Request
  *            from Test Controller.
- * 
+ *
  *     Ret:   None
- * 
+ *
  *     Notes: None
- * 
+ *
  *     File:  fw_api_int.c
- * 
+ *
  */
 PRIVATE S16 handlS1SetupReq(Void)
 {
@@ -1594,7 +1594,7 @@ PUBLIC S16 handleFwErabRelInd(FwErabRelInd_t *data)
 
    FW_ALLOC_MEM(fwCb, &uetMsg, sizeof(UetMessage));
    cmMemset((U8 *)uetMsg, 0, sizeof(UetMessage));
-   
+
    uetMsg->msgType = UE_ERAB_REL_IND;
    uetMsg->msg.ueErabRelInd.ueId = data->ueId;
    uetMsg->msg.ueErabRelInd.numOfErabIds = data->numOfErabIds;
@@ -1604,7 +1604,7 @@ PUBLIC S16 handleFwErabRelInd(FwErabRelInd_t *data)
          data->numOfErabIds);
    fwSendToUeApp(uetMsg);
 
-   FW_LOG_EXITFN(fwCb, ROK); 
+   FW_LOG_EXITFN(fwCb, ROK);
 } /* handleFwErabRelInd_t */
 
 PUBLIC S16 handleFwErabRelRsp(FwErabRelRsp_t *data)
@@ -1638,8 +1638,8 @@ PUBLIC S16 handleFwErabRelRsp(FwErabRelRsp_t *data)
  *
  *   Fun:   handleEmmStatus
  *
- *   Desc:  This function is used to handle EMM STATUS 
- *          from Test Controller 
+ *   Desc:  This function is used to handle EMM STATUS
+ *          from Test Controller
  *
  *   Ret:   None
  *
@@ -1671,18 +1671,18 @@ PUBLIC S16 handleEmmStatus(ueEmmStatus_t *data)
 }
 
 /*
- * 
+ *
  *   Fun:   handleX2HoTriggerReq
- * 
- *   Desc:  This function is used to handle X2 HO request 
- *          from Test Controller 
- * 
+ *
+ *   Desc:  This function is used to handle X2 HO request
+ *          from Test Controller
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PUBLIC Void handleX2HoTriggerReq(NbX2HOTriggerReq* data)
 {
@@ -1691,11 +1691,11 @@ PUBLIC Void handleX2HoTriggerReq(NbX2HOTriggerReq* data)
 
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
-   
-   if(SGetSBuf(fwCb->init.region, fwCb->init.pool, 
-       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK) 
-   {                                                  
-      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));              
+
+   if(SGetSBuf(fwCb->init.region, fwCb->init.pool,
+       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK)
+   {
+      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
    }
    else
    {
@@ -1711,18 +1711,18 @@ PUBLIC Void handleX2HoTriggerReq(NbX2HOTriggerReq* data)
 }
 
 /*
- * 
+ *
  *   Fun:   handleEnbConfigTrnsf
- * 
+ *
  *   Desc:  This function is used to handle enb Config Transfer
- *          from Test Controller 
- * 
+ *          from Test Controller
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PUBLIC Void handleEnbConfigTransfer(NbEnbConfigTrnsf* data)
 {
@@ -1731,11 +1731,11 @@ PUBLIC Void handleEnbConfigTransfer(NbEnbConfigTrnsf* data)
 
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
-   
-   if(SGetSBuf(fwCb->init.region, fwCb->init.pool, 
-       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK) 
-   {                                                  
-      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));              
+
+   if(SGetSBuf(fwCb->init.region, fwCb->init.pool,
+       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK)
+   {
+      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
    }
    else
    {
@@ -1753,8 +1753,8 @@ PUBLIC Void handleEnbConfigTransfer(NbEnbConfigTrnsf* data)
 /*
  *   Fun:   tfwApi
  *
- *   Desc:  This function is used to distinguish the messages from  
- *          Test controller based on message type and call the 
+ *   Desc:  This function is used to distinguish the messages from
+ *          Test controller based on message type and call the
  *          corresponding handler function.
  *
  *   Ret:   ROK
@@ -1772,7 +1772,7 @@ PUBLIC S16 tfwApi
 {
    S16 ret = ROK;
    FwCb  *fwCb = NULLP;
-  
+
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
 
@@ -1798,7 +1798,7 @@ PUBLIC S16 tfwApi
          break;
       }
       case UE_RAD_CAP_UPDATE_REQ:
-      {   
+      {
          FW_LOG_DEBUG(fwCb, "ueRadCapabilityConfig");
          handleUeRadCapConfig((ueRadCapUpd_t*)msg);
          break;
@@ -1820,7 +1820,7 @@ PUBLIC S16 tfwApi
          FW_LOG_DEBUG(fwCb, "S1 SETUP-REQ");
          switch(fwCb->nbState)
          {
-            case NB_CONFIG_DONE: 
+            case NB_CONFIG_DONE:
             {
                handlS1SetupReq();
                break;
@@ -1882,7 +1882,7 @@ PUBLIC S16 tfwApi
          if (fwCb->nbState == ENB_IS_UP)
          {
             handlAuthResp((ueAuthResp_t*)msg);
-         }  
+         }
          else
          {
             FW_LOG_ERROR(fwCb, "FAILED TO SEND UE_AUTH_RESP: "\
@@ -2160,7 +2160,7 @@ PUBLIC S16 tfwApi
             ret = RFAILED;
          }
          break;
-      } 
+      }
       case UE_SET_INIT_CTXT_SETUP_FAIL:
       {
          FW_LOG_DEBUG(fwCb, "Initial context setup Fail");
@@ -2385,18 +2385,18 @@ Void initTestFrameWork(TestCnrlrCallBack func)
 } /* initTestFrameWork */
 
 /*
- * 
+ *
  *   Fun:   handlPdnConnReq
- * 
- *   Desc:  This function is used to handle PDN connectivity Request 
- *          from Test Controller 
- * 
+ *
+ *   Desc:  This function is used to handle PDN connectivity Request
+ *          from Test Controller
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PRIVATE Void handlPdnConReq(uepdnConReq_t* data)
 {
@@ -2409,25 +2409,25 @@ PRIVATE Void handlPdnConReq(uepdnConReq_t* data)
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
 
-   if (SGetSBuf(fwCb->init.region, fwCb->init.pool, 
-            (Data **)&uetMsg, (Size) sizeof(UetMessage)) == ROK) 
-   {                                                  
-      cmMemset((U8 *)(uetMsg), 0,sizeof(UetMessage));              
-   }
-   else
+   if (SGetSBuf(fwCb->init.region, fwCb->init.pool,
+            (Data **)&uetMsg, (Size) sizeof(UetMessage)) == ROK)
    {
-      RETVOID;
-   }   
-   if (SGetSBuf(fwCb->init.region, fwCb->init.pool, 
-            (Data **)&ueIdCb, (Size) sizeof(UeIdCb)) == ROK) 
-   {                                                  
-      cmMemset((U8 *)(ueIdCb), 0,sizeof(UeIdCb));              
+      cmMemset((U8 *)(uetMsg), 0,sizeof(UetMessage));
    }
    else
    {
       RETVOID;
    }
-   
+   if (SGetSBuf(fwCb->init.region, fwCb->init.pool,
+            (Data **)&ueIdCb, (Size) sizeof(UeIdCb)) == ROK)
+   {
+      cmMemset((U8 *)(ueIdCb), 0,sizeof(UeIdCb));
+   }
+   else
+   {
+      RETVOID;
+   }
+
    insertUeCb(data->ue_Id, 0, 0, ueIdCb);
    uetMsg->msgType = UE_PDN_CON_REQ_TYPE;
    uePdnConReq = &uetMsg->msg.ueUetPdnConReq;
@@ -2453,10 +2453,10 @@ PRIVATE Void handlPdnConReq(uepdnConReq_t* data)
 
 /*
  *
- *       Fun:   handlErrIndMsg 
+ *       Fun:   handlErrIndMsg
  *
- *       Desc:  This function is used to handle Error Indication Msg 
- *              from Test Controller 
+ *       Desc:  This function is used to handle Error Indication Msg
+ *              from Test Controller
  *
  *       Ret:   None
  *
@@ -2479,8 +2479,8 @@ PRIVATE S16 handlErrIndMsg(fwNbErrIndMsg_t *data)
    msgReq->msgType = NB_ERR_IND_MSG;
    msgReq->t.s1ErrIndMsg.isUeAssoc = data->isUeAssoc;
    if(data->isUeAssoc == TRUE)
-   { 
-      msgReq->t.s1ErrIndMsg.ue_Id = data->ue_Id; 
+   {
+      msgReq->t.s1ErrIndMsg.ue_Id = data->ue_Id;
    }
    if(data->cause.pres == TRUE)
    {
@@ -2511,16 +2511,16 @@ PRIVATE S16 handlErrIndMsg(fwNbErrIndMsg_t *data)
             data->criticalityDiag.procedureCriticality;
       }
       msgReq->t.s1ErrIndMsg.criticalityDiag.ieLst.noComp =
-         data->criticalityDiag.ieLst.noComp; 
+         data->criticalityDiag.ieLst.noComp;
       FW_ALLOC_MEM(fwCb, &msgReq->t.s1ErrIndMsg.criticalityDiag.ieLst.member, \
       sizeof(FwCriticalityDiag_IE_Item));
       for(idx = 0 ; idx < data->criticalityDiag.ieLst.noComp ; idx++)
-      { 
+      {
          if(data->criticalityDiag.ieLst.member[idx].pres  == TRUE)
          {
             msgReq->t.s1ErrIndMsg.criticalityDiag.ieLst.member[idx].pres = TRUE;
             msgReq->t.s1ErrIndMsg.criticalityDiag.ieLst.member[idx].iECriticality = \
-              data->criticalityDiag.ieLst.member[idx].iECriticality; 
+              data->criticalityDiag.ieLst.member[idx].iECriticality;
             msgReq->t.s1ErrIndMsg.criticalityDiag.ieLst.member[idx].iE_ID = \
               data->criticalityDiag.ieLst.member[idx].iE_ID;
             msgReq->t.s1ErrIndMsg.criticalityDiag.ieLst.member[idx].TypOfErr = \
@@ -2535,10 +2535,10 @@ PRIVATE S16 handlErrIndMsg(fwNbErrIndMsg_t *data)
 
 /*
  *
- *   Fun:   handleUeResAllocReq 
+ *   Fun:   handleUeResAllocReq
  *
- *   Desc:  This function is used to handle Attach request 
- *          from Test Controller 
+ *   Desc:  This function is used to handle Attach request
+ *          from Test Controller
  *
  *   Ret:   None
  *
@@ -2567,13 +2567,13 @@ PUBLIC S16 handleUeResAllocReq(ueBearerAllocReq_t *data)
    bearAllocReq->bearerId       = data->bearerId;
    bearAllocReq->lnkEpsBearerId = data->lnkEpsBearerId;
 
-   bearAllocReq->epsQos.pres = data->qos.pres; 
+   bearAllocReq->epsQos.pres = data->qos.pres;
    if(bearAllocReq->epsQos.pres == TRUE)
    {
      bearAllocReq->epsQos.qci             = data->qos.qci;
      bearAllocReq->epsQos.lenQosCont      = data->qos.lenQosCont;
      bearAllocReq->epsQos.maxBitRateUL    = data->qos.maxBitRateUL;
-     bearAllocReq->epsQos.maxBitRateDL    = data->qos.maxBitRateDL; 
+     bearAllocReq->epsQos.maxBitRateDL    = data->qos.maxBitRateDL;
      bearAllocReq->epsQos.guaraBitRateUL  = data->qos.guaraBitRateUL;
      bearAllocReq->epsQos.guaraBitRateDL  = data->qos.guaraBitRateDL;
    }
@@ -2582,29 +2582,29 @@ PUBLIC S16 handleUeResAllocReq(ueBearerAllocReq_t *data)
    if(bearAllocReq->tft.pres == TRUE)
    {
        bearAllocReq->tft.pres           = data->tft.pres;
-       bearAllocReq->tft.len            = data->tft.len;       
-       bearAllocReq->tft.opCode         = data->tft.opCode;    
-       bearAllocReq->tft.noOfPfs        = data->tft.noOfPfs;   
-       bearAllocReq->tft.eBit           = data->tft.eBit;       
-       bearAllocReq->tft.noOfParams     = data->tft.noOfParams; 
+       bearAllocReq->tft.len            = data->tft.len;
+       bearAllocReq->tft.opCode         = data->tft.opCode;
+       bearAllocReq->tft.noOfPfs        = data->tft.noOfPfs;
+       bearAllocReq->tft.eBit           = data->tft.eBit;
+       bearAllocReq->tft.noOfParams     = data->tft.noOfParams;
 
       bearAllocReq->tft.noOfPfs = data->tft.noOfPfs;
       for( idx = 0 ; idx < bearAllocReq->tft.noOfPfs ; idx++)
       {
          bearAllocReq->tft.pfList[idx].pres = TRUE;
-         bearAllocReq->tft.pfList[idx].id =    data->tft.pfList[idx].id;    
+         bearAllocReq->tft.pfList[idx].id =    data->tft.pfList[idx].id;
          bearAllocReq->tft.pfList[idx].dir =   data->tft.pfList[idx].dir;
-         bearAllocReq->tft.pfList[idx].preced = data->tft.pfList[idx].preced;     
-         bearAllocReq->tft.pfList[idx].len =    data->tft.pfList[idx].len; 
+         bearAllocReq->tft.pfList[idx].preced = data->tft.pfList[idx].preced;
+         bearAllocReq->tft.pfList[idx].len =    data->tft.pfList[idx].len;
          bearAllocReq->tft.pfList[idx].ipv4.pres =  data->tft.pfList[idx].ipv4.pres;
          if(bearAllocReq->tft.pfList[idx].ipv4.pres == TRUE)
-         { 
+         {
             cmMemcpy((U8 *)&bearAllocReq->tft.pfList[idx].ipv4.ip4, \
                (U8 *)data->tft.pfList[idx].ipv4.ip4,CM_ESM_IPV4_SIZE);
             bearAllocReq->tft.pfList[idx].ipv4Mask = data->tft.pfList[idx].ipv4Mask;
          }
          if(bearAllocReq->tft.pfList[idx].ipv6.pres == TRUE)
-         { 
+         {
             cmMemcpy((U8 *)&bearAllocReq->tft.pfList[idx].ipv6.ip6, \
                (U8 *)data->tft.pfList[idx].ipv6.ip6,CM_ESM_IPV6_SIZE);
          }
@@ -2615,11 +2615,11 @@ PUBLIC S16 handleUeResAllocReq(ueBearerAllocReq_t *data)
          }
          if(data->tft.pfList[idx].localPort.pres)
          {
-            bearAllocReq->tft.pfList[idx].localPort.pres        =  data->tft.pfList[idx].localPort.pres; 
+            bearAllocReq->tft.pfList[idx].localPort.pres        =  data->tft.pfList[idx].localPort.pres;
             bearAllocReq->tft.pfList[idx].localPort.port        =  data->tft.pfList[idx].localPort.port;
          }
          if(data->tft.pfList[idx].remotePort.pres)
-         { 
+         {
             bearAllocReq->tft.pfList[idx].remotePort.pres       =  data->tft.pfList[idx].remotePort.pres;
             bearAllocReq->tft.pfList[idx].remotePort.port       =  data->tft.pfList[idx].remotePort.port;
          }
@@ -2636,10 +2636,10 @@ PUBLIC S16 handleUeResAllocReq(ueBearerAllocReq_t *data)
             bearAllocReq->tft.pfList[idx].remPortRange.rangeLow  =  \
                data->tft.pfList[idx].remPortRange.rangeLow;
              bearAllocReq->tft.pfList[idx].remPortRange.rangeHigh   =\
-               data->tft.pfList[idx].remPortRange.rangeHigh; 
+               data->tft.pfList[idx].remPortRange.rangeHigh;
          }
          if(data->tft.pfList[idx].secParam.pres)
-         { 
+         {
             bearAllocReq->tft.pfList[idx].secParam.pres  =  data->tft.pfList[idx].secParam.pres;
             cmMemcpy((U8 *)&bearAllocReq->tft.pfList[idx].secParam.params, \
                (U8 *)data->tft.pfList[idx].secParam.params, CM_ESM_IP_SEC_SIZE);
@@ -2647,11 +2647,11 @@ PUBLIC S16 handleUeResAllocReq(ueBearerAllocReq_t *data)
          if(data->tft.pfList[idx].tos.pres)
          {
             bearAllocReq->tft.pfList[idx].tos.pres       = data->tft.pfList[idx].tos.pres;
-            bearAllocReq->tft.pfList[idx].tos.tos        = data->tft.pfList[idx].tos.tos; 
-            bearAllocReq->tft.pfList[idx].tos.mask       = data->tft.pfList[idx].tos.mask; 
+            bearAllocReq->tft.pfList[idx].tos.tos        = data->tft.pfList[idx].tos.tos;
+            bearAllocReq->tft.pfList[idx].tos.mask       = data->tft.pfList[idx].tos.mask;
          }
          if(data->tft.pfList[idx].flowLabel.pres)
-         { 
+         {
             bearAllocReq->tft.pfList[idx].flowLabel.pres = data->tft.pfList[idx].flowLabel.pres;
             cmMemcpy((U8 *)&bearAllocReq->tft.pfList[idx].flowLabel.buf, \
                (U8 *)data->tft.pfList[idx].flowLabel.buf,CM_ESM_IPV6_FLOW_LABEL_SIZE);
@@ -2661,21 +2661,21 @@ PUBLIC S16 handleUeResAllocReq(ueBearerAllocReq_t *data)
       for( idx = 0 ; idx < bearAllocReq->tft.noOfParams ; idx++)
       {
          bearAllocReq->tft.params[idx].len      = data->tft.params[idx].len;
-         bearAllocReq->tft.params[idx].paramType = data->tft.params[idx].paramType; 
+         bearAllocReq->tft.params[idx].paramType = data->tft.params[idx].paramType;
           cmMemcpy((U8 *)&bearAllocReq->tft.params[idx].buf, \
             (U8 *)data->tft.params[idx].buf,CM_ESM_TFT_MAX_PARAM_BUF);
       }
    }
    fwSendToUeApp(uetMsg);
    FW_LOG_EXITFN(fwCb, ROK);
-}   
+}
 
 /*
  *
- *   Fun:   handleUeDeActvBerAcc 
+ *   Fun:   handleUeDeActvBerAcc
  *
- *   Desc:  This function is used to handle Attach request 
- *          from Test Controller 
+ *   Desc:  This function is used to handle Attach request
+ *          from Test Controller
  *
  *   Ret:   None
  *
@@ -2707,10 +2707,10 @@ PRIVATE S16 handleUeDeActvBerAcc(UeDeActvBearCtxtAcc_t* data)
 }
 /*
  *
- *   Fun:   handleUeActvDedBerAcc 
+ *   Fun:   handleUeActvDedBerAcc
  *
- *   Desc:  This function is used to handle Attach request 
- *          from Test Controller 
+ *   Desc:  This function is used to handle Attach request
+ *          from Test Controller
  *
  *   Ret:   None
  *
@@ -2745,7 +2745,7 @@ PRIVATE S16 handleUeActvDedBerAcc(UeActDedBearCtxtAcc_t* data)
 
 /*
  *
- *   Fun:   handleUeActvDedBerRej 
+ *   Fun:   handleUeActvDedBerRej
  *
  *
  *   Ret:   None
@@ -2776,7 +2776,7 @@ PRIVATE S16 handleUeActvDedBerRej(UeActDedBearCtxtRej_t* data)
 
    fwSendToUeApp(uetMsg);
    FW_LOG_EXITFN(fwCb, ROK);
-}   
+}
 
 /*
  *
@@ -2840,17 +2840,17 @@ PRIVATE S16 handleSctpShutdownReq(Void)
 }
 
 /*
- * 
+ *
  *   Fun:   handleUeNasNonDelivery
- * 
- *   Desc:  This function is used to handle the Nas non delivery 
- * 
+ *
+ *   Desc:  This function is used to handle the Nas non delivery
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PUBLIC Void handleUeNasNonDelivery(UeNasNonDel* data)
 {
@@ -2860,10 +2860,10 @@ PUBLIC Void handleUeNasNonDelivery(UeNasNonDel* data)
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
 
-   if(SGetSBuf(fwCb->init.region, fwCb->init.pool, 
-       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK) 
-   {                                                  
-      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));              
+   if(SGetSBuf(fwCb->init.region, fwCb->init.pool,
+       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK)
+   {
+      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
    }
    else
    {
@@ -2881,17 +2881,17 @@ PUBLIC Void handleUeNasNonDelivery(UeNasNonDel* data)
    RETVOID;
 }
 /*
- * 
- *   Fun:   handleUeInitCtxtSetupFail 
- * 
- *   Desc:  This function is used to handle the Initial Context Setup Failure  
- * 
+ *
+ *   Fun:   handleUeInitCtxtSetupFail
+ *
+ *   Desc:  This function is used to handle the Initial Context Setup Failure
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PUBLIC Void handleUeInitCtxtSetupFail(ueInitCtxtSetupFail* data)
 {
@@ -2901,10 +2901,10 @@ PUBLIC Void handleUeInitCtxtSetupFail(ueInitCtxtSetupFail* data)
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
 
-   if(SGetSBuf(fwCb->init.region, fwCb->init.pool, 
-       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK) 
-   {                                                  
-      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));              
+   if(SGetSBuf(fwCb->init.region, fwCb->init.pool,
+       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK)
+   {
+      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
    }
    else
    {
@@ -2922,17 +2922,17 @@ PUBLIC Void handleUeInitCtxtSetupFail(ueInitCtxtSetupFail* data)
    RETVOID;
 }
 /*
- * 
- *   Fun:   handleDropUeInitCtxtSetupReq 
- * 
+ *
+ *   Fun:   handleDropUeInitCtxtSetupReq
+ *
  *   Desc:  This function is used to handle  Drop Initial Context Setup Request
- * 
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PRIVATE Void handleDropUeInitCtxtSetupReq(UeDropInitCtxtSetup* data)
 {
@@ -2942,10 +2942,10 @@ PRIVATE Void handleDropUeInitCtxtSetupReq(UeDropInitCtxtSetup* data)
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
 
-   if(SGetSBuf(fwCb->init.region, fwCb->init.pool, 
-       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK) 
-   {                                                  
-      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));              
+   if(SGetSBuf(fwCb->init.region, fwCb->init.pool,
+       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK)
+   {
+      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
    }
    else
    {
@@ -2962,17 +2962,17 @@ PRIVATE Void handleDropUeInitCtxtSetupReq(UeDropInitCtxtSetup* data)
    RETVOID;
 }
 /*
- * 
- *   Fun:   handleDelayUeCtxtRelCmp 
- * 
+ *
+ *   Fun:   handleDelayUeCtxtRelCmp
+ *
  *   Desc:  This function is used to handle  Delay Initial Context Setup Response
- * 
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PRIVATE Void handleDelayUeCtxtRelCmp(UeDelayUeCtxtRelCmp* data)
 {
@@ -2982,10 +2982,10 @@ PRIVATE Void handleDelayUeCtxtRelCmp(UeDelayUeCtxtRelCmp* data)
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
 
-   if(SGetSBuf(fwCb->init.region, fwCb->init.pool, 
-       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK) 
-   {                                                  
-      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));              
+   if(SGetSBuf(fwCb->init.region, fwCb->init.pool,
+       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK)
+   {
+      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
    }
    else
    {
@@ -3002,17 +3002,17 @@ PRIVATE Void handleDelayUeCtxtRelCmp(UeDelayUeCtxtRelCmp* data)
    RETVOID;
 }
 /*
- * 
- *   Fun:   handleDelayUeInitCtxtSetupRsp 
- * 
+ *
+ *   Fun:   handleDelayUeInitCtxtSetupRsp
+ *
  *   Desc:  This function is used to handle  Delay Initial Context Setup Response
- * 
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PRIVATE Void handleDelayUeInitCtxtSetupRsp(UeDelayInitCtxtSetupRsp* data)
 {
@@ -3022,10 +3022,10 @@ PRIVATE Void handleDelayUeInitCtxtSetupRsp(UeDelayInitCtxtSetupRsp* data)
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
 
-   if(SGetSBuf(fwCb->init.region, fwCb->init.pool, 
-       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK) 
-   {                                                  
-      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));              
+   if(SGetSBuf(fwCb->init.region, fwCb->init.pool,
+       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK)
+   {
+      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
    }
    else
    {
@@ -3043,17 +3043,17 @@ PRIVATE Void handleDelayUeInitCtxtSetupRsp(UeDelayInitCtxtSetupRsp* data)
 }
 
 /*
- * 
- *   Fun:   handleSetCtxtRelForICS 
- * 
+ *
+ *   Fun:   handleSetCtxtRelForICS
+ *
  *   Desc:  This function is used to set the Ctxt Rel for ICS
- * 
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PRIVATE Void handleSetCtxtRelForICS(UeSetCtxtRelForInitCtxtSetup* data)
 {
@@ -3063,10 +3063,10 @@ PRIVATE Void handleSetCtxtRelForICS(UeSetCtxtRelForInitCtxtSetup* data)
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
 
-   if(SGetSBuf(fwCb->init.region, fwCb->init.pool, 
-       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK) 
-   {                                                  
-      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));              
+   if(SGetSBuf(fwCb->init.region, fwCb->init.pool,
+       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK)
+   {
+      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
    }
    else
    {
@@ -3084,18 +3084,18 @@ PRIVATE Void handleSetCtxtRelForICS(UeSetCtxtRelForInitCtxtSetup* data)
    RETVOID;
 }
 /*
- * 
+ *
  *   Fun:   handleEsmInformationRsp
- * 
- *   Desc:  This function is used to handle ESM Information Response 
- *          from Test Controller 
- * 
+ *
+ *   Desc:  This function is used to handle ESM Information Response
+ *          from Test Controller
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PRIVATE Void handleEsmInformationRsp(ueEsmInformationRsp_t* data)
 {
@@ -3108,29 +3108,30 @@ PRIVATE Void handleEsmInformationRsp(ueEsmInformationRsp_t* data)
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
 
-   if (SGetSBuf(fwCb->init.region, fwCb->init.pool, 
-            (Data **)&uetMsg, (Size) sizeof(UetMessage)) == ROK) 
-   {                                                  
-      cmMemset((U8 *)(uetMsg), 0,sizeof(UetMessage));              
-   }
-   else
+   if (SGetSBuf(fwCb->init.region, fwCb->init.pool,
+            (Data **)&uetMsg, (Size) sizeof(UetMessage)) == ROK)
    {
-      RETVOID;
-   }   
-   if (SGetSBuf(fwCb->init.region, fwCb->init.pool, 
-            (Data **)&ueIdCb, (Size) sizeof(UeIdCb)) == ROK) 
-   {                                                  
-      cmMemset((U8 *)(ueIdCb), 0,sizeof(UeIdCb));              
+      cmMemset((U8 *)(uetMsg), 0,sizeof(UetMessage));
    }
    else
    {
       RETVOID;
    }
-   
+   if (SGetSBuf(fwCb->init.region, fwCb->init.pool,
+            (Data **)&ueIdCb, (Size) sizeof(UeIdCb)) == ROK)
+   {
+      cmMemset((U8 *)(ueIdCb), 0,sizeof(UeIdCb));
+   }
+   else
+   {
+      RETVOID;
+   }
+
    insertUeCb(data->ue_Id, 0, 0, ueIdCb);
    uetMsg->msgType = UE_ESM_INFORMATION_RSP_TYPE;
    ueEsmInfoRsp = &uetMsg->msg.ueEsmInformationRsp;
-   ueEsmInfoRsp->ueId    = data->ue_Id;
+   ueEsmInfoRsp->ueId = data->ue_Id;
+   ueEsmInfoRsp->tId = data->tId;
    if(data->pdnAPN_pr.pres == TRUE)
    {
       ueEsmInfoRsp->nasPdnApn.len = data->pdnAPN_pr.len;
@@ -3141,18 +3142,18 @@ PRIVATE Void handleEsmInformationRsp(ueEsmInformationRsp_t* data)
 }
 
 /*
- * 
+ *
  *   Fun:   handleMultiEnbConfigReq
- * 
- *   Desc:  This function is used to handle multiple enb config request 
+ *
+ *   Desc:  This function is used to handle multiple enb config request
  *          from Test Controller
- * 
+ *
  *   Ret:   None
- * 
+ *
  *   Notes: None
- * 
+ *
  *   File:  fw_api_int.c
- * 
+ *
  */
 PRIVATE Void handleMultiEnbConfigReq(multiEnbConfigReq_t* data)
 {
@@ -3163,10 +3164,10 @@ PRIVATE Void handleMultiEnbConfigReq(multiEnbConfigReq_t* data)
    FW_LOG_ENTERFN(fwCb);
 
    FW_LOG_DEBUG(fwCb, "Handling Multi Enb config Req msg in TFW");
-   if(SGetSBuf(fwCb->init.region, fwCb->init.pool, 
-       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK) 
-   {                                                  
-      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));              
+   if(SGetSBuf(fwCb->init.region, fwCb->init.pool,
+       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK)
+   {
+      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
    }
    else
    {
@@ -3182,6 +3183,8 @@ PRIVATE Void handleMultiEnbConfigReq(multiEnbConfigReq_t* data)
       msgReq->t.multiEnbConfigReq.nbMultiEnbCfgParam[index].cell_id    = data->multiEnbCfgParam[index].cell_id;
       msgReq->t.multiEnbConfigReq.nbMultiEnbCfgParam[index].tac        = data->multiEnbCfgParam[index].tac;
       msgReq->t.multiEnbConfigReq.nbMultiEnbCfgParam[index].enbType    = data->multiEnbCfgParam[index].enbType;
+      msgReq->t.multiEnbConfigReq.nbMultiEnbCfgParam[index].plmn_length =
+        data->multiEnbCfgParam[index].plmn_length;
       msgReq->t.multiEnbConfigReq.nbMultiEnbCfgParam[index].plmn_id[0] = data->multiEnbCfgParam[index].plmn_id[0];
       msgReq->t.multiEnbConfigReq.nbMultiEnbCfgParam[index].plmn_id[1] = data->multiEnbCfgParam[index].plmn_id[1];
       msgReq->t.multiEnbConfigReq.nbMultiEnbCfgParam[index].plmn_id[2] = data->multiEnbCfgParam[index].plmn_id[2];

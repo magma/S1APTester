@@ -8,7 +8,7 @@
 
 /********************************************************************20**
 
-     Name:     
+     Name:
 
      Type:     C Hearder file
 
@@ -16,8 +16,8 @@
 
      File:     nbu.x
 
-     Sid:      
-     Prg:      
+     Sid:
+     Prg:
 
 *********************************************************************21*/
 #include "tft.h"
@@ -62,9 +62,10 @@ typedef struct _nbuErabCb
 
 typedef enum _nbuCauseRadioNw
 {
-  NBU_CAUSE_RADIONW_UNSPECIFIED = 0,
-  NBU_CAUSE_RADIONW_UNKNOWN_MME_UE_S1AP_ID = 1,
-  NBU_CAUSE_RADIONW_UNKNOWN_ENB_UE_S1AP_ID
+  NBU_CAUSE_RADIONW_UNSPECIFIED,
+  NBU_CAUSE_RADIONW_UNKNOWN_MME_UE_S1AP_ID,
+  NBU_CAUSE_RADIONW_UNKNOWN_ENB_UE_S1AP_ID,
+  NBU_CAUSE_RADIONW_UNSUPPORTED_QCI
 }NbuCauseRadioNw;
 typedef enum  _nbuCauseTport
 {
@@ -104,26 +105,38 @@ typedef struct _nbuErabRelCb
    U8 erabId;
    NbuErabRelCause cause;
 }NbuErabRelCb;
+
+typedef struct _nbuFailedErab {
+  U8 erabId;
+  U8 qci;
+  NbuErabRelCause cause;
+} NbuFailedErab;
+
+typedef struct _nbuFailedErabLst {
+  U8 noOfFailedErabs;
+  NbuFailedErab *failedErabs;
+} NbuFailedErabLst;
+
 typedef struct _nbuErabLst
 {
    U8 numOfErab;
-   NbuErabCb *rabCbs; 
+   NbuErabCb *rabCbs;
 }NbuErabLst;
 
 typedef struct _nbuErabRelLst
 {
    U8 numOfErab;
-   NbuErabRelCb *rabCbs; 
+   NbuErabRelCb *rabCbs;
 }NbuErabRelLst;
 
 typedef struct _nbuErabRelIndLst
 {
    U8 ueId;
    U8 numOfErabIds;
-   U8 *erabIdLst; 
+   U8 *erabIdLst;
 }NbuErabRelIndList;
 
-typedef struct _nbuErabsRelInfo 
+typedef struct _nbuErabsRelInfo
 {
    U8 ueId;
    Bool nasPduPres;
@@ -131,12 +144,13 @@ typedef struct _nbuErabsRelInfo
    TknStrOSXL nasPdu;
 }NbuErabsRelInfo;
 
-typedef struct _nbuErabsInfo 
+typedef struct _nbuErabsInfo
 {
    U8 ueId;
    Bool nasPduPres;
    Bool ueRadCapRcvd;
    NbuErabLst *erabInfo;
+   NbuFailedErabLst *failedErabList;
 }NbuErabsInfo;
 
 typedef struct _nbuS1RelInd
@@ -159,8 +173,8 @@ typedef struct _uePagingMsg
 {
    U8      ueIdenType;
    union
-   {   
-      NbuSTmsi  sTMSI;      /*!< S-TMSI of the UE*/ 
+   {
+      NbuSTmsi  sTMSI;      /*!< S-TMSI of the UE*/
       U8       imsi[22];   /*!< IMSI of the UE. IMSI size is
                              min-6 Integer digits and
                              max-21 Integer Digits.As we are using
@@ -211,6 +225,12 @@ typedef struct _nbuTunDelReq
    U32 erabId;
 }NbuTunDelReq;
 
+typedef struct _nbuNotifyPlmnInfo
+{
+   U8 ueId;
+   U8 plmnId[3];
+}NbuNotifyPlmnInfo;
+
 typedef S16 (*NbuInitialUeMsgHdl)(Pst*, NbuInitialUeMsg*);
 typedef S16 (*NbuUlNasMsgHdl)(Pst*, NbuUlNasMsg*);
 typedef S16 (*NbuDlNasMsgHdl)(Pst*, NbuDlNasMsg*);
@@ -223,6 +243,7 @@ typedef S16 (*NbuErabsRelInfoMsgHdl) (Pst *, NbuErabsRelInfo*);
 typedef S16 (*NbuUeIpInfoReqHdl) (Pst *, NbuUeIpInfoReq*);
 typedef S16 (*NbuUeIpInfoRspHdl) (Pst *, NbuUeIpInfoRsp*);
 typedef S16 (*NbuErabRelIndHdl)(Pst *, NbuErabRelIndList*);/*NbErabRelInd*);*/
+typedef S16 (*NbuNotifyPlmnInfoHdl) (Pst *, NbuNotifyPlmnInfo*);
 EXTERN S16 cmPkNbuInitialUeMsg(Pst *pst,NbuInitialUeMsg *req);
 EXTERN S16 cmPkNbuErabRelInd(Pst *pst, NbuErabRelIndList *);
 EXTERN S16 cmPkNbuUlNasMsg(Pst *pst,NbuUlNasMsg *msg);
@@ -234,6 +255,7 @@ EXTERN S16 cmPkNbuErabsInfo (Pst *pst,NbuErabsInfo *msg);
 EXTERN S16 cmPkNbuUeIpInfoRsp (Pst *pst,NbuUeIpInfoRsp *msg);
 EXTERN S16 cmPkNbuUlRrcMsg ARGS((Pst *pst, NbuUlRrcMsg *msg));
 EXTERN S16 cmPkNbuErabsRelInfo (Pst *pst,NbuErabsRelInfo *msg);
+EXTERN S16 cmPkNbuNotifyPlmnInfo ARGS((Pst *pst,NbuNotifyPlmnInfo *req));
 
 EXTERN S16 cmUnPkNbuInitialUeMsg(NbuInitialUeMsgHdl, Pst*, Buffer*);
 EXTERN S16 cmUnPkNbuErabRelInd(NbuErabRelIndHdl, Pst*, Buffer*);
@@ -253,8 +275,10 @@ EXTERN S16 NbUiNbuHdlUeRadioCapMsg(Pst *pst, NbuUlRrcMsg *msg);
 EXTERN S16 cmUnPkNbuUeIpInfoReq (NbuUeIpInfoReqHdl func,Pst *pst,Buffer *mBuf);
 EXTERN S16 cmUnPkNbuUeIpInfoRsp (NbuUeIpInfoRspHdl func,Pst *pst,Buffer *mBuf);
 EXTERN S16 cmUnPkNbuErabsRelInfo(NbuErabsRelInfoMsgHdl func, Pst *pst, Buffer *mBuf);
+EXTERN S16 cmUnPkNbuNotifyPlmnInfo (NbuNotifyPlmnInfoHdl func,Pst *pst,Buffer *mBuf);
+
 /********************************************************************30**
 
-         End of file:     
+         End of file:
 
 *********************************************************************31*/
