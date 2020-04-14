@@ -6136,48 +6136,6 @@ PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId,
         ueIpInfoRsp->lnkEpsBearId = bearerId;
         _fill_pf_comp(idx, ueCb, ueIpInfoRsp);
         break;
-=======
-PUBLIC Void populateIpAddrStrFromUeCb
-(
- U8 *temp_ip,
- UeCb *ueCb,
- U8  bearerId,
- BearType *bearerType
-)
-{
-   CmEsmPdnAdd *pdn_addr = NULLP;
-   U8 temp[20] = {0}, i = 0, j = 0;
-   U8 ip_addr[20] = {0};
-   U32 counter = 0;
-   U8 idx = 0;
-   /*pdn_addr = &evnt->m.emmEvnt->u.atchAcc.esmEvnt->m.esmEvnt->u.actReq.\
-    * pAddr; */
-     for(idx = 1; idx < UE_APP_MAX_DRBS; idx++)
-   {
-      if (ueCb->drbs[idx] == UE_APP_DRB_INUSE)
-      {
-        if(ueCb->ueRabCb[idx-1].epsBearerId == bearerId)
-        {
-           pdn_addr = &ueCb->ueRabCb[idx-1].pAddr;
-           *bearerType = ueCb->ueRabCb[idx-1].bearerType;
-           break;
-        }
-      }
-   }
-   if((pdn_addr != NULLP) && pdn_addr->pres)
-   {
-      for(counter = 0; counter < (pdn_addr->len - 1) ; counter++)
-      {
-         itoa(pdn_addr->addrInfo[counter], temp, 10);
-         for(j = 0; (i < 20) && (temp[j] != '\0') && (j < 19); i++, j++)
-            ip_addr[i] = temp[j];
-         /*strcat((U8*)ip_addr,(U8*)temp);*/
-         if(counter != (pdn_addr->len - 2) && (i < 20))
-            ip_addr[i++] = '.';
-         /* strcat((U8*)ip_addr,(U8*)".");*/
-         if(counter == (pdn_addr->len - 2) && (i < 20))
-            ip_addr[i] = '\0';
->>>>>>> upstream/master
       }
     }
   }
