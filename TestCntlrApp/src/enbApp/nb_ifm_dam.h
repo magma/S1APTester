@@ -36,7 +36,7 @@ extern "C" {
 #define EVDAMMODIFYEGTPTUNEL        3
 #define EVTDAMDELEGTPTUNEL          4
 #define EUTXXX 1
-
+#define MAX_TFT_PF 4
 /** @def WR_DAM_CFG_OK 
  * This Macro defines the Configuration Status Success.
  */
@@ -114,8 +114,13 @@ typedef struct nbDamTnlId
    NbDamTnlType              tnlType;
 } NbDamTnlId;
 
+typedef struct nbTft {
+  U32 lnkEpsBearId;
+  U8 num_pf;
+  TftPfs pfList[CM_MAX_PKT_FILTERS];
+} NbTft;
 /**
- *@brief This structure contains the DAM Tunnel Information. 
+ *@brief This structure contains the DAM Tunnel Information.
  *
  *@details These are the structure members
  * - U32            transId      Transaction ID.
@@ -127,15 +132,15 @@ typedef struct nbDamTnlId
  * - WrEgtpTeid     remTeid      Remote TEID.
  * - Bool           isFullCfg    indicate the need for full configuration during HO
  */
-typedef struct NbDamTunInfo
-{
-   NbDamTnlId                tnlId;
-   NbDamTnlType              tnlType;
-   CmTptAddr                 dstAddr;
-   CmTptAddr                 srcAddr;
-   NbEgtpTeid                remTeid;
-   NbEgtpTeid                lclTeid;
-   U32                       pdnAddr;
+typedef struct NbDamTunInfo {
+  NbDamTnlId tnlId;
+  NbDamTnlType tnlType;
+  CmTptAddr dstAddr;
+  CmTptAddr srcAddr;
+  NbEgtpTeid remTeid;
+  NbEgtpTeid lclTeid;
+  U32 pdnAddr;
+  NbTft tft;
 } NbDamTnlInfo;
 
 /**

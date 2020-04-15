@@ -43,7 +43,7 @@ PUBLIC S16 NbEnbDropInitCtxtSetup(NbDropInitCtxtSetup *dropInitCtxtSetup);
 PUBLIC S16 nbDelUeCb(U8 ueId);
 PUBLIC S16 nbUeTnlCreatCfm(U8, U32);
 PUBLIC S16 nbPrcDamUeDelCfm(U8);
-PUBLIC S16 nbCreateUeTunnReq(U8, U32,U8);
+PUBLIC S16 nbCreateUeTunnReq(U8, U32, U8, NbuUeIpInfoRsp *);
 PUBLIC S16 NbEnbUeRelReqHdl(NbUeCntxtRelReq*);
 PUBLIC S16 NbEnbResetReqHdl(NbResetRequest *resetReq);
 /*PUBLIC S16 NbEnbErabRelIndHdl(NbErabRelInd *erabRelInd);*/
@@ -421,60 +421,48 @@ PUBLIC S16 nbPrcDamUeDelCfm(U8 ueId)
    RETVALUE(ret);
 }
 
-PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U32 ueIpAddr,U8 bearerId)
+PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U32 ueIpAddr, U8 bearerId,
+                             NbuUeIpInfoRsp *rsp)
 {
-   U8 idx       = 0;
-   NbUeCb *ueCb = NULLP;
-   U32 berId = bearerId;
+  U8 idx = 0;
+  U8 num_tft = 0;
+  NbUeCb *ueCb = NULLP;
+  U32 berId = bearerId;
 
-   NbDamTnlInfo   *tnlInfo = NULLP;
-   NbUeTunInfo    *tunInfo = NULLP;
+  NbDamTnlInfo *tnlInfo = NULLP;
+  NbUeTunInfo *tunInfo = NULLP;
 
-   NB_LOG_ENTERFN(&nbCb);
-   #if 0
-   for(idx = 0; nbCb.ueCbLst[idx] != NULLP ; idx++)
-   {
-      if(nbCb.ueCbLst[idx]->ueId == ueId)
-      {
-         ueCb = nbCb.ueCbLst[idx];
-         break;
+  NB_LOG_ENTERFN(&nbCb);
+  if (ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueId), sizeof(U8), 0,
+                             (PTR *)&ueCb))) {
+    RETVALUE(RFAILED);
+  }
+
+  NB_ALLOC_SHAREBLE_BUF(&tnlInfo, sizeof(NbDamTnlInfo));
+  if (tnlInfo != NULLP) {
+    for (idx = 0; idx < ueCb->tunnIdx; idx++) {
+      if (ROK != (cmHashListFind(&(ueCb->tunnInfo), (U8 *)&(berId), sizeof(U32),
+                                 0, (PTR *)&tunInfo))) {
+        RETVALUE(RFAILED);
+      } else {
+        tnlInfo->tnlId.drbId = tunInfo->bearerId;
+        tnlInfo->tnlType = NB_TNL_NORMAL;
+        tnlInfo->remTeid = tunInfo->remTeId;
+        tnlInfo->lclTeid = tunInfo->lclTeId;
+        tnlInfo->pdnAddr = ueIpAddr;
+        nbCpyCmTptAddr(&tnlInfo->dstAddr, &(tunInfo->sgwAddr));
+        nbCpyCmTptAddr(&tnlInfo->srcAddr, &(nbCb.datAppAddr));
+        tnlInfo->tft.lnkEpsBearId = rsp->lnkEpsBearId;
+        // Fill TFT info
+        if (rsp->noOfPfs) {
+          tnlInfo->tft.num_pf = rsp->noOfPfs;
+          cmMemcpy(tnlInfo->tft.pfList, rsp->pfList, sizeof(rsp->pfList));
+        }
+        RETVALUE(nbIfmDamTnlCreatReq(tnlInfo));
       }
-   }
-   #endif
-   if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueId),
-      sizeof(U8),0,(PTR *)&ueCb)))
-   {
-      RETVALUE(RFAILED);
-   }
-
-   NB_ALLOC_SHAREBLE_BUF(&tnlInfo, sizeof(NbDamTnlInfo));
-   if(tnlInfo != NULLP)
-   {
-      for(idx = 0 ; idx < ueCb->tunnIdx; idx ++)
-      {
-#if 0
-         if(bearerId == ueCb->tunnInfo[idx]->bearerId)
-#else
-            if ( ROK != (cmHashListFind(&(ueCb->tunnInfo), (U8 *)&(berId),
-                        sizeof(U32),0,(PTR *)&tunInfo)))
-            {
-               RETVALUE(RFAILED);
-            }
-#endif
-            else
-            {
-               tnlInfo->tnlId.drbId      = tunInfo->bearerId;
-               tnlInfo->tnlType          = NB_TNL_NORMAL;
-               tnlInfo->remTeid          = tunInfo->remTeId;
-               tnlInfo->lclTeid          = tunInfo->lclTeId;
-               tnlInfo->pdnAddr          = ueIpAddr;
-               nbCpyCmTptAddr(&tnlInfo->dstAddr, &(tunInfo->sgwAddr));
-               nbCpyCmTptAddr(&tnlInfo->srcAddr, &(nbCb.datAppAddr));
-               RETVALUE(nbIfmDamTnlCreatReq(tnlInfo));
-            }
-      }
-   }
-   RETVALUE(RFAILED);
+    }
+  }
+  RETVALUE(RFAILED);
 }
 
 PUBLIC S16 nbDelUeCb(U8 ueId)

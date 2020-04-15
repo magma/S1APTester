@@ -207,25 +207,103 @@ typedef struct nbIpInfo
    U32   pdnAddr;
 }NbIpInfo;
 
-typedef struct nbDamUeCb
-{
-   CmHashListEnt             ueHashEnt;
-   CmTimer                   inactivityTmr;
-   U16                       ueId;
-   U16                       expiryCnt;
-   U8                        ueState;
-   U8                        dataRcvd;
-   U32                       numTunnels;
-   U32                       numDrbs;
-#if 0
-   NbDamDrbCb                *drbs[NB_DAM_MAX_DRBS];
-   NbIpInfo                  ipInfo[11];
-   U8                        numIps;
-   U16                       ueIdx;
-#else
-   CmHashListCp               drbs;
-   CmHashListCp               ipInfo;
-#endif
+/**
+ * @brief This structure contains IPv4 address
+ *
+ * @details These are the structure members
+ * - U32        ipv4_addr      IPv4 address
+ * - U32        ipv4_addr_mask IPv4 address mask
+ */
+typedef struct {
+  U32 ipv4_addr;
+  U32 ipv4_addr_mask;
+} NbTftIpv4Addr;
+
+/**
+ * @brief This structure contains IP packet information
+ *
+ * @details These are the structure members
+ * - U32           locIpv4Addr      Local IPv4 address
+ * - U32           remIpv4Addr      Remote IPv4 addr
+ * - U16           locPort          Single local port
+ * - U16           remPort          Single remote port
+ * - U8            proto_id         Protocol type(TCP/UDP)
+ * - U8            srvClass         Type Of service(ToS)
+ */
+typedef struct nbIpPktFields {
+  U32 locIpv4Addr;
+  U32 remIpv4Addr;
+  U16 locPort;
+  U16 remPort;
+  U8 proto_id;
+  U8 srvClass;
+} NbIpPktFields;
+
+/**
+ * @brief This structure contains Packet filter info
+ *
+ * @details These are the structure members
+ * - U8            drbId            bearer id
+ * - U8            dir              UL/DL
+ * - U8            preced           precedence
+ * - NbTftIpv4Addr remIpv4Addr      Remote IPv4 addr
+ * - U16           locPort          Single local port
+ * - U16           locPortRangeLow  Local port range
+ * - U16           locPortRangeHigh Local port range
+ * - U16           remPort          Single remote port
+ * - U16           remPortRangeLow  Remote port range
+ * - U16           remPortRangeHigh Remote port range
+ * - U8            proto_id         Protocol type(TCP/UDP)
+ * - U32           ipsecParamInd    IP security parameter Indication
+ * - U8            srvClass         Type Of service(ToS)
+ * - U16           presence_mask;   Component precence mask
+ */
+typedef struct nbPktFilterList {
+  CmLList link;
+  U8 drbId;
+  U8 dir;
+  U8 preced;
+  NbTftIpv4Addr remIpv4Addr;
+  U16 locPort;
+  U16 locPortRangeLow;
+  U16 locPortRangeHigh;
+  U16 remPort;
+  U16 remPortRangeLow;
+  U16 remPortRangeHigh;
+  U8 proto_id;
+  U32 ipsecParamInd;
+  U8 srvClass;
+  U16 presence_mask;
+} NbPktFilterList;
+
+/**
+ * @brief This structure contains PDN information
+ *
+ * @details These are the structure members
+ * - U32          pdnAddr        PDN Address
+ * - U32          lnkEpsBearId   default bearer id
+ * - CmLListCp    tftPfList      List of packet filters
+ */
+typedef struct nbPdnCb {
+  CmHashListEnt ueHashEnt;
+  U32 pdnAddr;
+  U32 lnkEpsBearId;
+  CmLListCp tftPfList;
+} NbPdnCb;
+
+typedef struct nbDamUeCb {
+  CmHashListEnt ueHashEnt;
+  CmTimer inactivityTmr;
+  U16 ueId;
+  U16 expiryCnt;
+  U8 ueState;
+  U8 dataRcvd;
+  U32 numTunnels;
+  U32 numDrbs;
+  CmHashListCp drbs;
+  CmHashListCp ipInfo;
+  /*PDN Hash List*/
+  CmHashListCp pdnCb;
 } NbDamUeCb;
 
 /** 

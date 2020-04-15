@@ -20,6 +20,8 @@
      Prg:
 
 *********************************************************************21*/
+#include "tft.h"
+
 typedef struct _nbuSTmsi
 {
    Bool                      pres;
@@ -189,13 +191,33 @@ typedef enum  _bearerType
  DEDICATED_BER
 }BearerType;
 
-typedef struct _nbuUeIpInfoRsp
-{
-   U8 ueId;
-   U8 bearerId;
-   S8 IpAddr[20];
-   BearerType berType;
-}NbuUeIpInfoRsp;
+typedef struct _tftPfs {
+  U8 id;               /* Packet Filter identifier*/
+  U8 dir;              /* Direction */
+  U8 preced;           /* Precedence */
+  U32 ipv4Mask;        /* Ipv4 Address mask*/
+  U32 remoteIpv4;      /* Ipv4 Address */
+  U8 protId;           /* Protocol Identifier */
+  U16 localPort;       /* Local  Port Identifier */
+  U16 locPortRangeLow; /* Local port range*/
+  U16 locPortRangeHigh;
+  U16 remotePort;      /* Remote Port Identifier */
+  U16 remPortRangeLow; /* Remote port range*/
+  U16 remPortRangeHigh;
+  U32 secParam;     /* Security  Param */
+  U8 tos;           /* Type of Service  Param */
+  U16 presenceMask; /* Component presence mask*/
+} TftPfs;
+
+typedef struct _nbuUeIpInfoRsp {
+  U8 ueId;
+  U8 bearerId;
+  S8 IpAddr[20];
+  BearerType berType;
+  U32 lnkEpsBearId;
+  U8 noOfPfs;
+  TftPfs pfList[CM_MAX_PKT_FILTERS];
+} NbuUeIpInfoRsp;
 
 typedef struct _nbuTunDelReq
 {

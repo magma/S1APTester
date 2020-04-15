@@ -1296,108 +1296,114 @@ PUBLIC S16 nbProcPagingMsg
  *       RFAILED : not able to process the ERAB Release Cmd message due to
  *       memory lack.
  */
-PUBLIC S16 nbProcErabRelCmd
-(
- S1apPdu *s1apErabRlsCmd
-)
+PUBLIC S16 nbProcErabRelCmd(S1apPdu *s1apErabRlsCmd) 
 {
-   S16 retVal = ROK;
-   U16 numComp = 0;
-   U16 cnt = 0;
-   U16 erabCnt = 0;
-   NbErabRelCmd erabRelCmd = {0};
-   SztE_RABRlsCmmd *erabRlsCmd = NULLP;
-   SztProtIE_Field_E_RABRlsCmmdIEs *ie = NULLP;
-   U32 enbUeS1apId = 0;
-   U32 mmeUeS1apId = 0;
-   U8 numOfErabIdsRlsd = 0;
-   SztNAS_PDU           *nasPdu = NULLP;
-   NbUeCb *ueCb = NULLP;
-   NbUeTunInfo *tunInfo = NULLP;
+  S16 retVal = ROK;
+  U16 numComp = 0;
+  U16 cnt = 0;
+  U16 erabCnt = 0;
+  NbErabRelCmd erabRelCmd = {0};
+  SztE_RABRlsCmmd *erabRlsCmd = NULLP;
+  SztProtIE_Field_E_RABRlsCmmdIEs *ie = NULLP;
+  U32 enbUeS1apId = 0;
+  U32 mmeUeS1apId = 0;
+  U8 numOfErabIdsRlsd = 0;
+  SztNAS_PDU *nasPdu = NULLP;
+  NbUeCb *ueCb = NULLP;
+  NbUeTunInfo *tunInfo = NULLP;
+  NbErabRelReq *erabRelReq = NULLP;
 
-   TRC2(nbProcErabRelCmd);
-   erabRlsCmd = &s1apErabRlsCmd->pdu.val.initiatingMsg.value.u.sztE_RABRlsCmmd;
-   numComp = erabRlsCmd->protocolIEs.noComp.val;
+  TRC2(nbProcErabRelCmd);
+  erabRlsCmd = &s1apErabRlsCmd->pdu.val.initiatingMsg.value.u.sztE_RABRlsCmmd;
+  numComp = erabRlsCmd->protocolIEs.noComp.val;
 
-   for(cnt = 0; cnt < numComp; cnt++)
-   {
-      ie = &erabRlsCmd->protocolIEs.member[cnt];
-      switch(ie->id.val)
-      {
-         case Sztid_eNB_UE_S1AP_ID:
-            erabRelCmd.enbUeS1apId = ie->value.u.sztENB_UE_S1AP_ID.val;
-            break;
-         case Sztid_MME_UE_S1AP_ID:
-            erabRelCmd.mmeUeS1apId = ie->value.u.sztMME_UE_S1AP_ID.val;
-            break;
-         case Sztid_E_RABToBeRlsdLst:
-            erabRelCmd.numOfErabIds = ie->value.u.sztE_RABLst.noComp.val;
-            NB_ALLOC(&erabRelCmd.erabIdLst, erabRelCmd.numOfErabIds);
-            for(erabCnt = 0; erabCnt < erabRelCmd.numOfErabIds; erabCnt++)
-            {
-               erabRelCmd.erabIdLst[erabCnt] = ie->value.u.sztE_RABLst.\
-                                                member[erabCnt].value.u.\
-                                                sztE_RABItem.e_RAB_ID.val;
-            }
-            break;
-         case Sztid_uEaggregateMaxBitrate:
-            break;
-         case Sztid_downlinkNASTport:
-            break;
-         case Sztid_NAS_PDU:
-	    if(ie->value.u.sztNAS_PDU.pres == PRSNT_NODEF){
-
-         erabRelCmd.nasPdu.pres = TRUE;
-         NB_ALLOC(&erabRelCmd.nasPdu.val,
-               ((ie->value.u.sztNAS_PDU.len + 1 ) * sizeof(U8)));
-         erabRelCmd.nasPdu.pres = TRUE;
-	 erabRelCmd.nasPdu.len  = ie->value.u.sztNAS_PDU.len;
-         cmMemcpy((U8 *)erabRelCmd.nasPdu.val, (U8 *)ie->value.u.sztNAS_PDU.val, erabRelCmd.nasPdu.len);
-            }
-            break;
-         default:
-            NB_LOG_ERROR(&nbCb, "Invalid IE.");
-            retVal = RFAILED;
-            break;
+  for (cnt = 0; cnt < numComp; cnt++) {
+    ie = &erabRlsCmd->protocolIEs.member[cnt];
+    switch (ie->id.val) {
+    case Sztid_eNB_UE_S1AP_ID:
+      erabRelCmd.enbUeS1apId = ie->value.u.sztENB_UE_S1AP_ID.val;
+      break;
+    case Sztid_MME_UE_S1AP_ID:
+      erabRelCmd.mmeUeS1apId = ie->value.u.sztMME_UE_S1AP_ID.val;
+      break;
+    case Sztid_E_RABToBeRlsdLst:
+      erabRelCmd.numOfErabIds = ie->value.u.sztE_RABLst.noComp.val;
+      NB_ALLOC(&erabRelCmd.erabIdLst, erabRelCmd.numOfErabIds);
+      for (erabCnt = 0; erabCnt < erabRelCmd.numOfErabIds; erabCnt++) {
+        erabRelCmd.erabIdLst[erabCnt] = ie->value.u.sztE_RABLst.member[erabCnt]
+                                            .value.u.sztE_RABItem.e_RAB_ID.val;
       }
-   }
-   enbUeS1apId = erabRelCmd.enbUeS1apId;
-   mmeUeS1apId = erabRelCmd.mmeUeS1apId;
-   numOfErabIdsRlsd = erabRelCmd.numOfErabIds;
+      break;
+    case Sztid_uEaggregateMaxBitrate:
+      break;
+    case Sztid_downlinkNASTport:
+      break;
+    case Sztid_NAS_PDU:
+      if (ie->value.u.sztNAS_PDU.pres == PRSNT_NODEF) {
 
-   /* Get UeCb using enb/mme ue s1ap Ids */
-   /*for(cnt = 0; cnt < nbCb.crntUeIdx; cnt++)
-   {
-   }*/
-   cmHashListFind(&(nbCb.ueCbLst),(U8*)&(enbUeS1apId),sizeof(U8),
-     0,(PTR*)(&ueCb));
-   for(cnt = 0; cnt < numOfErabIdsRlsd; cnt++)
-   {
-     U32 bearerId = erabRelCmd.erabIdLst[cnt];
-     retVal = cmHashListFind(&(ueCb->tunnInfo),(U8*)&(bearerId), sizeof(U32), 0, (PTR*)(&tunInfo));
-     if (tunInfo == NULL)
-     {
-       NB_LOG_ERROR(&nbCb, "Could not find tuninfo \n");
-     }
-     if (tunInfo)
-     {
-       cmHashListDelete(&(ueCb->tunnInfo),(PTR)(tunInfo));
-       NB_LOG_DEBUG(&nbCb, "Deleted tun info for bearer %d\n", erabRelCmd.erabIdLst[cnt]);
-     }
-   }
+        erabRelCmd.nasPdu.pres = TRUE;
+        NB_ALLOC(&erabRelCmd.nasPdu.val,
+                 ((ie->value.u.sztNAS_PDU.len + 1) * sizeof(U8)));
+        erabRelCmd.nasPdu.pres = TRUE;
+        erabRelCmd.nasPdu.len = ie->value.u.sztNAS_PDU.len;
+        cmMemcpy((U8 *)erabRelCmd.nasPdu.val, (U8 *)ie->value.u.sztNAS_PDU.val,
+                 erabRelCmd.nasPdu.len);
+      }
+      break;
+    default:
+      NB_LOG_ERROR(&nbCb, "Invalid IE.");
+      retVal = RFAILED;
+      break;
+    }
+  }
+  enbUeS1apId = erabRelCmd.enbUeS1apId;
+  mmeUeS1apId = erabRelCmd.mmeUeS1apId;
+  numOfErabIdsRlsd = erabRelCmd.numOfErabIds;
 
-   if (erabRelCmd.nasPdu.pres == TRUE) {
-   /* Need to send to UeApp */
-     retVal = nbSendErabsRelInfo(&erabRelCmd);
+  /* Get UeCb using enb/mme ue s1ap Ids */
+  /*for(cnt = 0; cnt < nbCb.crntUeIdx; cnt++)
+  {
+  }*/
+  cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(enbUeS1apId), sizeof(U8), 0,
+                 (PTR *)(&ueCb));
+  for (cnt = 0; cnt < numOfErabIdsRlsd; cnt++) {
+    U32 bearerId = erabRelCmd.erabIdLst[cnt];
+    retVal = cmHashListFind(&(ueCb->tunnInfo), (U8 *)&(bearerId), sizeof(U32),
+                            0, (PTR *)(&tunInfo));
+    if (tunInfo == NULL) {
+      NB_LOG_ERROR(&nbCb, "Could not find tuninfo \n");
+    }
+    if (tunInfo) {
+      cmHashListDelete(&(ueCb->tunnInfo), (PTR)(tunInfo));
+      NB_LOG_DEBUG(&nbCb, "Deleted tun info for bearer %d\n",
+                   erabRelCmd.erabIdLst[cnt]);
+    }
+  }
 
-   /* Send Erab Rel Rsp message */
-    retVal = nbBuildAndSendErabRelRsp(enbUeS1apId, mmeUeS1apId, numOfErabIdsRlsd, erabRelCmd.erabIdLst, 0, NULL);
-   } else {
-   /* Indicate the TFW about the recieved E-RAB Release command. */
+  /* Send message to nb dam to delete the packet filters */
+  NB_ALLOC(&erabRelReq, sizeof(NbErabRelReq));
+  erabRelReq->ueId = ueCb->ueId;
+  erabRelReq->numOfErabIds = numOfErabIdsRlsd;
+
+  NB_ALLOC(&erabRelReq->erabIdLst, erabRelReq->numOfErabIds * sizeof(U8));
+  cmMemcpy(erabRelReq->erabIdLst, erabRelCmd.erabIdLst,
+           erabRelReq->numOfErabIds * sizeof(U8));
+  nbIfmDamErabDelReq((Void *)erabRelReq);
+
+  if (erabRelCmd.nasPdu.pres == TRUE) {
+    /* Need to send to UeApp */
+    retVal = nbSendErabsRelInfo(&erabRelCmd);
+
+    /* Send Erab Rel Rsp message */
+    retVal =
+        nbBuildAndSendErabRelRsp(enbUeS1apId, mmeUeS1apId, numOfErabIdsRlsd,
+                                 erabRelCmd.erabIdLst, 0, NULL);
+  } else {
+    /* Indicate the TFW about the recieved E-RAB Release command. */
     nbUiSendErabRelCmdInfoToUser(&erabRelCmd);
-   }
+  }
 
-   RETVALUE(retVal);
+  RETVALUE(retVal);
 } /* end of nbProcErabRelCmd */
 
 /*

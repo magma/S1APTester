@@ -23,7 +23,7 @@ EXTERN S16 nbS1apFillEutranCgi(S1apPdu*, SztEUTRAN_CGI*, EnbCb*);
 EXTERN S16 nbS1apFillEutranCgi(S1apPdu*, SztEUTRAN_CGI*);
 #endif
 EXTERN S16 NbHandleInitialUeMsg(NbuInitialUeMsg*);
-EXTERN S16 nbCreateUeTunnReq(U8, U32,U8);
+EXTERN S16 nbCreateUeTunnReq(U8, U32, U8, NbuUeIpInfoRsp *);
 #ifdef MULTI_ENB_SUPPORT
 PRIVATE S16 nbS1apBldInitUePdu(NbUeCb*, NbTai*, TknStrOSXL*, S1apPdu**, U32,
       NbuSTmsi, EnbCb*);
@@ -496,21 +496,20 @@ PUBLIC S16 nbS1apFillEutranCgi
 
 PUBLIC S16 NbHandleUeIpInfoRsp(NbuUeIpInfoRsp *rsp)
 {
-   U32 ueIpAddr = 0;
-   U8 ueId;
-   U8 bearerId;
+  U32 ueIpAddr = 0;
+  U8 ueId;
+  U8 bearerId;
 
-   ueId = rsp->ueId;
-   bearerId = rsp->bearerId;
-   cmInetAddr(rsp->IpAddr, &ueIpAddr);
-   ueIpAddr = CM_INET_NTOH_U32(ueIpAddr);
-   if(rsp->berType == DEFAULT_BER)
-   {
-   nbAppCfgrPdnAssignedAddr(ueId, ueIpAddr);
-   }
-   /* set the datrcvd flag for ue */
-   nbDamSetDatFlag(ueId);
-   RETVALUE(nbCreateUeTunnReq(ueId, ueIpAddr,bearerId));
+  ueId = rsp->ueId;
+  bearerId = rsp->bearerId;
+  cmInetAddr(rsp->IpAddr, &ueIpAddr);
+  ueIpAddr = CM_INET_NTOH_U32(ueIpAddr);
+  if (rsp->berType == DEFAULT_BER) {
+    nbAppCfgrPdnAssignedAddr(ueId, ueIpAddr);
+  }
+  /* set the datrcvd flag for ue */
+  nbDamSetDatFlag(ueId);
+  RETVALUE(nbCreateUeTunnReq(ueId, ueIpAddr, bearerId, rsp));
 }
 
 PUBLIC Void nbHandleUeIpInfoReq(U8 ueId,U8 bearerId)
