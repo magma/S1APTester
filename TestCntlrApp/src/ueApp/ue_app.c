@@ -879,6 +879,44 @@ PRIVATE S16 encode_apn
    RETVALUE(RFAILED);
 }
 
+ /*
+ *
+ *       Fun: ueAppFillPco
+ *
+ *       Desc: This function populates PCO structure.
+ *
+ *       Notes: none
+ *
+ *       File:  ue_app.c
+ *
+ */
+PRIVATE Void ueAppFillPco(CmEsmProtCfgOpt *dest_pco, UeEsmProtCfgOpt src_pco)
+{
+  dest_pco->protCfgOpt.pres = TRUE;
+  dest_pco->protCfgOpt.cfgProt = src_pco.protCfgOpt.cfgProt;
+  dest_pco->protCfgOpt.ext = src_pco.protCfgOpt.ext;
+  dest_pco->protCfgOpt.numProtId = src_pco.protCfgOpt.numProtId;
+  dest_pco->protCfgOpt.numContId = src_pco.protCfgOpt.numContId;
+
+  U8 count = 0;
+  for (count=0;count<src_pco.protCfgOpt.numProtId;count ++) {
+    dest_pco->protCfgOpt.p[count].pid = src_pco.protCfgOpt.p[count].pid;
+    dest_pco->protCfgOpt.p[count].len = src_pco.protCfgOpt.p[count].len;
+    cmMemcpy(dest_pco->protCfgOpt.p[count].val,
+      src_pco.protCfgOpt.p[count].val,
+      src_pco.protCfgOpt.p[count].len);
+  }
+  for (count=0;count<src_pco.protCfgOpt.numContId;count ++) {
+    dest_pco->protCfgOpt.c[count].cid = src_pco.protCfgOpt.c[count].cid;
+    dest_pco->protCfgOpt.c[count].len = src_pco.protCfgOpt.c[count].len;
+    cmMemcpy(dest_pco->protCfgOpt.c[count].val,
+      src_pco.protCfgOpt.c[count].val,
+      src_pco.protCfgOpt.c[count].len);
+  }
+  RETVOID;
+}
+
+
 PRIVATE S16 ueAppUtlBldStandAlonePdnConReq
 (
  CmNasEvnt **esmEvnt,
@@ -932,6 +970,12 @@ PRIVATE S16 ueAppUtlBldStandAlonePdnConReq
      encode_apn(&msg->u.conReq.apn,&ueUetPdnConReq->nasPdnApn);
     } else {
      msg->u.conReq.apn.pres      = FALSE;
+   }
+   /* protocol configuration options */
+   ueAppFillPco(msg->u.conReq.protCfgOpt, ueUetPdnConReq->protCfgOpt);
+   if(ueUetPdnConReq->protCfgOpt.pres == TRUE)
+   {
+
    }
    RETVALUE(ROK);
 }
@@ -1022,28 +1066,7 @@ PRIVATE S16 ueAppUtlBldPdnConReq
    /* protocol configuration options */
    if(protCfgOpt->pres == TRUE)
    {
-      msg->u.conReq.protCfgOpt.pres = TRUE;
-      msg->u.conReq.protCfgOpt.cfgProt = protCfgOpt->cfgProt;
-      msg->u.conReq.protCfgOpt.ext = protCfgOpt->ext;
-      msg->u.conReq.protCfgOpt.numProtId = protCfgOpt->numProtId;
-      msg->u.conReq.protCfgOpt.numContId = protCfgOpt->numContId;
-
-     for (count=0;count<protCfgOpt->numProtId;count ++)
-     {
-  	msg->u.conReq.protCfgOpt.p[count].pid = protCfgOpt->p[count].pid;
-  	msg->u.conReq.protCfgOpt.p[count].len = protCfgOpt->p[count].len;
-	cmMemcpy(msg->u.conReq.protCfgOpt.p[count].val,
-		   protCfgOpt->p[count].val,
-		   protCfgOpt->p[count].len);
-     }
-     for (count=0;count<protCfgOpt->numContId;count ++)
-     {
-  	msg->u.conReq.protCfgOpt.c[count].cid = protCfgOpt->c[count].cid;
-  	msg->u.conReq.protCfgOpt.c[count].len = protCfgOpt->c[count].len;
-	cmMemcpy(msg->u.conReq.protCfgOpt.c[count].val,
-		   protCfgOpt->c[count].val,
-		   protCfgOpt->c[count].len);
-      }
+     ueAppFillPco(msg->u.conReq.protCfgOpt, *protCfgOpt);
    }
 
    RETVALUE(ROK);

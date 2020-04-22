@@ -325,6 +325,7 @@ typedef struct _ueUetPdnConReq
    U32             pdnType;
    UeEmmNasPdnApn  nasPdnApn;
    U8              reqType;
+   UeEsmProtCfgOpt protCfgOpt;
 }UeUetPdnConReq;
 
 typedef struct _uePdnRejectInfo

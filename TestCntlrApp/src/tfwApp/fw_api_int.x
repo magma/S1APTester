@@ -931,6 +931,7 @@ typedef struct uepdnConReq
    U8       reqType;
    pdn_Type pdnType_pr;
    pdn_APN  pdnAPN_pr;
+   prot_CfgOpts protCfgOpts_pr;
 }uepdnConReq_t;
 
 typedef struct uepdnDisconnectReq {
