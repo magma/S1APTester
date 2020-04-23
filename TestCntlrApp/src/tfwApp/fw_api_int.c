@@ -699,16 +699,16 @@ PUBLIC S16 handleEndToEndAttachReq(ueAttachRequest_t *data)
 	  {
 	  	ueAttachReq->protCfgOpt.p[count].pid = data->protCfgOpts_pr.p[count].pid;
 	  	ueAttachReq->protCfgOpt.p[count].len = data->protCfgOpts_pr.p[count].len;
-		cmMemcpy(ueAttachReq->protCfgOpt.p[count].val, 
-			   data->protCfgOpts_pr.p[count].val, 
+		cmMemcpy(ueAttachReq->protCfgOpt.p[count].val,
+			   data->protCfgOpts_pr.p[count].val,
 			   data->protCfgOpts_pr.p[count].len);
 	  }
 	  for (count=0;count<data->protCfgOpts_pr.numContId;count ++)
 	  {
 	  	ueAttachReq->protCfgOpt.c[count].cid = data->protCfgOpts_pr.c[count].cid;
 	  	ueAttachReq->protCfgOpt.c[count].len = data->protCfgOpts_pr.c[count].len;
-		cmMemcpy(ueAttachReq->protCfgOpt.c[count].val, 
-			   data->protCfgOpts_pr.c[count].val, 
+		cmMemcpy(ueAttachReq->protCfgOpt.c[count].val,
+			   data->protCfgOpts_pr.c[count].val,
 			   data->protCfgOpts_pr.c[count].len);
 	  }
    }
