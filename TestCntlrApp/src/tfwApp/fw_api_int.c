@@ -836,18 +836,18 @@ PUBLIC S16 handleAttachReq(ueAttachRequest_t *data)
 	  for (count=0;count<data->protCfgOpts_pr.numProtId;count ++)
 	  {
 	  	ueAttachReq->protCfgOpt.p[count].len = data->protCfgOpts_pr.p[count].len;
-		cmMemcpy(ueAttachReq->protCfgOpt.p[count].val, 
-			   data->protCfgOpts_pr.p[count].val, 
+		cmMemcpy(ueAttachReq->protCfgOpt.p[count].val,
+			   data->protCfgOpts_pr.p[count].val,
 			   data->protCfgOpts_pr.p[count].len);
 	  }
 	  for (count=0;count<data->protCfgOpts_pr.numContId;count ++)
 	  {
 	  	ueAttachReq->protCfgOpt.c[count].len = data->protCfgOpts_pr.c[count].len;
-		cmMemcpy(ueAttachReq->protCfgOpt.c[count].val, 
-			   data->protCfgOpts_pr.c[count].val, 
+		cmMemcpy(ueAttachReq->protCfgOpt.c[count].val,
+			   data->protCfgOpts_pr.c[count].val,
 			   data->protCfgOpts_pr.c[count].len);
 	  }
-   }  
+   }
    if(data->drxParm_pr.pres)
    	{
    	  ueAttachReq->drxParm.pres = TRUE;
