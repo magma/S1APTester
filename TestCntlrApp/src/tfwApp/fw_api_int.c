@@ -689,28 +689,28 @@ PUBLIC S16 handleEndToEndAttachReq(ueAttachRequest_t *data)
    }
    if (data->protCfgOpts_pr.pres == TRUE)
    {
-      ueAttachReq->protCfgOpt.pres = TRUE;
-      ueAttachReq->protCfgOpt.len = data->protCfgOpts_pr.len;
-      ueAttachReq->protCfgOpt.cfgProt = data->protCfgOpts_pr.cfgProt;
-      ueAttachReq->protCfgOpt.ext = data->protCfgOpts_pr.ext;
-      ueAttachReq->protCfgOpt.numProtId = data->protCfgOpts_pr.numProtId;
-      ueAttachReq->protCfgOpt.numContId = data->protCfgOpts_pr.numContId;
-      for (count=0;count<data->protCfgOpts_pr.numProtId;count ++)
-      {
-         ueAttachReq->protCfgOpt.p[count].pid = data->protCfgOpts_pr.p[count].pid;
-         ueAttachReq->protCfgOpt.p[count].len = data->protCfgOpts_pr.p[count].len;
-         cmMemcpy(ueAttachReq->protCfgOpt.p[count].val,
-               data->protCfgOpts_pr.p[count].val,
-               data->protCfgOpts_pr.p[count].len);
-      }
-      for (count=0;count<data->protCfgOpts_pr.numContId;count ++)
-      {
-         ueAttachReq->protCfgOpt.c[count].cid = data->protCfgOpts_pr.c[count].cid;
-         ueAttachReq->protCfgOpt.c[count].len = data->protCfgOpts_pr.c[count].len;
-         cmMemcpy(ueAttachReq->protCfgOpt.c[count].val,
-               data->protCfgOpts_pr.c[count].val,
-               data->protCfgOpts_pr.c[count].len);
-      }
+   	  ueAttachReq->protCfgOpt.pres = TRUE;
+	  ueAttachReq->protCfgOpt.len = data->protCfgOpts_pr.len;
+	  ueAttachReq->protCfgOpt.cfgProt = data->protCfgOpts_pr.cfgProt;
+	  ueAttachReq->protCfgOpt.ext = data->protCfgOpts_pr.ext;
+	  ueAttachReq->protCfgOpt.numProtId = data->protCfgOpts_pr.numProtId;
+	  ueAttachReq->protCfgOpt.numContId = data->protCfgOpts_pr.numContId;
+	  for (count=0;count<data->protCfgOpts_pr.numProtId;count ++)
+	  {
+	  	ueAttachReq->protCfgOpt.p[count].pid = data->protCfgOpts_pr.p[count].pid;
+	  	ueAttachReq->protCfgOpt.p[count].len = data->protCfgOpts_pr.p[count].len;
+		cmMemcpy(ueAttachReq->protCfgOpt.p[count].val, 
+			   data->protCfgOpts_pr.p[count].val, 
+			   data->protCfgOpts_pr.p[count].len);
+	  }
+	  for (count=0;count<data->protCfgOpts_pr.numContId;count ++)
+	  {
+	  	ueAttachReq->protCfgOpt.c[count].cid = data->protCfgOpts_pr.c[count].cid;
+	  	ueAttachReq->protCfgOpt.c[count].len = data->protCfgOpts_pr.c[count].len;
+		cmMemcpy(ueAttachReq->protCfgOpt.c[count].val, 
+			   data->protCfgOpts_pr.c[count].val, 
+			   data->protCfgOpts_pr.c[count].len);
+	  }
    }
    if(data->drxParm_pr.pres)
    	{
@@ -836,18 +836,18 @@ PUBLIC S16 handleAttachReq(ueAttachRequest_t *data)
 	  for (count=0;count<data->protCfgOpts_pr.numProtId;count ++)
 	  {
 	  	ueAttachReq->protCfgOpt.p[count].len = data->protCfgOpts_pr.p[count].len;
-		cmMemcpy(ueAttachReq->protCfgOpt.p[count].val,
-			   data->protCfgOpts_pr.p[count].val,
+		cmMemcpy(ueAttachReq->protCfgOpt.p[count].val, 
+			   data->protCfgOpts_pr.p[count].val, 
 			   data->protCfgOpts_pr.p[count].len);
 	  }
 	  for (count=0;count<data->protCfgOpts_pr.numContId;count ++)
 	  {
 	  	ueAttachReq->protCfgOpt.c[count].len = data->protCfgOpts_pr.c[count].len;
-		cmMemcpy(ueAttachReq->protCfgOpt.c[count].val,
-			   data->protCfgOpts_pr.c[count].val,
+		cmMemcpy(ueAttachReq->protCfgOpt.c[count].val, 
+			   data->protCfgOpts_pr.c[count].val, 
 			   data->protCfgOpts_pr.c[count].len);
 	  }
-   }
+   }  
    if(data->drxParm_pr.pres)
    	{
    	  ueAttachReq->drxParm.pres = TRUE;

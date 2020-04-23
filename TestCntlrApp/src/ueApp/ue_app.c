@@ -1032,22 +1032,22 @@ PRIVATE S16 ueAppUtlBldPdnConReq
       msg->u.conReq.protCfgOpt.ext = protCfgOpt->ext;
       msg->u.conReq.protCfgOpt.numProtId = protCfgOpt->numProtId;
       msg->u.conReq.protCfgOpt.numContId = protCfgOpt->numContId;
-
-      for (count=0;count<protCfgOpt->numProtId;count ++)
-      {
-         msg->u.conReq.protCfgOpt.p[count].pid = protCfgOpt->p[count].pid;
-         msg->u.conReq.protCfgOpt.p[count].len = protCfgOpt->p[count].len;
-         cmMemcpy(msg->u.conReq.protCfgOpt.p[count].val,
-               protCfgOpt->p[count].val,
-               protCfgOpt->p[count].len);
-      }
-      for (count=0;count<protCfgOpt->numContId;count ++)
-      {
-         msg->u.conReq.protCfgOpt.c[count].cid = protCfgOpt->c[count].cid;
-         msg->u.conReq.protCfgOpt.c[count].len = protCfgOpt->c[count].len;
-         cmMemcpy(msg->u.conReq.protCfgOpt.c[count].val,
-               protCfgOpt->c[count].val,
-               protCfgOpt->c[count].len);
+  
+     for (count=0;count<protCfgOpt->numProtId;count ++)
+     {
+  	msg->u.conReq.protCfgOpt.p[count].pid = protCfgOpt->p[count].pid;
+  	msg->u.conReq.protCfgOpt.p[count].len = protCfgOpt->p[count].len;
+	cmMemcpy(msg->u.conReq.protCfgOpt.p[count].val, 
+		   protCfgOpt->p[count].val, 
+		   protCfgOpt->p[count].len);
+     }
+     for (count=0;count<protCfgOpt->numContId;count ++)
+     {
+  	msg->u.conReq.protCfgOpt.c[count].cid = protCfgOpt->c[count].cid;
+  	msg->u.conReq.protCfgOpt.c[count].len = protCfgOpt->c[count].len;
+	cmMemcpy(msg->u.conReq.protCfgOpt.c[count].val, 
+		   protCfgOpt->c[count].val, 
+		   protCfgOpt->c[count].len);
       }
    }
 
