@@ -27,7 +27,7 @@ extern "C" {
 
 #define UE_IMSI_LENGTH 15
 #define CM_EMM_MAX_MOBILE_ID_DIGS 15
-#define MAX_APN_LEN 6
+#define MAX_APN_LEN 50
 #define OP_KEY_LEN 16
 #define SHARED_KEY_LEN 16
 #define EVTUEMSGREQ 0

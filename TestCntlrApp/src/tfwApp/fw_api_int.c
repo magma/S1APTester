@@ -594,47 +594,6 @@ PRIVATE Void insert_ue_entry(U8 ueid, UeIdCb *ueIdCb)
    FW_LOG_EXITFNVOID(fwCb);
 }
 
- /*
- *
- *   Fun:   fill_pco
- *
- *   Desc:  This function is used to populate PCO structure
- *
- *   Ret:   None
- *
- *   Notes: None
- *
- *   File:  fw_api_int.c
- *
- */
-PRIVATE Void fill_pco(prot_CfgOpts *dest_pco, prot_CfgOpts src_pco)
-{
-  dest_pco->pres = TRUE;
-  dest_pco->len = src_pco.len;
-  dest_pco->cfgProt = src_pco.cfgProt;
-  dest_pco->ext = src_pco.ext;
-  dest_pco->numProtId = src_pco.numProtId;
-  dest_pco->numContId = src_pco.numContId;
-
-  U8 count;
-  for (count=0;count<src_pco.numProtId;count ++) {
-    dest_pco->p[count].pid = src_pco.p[count].pid;
-    dest_pco->p[count].len = src_pco.p[count].len;
-    cmMemcpy(dest_pco->p[count].val,
-      src_pco.p[count].val,
-      src_pco.p[count].len);
-  }
-
-  for (count=0;count<src_pco.numContId;count ++) {
-    dest_pco->c[count].cid = src_pco.c[count].cid;
-    dest_pco->c[count].len = src_pco.c[count].len;
-    cmMemcpy(dest_pco->c[count].val,
-      src_pco.c[count].val,
-      src_pco.c[count].len);
-  }
-  RETVOID;
-}
-
 /*
  *
  *   Fun:   handleEndToEndAttachReq
@@ -730,8 +689,28 @@ PUBLIC S16 handleEndToEndAttachReq(ueAttachRequest_t *data)
    }
    if (data->protCfgOpts_pr.pres == TRUE)
    {
-      fill_pco(&ueAttachReq->protCfgOpt, data->protCfgOpts_pr);
-
+      ueAttachReq->protCfgOpt.pres = TRUE;
+      ueAttachReq->protCfgOpt.len = data->protCfgOpts_pr.len;
+      ueAttachReq->protCfgOpt.cfgProt = data->protCfgOpts_pr.cfgProt;
+      ueAttachReq->protCfgOpt.ext = data->protCfgOpts_pr.ext;
+      ueAttachReq->protCfgOpt.numProtId = data->protCfgOpts_pr.numProtId;
+      ueAttachReq->protCfgOpt.numContId = data->protCfgOpts_pr.numContId;
+      for (count=0;count<data->protCfgOpts_pr.numProtId;count ++)
+      {
+         ueAttachReq->protCfgOpt.p[count].pid = data->protCfgOpts_pr.p[count].pid;
+         ueAttachReq->protCfgOpt.p[count].len = data->protCfgOpts_pr.p[count].len;
+         cmMemcpy(ueAttachReq->protCfgOpt.p[count].val,
+               data->protCfgOpts_pr.p[count].val,
+               data->protCfgOpts_pr.p[count].len);
+      }
+      for (count=0;count<data->protCfgOpts_pr.numContId;count ++)
+      {
+         ueAttachReq->protCfgOpt.c[count].cid = data->protCfgOpts_pr.c[count].cid;
+         ueAttachReq->protCfgOpt.c[count].len = data->protCfgOpts_pr.c[count].len;
+         cmMemcpy(ueAttachReq->protCfgOpt.c[count].val,
+               data->protCfgOpts_pr.c[count].val,
+               data->protCfgOpts_pr.c[count].len);
+      }
    }
    if(data->drxParm_pr.pres)
    	{
@@ -2463,7 +2442,7 @@ PRIVATE Void handlPdnConReq(uepdnConReq_t* data)
    }
    // PCO
    if (data->protCfgOpts_pr.pres) {
-     fill_pco(&uePdnConReq->protCfgOpt, data->protCfgOpts_pr);
+     cmMemcpy(&uePdnConReq->protCfgOpt, &data->protCfgOpts_pr, sizeof(data->protCfgOpts_pr));
    }
    fwSendToUeApp(uetMsg);
    FW_LOG_DEBUG(fwCb, "\n-------------------------------\n\
