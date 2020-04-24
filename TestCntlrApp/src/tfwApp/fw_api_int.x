@@ -925,14 +925,13 @@ typedef struct ueCntxtRelReq
    RelCause cause;
 }ueCntxtRelReq_t;
 
-typedef struct uepdnConReq
-{
-   U8       ue_Id;
-   U8       reqType;
-   pdn_Type pdnType_pr;
-   pdn_APN  pdnAPN_pr;
-   prot_CfgOpts protCfgOpts_pr;
-}uepdnConReq_t;
+typedef struct uepdnConReq {
+  U8 ue_Id;
+  U8 reqType;
+  pdn_Type pdnType_pr;
+  pdn_APN pdnAPN_pr;
+  prot_CfgOpts protCfgOpts_pr;
+} uepdnConReq_t;
 
 typedef struct uepdnDisconnectReq {
   U8 ue_Id;

@@ -319,14 +319,13 @@ PDN APN */
    Bool eti; /*Esm Information Transfer Flag*/
 }UeUetAttachReq;
 
-typedef struct _ueUetPdnConReq
-{
-   U8              ueId;
-   U32             pdnType;
-   UeEmmNasPdnApn  nasPdnApn;
-   U8              reqType;
-   UeEsmProtCfgOpt protCfgOpt;
-}UeUetPdnConReq;
+typedef struct _ueUetPdnConReq {
+  U8 ueId;
+  U32 pdnType;
+  UeEmmNasPdnApn nasPdnApn;
+  U8 reqType;
+  UeEsmProtCfgOpt protCfgOpt;
+} UeUetPdnConReq;
 
 typedef struct _uePdnRejectInfo
 {
