@@ -879,61 +879,60 @@ PRIVATE S16 encode_apn
    RETVALUE(RFAILED);
 }
 
-PRIVATE S16 ueAppUtlBldStandAlonePdnConReq
-(
- CmNasEvnt **esmEvnt,
- UeUetPdnConReq *ueUetPdnConReq
-)
+PRIVATE S16 ueAppUtlBldStandAlonePdnConReq(CmNasEvnt **esmEvnt,
+                                           UeUetPdnConReq *ueUetPdnConReq)
 {
-   CmEsmMsg    *msg = NULLP;
-   printf("Building PDN Connection Request\n");
+  CmEsmMsg *msg = NULLP;
+  printf("Building PDN Connection Request\n");
 
-   if(esmEvnt == NULLP)
-   {
-      RETVALUE(RFAILED);
-   }
+  if (esmEvnt == NULLP) {
+    RETVALUE(RFAILED);
+  }
 
-   /* Allocate memory for mme evnt */
-   CM_ALLOC_NASEVNT (esmEvnt, CM_ESM_PD);
-   if (*esmEvnt == NULLP)
-   {
-      RETVALUE(RFAILED);
-   }
+  /* Allocate memory for mme evnt */
+  CM_ALLOC_NASEVNT(esmEvnt, CM_ESM_PD);
+  if (*esmEvnt == NULLP) {
+    RETVALUE(RFAILED);
+  }
 
-   /*Allocate memory for ESM message*/
-   if (cmGetMem(&(*esmEvnt)->memCp, sizeof(CmEsmMsg), (Ptr *)&msg) != ROK)
-   {
-      CM_FREE_NASEVNT(esmEvnt);
-      RETVALUE(RFAILED);
-   }
+  /*Allocate memory for ESM message*/
+  if (cmGetMem(&(*esmEvnt)->memCp, sizeof(CmEsmMsg), (Ptr *)&msg) != ROK) {
+    CM_FREE_NASEVNT(esmEvnt);
+    RETVALUE(RFAILED);
+  }
 
-   msg->protDisc = CM_ESM_PD;
-   (*esmEvnt)->m.esmEvnt = msg;
+  msg->protDisc = CM_ESM_PD;
+  (*esmEvnt)->m.esmEvnt = msg;
 
-   (*esmEvnt)->secHT = CM_NAS_SEC_HDR_TYPE_INT_PRTD_ENC;
-   /* Fill ESM PDN connectivity request message */
+  (*esmEvnt)->secHT = CM_NAS_SEC_HDR_TYPE_INT_PRTD_ENC;
+  /* Fill ESM PDN connectivity request message */
 
-   /*Fill mandatory IE's*/
-   /* EPS barer ID IE*/
-   msg->bearerId = 0;
+  /*Fill mandatory IE's*/
+  /* EPS barer ID IE*/
+  msg->bearerId = 0;
 
-   /* PDN connectivity request message idenmtity*/
-   msg->msgType = CM_ESM_MSG_PDN_CONN_REQ;
+  /* PDN connectivity request message idenmtity*/
+  msg->msgType = CM_ESM_MSG_PDN_CONN_REQ;
 
-   /* Request type IE*/
-   msg->u.conReq.reqType.pres = TRUE;
-   msg->u.conReq.reqType.val = CM_ESM_REQTYPE_INIT;
-   /* PDN type IE*/
-   msg->u.conReq.pdnType.pres = TRUE;
-   msg->u.conReq.pdnType.val = ueUetPdnConReq->pdnType;
+  /* Request type IE*/
+  msg->u.conReq.reqType.pres = TRUE;
+  msg->u.conReq.reqType.val = CM_ESM_REQTYPE_INIT;
+  /* PDN type IE*/
+  msg->u.conReq.pdnType.pres = TRUE;
+  msg->u.conReq.pdnType.val = ueUetPdnConReq->pdnType;
 
-   if( ueUetPdnConReq->nasPdnApn.len != 0) {
-     msg->u.conReq.apn.pres      = TRUE;
-     encode_apn(&msg->u.conReq.apn,&ueUetPdnConReq->nasPdnApn);
-    } else {
-     msg->u.conReq.apn.pres      = FALSE;
-   }
-   RETVALUE(ROK);
+  if (ueUetPdnConReq->nasPdnApn.len != 0) {
+    msg->u.conReq.apn.pres = TRUE;
+    encode_apn(&msg->u.conReq.apn, &ueUetPdnConReq->nasPdnApn);
+  } else {
+    msg->u.conReq.apn.pres = FALSE;
+  }
+  /* protocol configuration options */
+  if (ueUetPdnConReq->protCfgOpt.pres == TRUE) {
+    cmMemcpy(&msg->u.conReq.protCfgOpt, &ueUetPdnConReq->protCfgOpt,
+             sizeof(ueUetPdnConReq->protCfgOpt));
+  }
+  RETVALUE(ROK);
 }
 
 /*
