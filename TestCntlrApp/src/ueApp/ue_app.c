@@ -1675,7 +1675,7 @@ PRIVATE S16 ueAppUtlAddEsmCb(UeEsmCb **esmCb, UeCb *ueCb)
       UE_LOG_ERROR(ueAppCb, "Failed to allocate memory\n");
       RETVALUE(RFAILED);
    }
-   for (i = 1; i < CM_ESM_MAX_BEARERS; i++)
+   for (i = 1; i < CM_ESM_MAX_BEARER_ID; i++)
    {
       if (ueCb->esmTList[i] == NULLP)
       {
@@ -1753,11 +1753,11 @@ PUBLIC S16 ueAppUtlFndEsmCb(UeEsmCb **esmCb, U8 key, UeAppEsmKeyType type,
    if (((key < UE_ESM_TRANS_ID_INDX) || (key > UE_ESM_MAX_TRANS_ID)))
       UE_LOG_EXITFN(ueAppCb, RFAILED);
 
-   if ((type == UE_ESM_TRANS_KEY) && (key < CM_ESM_MAX_BEARERS))
+   if ((type == UE_ESM_TRANS_KEY) && (key < CM_ESM_MAX_BEARER_ID))
    {
       *esmCb = ueCb->esmTList[key];
    }
-   else if ((type == UE_ESM_BID_KEY) && (key < CM_ESM_MAX_BEARERS))
+   else if ((type == UE_ESM_BID_KEY) && (key < CM_ESM_MAX_BEARER_ID))
    {
       *esmCb = ueCb->esmBList[key];
    }

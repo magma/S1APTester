@@ -1360,6 +1360,7 @@ PUBLIC S16 handleTauRejectInd
    {
       fwStopTmr(fwCb, ueIdCb);
       delete_ue_entries(ueIdCb->ue_id);
+      FW_FREE_MEM(fwCb, ueIdCb, sizeof(UeIdCb));
       ret = sendUeTauRejectIndToTstCntrl(uetTauRejInd);
    }
    else
@@ -1531,12 +1532,12 @@ PRIVATE S16 handlePdnConRspInd
       tmpNode = tmpNode->next;
    }
 
-   FW_LOG_DEBUG(fwCb, "\nStoping timer T3482\n");
-
-   if (flag == 1)
-   {
-      fwStopTmr(fwCb, ueIdCb);
-      ret = sendUePdnConRspIndToTstCntlr(uetPdnConRspInd);
+   if (flag == 1) {
+     FW_LOG_DEBUG(fwCb, "\nStoping timer T3482\n");
+     fwStopTmr(fwCb, ueIdCb);
+     delete_ue_entries(ueIdCb->ue_id);
+     FW_FREE_MEM(fwCb, ueIdCb, sizeof(UeIdCb));
+     ret = sendUePdnConRspIndToTstCntlr(uetPdnConRspInd);
    }
    else
    {
@@ -1651,10 +1652,11 @@ PRIVATE S16 handleAndSendDeActvBerReqInd
        tmpNode = tmpNode->next;
    }
 
-   if (flag == 1)
-   {
-       FW_LOG_DEBUG(fwCb, "\nStoping timer T3492\n");
-       fwStopTmr(fwCb, ueIdCb);
+   if (flag == 1) {
+     FW_LOG_DEBUG(fwCb, "\nStoping timer T3492\n");
+     fwStopTmr(fwCb, ueIdCb);
+     delete_ue_entries(ueIdCb->ue_id);
+     FW_FREE_MEM(fwCb, ueIdCb, sizeof(UeIdCb));
    }
 
 
@@ -2123,12 +2125,12 @@ PRIVATE S16 handlePdnDisConRejInd
       tmpNode = tmpNode->next;
    }
 
-   FW_LOG_DEBUG(fwCb, "\nStoping timer T3492\n");
-
-   if (flag == 1)
-   {
-      fwStopTmr(fwCb, ueIdCb);
-      ret = sendUePdnDisConRejIndToTstCntlr(uetPdnDisConRejInd);
+   if (flag == 1) {
+     FW_LOG_DEBUG(fwCb, "\nStoping timer T3492\n");
+     fwStopTmr(fwCb, ueIdCb);
+     delete_ue_entries(ueIdCb->ue_id);
+     FW_FREE_MEM(fwCb, ueIdCb, sizeof(UeIdCb));
+     ret = sendUePdnDisConRejIndToTstCntlr(uetPdnDisConRejInd);
    }
    else
    {
