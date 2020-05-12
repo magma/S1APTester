@@ -305,39 +305,44 @@ PUBLIC S16 UeLiNbuUeInactvInd
    RETVALUE(ROK);
 }
 
-PUBLIC S16 UeLiNbuS1RelInd
-(
- Pst             *pst,    /* Post structure */
- NbuS1RelInd  *p_ueMsg /* request message */
-)
-{
-   S16 ret = RFAILED;
-   U8 ueId = 0;
-   UeAppCb *ueAppCb = NULLP;
-   UeCb *ueCb = NULLP;
+PUBLIC S16 UeLiNbuS1RelInd(Pst *pst,            /* Post structure */
+                           NbuS1RelInd *p_ueMsg /* request message */
+) {
+  S16 ret = RFAILED;
+  U8 ueId = 0;
+  UeAppCb *ueAppCb = NULLP;
+  UeCb *ueCb = NULLP;
 
-   UE_GET_CB(ueAppCb);
-   UE_LOG_ENTERFN(ueAppCb);
+  UE_GET_CB(ueAppCb);
+  UE_LOG_ENTERFN(ueAppCb);
 
-   /* sanity check */
-   if (!pst || !p_ueMsg)
-   {
-      RETVALUE(ret);
-   }
+  /* sanity check */
+  if (!pst || !p_ueMsg) {
+    RETVALUE(ret);
+  }
 
-   ueId = p_ueMsg->ueId;
-   /* Fetching the UeCb */
-   ret = ueDbmFetchUe(ueId, (PTR *)&ueCb);
-   if (ret != ROK)
-   {
-      UE_LOG_ERROR(ueAppCb,"UeCb doesn't exist for ueId = %d", ueId);
-      RETVALUE(ret);
-   }
+  ueId = p_ueMsg->ueId;
+  /* Fetching the UeCb */
+  ret = ueDbmFetchUe(ueId, (PTR *)&ueCb);
+  if (ret != ROK) {
+    UE_LOG_ERROR(ueAppCb, "UeCb doesn't exist for ueId = %d", ueId);
+    RETVALUE(ret);
+  }
 
-   /* change the ue state to idle */
-   ueCb->ecmCb.state = UE_ECM_IDLE;
+  /* Free all the DRBs allocated for this ueId */
+  UE_LOG_DEBUG(ueAppCb, "Freeing all the DRBs allocated for ueId: %d", ueId);
+  for (U8 idx = 0; idx < UE_APP_MAX_DRBS; idx++) {
+    if (ueCb->drbs[idx] == UE_APP_DRB_INUSE) {
+      cmMemset((U8 *)&(ueCb->ueRabCb[idx]), 0, sizeof(ueCb->ueRabCb[idx]));
+      ueCb->drbs[idx] = UE_APP_DRB_AVAILABLE;
+      ueCb->numRabs--;
+    }
+  }
 
-   RETVALUE(ROK);
+  /* change the ue state to idle */
+  ueCb->ecmCb.state = UE_ECM_IDLE;
+
+  RETVALUE(ROK);
 }
 
 PUBLIC S16 ueSendInitialUeMsg(NbuInitialUeMsg *pInitialUeMsg, Pst *pst)
