@@ -176,7 +176,7 @@ PRIVATE Void nbAppDlvrIpPkt
       RETVOID;
    }
 
-   if(SAddPstMsgMult((Data *)pktData + 14, bytesRcvd, mBuf) != ROK)
+   if(SAddPstMsgMult((Data *)pktData + 14, bytesRcvd - 14, mBuf) != ROK)
    {
       SPutMsg(mBuf);
       RETVOID;
