@@ -83,8 +83,9 @@ The following mask value, i.e., 24 needs to be changed in the file:
 TEST_IP_BLOCK = "192.168.128.0/24"
 ```
 
-Magma has reserved 12 IP addresses for internal testing purpose and therefore
-with the mask value of n, the maximum number of UE IP addresses allowed will be
+Magma has reserved 11 IP addresses for internal purpose and 2 IP addresses
+(Subnet Zero and All-Ones Subnet) are not allocatable. Therefore, with the mask
+value of n, the maximum number of UE IP addresses allowed will be
 ((2^(32-n)) - 13).
 
 ```
