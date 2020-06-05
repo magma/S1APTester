@@ -114,7 +114,7 @@ typedef struct _ueUetErrInd
 {
    U32            msgType;
    U32            errCode;
-   U8             ueId[UE_IMSI_LENGTH];
+   U32            ueId[UE_IMSI_LENGTH]; 
 }UeUetErrInd;
 
 typedef struct _ueUetAppCfReq
@@ -127,14 +127,14 @@ typedef struct _ueUetAppCfReq
 
 typedef struct _ueUetAppCfgCompInd
 {
-  U8 ueId;
+  U32 ueId;
   U8 cfgStatus;
   U8 cause;
 }UeUetAppCfgCompInd;
 
 typedef struct _ueUetCfgReq
 {
-   U8 ueId;       /*ue identity*/
+   U32 ueId;       /*ue identity*/
    U8 imsiLen;     /* len of IMSi inclusive of MCC+MNC+MSIN */
    U8 imsi[15];       /*Mobile subscriber identity*/
    U8 imei[16];       /*Mobile equipment identity*/
@@ -153,7 +153,7 @@ typedef struct _ueUetCfgReq
 
 typedef struct _ueUetCfgCompInd
 {
-  U8 ueId;
+  U32 ueId;
   U8 cfgStatus;
   U8 cause;
 }UeUetCfgCompInd;
@@ -305,7 +305,7 @@ typedef struct _ueUetAttachReq
 {
  /* UeId, Attach type, Old GUTI, Last TAI,PDN type,
 PDN APN */
-   U8 ueId;
+   U32 ueId;
    U8 mIdType;
    U8 useOldSecCtxt;
    U32 pdnType;
@@ -320,7 +320,7 @@ PDN APN */
 }UeUetAttachReq;
 
 typedef struct _ueUetPdnConReq {
-  U8 ueId;
+  U32 ueId;
   U32 pdnType;
   UeEmmNasPdnApn nasPdnApn;
   U8 reqType;
@@ -335,31 +335,31 @@ typedef struct _uePdnRejectInfo
 
 typedef struct _ueUetAttachRej
 {
-   U8 ueId;
+   U32 ueId;
    U8 cause;
 }UeUetAttachRej;
 
 typedef struct _ueUetTauReject
 {
-   U8 ueId;
+   U32 ueId;
    U8 cause;
 }UeUetTauReject;
 
 typedef struct _ueUetIdentReqInd
 {
-   U8 ueId;
+   U32 ueId;
    U8 idType;
 }UeUetIdentReqInd;
 
 typedef struct _ueUetIdentRsp
 {
-   U8 ueId;
+   U32 ueId;
    U8 idType;
 }UeUetIdentRsp;
 
 typedef struct _ueUetAuthReqInd
 {
-   U8 ueId;
+   U32 ueId;
    U8 rand[16];
    U8 autn[16];
    U8 sqn[6];
@@ -384,7 +384,7 @@ typedef struct _ueUetRandRcvd
 
 typedef struct _ueUetAuthRsp
 {
-   U8 ueId;
+   U32 ueId;
    UeUetSqnRcvd sqnRcvd;
    UeUetSqnRcvd maxSqnRcvd;
    UeUetRandRcvd randRcvd;
@@ -393,7 +393,7 @@ typedef struct _ueUetAuthRsp
 
 typedef struct _ueUetSecModeCmdInd
 {
-   U8 ueId;
+   U32 ueId;
    U8 NasCyphCfg;
    U8 NasIntProtCfg;
    U8 Kasme[UE_APP_KASME_KEY];
@@ -404,12 +404,12 @@ typedef struct _ueUetSecModeCmdInd
 
 typedef struct _ueUetSecModeComplete
 {
-   U8 ueId;
+   U32 ueId;
 }UeUetSecModeComplete;
 
 typedef struct _ueUetSecModeReject
 {
-   U8 ueId;
+   U32 ueId;
    U8 cause;
 }UeUetSecModeReject;
 
@@ -488,7 +488,7 @@ typedef struct _uePdnInfo
 
 typedef struct _ueUetPdnConRsp
 {
-   U8             ueId;
+   U32             ueId;
    U8             status; /* ROK/RFAILED */
    union
    {
@@ -499,7 +499,7 @@ typedef struct _ueUetPdnConRsp
 
 typedef struct _ueUetAttachAcceptInd
 {
-   U8 ueId;
+   U32 ueId;
    U8 epsAtchRes;
    U16 t3412;
    Guti guti;
@@ -514,12 +514,12 @@ typedef struct _ueUetAttachAcceptInd
 
 typedef struct _ueUetAttachComplete
 {
-   U8 ueId;
+   U32 ueId;
 }UeUetAttachComplete;
 
 typedef struct _ueUetAttachFail
 {
-   U8 ueId;
+   U32 ueId;
 }UeUetAttachFail;
 
 typedef enum _ueUetDetachType
@@ -537,13 +537,13 @@ typedef enum _ueUetNwInitDetachType
 
 typedef struct _ueUetDetachReq
 {
-   U8 ueId;
+   U32 ueId;
    UeUetDetachType ueDetType;
 }UeUetDetachReq;
 
 typedef struct _ueUetNwInitDetachReq
 {
-   U8 ueId;
+   U32 ueId;
    UeUetNwInitDetachType ueNwInitDetType;
    U8 cause;
 }UeUetNwInitDetachReq;
@@ -556,19 +556,19 @@ typedef struct _ueUetMtmsi
 
 typedef struct _ueUetServiceReq
 {
-   U8 ueId;
+   U32 ueId;
    UeUetMtmsi ueMtmsi;
    U8 rrcCause;
 }UeUetServiceReq;
 
 typedef struct _ueUetServiceRej
 {
-   U8 ueId;
+   U32 ueId;
    U8 cause;
 }UeUetServiceRej;
 typedef struct _ueUetRadCapUpdReq
 {
-   U8 ueId;
+   U32 ueId;
    Bool send_s1ap_msg;
    Bool upd_ueRadCap;
    U16 len;
@@ -577,23 +577,23 @@ typedef struct _ueUetRadCapUpdReq
 
 typedef struct _ueUetPagingMsg
 {
-   U8 ueId;
+   U32 ueId;
    U8 domainType;
 }UeUetPagingMsg;
 
 typedef struct _ueUetDetachReqAccept
 {
-   U8 ueId;
+   U32 ueId;
 }UeUetDetachAcceptInd;
 
 typedef struct _ueUetUeTrigDetachAccept
 {
-   U8 ueId;
+   U32 ueId;
 }UeUetUeTrigDetachAccept;
 
 typedef struct _ueUetTauRequest
 {
-   U8 ueId;
+   U32 ueId;
    UeUetMtmsi ueMtmsi;
    U8 epsUpdtType;
    U8 ActvFlag;
@@ -601,7 +601,7 @@ typedef struct _ueUetTauRequest
 
 typedef struct _ueUetTauAccept
 {
-   U8 ueId;
+   U32 ueId;
    U8 epsUpdateRes;
    U8 gutiChanged;
    Guti guti;
@@ -609,7 +609,7 @@ typedef struct _ueUetTauAccept
 
 typedef struct _ueUetTauComplete
 {
-   U8 ueId;
+   U32 ueId;
 }UeUetTauComplete;
 
 typedef struct _ueUetFlush
@@ -717,7 +717,7 @@ typedef struct ueEsmTft
 }UeEsmTft;
 typedef struct _ueUetBearerAllocReq
 {
-   U8                  ueId;
+   U32                  ueId;
    U8                  bearerId;
    U8                  lnkEpsBearerId;
    UeEsmEpsQos         epsQos;
@@ -726,7 +726,7 @@ typedef struct _ueUetBearerAllocReq
 /*Erab Release Indication*/
 typedef struct UeErabRelInd
 {
-   U8 ueId;
+   U32 ueId;
    U8 numOfErabIds;
    U8 *erabIdLst;
 }UeErabRelInd;
@@ -771,7 +771,7 @@ typedef struct _ueEsmTxnId
 /* cm_esm_x_001.main_1: Activate dedicated EPS bearer context request */
 typedef struct ueUetActDedBearCtxtReq
 {
-   U8                ueId;
+   U32               ueId;
    U8                bearerId;
    U8                lnkBearerId;
    UeEsmEpsQos       epsQos;
@@ -789,7 +789,7 @@ typedef struct ueUetActDedBearCtxtReq
 /* Activate dedicated EPS bearer context accept message */
 typedef struct ueEsmActDedBearCtxtAcc
 {
-   U8 ueId;
+   U32 ueId;
    U8 bearerId;
 # if 0
    UeEsmProtCfgOpt   protCfgOpt;
@@ -797,7 +797,7 @@ typedef struct ueEsmActDedBearCtxtAcc
 }UeEsmActDedBearCtxtAcc;
 typedef struct ueEsmActDedBearCtxtRej
 {
-   U8 ueId;
+   U32 ueId;
    U8 bearerId;
    U8 esmCause;
 # if 0
@@ -808,7 +808,7 @@ typedef struct ueEsmActDedBearCtxtRej
 /* cm_esm_x_001.main_1: De-Activate EPS bearer context request */
 typedef struct ueUetDeActvBearCtxtReq
 {
-   U8 ueId;
+   U32 ueId;
    U8 bearerId;
    U8 esmCause;
 }UeUetDeActvBearCtxtReq;
@@ -816,13 +816,13 @@ typedef struct ueUetDeActvBearCtxtReq
 /* cm_esm_x_001.main_1: De-Activate EPS bearer context accept */
 typedef struct ueUetDeActvBearCtxtAcc
 {
-   U8 ueId;
+   U32 ueId;
    U8 bearerId;
 }UeUetDeActvBearCtxtAcc;
 
 typedef struct ueEsmActDfltBearCtxtRej
 {
-   U8 ueId;
+   U32 ueId;
    U8 bearerId;
    U8 esmCause;
 # if 0
@@ -832,43 +832,43 @@ typedef struct ueEsmActDfltBearCtxtRej
 
 typedef struct _ueUetEmmInformation
 {
-   U8 ueId;
+   U32 ueId;
 }UeUetEmmInformation;
 
 typedef struct _ueUetAuthRejInd
 {
-   U8 ueId;
+   U32 ueId;
 }UeUetAuthRejInd;
 
 typedef struct _ueUetEmmStatus
 {
-   U8 ueId;
+   U32 ueId;
    U8 cause;
 }UeUetEmmStatus;
 
 typedef struct _ueUetEsmInformationReq
 {
-   U8 ueId;
+   U32 ueId;
    U8 tId;
 }UeUetEsmInformationReq;
 
 typedef struct _ueUetEsmInformationRsp
 {
-   U8 ueId;
+   U32 ueId;
    U8 tId;
    UeEmmNasPdnApn  nasPdnApn;
 }UeUetEsmInformationRsp;
 
 /* PDN Disconnect Request message */
 typedef struct _ueUetPdnDisconnectReq {
-  U8 ueId;
+  U32 ueId;
   U8 bearerId;
 } UeUetPdnDisconnectReq;
 
 /* PDN Disconnect Reject*/
 typedef struct _ueUetPdnDisconnectRej
 {
-  U8 ueId;
+  U32 ueId;
   U8 cause;
 }UeUetPdnDisconnectRej;
 
@@ -879,7 +879,7 @@ typedef struct _uetFailedErablist {
 } UetFailedErablist;
 
 typedef struct _ueUetErabSetupFailedTosetup {
-  U8 ueId;
+  U32 ueId;
 #define MAX_FAILED_ERABS 11
   U8 noOfFailedErabs;
   UetFailedErablist failedErablist[MAX_FAILED_ERABS];

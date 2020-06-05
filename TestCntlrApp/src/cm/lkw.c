@@ -2651,7 +2651,7 @@ Buffer *mBuf;
          }
          CMCHKPK(SPkU8, param->val.ipThMeas.ueInfoLst[idx1].numQci, mBuf);
       }
-      CMCHKPK(SPkU16, param->val.ipThMeas.numUes, mBuf);
+      CMCHKPK(SPkU32, param->val.ipThMeas.numUes, mBuf);
       CMCHKPK(SPkU8, param->measType, mBuf);
       RETVALUE(ROK);
    }

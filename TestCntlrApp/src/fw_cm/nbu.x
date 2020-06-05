@@ -31,7 +31,7 @@ typedef struct _nbuSTmsi
 
 typedef struct _nbuUeAttachReq
 {
-    U8 ueId;
+    U32 ueId;
     U32 rrcCause;
     NbuSTmsi stmsi;
     TknStrOSXL nasPdu;
@@ -39,18 +39,18 @@ typedef struct _nbuUeAttachReq
 
 typedef struct _nbuUlNasMsg
 {
-   U8 ueId;
+   U32 ueId;
    TknStrOSXL  nasPdu;
 }NbuUlNasMsg;
 typedef struct _nbuUlRrcMsg
 {
-   U8 ueId;
+   U32 ueId;
    TknStrOSXL  rrcPdu;
 }NbuUlRrcMsg;
 
 typedef struct _nbuDlNasMsg
 {
-   U8 ueId;
+   U32 ueId;
    TknStrOSXL nasPdu;
 }NbuDlNasMsg;
 
@@ -131,14 +131,14 @@ typedef struct _nbuErabRelLst
 
 typedef struct _nbuErabRelIndLst
 {
-   U8 ueId;
+   U32 ueId;
    U8 numOfErabIds;
    U8 *erabIdLst;
 }NbuErabRelIndList;
 
 typedef struct _nbuErabsRelInfo
 {
-   U8 ueId;
+   U32 ueId;
    Bool nasPduPres;
    NbuErabRelLst *erabInfo;
    TknStrOSXL nasPdu;
@@ -146,7 +146,7 @@ typedef struct _nbuErabsRelInfo
 
 typedef struct _nbuErabsInfo
 {
-   U8 ueId;
+   U32 ueId;
    Bool nasPduPres;
    Bool ueRadCapRcvd;
    NbuErabLst *erabInfo;
@@ -155,17 +155,17 @@ typedef struct _nbuErabsInfo
 
 typedef struct _nbuS1RelInd
 {
-   U8 ueId;
+   U32 ueId;
 }NbuS1RelInd;
 
 typedef struct _nbuUeInActvInd
 {
-   U8 ueId;
+   U32 ueId;
 }NbuUeInActvInd;
 
 typedef struct _nbuUeIpInfoReq
 {
-   U8 ueId;
+   U32 ueId;
    U8 bearerId;
 }NbuUeIpInfoReq;
 
@@ -210,7 +210,7 @@ typedef struct _tftPfs {
 } TftPfs;
 
 typedef struct _nbuUeIpInfoRsp {
-  U8 ueId;
+  U32 ueId;
   U8 bearerId;
   S8 IpAddr[20];
   BearerType berType;
@@ -221,13 +221,13 @@ typedef struct _nbuUeIpInfoRsp {
 
 typedef struct _nbuTunDelReq
 {
-   U8 ueId;
+   U32 ueId;
    U32 erabId;
 }NbuTunDelReq;
 
 typedef struct _nbuNotifyPlmnInfo
 {
-   U8 ueId;
+   U32 ueId;
    U8 plmnId[3];
 }NbuNotifyPlmnInfo;
 

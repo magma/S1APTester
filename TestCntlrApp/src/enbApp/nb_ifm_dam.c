@@ -190,7 +190,7 @@ PUBLIC S16 nbIfmDamTnlCreatReq
 
 PUBLIC S16 nbIfmDamUeRelReq
 (
- U16 ueId,
+ U32 ueId,
  U8 cause
 )
 {
@@ -215,7 +215,7 @@ PUBLIC S16 nbIfmDamUeRelReq
  */
 PUBLIC S16 nbIfmDamUeDelReq
 (
- U8 ueId
+ U32 ueId
 )
 {
    Pst *pst;
@@ -249,7 +249,7 @@ PUBLIC S16 nbIfmDamErabDelReq
 
 PUBLIC Void nbIfmDamNbUeDelReq
 (
- U8 ueId
+ U32 ueId
 )
 {
    nbDamUeDelReq(ueId);

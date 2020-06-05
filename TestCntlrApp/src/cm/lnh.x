@@ -291,7 +291,7 @@ typedef struct nhSapInfo
 /** @brief Cell and UE ID structure parameters */
 typedef struct nhCellUEId
 {
-   U16        ueId;         /*!< UE ID */
+   U32        ueId;         /*!< UE ID */
    U16        cellId;       /*!< Cell ID */
 }NhCellUEId;
 /**

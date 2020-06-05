@@ -538,7 +538,7 @@ Buffer *mBuf;
 PUBLIC S16 cmPkUeCntxtRelReq
 (
  Pst *pst,
- U16 ueId,
+ U32 ueId,
  U8 cause
 )
 {
@@ -550,7 +550,7 @@ PUBLIC S16 cmPkUeCntxtRelReq
 
       RETVALUE(RFAILED);
    }
-   CMCHKPKLOG(SPkU16, ueId, mBuf, 0, pst);
+   CMCHKPKLOG(SPkU32, ueId, mBuf, 0, pst);
    CMCHKPKLOG(SPkU8, cause, mBuf, 0, pst);
  
    pst->event = (Event)EVTDAMUECNTXTRELREQ;
@@ -563,11 +563,11 @@ Pst *pst,
 Buffer *mBuf
 )
 {
-   U16 ueId = 0;
+   U32 ueId = 0;
    U8 causeVal = 0;
    U8 causeType = 0;
 
-   CMCHKUNPKLOG(SUnpkU16, &ueId, mBuf, 0, pst);
+   CMCHKUNPKLOG(SUnpkU32, &ueId, mBuf, 0, pst);
    CMCHKUNPKLOG(SUnpkU8, &causeVal, mBuf, 0, pst);
    CMCHKUNPKLOG(SUnpkU8, &causeType, mBuf, 0, pst);
 
@@ -674,7 +674,7 @@ Buffer *mBuf;
 * Function:cmPkUeDelReq 
 * 
 * @param[in]   Pst *  pst
-* @param[in]   U8 ueId 
+* @param[in]   U32 ueId 
 * @return   S16
 *  -# ROK
 **/
@@ -682,12 +682,12 @@ Buffer *mBuf;
 PUBLIC S16 cmPkUeDelReq 
 (
 Pst *pst,
-U8 ueId
+U32 ueId
 )
 #else
 PUBLIC S16 cmPkUeDelReq(pst, ueId)
 Pst * pst;
-U8 ueId;
+U32 ueId;
 #endif
 {
    Buffer *mBuf = NULLP;
@@ -699,7 +699,7 @@ U8 ueId;
       NB_LOG_ERROR(&nbCb,"Memory allocation failed.");
       RETVALUE(RFAILED);
    }
-   CMCHKPKLOG(SPkU8, ueId, mBuf, EDAM002, pst);
+   CMCHKPKLOG(SPkU32, ueId, mBuf, EDAM002, pst);
 
    
    pst->event = (Event)EVTDAMUEDELTREQ;
@@ -733,9 +733,9 @@ Pst *pst;
 Buffer *mBuf;
 #endif
 {
-   U8 ueId  = 0;
+   U32 ueId  = 0;
 
-   CMCHKUNPKLOG(SUnpkU8, (&ueId), mBuf, EDAM007, pst);
+   CMCHKUNPKLOG(SUnpkU32, (&ueId), mBuf, EDAM007, pst);
 
    NB_DAM_FREE_BUFFER(pst->region, mBuf);
    nbIfmDamNbUeDelReq(ueId);
@@ -784,7 +784,7 @@ PUBLIC Void cmUnPkErabDelReq
 * Function:cmPkUeDelCfm 
 * 
 * @param[in]   Pst *  pst
-* @param[in]   U16 ueId
+* @param[in]   U32 ueId
 * @return   S16
 *  -# ROK
 **/
@@ -792,12 +792,12 @@ PUBLIC Void cmUnPkErabDelReq
 PUBLIC S16 cmPkUeDelCfm 
 (
  Pst *pst,
- U8 ueId
+ U32 ueId
 )
 #else
 PUBLIC S16 cmPkUeDelCfm(pst, ueId)
 Pst * pst;
-U8 ueId;
+U32 ueId;
 #endif
 {
    Buffer *mBuf = NULLP;
@@ -811,7 +811,7 @@ U8 ueId;
       RETVALUE(RFAILED);
    }
    
-   CMCHKPKLOG(SPkU8, ueId, mBuf, EDAM002, pst);
+   CMCHKPKLOG(SPkU32, ueId, mBuf, EDAM002, pst);
    
    pst->event = (Event)EVTDAMUEDELTCFM;
    RETVALUE(SPstTsk(pst, mBuf));
@@ -845,11 +845,11 @@ Pst *pst;
 Buffer *mBuf;
 #endif
 {
-    U8 ueId = 0;
+    U32 ueId = 0;
  
     TRC3(cmUnPkUeDelCfm)
 
-    CMCHKUNPKLOG(SUnpkU8,(&ueId), mBuf, EDAM001, pst);
+    CMCHKUNPKLOG(SUnpkU32,(&ueId), mBuf, EDAM001, pst);
  
     NB_DAM_FREE_BUFFER (pst->region, mBuf);
  
@@ -866,7 +866,7 @@ Buffer *mBuf;
 * Function: cmPkDamSendCtxtRel 
 *
 * @param[in] Pst      *pst
-* @param[in] U8       ueId 
+* @param[in] U32       ueId 
 * @param[in] U8       causeVal
 * @param[in] U8       causeTyp 
 * @return   S16
@@ -875,7 +875,7 @@ Buffer *mBuf;
 PUBLIC S16 cmPkDamSendCtxtRel 
 (
 Pst *pst,
-U8  ueId,
+U32  ueId,
 U8  causeVal,
 U8  causeTyp
 )
@@ -890,7 +890,7 @@ U8  causeTyp
       RETVALUE(RFAILED);
    }
 
-   CMCHKPKLOG(SPkU8, ueId, mBuf,0, pst);
+   CMCHKPKLOG(SPkU32, ueId, mBuf,0, pst);
    CMCHKPKLOG(SPkU8, causeVal, mBuf,0, pst);
    CMCHKPKLOG(SPkU8, causeTyp, mBuf,0, pst);
 
@@ -926,7 +926,7 @@ Pst *pst;
 Buffer *mBuf;
 #endif
 {
-   U8  ueId;
+   U32  ueId;
    U8  causeVal;
    U8  causeTyp;
    NbUeMsgCause relCause;
@@ -935,7 +935,7 @@ Buffer *mBuf;
 
    CMCHKUNPKLOG(SUnpkU8,&causeVal, mBuf,0, pst);
    CMCHKUNPKLOG(SUnpkU8,&causeTyp, mBuf,0, pst);
-   CMCHKUNPKLOG(SUnpkU8,(&ueId), mBuf,0, pst);
+   CMCHKUNPKLOG(SUnpkU32,(&ueId), mBuf,0, pst);
    NB_DAM_FREE_BUFFER(pst->region, mBuf);
    
    relCause.causeTyp = causeTyp;
