@@ -66,6 +66,37 @@ $ make
 On successful compilation, the “libtrfgen.so” library gets generated under
 Trfgen/lib folder.
 
+# Testing with Magma
+Following points should be considered when using S1APTester with
+[Magma](https://github.com/facebookincubator/magma)
+
+## UE IP Address Configuration
+While testing with [Magma](https://github.com/facebookincubator/magma) setup,
+the current configuration parameters in Magma allow allocation of only 243 UE
+IP addresses. We need to change the configuration in Magma codebase, in order
+to support allocation of more than 243 UE IP addresses.
+
+The following mask value, i.e., 24 needs to be changed in the file:
+[s1ap_wrapper.py](https://github.com/facebookincubator/magma/blob/master/lte/gateway/python/integ_tests/s1aptests/s1ap_wrapper.py)
+(Filepath: [magma/lte/gateway/python/integ_tests/s1aptests/s1ap_wrapper.py](https://github.com/facebookincubator/magma/blob/master/lte/gateway/python/integ_tests/s1aptests/s1ap_wrapper.py))
+```
+TEST_IP_BLOCK = "192.168.128.0/24"
+```
+
+Magma has reserved 11 IP addresses for internal purpose and 2 IP addresses
+(Subnet Zero and All-Ones Subnet) are not allocatable. Therefore, with the mask
+value of n, the maximum number of UE IP addresses allowed will be
+((2^(32-n)) - 13).
+
+```
+Example:
+For the mask value of 24, maximum number of allowed UE IP addresses = ((2^(32-24)) - 13) = 243
+For the mask value of 20, maximum number of allowed UE IP addresses = ((2^(32-20)) - 13) = 4083
+For the mask value of 17, maximum number of allowed UE IP addresses = ((2^(32-17)) - 13) = 32755
+```
+Decreasing the mask value will provide more number of UE IP addresses in the
+free IP address pool.
+
 ## License
 
 S1APTester is BSD License licensed, as found in the LICENSE file.
