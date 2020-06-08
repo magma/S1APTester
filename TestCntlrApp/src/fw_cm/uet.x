@@ -841,12 +841,11 @@ typedef struct _ueUetAuthRejInd
    U8 ueId;
 }UeUetAuthRejInd;
 
-typedef struct _ueUetAuthFailure
-{
-   U8 ueId;
-   U8 cause;
-   U8 auts[14];
-}UeUetAuthFailure;
+typedef struct _ueUetAuthFailure {
+  U8 ueId;
+  U8 cause;
+  U8 auts[14];
+} UeUetAuthFailure;
 
 typedef struct _ueUetEmmStatus
 {
@@ -946,7 +945,7 @@ typedef struct _uetMessage
      UeUetPdnDisconnectReq  ueUetPdnDisconnectReq;
      UeUetPdnDisconnectRej  ueUetPdnDisconnectRej;
      UeUetErabSetupFailedTosetup ueErabsFailedToSetup;
-     UeUetAuthFailure         ueUetAuthFailure;
+     UeUetAuthFailure ueUetAuthFailure;
    }msg;
 }UetMessage;
 /* Ue Interface general Structure declerations */
