@@ -205,9 +205,10 @@ typedef enum _ueMsgTypes
    UE_ESM_INFORMATION_RSP_TYPE,
    UE_EPS_DEACTIVATE_BER_REQ,
    UE_EPS_DEACTIVATE_BER_ACC,
-  UE_PDN_DISCONNECT_REQ_TYPE,
-  UE_PDN_DISCONNECT_REJ_TYPE,
-  UE_ERAB_SETUP_REQ_FAILED_FOR_ERABS,
+   UE_PDN_DISCONNECT_REQ_TYPE,
+   UE_PDN_DISCONNECT_REJ_TYPE,
+   UE_ERAB_SETUP_REQ_FAILED_FOR_ERABS,
+   UE_AUTH_FAILURE_TYPE,
 }UeMsgTypes;
 
 typedef struct _ueEmmEpsAtchType
@@ -840,6 +841,12 @@ typedef struct _ueUetAuthRejInd
    U8 ueId;
 }UeUetAuthRejInd;
 
+typedef struct _ueUetAuthFailure {
+  U8 ueId;
+  U8 cause;
+  U8 auts[14];
+} UeUetAuthFailure;
+
 typedef struct _ueUetEmmStatus
 {
    U8 ueId;
@@ -938,6 +945,7 @@ typedef struct _uetMessage
      UeUetPdnDisconnectReq  ueUetPdnDisconnectReq;
      UeUetPdnDisconnectRej  ueUetPdnDisconnectRej;
      UeUetErabSetupFailedTosetup ueErabsFailedToSetup;
+     UeUetAuthFailure ueUetAuthFailure;
    }msg;
 }UetMessage;
 /* Ue Interface general Structure declerations */
