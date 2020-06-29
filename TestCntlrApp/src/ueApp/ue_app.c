@@ -6189,19 +6189,43 @@ PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId,
       }
     }
   }
+  printf("** Pruthvi in populateIpInfo  %d\n", pdn_addr->pdnType);
   // Construct IP address
   if ((pdn_addr != NULLP) && pdn_addr->pres) {
-    for (counter = 0; counter < (pdn_addr->len - 1); counter++) {
-      itoa(pdn_addr->addrInfo[counter], temp, 10);
-      for (cnt = 0; (itrn < 20) && (temp[cnt] != '\0') && (cnt < 19);
+    if (pdn_addr->pdnType == CM_ESM_PDN_IPV4) {
+      ueIpInfoRsp->pdnType = CM_ESM_PDN_IPV4; 
+      for (counter = 0; counter < (pdn_addr->len - 1); counter++) {
+        itoa(pdn_addr->addrInfo[counter], temp, 10);
+        for (cnt = 0; (itrn < 20) && (temp[cnt] != '\0') && (cnt < 19);
            itrn++, cnt++)
-        ip_addr[itrn] = temp[cnt];
-      if (counter != (pdn_addr->len - 2) && (itrn < 20))
-        ip_addr[itrn++] = '.';
-      if (counter == (pdn_addr->len - 2) && (itrn < 20))
-        ip_addr[itrn] = '\0';
+          ip_addr[itrn] = temp[cnt];
+        if (counter != (pdn_addr->len - 2) && (itrn < 20))
+          ip_addr[itrn++] = '.';
+        if (counter == (pdn_addr->len - 2) && (itrn < 20))
+          ip_addr[itrn] = '\0';
+      }
+      strcpy(ueIpInfoRsp->Ip4Addr, ip_addr);
+    } else if (pdn_addr->pdnType == CM_ESM_PDN_IPV6) {
+      ueIpInfoRsp->pdnType = CM_ESM_PDN_IPV6;
+      strcpy(ueIpInfoRsp->Ip6Addr, pdn_addr->addrInfo);
+
+      for (int i =0; i<sizeof(pdn_addr->addrInfo);i++) {
+      printf("*** Pruthvi In populateIpInfo pdn type %d pdn addr %x\n", pdn_addr->pdnType, ueIpInfoRsp->Ip6Addr[i]);
+      }
+    } else if (pdn_addr->pdnType == CM_ESM_PDN_IPV4V6) {
+      for (counter = 0; counter < (pdn_addr->len - 1); counter++) {
+        itoa(pdn_addr->addrInfo[counter], temp, 10);
+        for (cnt = 0; (itrn < 20) && (temp[cnt] != '\0') && (cnt < 19);
+          itrn++, cnt++)
+          ip_addr[itrn] = temp[cnt];
+        if (counter != (pdn_addr->len - 2) && (itrn < 20))
+          ip_addr[itrn++] = '.';
+        if (counter == (pdn_addr->len - 2) && (itrn < 20))
+          ip_addr[itrn] = '\0';
+      }
+      strcpy(ueIpInfoRsp->Ip6Addr, ip_addr);
+      ueIpInfoRsp->pdnType = CM_ESM_PDN_IPV4V6;
     }
-    strcpy(ueIpInfoRsp->IpAddr, ip_addr);
   }
 }
 
@@ -6826,6 +6850,9 @@ PRIVATE S16 uefillDefEsmInfoToUeCb
       params->pAddr.pdnType = actReq->pAddr.pdnType;
       cmMemcpy((U8 *)&params->pAddr.addrInfo, (U8 *)&actReq->pAddr.addrInfo,
             CM_ESM_MAX_LEN_PDN_ADDRESS);
+      for (int i =0; i<sizeof(actReq->pAddr.addrInfo);i++) {
+      printf("*** Pruthvi In def bearer req pdn type %d pdn addr %x\n", params->pAddr.pdnType, params->pAddr.addrInfo[i]);
+      }
    }
    else
    {
@@ -7008,6 +7035,7 @@ PRIVATE S16 ueAppEsmHndlIncActDefBearerReq
 
    if(pAddr->pdnType == CM_ESM_PDN_IPV4)
    {
+      selfAddr->type = CM_IPV4ADDR_TYPE;
       selfAddr->u.ipv4NetAddr = (((U32)(pAddr->addrInfo[0]) << 24) |
             ((U32)(pAddr->addrInfo[1]) << 16) |
             ((U32)(pAddr->addrInfo[2]) << 8) |
@@ -7016,6 +7044,7 @@ PRIVATE S16 ueAppEsmHndlIncActDefBearerReq
    else
    {
 #ifdef IPV6_SUPPORTED
+      selfAddr->type = CM_IPV6ADDR_TYPE;
       cmMemcpy((U8 *)&selfAddr->u.ipv6NetAddr, (U8 *)pAddr->addrInfo,
             pAddr->len);
 #endif

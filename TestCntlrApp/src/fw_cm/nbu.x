@@ -212,7 +212,9 @@ typedef struct _tftPfs {
 typedef struct _nbuUeIpInfoRsp {
   U8 ueId;
   U8 bearerId;
-  S8 IpAddr[20];
+  U8 pdnType;
+  S8 Ip4Addr[20];
+  U8 Ip6Addr[INET6_ADDRSTRLEN];
   BearerType berType;
   U32 lnkEpsBearId;
   U8 noOfPfs;

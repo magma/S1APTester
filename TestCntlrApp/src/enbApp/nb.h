@@ -204,6 +204,12 @@ typedef U32                  NbMmeId;
 #define NB_MAX_GRPS_PER_MME        256
 #define NB_MAX_CODES_PER_MME       256
 
+/* PDN types */
+#define NB_PDN_IPV4    1
+#define NB_PDN_IPV6    2
+#define NB_PDN_IPV4V6  3
+
+
 EXTERN U16 szElmSize[][SZT_MAX_PROC_ID];
 typedef struct _nbUeCb _nbUeCb;
 

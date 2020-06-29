@@ -581,24 +581,34 @@ PRIVATE S16 nbAddPfs(NbPdnCb *pdnCb, NbDamTnlInfo *tnlInfo)
  */
 PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
 {
+  U8 ret = RFAILED;
   NbPdnCb *pdnCb = NULL;
 
-  if (ROK == (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnAddr),
-                             sizeof(U32), 0, (PTR *)&pdnCb))) {
+  if ((tnlInfo->pdnType == NB_PDN_IPV4) || (tnlInfo->pdnType == NB_PDN_IPV4V6)) {
+    ret = (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp4Addr),
+                             sizeof(U32), 0, (PTR *)&pdnCb));
+  } else if (tnlInfo->pdnType == NB_PDN_IPV6) {
+    ret = (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp6Addr),
+                             sizeof(tnlInfo->pdnIp6Addr), 0, (PTR *)&pdnCb));
+  } 
+  if (tnlInfo->pdnType == NB_PDN_IPV4V6) {
+
+    if (ret == ROK) {
+      ret = (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp6Addr),
+                             sizeof(tnlInfo->pdnIp6Addr), 0, (PTR *)&pdnCb));
+    }
+  }
+  if (ret == ROK) {
     /* Sort and add Packet Filter/s */
     if (tnlInfo->tft.num_pf) {
       if (ROK != (nbAddPfs(pdnCb, tnlInfo))) {
-        NB_LOG_ERROR(&nbCb, "Failed to add Packet Filters for pdn addr %s",
-                     tnlInfo->pdnAddr);
+        /*NB_LOG_ERROR(&nbCb, "Failed to add Packet Filters for pdn addr %s",
+                     ((tnlInfo->pdnType == NB_PDN_IPV4) ? (tnlInfo->pdnIp4Addr) : (tnlInfo->pdnType == NB_PDN_IPV6) ? (tnlInfo->pdnIp6Addr) : (tnlInfo->pdnType == NB_PDN_IPV4V6) ? (tnlInfo->pdnIp4Addr) "%s", (tnlInfo->pdnIp6Addr) : NULL));*/
         RETVALUE(RFAILED);
       }
     }
-  }
-
-  /* Create a new hash list entry */
-  else {
+  } else { /* Create a new hash list entry */
     NB_ALLOC(&(pdnCb), sizeof(NbPdnCb));
-    pdnCb->pdnAddr = tnlInfo->pdnAddr;
     pdnCb->lnkEpsBearId = tnlInfo->tft.lnkEpsBearId;
 
     if (tnlInfo->tft.num_pf) {
@@ -608,12 +618,25 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
         RETVALUE(RFAILED);
       }
     }
-    /* Insert pdncb*/
-    if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCb,
-                                (U8 *)&tnlInfo->pdnAddr, sizeof(U32))) {
-      NB_FREE(pdnCb, sizeof(NbPdnCb))
-      NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for pdnCb");
-      RETVALUE(RFAILED);
+    if ((tnlInfo->pdnType == NB_PDN_IPV4) || (tnlInfo->pdnType == NB_PDN_IPV4V6)) {
+      pdnCb->pdnIp4Addr = tnlInfo->pdnIp4Addr;
+      /* Insert pdncb*/
+      if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCb,
+                                (U8 *)&tnlInfo->pdnIp4Addr, sizeof(U32))) {
+        NB_FREE(pdnCb, sizeof(NbPdnCb))
+        NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for pdnCb");
+        RETVALUE(RFAILED);
+      }
+    }
+    if (tnlInfo->pdnType == NB_PDN_IPV6) {
+      cmMemcpy(pdnCb->pdnIp6Addr,tnlInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr));
+      /* Insert pdncb*/
+      if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCb,
+                                (U8 *)&tnlInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr))) {
+        NB_FREE(pdnCb, sizeof(NbPdnCb))
+        NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for pdnCb");
+        RETVALUE(RFAILED);
+      }
     }
   }
   RETVALUE(ROK);
@@ -727,18 +750,31 @@ NbDamTnlInfo                 *tnlInfo
    }
    /* Create the tunnel */
    NB_ALLOC(&(ipInfo), sizeof(NbIpInfo));
-   ipInfo->pdnAddr = tnlInfo->pdnAddr;
    ipInfo->drbId = rbId;
-   NB_LOG_DEBUG(&nbCb, "Successfully created PdnCb\n");
+   if ((tnlInfo->pdnType == NB_PDN_IPV4) || (tnlInfo->pdnType == NB_PDN_IPV4V6)) {
+     ipInfo->pdnIp4Addr = tnlInfo->pdnIp4Addr;
 
-   if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ipInfo,
-                     (U8 *)&ipInfo->pdnAddr, sizeof(U32)))
-   {
-      NB_FREE(ueCb, sizeof(NbIpInfo))
-      NB_LOG_ERROR(&nbCb, "Failed to Insert ip address into ipInfo");
-      RETVALUE(RFAILED);
+     if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ipInfo,
+                     (U8 *)&ipInfo->pdnIp4Addr, sizeof(U32)))
+     {
+        NB_FREE(ueCb, sizeof(NbIpInfo))
+        NB_LOG_ERROR(&nbCb, "Failed to Insert ipv4 address into ipInfo");
+        RETVALUE(RFAILED);
+     }
    }
-
+   if (tnlInfo->pdnType == NB_PDN_IPV6) {
+     cmMemcpy(ipInfo->pdnIp6Addr, tnlInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr));
+     printf("In nbDamAddTunnel pdn type %d ipv6 addr %s\n", tnlInfo->pdnType, ipInfo->pdnIp6Addr);
+     if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ipInfo,
+                     (U8 *)&ipInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr)))
+     {
+        NB_FREE(ueCb, sizeof(NbIpInfo))
+        NB_LOG_ERROR(&nbCb, "Failed to Insert ipv6 address into ipInfo");
+        RETVALUE(RFAILED);
+     }
+     
+   }
+   NB_LOG_DEBUG(&nbCb, "Successfully created PdnCb\n");
    tnlCb->locTeId = tnlInfo->lclTeid;
    tnlCb->remTeid = tnlInfo->remTeid;
    nbCpyCmTptAddr(&(tnlCb->dstAddr), &tnlInfo->dstAddr);

@@ -204,7 +204,8 @@ typedef struct nbIpInfo
 {
    CmHashListEnt             ueHashEnt;
    U8    drbId;
-   U32   pdnAddr;
+   U32   pdnIp4Addr;
+   U8    pdnIp6Addr;
 }NbIpInfo;
 
 /**
@@ -286,7 +287,8 @@ typedef struct nbPktFilterList {
  */
 typedef struct nbPdnCb {
   CmHashListEnt ueHashEnt;
-  U32 pdnAddr;
+  U32 pdnIp4Addr;
+  U8  pdnIp6Addr[INET6_ADDRSTRLEN];
   U32 lnkEpsBearId;
   CmLListCp tftPfList;
 } NbPdnCb;

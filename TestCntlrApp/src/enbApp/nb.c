@@ -43,7 +43,7 @@ PUBLIC S16 NbEnbDropInitCtxtSetup(NbDropInitCtxtSetup *dropInitCtxtSetup);
 PUBLIC S16 nbDelUeCb(U8 ueId);
 PUBLIC S16 nbUeTnlCreatCfm(U8, U32);
 PUBLIC S16 nbPrcDamUeDelCfm(U8);
-PUBLIC S16 nbCreateUeTunnReq(U8, U32, U8, NbuUeIpInfoRsp *);
+PUBLIC S16 nbCreateUeTunnReq(U8, U8, NbuUeIpInfoRsp *);
 PUBLIC S16 NbEnbUeRelReqHdl(NbUeCntxtRelReq*);
 PUBLIC S16 NbEnbResetReqHdl(NbResetRequest *resetReq);
 /*PUBLIC S16 NbEnbErabRelIndHdl(NbErabRelInd *erabRelInd);*/
@@ -421,7 +421,7 @@ PUBLIC S16 nbPrcDamUeDelCfm(U8 ueId)
    RETVALUE(ret);
 }
 
-PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U32 ueIpAddr, U8 bearerId,
+PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U8 bearerId,
                              NbuUeIpInfoRsp *rsp)
 {
   U8 idx = 0;
@@ -449,7 +449,17 @@ PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U32 ueIpAddr, U8 bearerId,
         tnlInfo->tnlType = NB_TNL_NORMAL;
         tnlInfo->remTeid = tunInfo->remTeId;
         tnlInfo->lclTeid = tunInfo->lclTeId;
-        tnlInfo->pdnAddr = ueIpAddr;
+        tnlInfo->pdnType = rsp->pdnType;
+        if ((rsp->pdnType == NB_PDN_IPV4) || (rsp->pdnType == NB_PDN_IPV4V6)) {
+          U32 ueIp4Addr;
+          cmInetAddr(rsp->Ip4Addr, &ueIp4Addr);
+          ueIp4Addr = CM_INET_NTOH_U32(ueIp4Addr);
+          tnlInfo->pdnIp4Addr = ueIp4Addr;
+        }
+        if (rsp->pdnType == NB_PDN_IPV6) {
+          cmMemcpy(tnlInfo->pdnIp6Addr, rsp->Ip6Addr, sizeof(rsp->Ip6Addr));   
+          printf("*** In nbCreateUeTunnReq tnlInfo->pdnIp6Addr %s\n", tnlInfo->pdnIp6Addr);
+        }
         nbCpyCmTptAddr(&tnlInfo->dstAddr, &(tunInfo->sgwAddr));
         nbCpyCmTptAddr(&tnlInfo->srcAddr, &(nbCb.datAppAddr));
         tnlInfo->tft.lnkEpsBearId = rsp->lnkEpsBearId;
@@ -458,6 +468,7 @@ PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U32 ueIpAddr, U8 bearerId,
           tnlInfo->tft.num_pf = rsp->noOfPfs;
           cmMemcpy(tnlInfo->tft.pfList, rsp->pfList, sizeof(rsp->pfList));
         }
+        printf("*** Before nbIfmDamTnlCreatReq \n");
         RETVALUE(nbIfmDamTnlCreatReq(tnlInfo));
       }
     }
