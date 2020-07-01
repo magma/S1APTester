@@ -819,6 +819,9 @@ PUBLIC S16 nbUiBuildAndSendNasNonDlvryIndToTfw( U8 ueId );
 EXTERN S16 nbSendErabsRelInfo(NbErabRelLst *erabInfo);
 
 EXTERN  S16 nbNotifyPlmnInfo(U8 ueId, NbPlmnId plmnId);
+
+PUBLIC Void print_ipv6_netaddr(const struct in6_addr *ipv6NetAddr); 
+
 /* Broadcasted PLMN List */
 typedef struct _nbBPlmnList
 {
@@ -1014,6 +1017,7 @@ typedef enum
       _encPlmn[2] = ((_plmnVal%10)<<4)|((_plmnVal/10)%10);\
    }\
 }
+
 
 #ifdef __cplusplus
 }

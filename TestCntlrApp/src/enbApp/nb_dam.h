@@ -205,7 +205,7 @@ typedef struct nbIpInfo
    CmHashListEnt             ueHashEnt;
    U8    drbId;
    U32   pdnIp4Addr;
-   U8    pdnIp6Addr;
+   U8    pdnIp6Addr[INET6_ADDRSTRLEN];
 }NbIpInfo;
 
 /**

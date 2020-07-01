@@ -584,15 +584,16 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
   U8 ret = RFAILED;
   NbPdnCb *pdnCb = NULL;
 
-  if ((tnlInfo->pdnType == NB_PDN_IPV4) || (tnlInfo->pdnType == NB_PDN_IPV4V6)) {
+  printf("Inside nbAddPdnCb pdn type %d\n", tnlInfo->pdnType);
+  if (tnlInfo->pdnType == NB_PDN_IPV4) {
     ret = (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp4Addr),
                              sizeof(U32), 0, (PTR *)&pdnCb));
   } else if (tnlInfo->pdnType == NB_PDN_IPV6) {
     ret = (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp6Addr),
                              sizeof(tnlInfo->pdnIp6Addr), 0, (PTR *)&pdnCb));
-  } 
-  if (tnlInfo->pdnType == NB_PDN_IPV4V6) {
-
+  } else if (tnlInfo->pdnType == NB_PDN_IPV4V6) {
+    ret = (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp4Addr),
+                             sizeof(U32), 0, (PTR *)&pdnCb));
     if (ret == ROK) {
       ret = (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp6Addr),
                              sizeof(tnlInfo->pdnIp6Addr), 0, (PTR *)&pdnCb));
@@ -637,8 +638,119 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
         NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for pdnCb");
         RETVALUE(RFAILED);
       }
+      printf("PDN cb insert success for IPV6 addr %s\n", pdnCb->pdnIp6Addr);
     }
   }
+  RETVALUE(ROK);
+}
+
+/** @brief This function generates Router Solicit message.
+ *
+ * @details
+ *
+ *     Function: nbGenerateRouterSolicit
+ *
+ *         Processing steps:
+ *         - Populate Router Solicit message values
+ *
+ * @param[in]  routerSolicit : Pointer to Icmpv6RouterSolicit
+ * @param[in]  ip6Addr: IPv6 Address
+ * @return S16
+ */
+PRIVATE Void nbGenerateRouterSolicit(Icmpv6RouterSolicit *routerSolicit)
+{
+  routerSolicit->type = ICMPV6_TYPE_ROUTER_SOL;
+  routerSolicit->code = 0;
+  routerSolicit->checksum = ;
+  routerSolicit->reserved = 0;
+  RETVOID;
+}
+
+/** @brief This function generates IPv6 header.
+ *
+ * @details
+ *
+ *     Function: nbGenerateIpv6Hdr
+ *
+ *         Processing steps:
+ *         - Populate IPv6 header fields
+ *
+ * @param[in]  ip6Addr : pointer to IPv6 header structure
+ * @return S16
+ */
+PRIVATE Void nbGenerateIpv6Hdr(CmIpv6Hdr *ip6Hdr, U8 *ip6Addr)
+{
+  //link-local IPv6 address
+  U8 temp_src_addr[ip6Hdr->ip6_src] = "fe80::"; 
+  // Version:6, Priority/Traffic Class:0, Flow Label:0
+  ip6Hdr->ip6_ctlun.ip6_un1_flow = htonl((6 << 28) | (0 << 20) | 0);
+  // Payload length
+  ip6Hdr->ip6_ctlun.ip6_un1_plen = ROUTER_SOL_MSG_SIZE;
+  // Next header type
+  ip6Hdr->ip6_ctlun.ip6_un1_nxt = IPPROTO_ICMPV6;
+  // Hop limi as per RFC 4861
+  ip6Hdr->ip6_ctlun.ip6_un1_hlim = 255;
+  // Destination address - All router multicast address
+  cmMemcpy(ip6Hdr->ip6_dst, ROUTER_MCAST_ADDR, sizeof(ip6Hdr->ip6_dst));
+  /* Source address - link-local IPv6 address(fe80::) +
+   * UE IPv6 address received from NW
+   */
+  strcat(temp_src_addr, ip6Addr);
+  cmMemcpy(ip6Hdr->ip6_src, temp_src_addr, sizeof(ip6Hdr->ip6_src)); 
+  RETVOID;
+}
+
+/** @brief This function builds and sends the Router Solicit message.
+ *
+ * @details
+ *
+ *     Function: nbSendIcmpv6RouterSolicit
+ *
+ *         Processing steps:
+ *         - Populate Router Solicit message
+ *         - Populate IPv6 header
+ *         - Trigger EGTP Data Req 
+ *
+ * @param[in]  tnlCb : new tunnelCb
+ * @param[in]  ip6Addr: IPv6 Address
+ * @return S16
+ */
+PRIVATE S16 nbSendIcmpv6RouterSolicit(NbDamTnlCb *tnlCb, U8 *ip6Addr)
+{
+  Icmpv6RouterSolicit routerSolicit;
+  CmIpv6Hdr ipv6Hdr;
+  Buffer *mBuf = NULLP;
+  u8 buff[sizeof(Icmpv6RouterSolicit) + sizeof(CmIpv6Hdr)];
+  EgtUEvnt *eguEvtMsg;
+  EgUMsg *egMsg;
+  U8 idx = 0;
+
+  // Populate IPv6 header
+  nbGenerateIpv6Hdr(&ipv6Hdr, ip6Addr);
+  // Populate Router Solicit message
+  nbGenerateRouterSolicit(&routerSolicit);
+
+  SGetMsg(DFLT_REGION, DFLT_POOL, &mBuf);
+  if(mBuf == NULLP) {
+    RETVOID;
+  }
+
+  if(SAddPstMsgMult((Data *)buff, idx, mBuf) != ROK) {
+    SPutMsg(mBuf);
+    RETVOID;
+  }
+
+  if(ROK != nbFillEgtpDatMsg(tnlCb, &eguEvtMsg, EGT_GTPU_MSG_GPDU)) {
+    NB_FREEMBUF(mBuf);
+    RETVALUE(ROK);
+  }
+  egMsg = eguEvtMsg->u.egMsg;
+  egMsg->u.mBuf = mBuf;
+
+  /* Trigger EGTP Data Req */
+  NbIfmEgtpEguDatReq(eguEvtMsg);
+
+  
   RETVALUE(ROK);
 }
 
@@ -751,7 +863,7 @@ NbDamTnlInfo                 *tnlInfo
    /* Create the tunnel */
    NB_ALLOC(&(ipInfo), sizeof(NbIpInfo));
    ipInfo->drbId = rbId;
-   if ((tnlInfo->pdnType == NB_PDN_IPV4) || (tnlInfo->pdnType == NB_PDN_IPV4V6)) {
+   if (tnlInfo->pdnType == NB_PDN_IPV4) {
      ipInfo->pdnIp4Addr = tnlInfo->pdnIp4Addr;
 
      if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ipInfo,
@@ -761,8 +873,7 @@ NbDamTnlInfo                 *tnlInfo
         NB_LOG_ERROR(&nbCb, "Failed to Insert ipv4 address into ipInfo");
         RETVALUE(RFAILED);
      }
-   }
-   if (tnlInfo->pdnType == NB_PDN_IPV6) {
+   } else if (tnlInfo->pdnType == NB_PDN_IPV6) {
      cmMemcpy(ipInfo->pdnIp6Addr, tnlInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr));
      printf("In nbDamAddTunnel pdn type %d ipv6 addr %s\n", tnlInfo->pdnType, ipInfo->pdnIp6Addr);
      if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ipInfo,
@@ -772,17 +883,44 @@ NbDamTnlInfo                 *tnlInfo
         NB_LOG_ERROR(&nbCb, "Failed to Insert ipv6 address into ipInfo");
         RETVALUE(RFAILED);
      }
-     
-   }
-   NB_LOG_DEBUG(&nbCb, "Successfully created PdnCb\n");
-   tnlCb->locTeId = tnlInfo->lclTeid;
-   tnlCb->remTeid = tnlInfo->remTeid;
-   nbCpyCmTptAddr(&(tnlCb->dstAddr), &tnlInfo->dstAddr);
-   nbCpyCmTptAddr(&(tnlCb->lclAddr), &tnlInfo->srcAddr);
+   } else if (tnlInfo->pdnType == NB_PDN_IPV4V6) {
+     if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ipInfo,
+                     (U8 *)&ipInfo->pdnIp4Addr, sizeof(U32)))
+     {
+        NB_FREE(ueCb, sizeof(NbIpInfo))
+        NB_LOG_ERROR(&nbCb, "Failed to Insert ipv4 address into ipInfo");
+        RETVALUE(RFAILED);
+     }
+     cmMemcpy(ipInfo->pdnIp6Addr, tnlInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr));
+     printf("In nbDamAddTunnel pdn type %d ipv6 addr %s\n", tnlInfo->pdnType, ipInfo->pdnIp6Addr);
+     if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ipInfo,
+                     (U8 *)&ipInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr)))
+     {
+        NB_FREE(ueCb, sizeof(NbIpInfo))
+        NB_LOG_ERROR(&nbCb, "Failed to Insert ipv6 address into ipInfo");
+        RETVALUE(RFAILED);
+     }
+  } 
+  NB_LOG_DEBUG(&nbCb, "Successfully created PdnCb\n");
+  tnlCb->locTeId = tnlInfo->lclTeid;
+  tnlCb->remTeid = tnlInfo->remTeid;
+  nbCpyCmTptAddr(&(tnlCb->dstAddr), &tnlInfo->dstAddr);
+  nbCpyCmTptAddr(&(tnlCb->lclAddr), &tnlInfo->srcAddr);
 
-   /* Invoke GTP to add the tunnel here */
-   nbDamAddTunnelAtGtp(tnlCb);
-   RETVALUE(ROK);
+  /* Invoke GTP to add the tunnel here */
+  if (nbDamAddTunnelAtGtp(tnlCb) == ROK) {
+    if ((tnlInfo->pdnType == NB_PDN_IPV6) || (tnlInfo->pdnType == NB_PDN_IPV4V6)) {
+      // Send ICMPv6 Router Solicit message
+      if (nbSendIcmpv6RouterSolicit(ipInfo->pdnIp6Addr, tnlCb) != ROK) {
+        NB_LOG_ERROR(ueAppCb, "Failed to send Router Solicit message for Interface id %s \n",
+          ipInfo->pdnIp6Addr);
+      }
+    }
+  } else {
+    NB_LOG_ERROR(&nbCb, "Failed to create GTP tunnel for UE %u", ueId);
+    RETVALUE(RFAILED);
+  }
+  RETVALUE(ROK);
 }
 
 /** @brief This function handles the incoming tunnel create request.

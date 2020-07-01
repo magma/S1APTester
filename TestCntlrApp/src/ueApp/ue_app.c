@@ -6204,7 +6204,12 @@ PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId,
         if (counter == (pdn_addr->len - 2) && (itrn < 20))
           ip_addr[itrn] = '\0';
       }
+      for (int i =0; i<sizeof(pdn_addr->addrInfo);i++) {
+      printf("*** Pruthvi In populateIpInfo pdn type %d pdn addr %x\n", pdn_addr->pdnType, pdn_addr->addrInfo[i]);
+      }
+ 
       strcpy(ueIpInfoRsp->Ip4Addr, ip_addr);
+      printf("*** Pruthvi In populateIpInfo pdn type %d pdn addr %s\n", pdn_addr->pdnType, ueIpInfoRsp->Ip4Addr);
     } else if (pdn_addr->pdnType == CM_ESM_PDN_IPV6) {
       ueIpInfoRsp->pdnType = CM_ESM_PDN_IPV6;
       strcpy(ueIpInfoRsp->Ip6Addr, pdn_addr->addrInfo);
@@ -7033,7 +7038,7 @@ PRIVATE S16 ueAppEsmHndlIncActDefBearerReq
    selfAddr = &(ueCb->ueCtxt.selfAddr);
    pAddr    = &evnt->m.esmEvnt->u.actReq.pAddr;
 
-   if(pAddr->pdnType == CM_ESM_PDN_IPV4)
+   if((pAddr->pdnType == CM_ESM_PDN_IPV4) || (pAddr->pdnType == CM_ESM_PDN_IPV4V6))
    {
       selfAddr->type = CM_IPV4ADDR_TYPE;
       selfAddr->u.ipv4NetAddr = (((U32)(pAddr->addrInfo[0]) << 24) |
