@@ -35,6 +35,7 @@
 #include "nb_log.h"
 #include "nb_traffic_handler.x"
 #include "tft.h"
+#include "icmpv6.h"
 
 EXTERN S16 cmPkUeDelCfm(Pst*, U8);
 PRIVATE S16 nbDamLSapCfg(LnbMngmt *cfg, CmStatus *status);
@@ -644,6 +645,110 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
   RETVALUE(ROK);
 }
 
+/** @brief This function is responsible for filling the egtp event structure
+ *         for sending data packet.
+ *
+ * @details
+ *
+ *     Function: nbFillEgtpDatMsg
+ *
+ *         Processing steps:
+ *         - allocate a new EgtUEvnt
+ *         - fill the src and dst addresses
+ *         - fill the message header with default values and with the 
+ *           tnl info
+ *
+ *
+ * @param[in]   tnl       : tunnel info
+ * @param[out]  eguEvtMsg : outgoing egtp message
+ * @return S16
+ *    -#Success : ROK
+ *    -#Failure : RFAILED
+ */
+PRIVATE S16  nbFillEgtpDatMsg
+(
+NbDamTnlCb                   *tnl,
+EgtUEvnt                     **eguEvtMsg,
+U8                           msgType
+)
+{
+   EgUMsgHdr                 *eguHdr = NULLP;
+
+   NB_ALLOC_DATA_APP(eguEvtMsg, sizeof(EgtUEvnt));
+   if (*eguEvtMsg == NULLP)
+   {
+      NB_LOG_ERROR(&nbCb,"SGetSBuf  failed.");
+      RETVALUE(RFAILED);
+   }
+   NB_ALLOCEVNT_DATA_APP(&((*eguEvtMsg)->u.egMsg), sizeof(EgUMsg));
+   if ((*eguEvtMsg)->u.egMsg == NULLP)
+   {
+      NB_LOG_ERROR(&nbCb,"cmAllocEvnt failed.");
+      RETVALUE(RFAILED);
+   }
+
+   /* Src & Dst Address */
+   nbCpyCmTptAddr(&((*eguEvtMsg)->u.egMsg->srcAddr), &(tnl->lclAddr));
+   nbCpyCmTptAddr(&((*eguEvtMsg)->u.egMsg->remAddr), &(tnl->dstAddr));
+   (*eguEvtMsg)->u.egMsg->lclTeid = tnl->locTeId;
+
+   /* Populating Header Info */
+   eguHdr = &(*eguEvtMsg)->u.egMsg->msgHdr;
+   eguHdr->msgType = msgType;
+   eguHdr->nPduNmb.pres = FALSE;
+   eguHdr->seqNumber.pres = FALSE;
+   eguHdr->extHdr.udpPort.pres = FALSE;
+   eguHdr->extHdr.pdcpNmb.pres = FALSE;
+   eguHdr->teId = tnl->remTeid;
+
+   RETVALUE(ROK);
+}
+
+/** @brief This function computes ICMPv6 checksum.
+ *
+ * @details
+ *
+ *     Function: checksum
+ *
+ *         Processing steps:
+ *         - Computes ICMPv6 checksumi as per RFC 1071
+ *
+ * @param[in]  phdr: Few IPv6 hdr fields +
+               ICMPv6 message
+ * @param[in]  len: pseudo-header length
+ * @return S16
+ */
+
+PRIVATE U16 checksum (U16 *phdr, U8 len)
+{
+   S32 count = len;
+   U32 sum = 0;
+   U16 csum = 0;
+
+   // Sum up 2-byte values until none or only one byte left.
+   while (count > 1) {
+      sum += *(phdr++);
+      count -= 2;
+   }
+
+   // Add left-over byte, if any.
+   if (count > 0) {
+      sum += *(uint8_t *) phdr;
+   }
+
+   // Fold 32-bit sum into 16 bits,
+   // sum = (lower 16 bits) + (upper 16 bits shifted right 16 bits)
+   while (sum >> 16) {
+      sum = (sum & 0xffff) + (sum >> 16);
+   }
+
+   // Checksum is one's compliment of sum.
+   csum = ~sum;
+
+   RETVALUE(csum);
+}
+
+
 /** @brief This function generates Router Solicit message.
  *
  * @details
@@ -654,15 +759,50 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
  *         - Populate Router Solicit message values
  *
  * @param[in]  routerSolicit : Pointer to Icmpv6RouterSolicit
- * @param[in]  ip6Addr: IPv6 Address
+ * @param[in]  ip6Addr: Pointer to IPv6 header
  * @return S16
  */
-PRIVATE Void nbGenerateRouterSolicit(Icmpv6RouterSolicit *routerSolicit)
+PRIVATE Void nbGenerateRouterSolicit(Icmpv6RouterSolicit *routerSolicit, CmIpv6Hdr *ipv6Hdr)
 {
+  U8 *rsBuf = routerSolicit;
+  // Pseudo header for checksum calculation
+  U8 psdhdr[1024]={0};
+  U8 psdhdrlen = 0;
+  // Length of Icmpv6RouterSolicit
+  U8 rsLen = sizeof(Icmpv6RouterSolicit);
+  U8 idx = 0;
+
   routerSolicit->type = ICMPV6_TYPE_ROUTER_SOL;
   routerSolicit->code = 0;
-  routerSolicit->checksum = ;
+  routerSolicit->checksum = htons(0);
   routerSolicit->reserved = 0;
+
+  /* Populate the pseudo header for checksum calculation as per RFC 2463.
+   * pseudo header contains IPv6 Src+Dst address, length of Router Solicit msg
+   * as 32 Bit wide field + next header type + Router Solict message
+   */
+  // IPv6 src address
+  cmMemcpy(psdhdr, ipv6Hdr->ip6_src, IPV6_ADDRESS_LEN);
+  // IPv6 destination address
+  cmMemcpy(psdhdr+IPV6_ADDRESS_LEN, ipv6Hdr->ip6_dst, IPV6_ADDRESS_LEN);
+  // Increment the idx  - length of IPv6 src+dst address
+  idx += 2*IPV6_ADDRESS_LEN;
+  // Payload length 4 bytes - Length of Icmpv6RouterSolicit
+  psdhdr[idx++] = 0;
+  psdhdr[idx++] = 0;
+  psdhdr[idx++] = rsLen >> 8;
+  psdhdr[idx++] = rsLen;
+  // 3 bytes of 0
+  psdhdr[idx++] = 0;
+  psdhdr[idx++] = 0;
+  psdhdr[idx++] = 0;
+  // Next header Type
+  psdhdr[idx++] = IPPROTO_ICMPV6;
+  // Copy the Icmpv6RouterSolicit message
+  memcpy (psdhdr + idx, rsBuf, rsLen);
+  psdhdrlen = idx + rsLen;
+  routerSolicit->checksum = checksum ((U16 *) psdhdr, psdhdrlen);
+
   RETVOID;
 }
 
@@ -680,23 +820,91 @@ PRIVATE Void nbGenerateRouterSolicit(Icmpv6RouterSolicit *routerSolicit)
  */
 PRIVATE Void nbGenerateIpv6Hdr(CmIpv6Hdr *ip6Hdr, U8 *ip6Addr)
 {
+  struct in6_addr ipv6_src;
+  struct in6_addr ipv6_dst;
+  //Router Multicast address
+  U8 temp_dst_addr[30] = {0};
+  strcpy(temp_dst_addr,ROUTER_MCAST_ADDR); 
   //link-local IPv6 address
-  U8 temp_src_addr[ip6Hdr->ip6_src] = "fe80::"; 
+  U8 temp_src_addr[30] = {0};
+  strcpy(temp_src_addr,LCL_LINK_ADDR); 
   // Version:6, Priority/Traffic Class:0, Flow Label:0
-  ip6Hdr->ip6_ctlun.ip6_un1_flow = htonl((6 << 28) | (0 << 20) | 0);
+  ip6Hdr->ip6_ctlun.ip6_un1.ip6_un1_flow = htonl((6 << 28) | (0 << 20) | 0);
   // Payload length
-  ip6Hdr->ip6_ctlun.ip6_un1_plen = ROUTER_SOL_MSG_SIZE;
+  ip6Hdr->ip6_ctlun.ip6_un1.ip6_un1_plen = ROUTER_SOL_MSG_SIZE;
   // Next header type
-  ip6Hdr->ip6_ctlun.ip6_un1_nxt = IPPROTO_ICMPV6;
+  ip6Hdr->ip6_ctlun.ip6_un1.ip6_un1_nxt = IPPROTO_ICMPV6;
   // Hop limi as per RFC 4861
-  ip6Hdr->ip6_ctlun.ip6_un1_hlim = 255;
+  ip6Hdr->ip6_ctlun.ip6_un1.ip6_un1_hlim = 255;
   // Destination address - All router multicast address
-  cmMemcpy(ip6Hdr->ip6_dst, ROUTER_MCAST_ADDR, sizeof(ip6Hdr->ip6_dst));
+  inet_pton(AF_INET6, temp_dst_addr, &ipv6_dst); 
+  cmMemcpy(ip6Hdr->ip6_dst, ipv6_dst.s6_addr, IPV6_ADDRESS_LEN);
   /* Source address - link-local IPv6 address(fe80::) +
    * UE IPv6 address received from NW
    */
   strcat(temp_src_addr, ip6Addr);
-  cmMemcpy(ip6Hdr->ip6_src, temp_src_addr, sizeof(ip6Hdr->ip6_src)); 
+  printf("In nbGenerateIpv6Hdr strcat %s\n", temp_src_addr);
+  inet_pton(AF_INET6, temp_src_addr, &ipv6_src);
+  cmMemcpy(ip6Hdr->ip6_src, ipv6_src.s6_addr, IPV6_ADDRESS_LEN);
+  for (int i=0;i<IPV6_ADDRESS_LEN;i++) 
+  printf("In ip6Hdr->ip6_src %x \n", ip6Hdr->ip6_src[i]);
+  RETVOID;
+}
+
+/** @brief This function packs IPv6 hdr and Router Solicit message.
+ *
+ * @details
+ *
+ *     Function: nbPackIpv6HdrRtrSolicit
+ *
+ *         Processing steps:
+ *         - Pack IPv6 hdr and Router Solicit message fields to U8 buffer
+ *
+ * @param[in]  ip6Addr : pointer to IPv6 header structure
+ * @param[in]  routerSolicit : Pointer to Icmpv6RouterSolicit
+ * @param[in]  buff : unsigned char buffer
+ * @param[in]  idx : index to buffer
+ * @return S16
+ */
+PRIVATE Void nbPackIpv6HdrRtrSolicit(CmIpv6Hdr *ipv6Hdr, Icmpv6RouterSolicit *routerSolicit,
+ U8 *buff, U8 *idx)
+{
+  U8 pru[200];
+  printf("**** idx %u\n", *idx);
+  buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_flow;
+  buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_flow >> 8;
+  buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_flow >> 16;
+  buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_flow >> 24;
+  printf("In nbPackIpv6HdrRtrSolicit, packed version field idx %d\n", (*idx));
+  // Payload length
+  buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_plen >> 8;
+  buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_plen;
+  printf("In nbPackIpv6HdrRtrSolicit, packed Payload length field\n");
+  // Next header type
+  buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_nxt;
+  printf("In nbPackIpv6HdrRtrSolicit, packed Next header\n");
+  // Hop limi as per RFC 4861
+  buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_hlim;
+  printf("In nbPackIpv6HdrRtrSolicit, packed Hop limit\n");
+  printf("In nbPackIpv6HdrRtrSolicit idx %d\n", *idx);
+  // Source address
+  cmMemcpy(&buff[(*idx)], ipv6Hdr->ip6_src, IPV6_ADDRESS_LEN);
+  (*idx) += IPV6_ADDRESS_LEN;
+  // Destination address
+  cmMemcpy(&buff[(*idx)], ipv6Hdr->ip6_dst,IPV6_ADDRESS_LEN); 
+  (*idx) += IPV6_ADDRESS_LEN;
+
+  //printf("In nbPackIpv6HdrRtrSolicit, packed dst addr %s\n", buff[*idx]);
+  // Pack Router Solicit message
+  buff[(*idx)++] = routerSolicit->type;
+  buff[(*idx)++] = routerSolicit->code;
+  buff[(*idx)++] = routerSolicit->checksum >> 8;
+  buff[(*idx)++] = routerSolicit->checksum;
+  buff[(*idx)++] = routerSolicit->reserved;
+  buff[(*idx)++] = routerSolicit->reserved;
+  buff[(*idx)++] = routerSolicit->reserved;
+  buff[(*idx)++] = routerSolicit->reserved;
+  printf("In nbPackIpv6HdrRtrSolicit, packed RS\n");
   RETVOID;
 }
 
@@ -715,40 +923,56 @@ PRIVATE Void nbGenerateIpv6Hdr(CmIpv6Hdr *ip6Hdr, U8 *ip6Addr)
  * @param[in]  ip6Addr: IPv6 Address
  * @return S16
  */
-PRIVATE S16 nbSendIcmpv6RouterSolicit(NbDamTnlCb *tnlCb, U8 *ip6Addr)
+PRIVATE S16 nbSendIcmpv6RouterSolicit(U8 *ip6Addr, NbDamTnlCb *tnlCb)
 {
   Icmpv6RouterSolicit routerSolicit;
   CmIpv6Hdr ipv6Hdr;
   Buffer *mBuf = NULLP;
-  u8 buff[sizeof(Icmpv6RouterSolicit) + sizeof(CmIpv6Hdr)];
+  //U8 buff[sizeof(Icmpv6RouterSolicit) + sizeof(CmIpv6Hdr)];
+  U8 buff[1024];
   EgtUEvnt *eguEvtMsg;
   EgUMsg *egMsg;
   U8 idx = 0;
 
   // Populate IPv6 header
+  printf("ip6Addr %s\n", ip6Addr);
   nbGenerateIpv6Hdr(&ipv6Hdr, ip6Addr);
+  printf("nbGenerateIpv6Hdr success\n");
   // Populate Router Solicit message
-  nbGenerateRouterSolicit(&routerSolicit);
+  nbGenerateRouterSolicit(&routerSolicit, &ipv6Hdr);
+  printf("nbGenerateRouterSolicit success\n");
 
+  /* Pack Ipv6 hdr and Router Solicit into buffer
+   * This is needed because eGTP data request requires
+   * mBuf format
+   */
+  nbPackIpv6HdrRtrSolicit(&ipv6Hdr, &routerSolicit, buff, &idx);
+  printf("nbPackIpv6HdrRtrSolicit success\n");
+  // Assign memory to mBuf
   SGetMsg(DFLT_REGION, DFLT_POOL, &mBuf);
   if(mBuf == NULLP) {
     RETVOID;
   }
 
+  // Convert buff to mbuf to be assigned to EGTP Data Req
   if(SAddPstMsgMult((Data *)buff, idx, mBuf) != ROK) {
     SPutMsg(mBuf);
     RETVOID;
   }
 
+  printf("SAddPstMsgMult success\n");
   if(ROK != nbFillEgtpDatMsg(tnlCb, &eguEvtMsg, EGT_GTPU_MSG_GPDU)) {
     NB_FREEMBUF(mBuf);
     RETVALUE(ROK);
   }
+  printf("nbFillEgtpDatMsg success\n");
   egMsg = eguEvtMsg->u.egMsg;
   egMsg->u.mBuf = mBuf;
 
+  printf("Before NbIfmEgtpEguDatReq\n");
   /* Trigger EGTP Data Req */
   NbIfmEgtpEguDatReq(eguEvtMsg);
+  printf("NbIfmEgtpEguDatReq success\n");
 
   
   RETVALUE(ROK);
@@ -911,8 +1135,9 @@ NbDamTnlInfo                 *tnlInfo
   if (nbDamAddTunnelAtGtp(tnlCb) == ROK) {
     if ((tnlInfo->pdnType == NB_PDN_IPV6) || (tnlInfo->pdnType == NB_PDN_IPV4V6)) {
       // Send ICMPv6 Router Solicit message
+      printf("*** Sending ICMPv6 Router Solicit message %s****\n", ipInfo->pdnIp6Addr);
       if (nbSendIcmpv6RouterSolicit(ipInfo->pdnIp6Addr, tnlCb) != ROK) {
-        NB_LOG_ERROR(ueAppCb, "Failed to send Router Solicit message for Interface id %s \n",
+        NB_LOG_ERROR(&nbCb, "Failed to send Router Solicit message for Interface id %s \n",
           ipInfo->pdnIp6Addr);
       }
     }
@@ -985,64 +1210,6 @@ NbDamDrbCb                  *drbCb
    RETVALUE(ROK);
 }
 
-/** @brief This function is responsible for filling the egtp event structure
- *         for sending data packet.
- *
- * @details
- *
- *     Function: nbFillEgtpDatMsg
- *
- *         Processing steps:
- *         - allocate a new EgtUEvnt
- *         - fill the src and dst addresses
- *         - fill the message header with default values and with the 
- *           tnl info
- *
- *
- * @param[in]   tnl       : tunnel info
- * @param[out]  eguEvtMsg : outgoing egtp message
- * @return S16
- *    -#Success : ROK
- *    -#Failure : RFAILED
- */
-PRIVATE S16  nbFillEgtpDatMsg
-(
-NbDamTnlCb                   *tnl,
-EgtUEvnt                     **eguEvtMsg,
-U8                           msgType
-)
-{
-   EgUMsgHdr                 *eguHdr = NULLP;
-
-   NB_ALLOC_DATA_APP(eguEvtMsg, sizeof(EgtUEvnt));
-   if (*eguEvtMsg == NULLP)
-   {
-      NB_LOG_ERROR(&nbCb,"SGetSBuf  failed.");
-      RETVALUE(RFAILED);
-   }
-   NB_ALLOCEVNT_DATA_APP(&((*eguEvtMsg)->u.egMsg), sizeof(EgUMsg));
-   if ((*eguEvtMsg)->u.egMsg == NULLP)
-   {
-      NB_LOG_ERROR(&nbCb,"cmAllocEvnt failed.");
-      RETVALUE(RFAILED);
-   }
-
-   /* Src & Dst Address */
-   nbCpyCmTptAddr(&((*eguEvtMsg)->u.egMsg->srcAddr), &(tnl->lclAddr));
-   nbCpyCmTptAddr(&((*eguEvtMsg)->u.egMsg->remAddr), &(tnl->dstAddr));
-   (*eguEvtMsg)->u.egMsg->lclTeid = tnl->locTeId;
-
-   /* Populating Header Info */
-   eguHdr = &(*eguEvtMsg)->u.egMsg->msgHdr;
-   eguHdr->msgType = msgType;
-   eguHdr->nPduNmb.pres = FALSE;
-   eguHdr->seqNumber.pres = FALSE;
-   eguHdr->extHdr.udpPort.pres = FALSE;
-   eguHdr->extHdr.pdcpNmb.pres = FALSE;
-   eguHdr->teId = tnl->remTeid;
-
-   RETVALUE(ROK);
-}
 
 /** @brief This function handles the incoming Uplink PCAP data indication.
  *
