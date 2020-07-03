@@ -6204,7 +6204,7 @@ PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId,
         if (counter == (pdn_addr->len - 2) && (itrn < 20))
           ip_addr[itrn] = '\0';
       }
-      for (int i =0; i<sizeof(pdn_addr->addrInfo);i++) {
+      for (int i =0; i<16;i++) {
       printf("*** Pruthvi In populateIpInfo pdn type %d pdn addr %x\n", pdn_addr->pdnType, pdn_addr->addrInfo[i]);
       }
  
@@ -6212,7 +6212,7 @@ PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId,
       printf("*** Pruthvi In populateIpInfo pdn type %d pdn addr %s\n", pdn_addr->pdnType, ueIpInfoRsp->Ip4Addr);
     } else if (pdn_addr->pdnType == CM_ESM_PDN_IPV6) {
       ueIpInfoRsp->pdnType = CM_ESM_PDN_IPV6;
-      strcpy(ueIpInfoRsp->Ip6Addr, pdn_addr->addrInfo);
+      cmMemcpy(ueIpInfoRsp->Ip6Addr, pdn_addr->addrInfo, CM_ESM_MAX_LEN_PDN_ADDRESS);
 
       for (int i =0; i<sizeof(pdn_addr->addrInfo);i++) {
       printf("*** Pruthvi In populateIpInfo pdn type %d pdn addr %x\n", pdn_addr->pdnType, ueIpInfoRsp->Ip6Addr[i]);
@@ -6228,7 +6228,7 @@ PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId,
         if (counter == (pdn_addr->len - 2) && (itrn < 20))
           ip_addr[itrn] = '\0';
       }
-      strcpy(ueIpInfoRsp->Ip6Addr, ip_addr);
+      cmMemcpy(ueIpInfoRsp->Ip6Addr, ip_addr, CM_ESM_MAX_LEN_PDN_ADDRESS);
       ueIpInfoRsp->pdnType = CM_ESM_PDN_IPV4V6;
     }
   }

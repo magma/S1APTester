@@ -765,16 +765,16 @@ PRIVATE U16 checksum (U16 *phdr, U8 len)
 PRIVATE Void nbGenerateRouterSolicit(Icmpv6RouterSolicit *routerSolicit, CmIpv6Hdr *ipv6Hdr)
 {
   U8 *rsBuf = routerSolicit;
-  // Pseudo header for checksum calculation
-  U8 psdhdr[1024]={0};
-  U8 psdhdrlen = 0;
   // Length of Icmpv6RouterSolicit
   U8 rsLen = sizeof(Icmpv6RouterSolicit);
+  // Pseudo header for checksum calculation
+  U8 size = sizeof(CmIpv6Hdr)+rsLen;
+  U8 psdhdr[size];
+  U8 psdhdrlen = 0;
   U8 idx = 0;
 
   routerSolicit->type = ICMPV6_TYPE_ROUTER_SOL;
   routerSolicit->code = 0;
-  routerSolicit->checksum = htons(0);
   routerSolicit->reserved = 0;
 
   /* Populate the pseudo header for checksum calculation as per RFC 2463.
@@ -799,10 +799,9 @@ PRIVATE Void nbGenerateRouterSolicit(Icmpv6RouterSolicit *routerSolicit, CmIpv6H
   // Next header Type
   psdhdr[idx++] = IPPROTO_ICMPV6;
   // Copy the Icmpv6RouterSolicit message
-  memcpy (psdhdr + idx, rsBuf, rsLen);
+  cmMemcpy (psdhdr + idx, rsBuf, rsLen);
   psdhdrlen = idx + rsLen;
-  routerSolicit->checksum = checksum ((U16 *) psdhdr, psdhdrlen);
-
+  routerSolicit->checksum = htons(checksum ((U16 *) psdhdr, psdhdrlen));
   RETVOID;
 }
 
@@ -823,10 +822,12 @@ PRIVATE Void nbGenerateIpv6Hdr(CmIpv6Hdr *ip6Hdr, U8 *ip6Addr)
   struct in6_addr ipv6_src;
   struct in6_addr ipv6_dst;
   //Router Multicast address
-  U8 temp_dst_addr[30] = {0};
+  U8 dst_addr_sz = sizeof(ROUTER_MCAST_ADDR);
+  U8 temp_dst_addr[dst_addr_sz];
   strcpy(temp_dst_addr,ROUTER_MCAST_ADDR); 
   //link-local IPv6 address
-  U8 temp_src_addr[30] = {0};
+  U8 src_addr_sz = sizeof(ROUTER_MCAST_ADDR);
+  U8 temp_src_addr[src_addr_sz];
   strcpy(temp_src_addr,LCL_LINK_ADDR); 
   // Version:6, Priority/Traffic Class:0, Flow Label:0
   ip6Hdr->ip6_ctlun.ip6_un1.ip6_un1_flow = htonl((6 << 28) | (0 << 20) | 0);
