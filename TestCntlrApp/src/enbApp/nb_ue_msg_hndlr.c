@@ -503,6 +503,7 @@ PUBLIC S16 NbHandleUeIpInfoRsp(NbuUeIpInfoRsp *rsp)
   bearerId = rsp->bearerId;
   printf("In NbHandleUeIpInfoRsp PDN Type %d\n", rsp->pdnType);
   if ((rsp->pdnType == NB_PDN_IPV4) || (rsp->pdnType == NB_PDN_IPV4V6)) {
+    printf("Before nbAppCfgrPdnAssignedAddr\n");
     U32 ueIp4Addr = 0;
     cmInetAddr(rsp->Ip4Addr, &ueIp4Addr);
     ueIp4Addr = CM_INET_NTOH_U32(ueIp4Addr);

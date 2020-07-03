@@ -470,24 +470,26 @@ PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U8 bearerId,
         tnlInfo->remTeid = tunInfo->remTeId;
         tnlInfo->lclTeid = tunInfo->lclTeId;
         tnlInfo->pdnType = rsp->pdnType;
+
         if ((rsp->pdnType == NB_PDN_IPV4) || (rsp->pdnType == NB_PDN_IPV4V6)) {
           U32 ueIp4Addr;
           cmInetAddr(rsp->Ip4Addr, &ueIp4Addr);
           ueIp4Addr = CM_INET_NTOH_U32(ueIp4Addr);
           tnlInfo->pdnIp4Addr = ueIp4Addr;
+          printf("*** In nbCreateUeTunnReq converted ipv4 %u\n", tnlInfo->pdnIp4Addr);
+        } 
+        if ((rsp->pdnType == NB_PDN_IPV6) || (rsp->pdnType == NB_PDN_IPV4V6)) {
+          // Convert IPv6 address string to in6_addr and copy to tnlInfo.
+          struct in6_addr ipv6_addr;
+          printf("*** In nbCreateUeTunnReq rsp->Ip6Addr %s\n", rsp->Ip6Addr);
+          inet_pton(AF_INET6, rsp->Ip6Addr, &ipv6_addr);
+          cmMemcpy(tnlInfo->pdnIp6Addr, ipv6_addr.s6_addr, sizeof(ipv6_addr.s6_addr));
+          printf("*** In nbCreateUeTunnReq converted ipv4 %u\n", tnlInfo->pdnIp4Addr);
+          for (int i=0;i<sizeof(ipv6_addr.s6_addr);i++) {
+            printf("tnlInfo->pdnIp6Addr %x\n", tnlInfo->pdnIp6Addr[i]);
+          }
         }
-        if (rsp->pdnType == NB_PDN_IPV6) {
-          // Convert IPv6 address string.
-          U8 ip6_str[20];
-          sprintf(ip6_str,"%02x%02x:%02x%02x:%02x%02x:%02x%02x",
-            (int)rsp->Ip6Addr[0], (int)rsp->Ip6Addr[1],
-            (int)rsp->Ip6Addr[2], (int)rsp->Ip6Addr[3],
-            (int)rsp->Ip6Addr[4], (int)rsp->Ip6Addr[5],
-            (int)rsp->Ip6Addr[6], (int)rsp->Ip6Addr[7]);
-
-          printf("After sprintf %s", ip6_str);
-          cmMemcpy(tnlInfo->pdnIp6Addr, ip6_str, sizeof(ip6_str));
-        }
+ 
         nbCpyCmTptAddr(&tnlInfo->dstAddr, &(tunInfo->sgwAddr));
         nbCpyCmTptAddr(&tnlInfo->srcAddr, &(nbCb.datAppAddr));
         tnlInfo->tft.lnkEpsBearId = rsp->lnkEpsBearId;

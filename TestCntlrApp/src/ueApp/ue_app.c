@@ -6156,6 +6156,73 @@ PRIVATE Void _fill_pf_comp(U8 idx, UeCb *ueCb, NbuUeIpInfoRsp *ueIpInfoRsp)
 
 /*
  *
+ *       Fun: ueAppFormIpv4Addr
+ *
+ *       Desc: Converts the IPv4 address received from NW
+ *             into dotted format(x.x.x.x)
+ *
+ *       Ret:  None
+ *
+ *       Notes: none
+ *
+ *       File:  ue_app.c
+ *
+ */
+
+PRIVATE Void ueAppFormIpv4Addr(NbuUeIpInfoRsp *ueIpInfoRsp, CmEsmPdnAdd *pdn_addr)
+{
+  U8 temp[20] = {0}, itrn = 0, cnt = 0;
+  U8 ip_addr[20] = {0};
+  U32 counter = 0;
+  U8 idx = 0;
+  printf("Forming IPv4 address\n"); 
+  for (counter = 0; counter < (pdn_addr->len - 1); counter++) {
+    itoa(pdn_addr->addrInfo[counter], temp, 10);
+      for (cnt = 0; (itrn < 20) && (temp[cnt] != '\0') && (cnt < 19);
+        itrn++, cnt++)
+        ip_addr[itrn] = temp[cnt];
+      if (counter != (pdn_addr->len - 2) && (itrn < 20))
+        ip_addr[itrn++] = '.';
+      if (counter == (pdn_addr->len - 2) && (itrn < 20))
+        ip_addr[itrn] = '\0';
+  }
+  strcpy(ueIpInfoRsp->Ip4Addr, ip_addr);
+  RETVOID;
+}
+
+/*
+ *
+ *       Fun: ueAppFormIpv6Addr
+ *
+ *       Desc: Converts the IPv6 address received from NW
+ *             into : separated format(x:x:x:x:x:x:x:x)
+ *
+ *       Ret:  None
+ *
+ *       Notes: none
+ *
+ *       File:  ue_app.c
+ *
+ */
+PRIVATE Void ueAppFormIpv6Addr(NbuUeIpInfoRsp *ueIpInfoRsp, CmEsmPdnAdd *pdn_addr)
+{
+  U8 ip6_str[INET6_ADDRSTRLEN];
+  printf("Forming IPv6 address\n"); 
+  // Form IPv6 address string by prepending Link local address-fe80::
+  sprintf(ip6_str,"%s::%02x%02x:%02x%02x:%02x%02x:%02x%02x",
+    "fe80",
+    (int)pdn_addr->addrInfo[0], (int)pdn_addr->addrInfo[1],
+    (int)pdn_addr->addrInfo[2], (int)pdn_addr->addrInfo[3],
+    (int)pdn_addr->addrInfo[4], (int)pdn_addr->addrInfo[5],
+    (int)pdn_addr->addrInfo[6], (int)pdn_addr->addrInfo[7]);
+
+  printf("After sprintf %s\n", ip6_str);
+  cmMemcpy(ueIpInfoRsp->Ip6Addr, ip6_str, INET6_ADDRSTRLEN);
+  RETVOID;
+}
+
+/*
+ *
  *       Fun: populateIpInfo
  *
  *       Desc: Populates NbuUeIpInfoRsp structure
@@ -6170,11 +6237,8 @@ PRIVATE Void _fill_pf_comp(U8 idx, UeCb *ueCb, NbuUeIpInfoRsp *ueIpInfoRsp)
 PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId,
                            NbuUeIpInfoRsp *ueIpInfoRsp)
 {
-  CmEsmPdnAdd *pdn_addr = NULLP;
-  U8 temp[20] = {0}, itrn = 0, cnt = 0;
-  U8 ip_addr[20] = {0};
-  U32 counter = 0;
   U8 idx = 0;
+  CmEsmPdnAdd *pdn_addr = NULLP;
   ueIpInfoRsp->ueId = ueCb->ueId;
   ueIpInfoRsp->bearerId = bearerId;
 
@@ -6193,43 +6257,19 @@ PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId,
   // Construct IP address
   if ((pdn_addr != NULLP) && pdn_addr->pres) {
     if (pdn_addr->pdnType == CM_ESM_PDN_IPV4) {
-      ueIpInfoRsp->pdnType = CM_ESM_PDN_IPV4; 
-      for (counter = 0; counter < (pdn_addr->len - 1); counter++) {
-        itoa(pdn_addr->addrInfo[counter], temp, 10);
-        for (cnt = 0; (itrn < 20) && (temp[cnt] != '\0') && (cnt < 19);
-           itrn++, cnt++)
-          ip_addr[itrn] = temp[cnt];
-        if (counter != (pdn_addr->len - 2) && (itrn < 20))
-          ip_addr[itrn++] = '.';
-        if (counter == (pdn_addr->len - 2) && (itrn < 20))
-          ip_addr[itrn] = '\0';
-      }
-      for (int i =0; i<16;i++) {
-      printf("*** Pruthvi In populateIpInfo pdn type %d pdn addr %x\n", pdn_addr->pdnType, pdn_addr->addrInfo[i]);
-      }
- 
-      strcpy(ueIpInfoRsp->Ip4Addr, ip_addr);
-      printf("*** Pruthvi In populateIpInfo pdn type %d pdn addr %s\n", pdn_addr->pdnType, ueIpInfoRsp->Ip4Addr);
+      ueIpInfoRsp->pdnType = CM_ESM_PDN_IPV4;
+      // Convert IPv4 address arrary to dotted notation(x.x.x.x)
+      ueAppFormIpv4Addr(ueIpInfoRsp, pdn_addr);
     } else if (pdn_addr->pdnType == CM_ESM_PDN_IPV6) {
       ueIpInfoRsp->pdnType = CM_ESM_PDN_IPV6;
-      cmMemcpy(ueIpInfoRsp->Ip6Addr, pdn_addr->addrInfo, CM_ESM_MAX_LEN_PDN_ADDRESS);
-
-      for (int i =0; i<sizeof(pdn_addr->addrInfo);i++) {
-      printf("*** Pruthvi In populateIpInfo pdn type %d pdn addr %x\n", pdn_addr->pdnType, ueIpInfoRsp->Ip6Addr[i]);
-      }
+      // Convert IPv6 address arrary to ":" separated notation(x:x:x:x:x:x:x:x) 
+      ueAppFormIpv6Addr(ueIpInfoRsp, pdn_addr);
     } else if (pdn_addr->pdnType == CM_ESM_PDN_IPV4V6) {
-      for (counter = 0; counter < (pdn_addr->len - 1); counter++) {
-        itoa(pdn_addr->addrInfo[counter], temp, 10);
-        for (cnt = 0; (itrn < 20) && (temp[cnt] != '\0') && (cnt < 19);
-          itrn++, cnt++)
-          ip_addr[itrn] = temp[cnt];
-        if (counter != (pdn_addr->len - 2) && (itrn < 20))
-          ip_addr[itrn++] = '.';
-        if (counter == (pdn_addr->len - 2) && (itrn < 20))
-          ip_addr[itrn] = '\0';
-      }
-      cmMemcpy(ueIpInfoRsp->Ip6Addr, ip_addr, CM_ESM_MAX_LEN_PDN_ADDRESS);
       ueIpInfoRsp->pdnType = CM_ESM_PDN_IPV4V6;
+      // Convert IPv4 address arrary to dotted notation(x.x.x.x)
+      ueAppFormIpv4Addr(ueIpInfoRsp, pdn_addr);
+      // Convert IPv6 address arrary to ":" separated notation(x:x:x:x:x:x:x:x) 
+      ueAppFormIpv6Addr(ueIpInfoRsp, pdn_addr);
     }
   }
 }

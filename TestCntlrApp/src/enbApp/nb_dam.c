@@ -35,7 +35,7 @@
 #include "nb_log.h"
 #include "nb_traffic_handler.x"
 #include "tft.h"
-#include "icmpv6.h"
+#include "nb_icmpv6.h"
 
 EXTERN S16 cmPkUeDelCfm(Pst*, U8);
 PRIVATE S16 nbDamLSapCfg(LnbMngmt *cfg, CmStatus *status);
@@ -629,9 +629,11 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
         NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for pdnCb");
         RETVALUE(RFAILED);
       }
+      printf("Added pdnIp4Addr into hash list %u\n", tnlInfo->pdnIp4Addr);
     }
-    if (tnlInfo->pdnType == NB_PDN_IPV6) {
+    if ((tnlInfo->pdnType == NB_PDN_IPV6) || (tnlInfo->pdnType == NB_PDN_IPV4V6)) {
       cmMemcpy(pdnCb->pdnIp6Addr,tnlInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr));
+      printf("Memcpy done\n");
       /* Insert pdncb*/
       if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCb,
                                 (U8 *)&tnlInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr))) {
@@ -825,10 +827,6 @@ PRIVATE Void nbGenerateIpv6Hdr(CmIpv6Hdr *ip6Hdr, U8 *ip6Addr)
   U8 dst_addr_sz = sizeof(ROUTER_MCAST_ADDR);
   U8 temp_dst_addr[dst_addr_sz];
   strcpy(temp_dst_addr,ROUTER_MCAST_ADDR); 
-  //link-local IPv6 address
-  U8 src_addr_sz = sizeof(ROUTER_MCAST_ADDR);
-  U8 temp_src_addr[src_addr_sz];
-  strcpy(temp_src_addr,LCL_LINK_ADDR); 
   // Version:6, Priority/Traffic Class:0, Flow Label:0
   ip6Hdr->ip6_ctlun.ip6_un1.ip6_un1_flow = htonl((6 << 28) | (0 << 20) | 0);
   // Payload length
@@ -836,17 +834,14 @@ PRIVATE Void nbGenerateIpv6Hdr(CmIpv6Hdr *ip6Hdr, U8 *ip6Addr)
   // Next header type
   ip6Hdr->ip6_ctlun.ip6_un1.ip6_un1_nxt = IPPROTO_ICMPV6;
   // Hop limi as per RFC 4861
-  ip6Hdr->ip6_ctlun.ip6_un1.ip6_un1_hlim = 255;
+  ip6Hdr->ip6_ctlun.ip6_un1.ip6_un1_hlim = HOP_LIMIT;
   // Destination address - All router multicast address
   inet_pton(AF_INET6, temp_dst_addr, &ipv6_dst); 
   cmMemcpy(ip6Hdr->ip6_dst, ipv6_dst.s6_addr, IPV6_ADDRESS_LEN);
   /* Source address - link-local IPv6 address(fe80::) +
    * UE IPv6 address received from NW
    */
-  strcat(temp_src_addr, ip6Addr);
-  printf("In nbGenerateIpv6Hdr strcat %s\n", temp_src_addr);
-  inet_pton(AF_INET6, temp_src_addr, &ipv6_src);
-  cmMemcpy(ip6Hdr->ip6_src, ipv6_src.s6_addr, IPV6_ADDRESS_LEN);
+  cmMemcpy(ip6Hdr->ip6_src, ip6Addr, IPV6_ADDRESS_LEN);
   for (int i=0;i<IPV6_ADDRESS_LEN;i++) 
   printf("In ip6Hdr->ip6_src %x \n", ip6Hdr->ip6_src[i]);
   RETVOID;
@@ -1090,7 +1085,6 @@ NbDamTnlInfo                 *tnlInfo
    ipInfo->drbId = rbId;
    if (tnlInfo->pdnType == NB_PDN_IPV4) {
      ipInfo->pdnIp4Addr = tnlInfo->pdnIp4Addr;
-
      if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ipInfo,
                      (U8 *)&ipInfo->pdnIp4Addr, sizeof(U32)))
      {
@@ -1109,6 +1103,7 @@ NbDamTnlInfo                 *tnlInfo
         RETVALUE(RFAILED);
      }
    } else if (tnlInfo->pdnType == NB_PDN_IPV4V6) {
+     ipInfo->pdnIp4Addr = tnlInfo->pdnIp4Addr;
      if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ipInfo,
                      (U8 *)&ipInfo->pdnIp4Addr, sizeof(U32)))
      {
@@ -1116,8 +1111,9 @@ NbDamTnlInfo                 *tnlInfo
         NB_LOG_ERROR(&nbCb, "Failed to Insert ipv4 address into ipInfo");
         RETVALUE(RFAILED);
      }
+     printf("In nbDamAddTunnel pdn type %d added ipv4 addr %u\n", tnlInfo->pdnType, ipInfo->pdnIp4Addr);
      cmMemcpy(ipInfo->pdnIp6Addr, tnlInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr));
-     printf("In nbDamAddTunnel pdn type %d ipv6 addr %s\n", tnlInfo->pdnType, ipInfo->pdnIp6Addr);
+     printf("In nbDamAddTunnel pdn type %d added ipv6 addr %s\n", tnlInfo->pdnType, ipInfo->pdnIp6Addr);
      if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ipInfo,
                      (U8 *)&ipInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr)))
      {
