@@ -1442,7 +1442,7 @@ typedef struct _resetReq
    {
       CompleteReset completeRst;
       PartialReset partialRst;
-   }r;
+   }u;
 }ResetReq;
 
 typedef struct _fwNbS1ResetAck
