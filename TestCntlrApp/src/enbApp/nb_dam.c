@@ -1349,6 +1349,41 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
    RETVALUE(ROK);
 }
 
+PRIVATE S16 nbProcRouterAdv(NbDamUeCb *ueCb, CmLteRbId drbId, U8 *buf)
+{
+  S16 ret;
+  NbIpInfo *ipInfo = NULLP;
+  NbIpInfo *prevIpInfo = NULLP;
+  NbPdnCb *pdnCb = NULLP;
+  U8 tempIp6Add[INET6_ADDRSTRLEN] = {0};
+
+  // Fetch the pdnIp6Addr from NbIpInfo using drbId
+  for (; ((cmHashListGetNext(&(ueCb->ipInfo), (PTR)prevIpInfo, (PTR *)&ipInfo)) ==
+          ROK);) {
+    if (drbId == ipInfo->drbId) {
+      // Find the dnCb->pdnIp6Addr(interface id) stored earlier
+      if ((cmHashListFind(&(ueCb->pdnCb), (U8 *)&(ipInfo->pdnIp6Addr),
+        sizeof(NbPdnCb), 0, (PTR *)&pdnCb)) == ROK) {
+        // take a copy of pdnCb->pdnIp6Addr(interface id)
+        cmMemcpy(tempIp6Add, pdnCb->pdnIp6Addr, sizeof(pdnCb->pdnIp6Addr));
+        // Prepend IPv6 prefix to pdnCb->pdnIp6Addir
+        cmMemcpy(pdnCb->pdnIp6Addr, buf, IPV6_ADDRESS_LEN/2);
+        // Copy the interface id from tempIp6Add
+        cmMemcpy(pdnCb->pdnIp6Addr[8], tempIp6Add, IPV6_ADDRESS_LEN/2);
+        // Update ipInfo->pdnIp6Addr
+        cmMemcpy(ipInfo->pdnIp6Addr, pdnCb->pdnIp6Addr, IPV6_ADDRESS_LEN);
+        RETVALUE(ROK);
+      } else {
+        NB_LOG_ERROR(&nbCb,"pdnCb not found for drbId %u", drbId);
+        RETVALUE(RFAILED);
+      }
+    }
+    prevIpInfo = ipInfo;
+    ipInfo = NULLP;
+  }
+  RETVALUE(RFAILED);
+}
+
 /** @brief This function handles the incoming EGTP data packets and forwards
  *         them to PDCP.
  *
@@ -1402,6 +1437,7 @@ EgtUEvnt                     *eguMsg
    /* mark for ue data received */
    ueCb->dataRcvd = TRUE;   
 
+   //printf("msgType in nbDamEgtpDatInd %x teid %x\n", eguMsg->u.egMsg->msgHdr.msgType, lclTeid);
    if(eguMsg->u.egMsg->msgHdr.msgType == EGT_GTPU_MSG_SUPP_EXT_HDR_NTF)
    {
       NB_LOG_ERROR(&nbCb,"Received EGTP HDR NOTIFY");
@@ -1420,15 +1456,11 @@ EgtUEvnt                     *eguMsg
       RETVALUE(RFAILED);
    }
 
-#if 0
-   drbCb = ueCb->drbs[rbId];
-#else
    if ( ROK != (cmHashListFind(&(ueCb->drbs), (U8 *)&(rbId),
                sizeof(U8),0,(PTR *)&drbCb)))
    {    
       RETVALUE(RFAILED);
    }    
-#endif
    if(drbCb)
    {
       tnlCb = drbCb->tnlInfo;
@@ -1454,8 +1486,23 @@ EgtUEvnt                     *eguMsg
       RETVALUE(RFAILED);
    }
    /* Convert the mBuf to U8 array */
-   SCpyMsgFix(eguMsg->u.egMsg->u.mBuf, 0, len, flatBuf, &cnt); 
+   SCpyMsgFix(eguMsg->u.egMsg->u.mBuf, 0, len, flatBuf, &cnt);
+
+   /* Check if the received packet is EGT_GTPU_MSG_GPDU, version is 6,
+    * protocol type is IPPROTO_ICMPV6
+    * and ICMPv6 message type is ICMPV6_TYPE_ROUTER_ADV. If so, process
+    * the message
+    */
+   if ((eguMsg->u.egMsg->msgHdr.msgType == EGT_GTPU_MSG_GPDU) &&
+     (flatBuf[0] == 0x60) && (flatBuf[6] == IPPROTO_ICMPV6)
+     && (flatBuf[40] == ICMPV6_TYPE_ROUTER_ADV)) {
+     // index-80 = Start of IPv6 prefix
+     nbProcRouterAdv(ueCb, rbId, flatBuf[80]);
+     RETVALUE(ROK);
+   }
    /* send the downlink packet to pcap */
+   for(int i=0;i<50;i++)
+   printf("%x\t", flatBuf[i]);
    nbAppFrwdIpPkt(flatBuf, cnt);
    NB_FREE(flatBuf, len);
 
@@ -1546,9 +1593,7 @@ PUBLIC Void nbDamUeDelReq
 PUBLIC Void nbDeletePf(NbDamUeCb *ueCb, U8 bearerId)
 {
   NbPdnCb *pdnCb = NULLP;
-  ;
   NbPdnCb *prevPdnCb = NULLP;
-  ;
   CmLList *temp_node = NULLP;
   NbPktFilterList *temp_pf = NULLP;
   U8 bearer_found = FALSE;
