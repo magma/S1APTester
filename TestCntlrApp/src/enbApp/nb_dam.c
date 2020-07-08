@@ -784,11 +784,11 @@ PRIVATE Void nbGenerateRouterSolicit(Icmpv6RouterSolicit *routerSolicit, CmIpv6H
    * as 32 Bit wide field + next header type + Router Solict message
    */
   // IPv6 src address
-  cmMemcpy(psdhdr, ipv6Hdr->ip6_src, IPV6_ADDRESS_LEN);
+  cmMemcpy(psdhdr, ipv6Hdr->ip6_src, NB_IPV6_ADDRESS_LEN);
   // IPv6 destination address
-  cmMemcpy(psdhdr+IPV6_ADDRESS_LEN, ipv6Hdr->ip6_dst, IPV6_ADDRESS_LEN);
+  cmMemcpy(psdhdr+NB_IPV6_ADDRESS_LEN, ipv6Hdr->ip6_dst, NB_IPV6_ADDRESS_LEN);
   // Increment the idx  - length of IPv6 src+dst address
-  idx += 2*IPV6_ADDRESS_LEN;
+  idx += 2*NB_IPV6_ADDRESS_LEN;
   // Payload length 4 bytes - Length of Icmpv6RouterSolicit
   psdhdr[idx++] = 0;
   psdhdr[idx++] = 0;
@@ -837,12 +837,12 @@ PRIVATE Void nbGenerateIpv6Hdr(CmIpv6Hdr *ip6Hdr, U8 *ip6Addr)
   ip6Hdr->ip6_ctlun.ip6_un1.ip6_un1_hlim = HOP_LIMIT;
   // Destination address - All router multicast address
   inet_pton(AF_INET6, temp_dst_addr, &ipv6_dst); 
-  cmMemcpy(ip6Hdr->ip6_dst, ipv6_dst.s6_addr, IPV6_ADDRESS_LEN);
+  cmMemcpy(ip6Hdr->ip6_dst, ipv6_dst.s6_addr, NB_IPV6_ADDRESS_LEN);
   /* Source address - link-local IPv6 address(fe80::) +
    * UE IPv6 address received from NW
    */
-  cmMemcpy(ip6Hdr->ip6_src, ip6Addr, IPV6_ADDRESS_LEN);
-  for (int i=0;i<IPV6_ADDRESS_LEN;i++) 
+  cmMemcpy(ip6Hdr->ip6_src, ip6Addr, NB_IPV6_ADDRESS_LEN);
+  for (int i=0;i<NB_IPV6_ADDRESS_LEN;i++) 
   printf("In ip6Hdr->ip6_src %x \n", ip6Hdr->ip6_src[i]);
   RETVOID;
 }
@@ -884,11 +884,11 @@ PRIVATE Void nbPackIpv6HdrRtrSolicit(CmIpv6Hdr *ipv6Hdr, Icmpv6RouterSolicit *ro
   printf("In nbPackIpv6HdrRtrSolicit, packed Hop limit\n");
   printf("In nbPackIpv6HdrRtrSolicit idx %d\n", *idx);
   // Source address
-  cmMemcpy(&buff[(*idx)], ipv6Hdr->ip6_src, IPV6_ADDRESS_LEN);
-  (*idx) += IPV6_ADDRESS_LEN;
+  cmMemcpy(&buff[(*idx)], ipv6Hdr->ip6_src, NB_IPV6_ADDRESS_LEN);
+  (*idx) += NB_IPV6_ADDRESS_LEN;
   // Destination address
-  cmMemcpy(&buff[(*idx)], ipv6Hdr->ip6_dst,IPV6_ADDRESS_LEN); 
-  (*idx) += IPV6_ADDRESS_LEN;
+  cmMemcpy(&buff[(*idx)], ipv6Hdr->ip6_dst,NB_IPV6_ADDRESS_LEN); 
+  (*idx) += NB_IPV6_ADDRESS_LEN;
 
   //printf("In nbPackIpv6HdrRtrSolicit, packed dst addr %s\n", buff[*idx]);
   // Pack Router Solicit message
@@ -1349,39 +1349,89 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
    RETVALUE(ROK);
 }
 
+/** @brief This function populates the NbuUeIpInfoUpdt message 
+ *
+ * @details
+ *
+ *     Function: nbUpdateIpInfo
+ *     Processing steps:
+ *         - Populate NbuUeIpInfoUpdt message
+ *         - send the message to ueApp
+ **
+ * @param[in]  ueId : UE identifier
+ * @param[in]  ipv6Addr  : Complete iPv6 address
+ * @param[in]  lnkEpsBearId  : linked/default bearer id
+ * @return S16 - ROK/RFAILED
+ */
+PRIVATE S16 nbUpdateIpInfo(U8 ueId, U8 *ipv6Addr, U32 lnkEpsBearId)
+{
+  S16 ret             = ROK;
+  NbuUeIpInfoUpdt *msg = NULLP;
+
+  NB_ALLOC(&msg, sizeof(NbuUeIpInfoUpdt));
+  msg->ueId      = ueId;
+  msg->bearerId  = lnkEpsBearId;
+  cmMemcpy(msg->ipv6Addr, ipv6Addr, NB_IPV6_ADDRESS_LEN);
+
+  /* Send Ip Info Update message to UEAPP */
+  ret = cmPkNbuUeIpInfoUpdt(&nbCb.ueAppPst, msg);
+  if(ret != ROK) {
+    NB_LOG_ERROR(&nbCb,"Failed To Send Ue Ip Info Update message to UeApp %u", ueId);
+  }
+   RETVALUE(ret);
+}
+
+/** @brief This function processes the Router Advertisement message
+ *          and constructs the complete IPv6 address
+ * @details
+ *
+ *     Function: nbProcRouterAdv
+ *     Processing steps:
+ *         - prepend IPv6 prefix to pdnCb->pdnIp6Addr
+ *         - prepend IPv6 prefix to ipInfo->pdnIp6Addr
+ *         - send the updated ipv6 address to ueApp
+ **
+ * @param[in]  ueCb : Pointer to NbDamUeCb
+ * @param[in]  drbId  : DRB id
+ * @param[in]  buf  : Router Advertisement message buffer
+ * @return S16
+ *    -#Success : ROK
+ */
 PRIVATE S16 nbProcRouterAdv(NbDamUeCb *ueCb, CmLteRbId drbId, U8 *buf)
 {
-  S16 ret;
+  S16 ret = RFAILED;
   NbIpInfo *ipInfo = NULLP;
   NbIpInfo *prevIpInfo = NULLP;
   NbPdnCb *pdnCb = NULLP;
   U8 tempIp6Add[INET6_ADDRSTRLEN] = {0};
 
-  // Fetch the pdnIp6Addr from NbIpInfo using drbId
+  // Fetch the pdnIp6Addr(interface id) from NbIpInfo using drbId
   for (; ((cmHashListGetNext(&(ueCb->ipInfo), (PTR)prevIpInfo, (PTR *)&ipInfo)) ==
           ROK);) {
     if (drbId == ipInfo->drbId) {
-      // Find the dnCb->pdnIp6Addr(interface id) stored earlier
+      // Fetch the pdnCb->pdnIp6Addr(interface id) stored earlier
       if ((cmHashListFind(&(ueCb->pdnCb), (U8 *)&(ipInfo->pdnIp6Addr),
         sizeof(NbPdnCb), 0, (PTR *)&pdnCb)) == ROK) {
         // take a copy of pdnCb->pdnIp6Addr(interface id)
         cmMemcpy(tempIp6Add, pdnCb->pdnIp6Addr, sizeof(pdnCb->pdnIp6Addr));
-        // Prepend IPv6 prefix to pdnCb->pdnIp6Addir
-        cmMemcpy(pdnCb->pdnIp6Addr, buf, IPV6_ADDRESS_LEN/2);
+        // Prepend 8 bytes of IPv6 prefix to pdnCb->pdnIp6Addir
+        cmMemcpy(pdnCb->pdnIp6Addr, buf, NB_IPV6_ADDRESS_LEN/2);
         // Copy the interface id from tempIp6Add
-        cmMemcpy(pdnCb->pdnIp6Addr[8], tempIp6Add, IPV6_ADDRESS_LEN/2);
+        cmMemcpy(pdnCb->pdnIp6Addr[8], tempIp6Add, NB_IPV6_ADDRESS_LEN/2);
         // Update ipInfo->pdnIp6Addr
-        cmMemcpy(ipInfo->pdnIp6Addr, pdnCb->pdnIp6Addr, IPV6_ADDRESS_LEN);
-        RETVALUE(ROK);
+        cmMemcpy(ipInfo->pdnIp6Addr, pdnCb->pdnIp6Addr, NB_IPV6_ADDRESS_LEN);
+        // Send the updated IPv6 address to UE
+        ret = nbUpdateIpInfo(ueCb->ueId, pdnCb->pdnIp6Addr, pdnCb->lnkEpsBearId);
+        RETVALUE(ret);
       } else {
         NB_LOG_ERROR(&nbCb,"pdnCb not found for drbId %u", drbId);
-        RETVALUE(RFAILED);
+        RETVALUE(ret);
       }
     }
     prevIpInfo = ipInfo;
     ipInfo = NULLP;
   }
-  RETVALUE(RFAILED);
+  RETVALUE(ret);
 }
 
 /** @brief This function handles the incoming EGTP data packets and forwards
@@ -1497,12 +1547,17 @@ EgtUEvnt                     *eguMsg
      (flatBuf[0] == 0x60) && (flatBuf[6] == IPPROTO_ICMPV6)
      && (flatBuf[40] == ICMPV6_TYPE_ROUTER_ADV)) {
      // index-80 = Start of IPv6 prefix
-     nbProcRouterAdv(ueCb, rbId, flatBuf[80]);
-     RETVALUE(ROK);
+     if(ROK == nbProcRouterAdv(ueCb, rbId, flatBuf[80])) {
+       NB_LOG_DEBUG(&nbCb,"Successfully processed ICMPV6_TYPE_ROUTER_ADV for ueId %u\n",
+         ueId);
+       RETVALUE(ROK);
+     } else {
+       NB_LOG_ERROR(&nbCb,"Failed to process ICMPV6_TYPE_ROUTER_ADV for ueId %u\n",
+        ueId);
+     }
+     RETVALUE(RFAILED);
    }
    /* send the downlink packet to pcap */
-   for(int i=0;i<50;i++)
-   printf("%x\t", flatBuf[i]);
    nbAppFrwdIpPkt(flatBuf, cnt);
    NB_FREE(flatBuf, len);
 

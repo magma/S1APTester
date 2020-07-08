@@ -160,6 +160,7 @@ PRIVATE S16 ueAppEmmHndlInSecModecmd(CmNasEvnt *evnt, UeCb *ueCb);
 PRIVATE S16 ueAppEsmHndlIncActDefBearerReq(UeEsmCb*, CmNasEvnt*, UeCb*,U8*,U8);
 PRIVATE S16 ueAppEmmHndlInAttachAccept(CmNasEvnt *evnt, UeCb  *ueCb);
 EXTERN S16 ueUiProcIpInfoReqMsg(UeCb * p_ueCb, U8 bearerId);
+EXTERN S16 ueUiProcIpInfoUpdtMsg(UeCb * p_ueCb, NbuUeIpInfoUpdt *);
 PRIVATE S16 ueAppEsmHndlOutEsmInformationRsp(UeEsmCb *esmCb, CmNasEvnt *evnt);
 #if 0
 PRIVATE S16 handleUeCntxtRcvdIndFromEnb(UeCb *ueCb);
@@ -8031,6 +8032,32 @@ PUBLIC S16 ueUiProcErabsInfoMsg(Pst *pst, NbuErabsInfo *pNbuErabsInfo)
      ueSendErabSetupRspForFailedBearers(pNbuErabsInfo);
    }
    UE_LOG_EXITFN(ueAppCb, ret);
+}
+
+PUBLIC S16 ueUiProcIpInfoUpdtMsg(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt)
+{
+   UeAppCb *ueAppCb = NULLP;
+   UetMessage *tfwMsg = NULLP;
+   UE_GET_CB(ueAppCb);
+   UE_LOG_ENTERFN(ueAppCb);
+   // Update the IPv6 address to ueAppCb
+   for (int idx=0; idx<UE_APP_MAX_DRBS; idx++) {
+     if (ueCb->ueRabCb[idx].lnkEpsBearId == ipInfoUpdt->bearerId) {
+       cmMemcpy(ueCb->ueRabCb[idx].ipv6Addr, ipInfoUpdt->ipv6Addr, sizeof(ipInfoUpdt->ipv6Addr));
+     }
+   }
+   // Send message to Test controller
+   tfwMsg = (UetMessage*)ueAlloc(sizeof(UetMessage));
+   tfwMsg->msg.ueUetRouterAdv.ueId = ueCb->ueId;
+   tfwMsg->msg.ueUetRouterAdv.bearerId  = ipInfoUpdt->bearerId;
+   tfwMsg->msgType = UE_ICMPV6_ROUTER_ADV_TYPE;
+   if (ueSendToTfwApp(tfwMsg, &ueAppCb->fwPst) != ROK) {
+     UE_LOG_ERROR(ueAppCb, "Sending ICMPV6 ROUTER ADVERTISEMENT to "\
+       "TFWAPP failed");
+     RETVALUE(RFAILED);
+   }
+   UE_LOG_DEBUG(ueAppCb, "Sent ICMPV6 ROUTER ADVERTISEMENT to tfwApp \n");
+   RETVALUE(ROK);
 }
 
 PUBLIC S16 ueUiProcIpInfoReqMsg(UeCb *p_ueCb, U8 bearerId)

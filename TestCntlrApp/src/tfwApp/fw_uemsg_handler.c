@@ -120,7 +120,7 @@ PRIVATE S16 sendUePdnDisConRejIndToTstCntlr(UetResponse *uetMsg);
 PRIVATE S16 handlePdnDisConRejInd(Pst *pst, UetMessage *uetPdnDisConRejInd);
 PRIVATE Void handle_erab_setup_req_failed_for_bearers( Pst *pst, UetMessage *erab_setup_req_failed_for_bearers);
 PRIVATE Void sendUeErabSetupReqFailedForBearers( UetMessage *erab_setup_req_failed_for_bearers);
-
+PRIVATE S16 handleRouterAdvInd(Pst *pst, UeUetRouterAdv *uetRouterAdv);
 
 /*
 *        Fun:  sendUeAppConfigRespToTstCntlr
@@ -312,7 +312,12 @@ PUBLIC S16 handleMessageFromUeApp
          handle_erab_setup_req_failed_for_bearers(pst, uetRspMsg);
          break;
       }
-
+      case UE_ICMPV6_ROUTER_ADV_TYPE:
+      {
+         FW_LOG_DEBUG(fwCb, "Recieved Router Advertisement Indication");
+         handleRouterAdvInd(pst, uetRspMsg);
+         break;
+      }
       default:
       {
          FW_LOG_ERROR(fwCb, "Invalid message type recieved");
@@ -2218,4 +2223,37 @@ PRIVATE Void sendUeErabSetupReqFailedForBearers(
 
   FW_FREE_MEM(fwCb, erabSetupFailedTosetup, sizeof(FwErabSetupFailedTosetup));
   FW_LOG_EXITFNVOID(fwCb);
+}
+
+/*
+*  Fun:  handleRouterAdvInd 
+*
+*  Desc: Sends the Router Advertisement indication to test controller
+*
+*  Ret:   ROK
+*
+*  Notes: None
+*
+*  File: fw_uemsg_handler.c
+*
+*/
+PRIVATE S16 handleRouterAdvInd(Pst *pst, UeUetRouterAdv *uetRouterAdv)
+{
+   S16 ret = ROK;
+   FwCb *fwCb = NULLP;
+   ueRouterAdv_t *tfwUeRouterAdv = NULLP;
+
+   FW_GET_CB(fwCb);
+   FW_LOG_ENTERFN(fwCb);
+
+   FW_ALLOC_MEM(fwCb, &tfwUeRouterAdv , sizeof(ueRouterAdv_t));
+
+   tfwUeRouterAdv->ueId = uetRouterAdv->ueId;
+   tfwUeRouterAdv->bearerId = uetRouterAdv->bearerId;
+   cmMemcpy(tfwUeRouterAdv->ipv6Addr, uetRouterAdv->ipv6Addr, sizeof(uetRouterAdv->ipv6Addr));
+   (fwCb->testConrollerCallBack)(UE_ROUTER_ADV_IND, tfwUeRouterAdv,
+         sizeof(ueRouterAdv_t));
+
+   FW_FREE_MEM(fwCb, tfwUeRouterAdv, sizeof(ueRouterAdv_t));
+   FW_LOG_EXITFN(fwCb, ret);
 }

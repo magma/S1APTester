@@ -33,6 +33,7 @@ extern "C" {
 #define FW_ESM_MAX_LEN_PROT_CFG_OPT 247
 #define FW_ESM_MAX_PROTO_ID 4
 #define FW_ESM_MAX_CONT_ID 10
+#define FW_ESM_MAX_IPV6_LEN 16
 
 typedef enum {
    UE_APPL_CONFIG = 1,
@@ -120,7 +121,8 @@ typedef enum {
    UE_PDN_DISCONNECT_TIMEOUT_IND,
    UE_PDN_DISCONNECT_REJ,
    UE_FW_ERAB_SETUP_REQ_FAILED_FOR_ERABS,
-   UE_AUTH_FAILURE
+   UE_AUTH_FAILURE,
+   UE_ROUTER_ADV_IND
 }tfwCmd;
 
 typedef enum
@@ -1563,6 +1565,13 @@ typedef struct _FwErabSetupFailedTosetup {
   U8 noOfFailedErabs;
   FwFailedErablist failedErablist[MAX_FAILED_ERABS];
 } FwErabSetupFailedTosetup;
+
+typedef struct ueRouterAdv
+{
+   U8 ueId;
+   U8 bearerId;
+   U8 ipv6Addr[FW_ESM_MAX_IPV6_LEN];
+}ueRouterAdv_t;
 
 typedef FwErabRelCmd_t FwErabRelRsp_t;
 

@@ -2206,6 +2206,7 @@ NbuUeIpInfoReq *msg;
    switch(pst->selector)
    {
       case NBU_SEL_LC:
+      printf("In case NBU_SEL_LC\n");
 #ifdef LCNBU
          ret1 = cmPkUeIpInfoReq(msg, EVTNBUUEIPINFOREQ,mBuf);
 #if(ERRCLASS & ERRCLS_ADD_RES)
@@ -2222,6 +2223,7 @@ NbuUeIpInfoReq *msg;
 #endif
 #ifdef LWLCNBU
       case NBU_SEL_LWLC:
+      printf("In case NBU_SEL_LWLC\n");
          CMCHKPKLOG(cmPkPtr, (PTR)msg, mBuf, ENBU016, pst);
          break;
 #endif
@@ -2298,6 +2300,7 @@ Buffer *mBuf;
       {
 #ifdef LCNBU
          case NBU_SEL_LC:
+            printf("In cmUnPkNbuUeIpInfoReq in case NBU_SEL_LC\n");
             ret1 = cmUnPkUeIpInfoReq((NbuUeIpInfoReq *)&msg,mBuf);
 #if(ERRCLASS & ERRCLS_DEBUG)
             if(ret1 != ROK)
@@ -2313,6 +2316,7 @@ Buffer *mBuf;
 #endif
 #ifdef LWLCNBU
          case  NBU_SEL_LWLC:
+            printf("In cmUnPkNbuUeIpInfoReq in case NBU_SEL_LWLC\n");
             CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &msg, mBuf, (ErrVal)ENBU025, pst);
             break;
 #endif
@@ -2361,6 +2365,70 @@ Buffer *mBuf;
    RETVALUE(ROK);
 }
 #endif
+
+/*
+ *
+ *    Fun:    cmUnPkNbuUeIpInfoUpdt
+ *
+ *    Desc:   unpack the NbuUeIpInfo Update Msg
+ *
+ *    Ret:    ROK  -ok
+ *
+ *    Notes:  None
+ *
+ *    File:   nbu.c 
+ *
+ */
+
+PUBLIC S16 cmUnPkNbuUeIpInfoUpdt(NbuUeIpInfoUpdtHdl func, Pst *pst, Buffer *mBuf)
+{
+   S16 ret = ROK;
+   NbuUeIpInfoReq *msg = NULLP;
+
+   TRC3(cmUnPkNbuUeIpInfoUpdt)
+   CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &msg, mBuf, (ErrVal)ENBU025, pst);
+   SPutMsg(mBuf);
+#ifdef LWLCNBU
+   ret = (*func)(pst, msg);
+   SPutSBuf(pst->region, pst->pool, (Data *) msg, sizeof(NbuUeIpInfoUpdt));
+   RETVALUE(ret);
+#else
+   RETVALUE((*func)(pst, &msg));
+#endif
+}
+
+/*
+ *
+ *    Fun:    cmPkNbuUeIpInfoUpdt
+ *
+ *    Desc:   pack the Ue Ip Info Update msg
+ *
+ *    Ret:    ROK  -ok
+ *
+ *    Notes:  None
+ *
+ *    File:   nbu.c 
+ *
+ */
+PUBLIC S16 cmPkNbuUeIpInfoUpdt(Pst *pst, NbuUeIpInfoUpdt *msg)
+{
+  S16 ret;
+  Buffer *mBuf;
+  mBuf = NULLP;
+  TRC3(cmPkNbuUeIpInfoUpdt)
+
+  if((ret = SGetMsg(pst->region, pst->pool, &mBuf)) != ROK) {
+#if (ERRCLASS & ERRCLS_ADD_RES)
+    SLogError(pst->srcEnt, pst->srcInst, pst->srcProcId,
+    __FILE__, __LINE__, (ErrCls)ERRCLS_ADD_RES,
+    (ErrVal)ENBU014, (ErrVal)0, "SGetMsg() failed");
+#endif /*  ERRCLASS & ERRCLS_ADD_RES  */
+    RETVALUE(ret);
+  }
+  CMCHKPKLOG(cmPkPtr, (PTR)msg, mBuf, ENBU016, pst);
+  pst->event = (Event)EVTNBUUEIPINFOUPDT;
+  RETVALUE(SPstTsk(pst,mBuf));
+}
 
 /*
  *

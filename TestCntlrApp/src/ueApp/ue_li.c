@@ -448,6 +448,42 @@ PUBLIC S16 ueSendUlRrcMsgToNb(NbuUlRrcMsg *pUlRrcMsg, Pst *pst)
    RETVALUE(ret);
 }
 
+PUBLIC S16 UeLiNbuUeIpInfoUpdt(Pst *pst, NbuUeIpInfoUpdt *p_ueMsg)
+{
+   S16   ret = RFAILED;
+   U8    ueId = 0;
+   UeAppCb *ueAppCb=NULLP;
+   UeCb *ueCb = NULLP;
+   U8 bearerId = 0;
+
+   UE_GET_CB(ueAppCb);
+
+   UE_LOG_ENTERFN(ueAppCb);
+
+   /* sanity check */
+   if (!pst || !p_ueMsg)
+   {
+      RETVALUE(ret);
+   } /* end of if pst or p_ueMsg are not valid pointers */
+
+   ueId     = p_ueMsg->ueId;
+   /* Fetching the UeCb */
+   ret = ueDbmFetchUe(ueId, (PTR *)&ueCb);
+   if (ret != ROK)
+   {
+      UE_LOG_ERROR(ueAppCb,"[UEAPP]: UeCb List NULL ueId = %d", ueId);
+      RETVALUE(ret);
+   }
+
+   /* process the received received */
+   if((ret = ueUiProcIpInfoUpdtMsg(ueCb,p_ueMsg)) != ROK)
+   {
+      UE_LOG_ERROR(ueAppCb, "Failed to process IP Info Update message");
+      ret = RFAILED;
+   } /* end of if processing the message fails */
+   RETVALUE(ret);
+}
+
 PUBLIC S16 UeLiNbuNotifyPlmnInfo
 (
  Pst             *pst,          /* Post structure */

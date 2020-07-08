@@ -43,6 +43,7 @@
 #define EVTNBUERABRELIND           11 /* Erab Rel Indication*/
 #define EVTNBUERABSRELINFO         12 /* Erab Rel Information Indication */
 #define EVTNBUUPDATEPLMNINFO       13 /* Update Plmn Info */
+#define EVTNBUUEIPINFOUPDT         14 /* Update IPv6 address */
 #define ERRNBU                     0
 
 #define ENBU001         (ERRNBU + 1)
