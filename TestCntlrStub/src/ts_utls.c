@@ -229,7 +229,6 @@ int TC_msg_recv(int msgid, int timeout)
    FwErabRelCmd_t     *tfwErabRelCmdInfo = NULL;
    ueNasNonDelRsp_t   *tfwNasNonDelRsp = NULL;
    FwNbIntCtxSetupInd_t *tfwIntCtxSetupInd = NULL;
-   uePdnDisconnFail_t *tfwPdnDisconnFail = NULL;
 
    printf("[Stub] %s:%s():%d: Entering\n", __FILE__, __FUNCTION__, __LINE__);
    printf("[Stub] TC_msg_recv(): msgid=%d\n", msgid);
