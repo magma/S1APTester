@@ -2239,21 +2239,33 @@ PRIVATE Void sendUeErabSetupReqFailedForBearers(
 */
 PRIVATE S16 handleRouterAdvInd(Pst *pst, UeUetRouterAdv *uetRouterAdv)
 {
-   S16 ret = ROK;
-   FwCb *fwCb = NULLP;
-   ueRouterAdv_t *tfwUeRouterAdv = NULLP;
+  S16 ret = ROK;
+  FwCb *fwCb = NULLP;
+  ueRouterAdv_t *tfwUeRouterAdv = NULLP;
+  U8 ipv6AddrStr[FW_ESM_MAX_IPV6_LEN] = {0};
 
-   FW_GET_CB(fwCb);
-   FW_LOG_ENTERFN(fwCb);
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
 
-   FW_ALLOC_MEM(fwCb, &tfwUeRouterAdv , sizeof(ueRouterAdv_t));
+  FW_ALLOC_MEM(fwCb, &tfwUeRouterAdv , sizeof(ueRouterAdv_t));
 
-   tfwUeRouterAdv->ueId = uetRouterAdv->ueId;
-   tfwUeRouterAdv->bearerId = uetRouterAdv->bearerId;
-   cmMemcpy(tfwUeRouterAdv->ipv6Addr, uetRouterAdv->ipv6Addr, sizeof(uetRouterAdv->ipv6Addr));
-   (fwCb->testConrollerCallBack)(UE_ROUTER_ADV_IND, tfwUeRouterAdv,
-         sizeof(ueRouterAdv_t));
+  tfwUeRouterAdv->ueId = uetRouterAdv->ueId;
+  tfwUeRouterAdv->bearerId = uetRouterAdv->bearerId;
+  // Convert IPv6 U8 arrary into : separate string for better readability
+  sprintf((char*) ipv6AddrStr,"%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x",
+    (int)uetRouterAdv->ipv6Addr[0], (int)uetRouterAdv->ipv6Addr[1],
+    (int)uetRouterAdv->ipv6Addr[2], (int)uetRouterAdv->ipv6Addr[3],
+    (int)uetRouterAdv->ipv6Addr[4], (int)uetRouterAdv->ipv6Addr[5],
+    (int)uetRouterAdv->ipv6Addr[6], (int)uetRouterAdv->ipv6Addr[7],
+    (int)uetRouterAdv->ipv6Addr[8], (int)uetRouterAdv->ipv6Addr[9],
+    (int)uetRouterAdv->ipv6Addr[10], (int)uetRouterAdv->ipv6Addr[11],
+    (int)uetRouterAdv->ipv6Addr[12], (int)uetRouterAdv->ipv6Addr[13],
+    (int)uetRouterAdv->ipv6Addr[14], (int)uetRouterAdv->ipv6Addr[15]);
 
-   FW_FREE_MEM(fwCb, tfwUeRouterAdv, sizeof(ueRouterAdv_t));
-   FW_LOG_EXITFN(fwCb, ret);
+  cmMemcpy(tfwUeRouterAdv->ipv6Addr, ipv6AddrStr, FW_ESM_MAX_IPV6_LEN);
+  (fwCb->testConrollerCallBack)(UE_ROUTER_ADV_IND, tfwUeRouterAdv,
+        sizeof(ueRouterAdv_t));
+
+  FW_FREE_MEM(fwCb, tfwUeRouterAdv, sizeof(ueRouterAdv_t));
+  FW_LOG_EXITFN(fwCb, ret);
 }

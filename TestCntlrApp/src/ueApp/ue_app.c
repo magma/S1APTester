@@ -8050,6 +8050,7 @@ PUBLIC S16 ueUiProcIpInfoUpdtMsg(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt)
    tfwMsg = (UetMessage*)ueAlloc(sizeof(UetMessage));
    tfwMsg->msg.ueUetRouterAdv.ueId = ueCb->ueId;
    tfwMsg->msg.ueUetRouterAdv.bearerId  = ipInfoUpdt->bearerId;
+   cmMemcpy(tfwMsg->msg.ueUetRouterAdv.ipv6Addr, ipInfoUpdt->ipv6Addr, sizeof(ipInfoUpdt->ipv6Addr));
    tfwMsg->msgType = UE_ICMPV6_ROUTER_ADV_TYPE;
    if (ueSendToTfwApp(tfwMsg, &ueAppCb->fwPst) != ROK) {
      UE_LOG_ERROR(ueAppCb, "Sending ICMPV6 ROUTER ADVERTISEMENT to "\
