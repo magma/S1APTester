@@ -209,6 +209,8 @@ typedef U32                  NbMmeId;
 #define NB_PDN_IPV6    2
 #define NB_PDN_IPV4V6  3
 #define NB_IPV6_ADDRESS_LEN 16
+#define NB_IPV4_VERSION 4
+#define NB_IPV6_VERSION 6
 
 EXTERN U16 szElmSize[][SZT_MAX_PROC_ID];
 typedef struct _nbUeCb _nbUeCb;

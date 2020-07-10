@@ -1207,6 +1207,211 @@ NbDamDrbCb                  *drbCb
    RETVALUE(ROK);
 }
 
+/** @brief This function handles the incoming Uplink PCAP IPv4 packet.
+ *
+ * @details
+ *
+ *     Function: nbProcIpv4Packet
+ *
+ *         Processing steps:
+ *         - fetch the packet fields
+ *         - fetch the tunnelCb
+ *         - fetch the ueCb
+ *
+ *
+ * @param[in]  mBuf   : uplink data packet
+ * @param[in]  ipPktFields   : Pointer to NbIpPktFields
+ * @return S16
+ *    -#Success : ROK
+ *    -#Failure : RFAILED
+ */
+PRIVATE S16 nbProcIpv4Packet(Buffer *mBuf, NbIpPktFields *ipPktFields)
+{ 
+  U8 ipPkt[NB_PACKET_SIZE] = {0};
+  MsgLen ipIdx = 0;
+  
+  /* Fetch ToS or DSCP*/
+  if ((SExamMsg(&ipPkt[0], mBuf, ipIdx) != ROK)) {
+    NB_LOG_ERROR(&nbCb, "Failed to fetch ToS");
+    SPutMsg(mBuf);
+    RETVALUE(RFAILED);
+  }
+  /* Tos or DSCP*/
+  ipPktFields->srvClass = ipPkt[0];
+  /* Skip 9 bytes to fetch the protocol ID*/
+  ipIdx = 9;
+  /* Fetch protocol Id*/
+  if ((SExamMsg(&ipPkt[0], mBuf, ipIdx) != ROK)) {
+    NB_LOG_ERROR(&nbCb, "Failed to fetch protocol Id");
+    SPutMsg(mBuf);
+    RETVALUE(RFAILED);
+  }
+  ipPktFields->proto_id = ipPkt[0];
+
+  /* Skip 12 bytes for Local IPv4 address*/
+  ipIdx = 12;
+  U8 idx = 0;
+  /* Fetch IPv4 local address*/
+  for (idx = 0; idx < 4; idx++) {
+    if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
+      NB_LOG_ERROR(&nbCb, "Failed to fetch IPv4 local address");
+      SPutMsg(mBuf);
+      RETVALUE(RFAILED);
+    }
+    ipIdx++;
+  }
+
+  /* Local IPv4 address*/
+  ipPktFields->locIpv4Addr =
+      (ipPkt[0] << 24) + (ipPkt[1] << 16) + (ipPkt[2] << 8) + ipPkt[3];
+
+  /* Skip 16 bytes for remote IPv4 address*/
+  ipIdx = 16;
+  /* Remote IPv4 address*/
+  for (idx = 0; idx < 4; idx++) {
+    if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
+      NB_LOG_ERROR(&nbCb, "Failed to fetch remote IPv4 address");
+      SPutMsg(mBuf);
+      RETVALUE(RFAILED);
+    }
+    ipIdx++;
+  }
+
+  ipPktFields->remIpv4Addr =
+      (ipPkt[0] << 24) + (ipPkt[1] << 16) + (ipPkt[2] << 8) + ipPkt[3];
+
+  /* Local port*/
+  ipIdx = 20;
+  for (idx = 0; idx < 2; idx++) {
+    if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
+      NB_LOG_ERROR(&nbCb, "Failed to fetch local port");
+      SPutMsg(mBuf);
+      RETVALUE(RFAILED);
+    }
+    ipIdx++;
+  }
+  ipPktFields->locPort = (ipPkt[0] << 8) + ipPkt[1];
+
+  /* Remote port*/
+  ipIdx = 22;
+  for (idx = 0; idx < 2; idx++) {
+    if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
+      NB_LOG_ERROR(&nbCb, "Failed to fetch remote port");
+      SPutMsg(mBuf);
+      RETVALUE(RFAILED);
+    }
+    ipIdx++;
+  }
+  ipPktFields->remPort = (ipPkt[0] << 8) + ipPkt[1];
+
+  RETVALUE(ROK);
+}
+
+/** @brief This function handles the incoming Uplink PCAP IPv6 packet.
+ *
+ * @details
+ *
+ *     Function: nbProcIpv6Packet
+ *
+ *         Processing steps:
+ *         - fetch the packet fields
+ *         - fetch the tunnelCb
+ *         - fetch the ueCb
+ *
+ *
+ * @param[in]  mBuf   : uplink data packet
+ * @param[in]  ipPktFields   : Pointer to NbIpPktFields
+ * @return S16
+ *    -#Success : ROK
+ *    -#Failure : RFAILED
+ */
+PRIVATE S16 nbProcIpv6Packet(Buffer *mBuf, NbIpPktFields *ipPktFields)
+{ 
+  U8 ipPkt[NB_PACKET_SIZE] = {0};
+  MsgLen ipIdx = 0;
+  U8 idx = 0;
+ 
+  /* Fetch ToS or DSCP*/
+  for (idx = 0; idx < 2; idx++) {
+    if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
+      NB_LOG_ERROR(&nbCb, "Failed to fetch ToS");
+      SPutMsg(mBuf);
+      RETVALUE(RFAILED);
+    }
+    ipIdx++;
+  }
+
+  // Extract 4 bits from the 1st byte and 4 bits from the 2nd byte
+  U8 tos = ((ipPkt[0] & 0x0f) | ((ipPkt[0] & 0xf0) >> 4));
+  /* Tos or DSCP*/
+  ipPktFields->srvClass = tos;
+  /* Skip 6 bytes to fetch the next header/protocol ID*/
+  ipIdx = 6;
+  /* Fetch protocol Id*/
+  if ((SExamMsg(&ipPkt[0], mBuf, ipIdx) != ROK)) {
+    NB_LOG_ERROR(&nbCb, "Failed to fetch protocol Id");
+    SPutMsg(mBuf);
+    RETVALUE(RFAILED);
+  }
+  ipPktFields->proto_id = ipPkt[0];
+
+  /* Skip 8 bytes for Local IPv6 address*/
+  ipIdx = 8;
+  /* Fetch IPv6 local address*/
+  for (idx = 0; idx < NB_IPV6_ADDRESS_LEN; idx++) {
+    if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
+      NB_LOG_ERROR(&nbCb, "Failed to fetch IPv6 local address");
+      SPutMsg(mBuf);
+      RETVALUE(RFAILED);
+    }
+    ipIdx++;
+  }
+
+  /* Local IPv6 address is used only to verify if we have 
+   * a valid context for this UE
+   */
+  cmMemcpy(ipPktFields->localIpv6Addr, ipPkt, NB_IPV6_ADDRESS_LEN);
+
+  /* Skip 24 bytes for remote IPv4 address*/
+  ipIdx = 24;
+  /* Remote IPv6 address*/
+  for (idx = 0; idx < NB_IPV6_ADDRESS_LEN; idx++) {
+    if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
+      NB_LOG_ERROR(&nbCb, "Failed to fetch remote IPv6 address");
+      SPutMsg(mBuf);
+      RETVALUE(RFAILED);
+    }
+    ipIdx++;
+  }
+
+  cmMemcpy(ipPktFields->remIpv6Addr, ipPkt, NB_IPV6_ADDRESS_LEN);
+
+  /* Local port*/
+  ipIdx = 40;
+  for (idx = 0; idx < 2; idx++) {
+    if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
+      NB_LOG_ERROR(&nbCb, "Failed to fetch local port");
+      SPutMsg(mBuf);
+      RETVALUE(RFAILED);
+    }
+    ipIdx++;
+  }
+  ipPktFields->locPort = (ipPkt[0] << 8) + ipPkt[1];
+
+  /* Remote port*/
+  ipIdx = 42;
+  for (idx = 0; idx < 2; idx++) {
+    if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
+      NB_LOG_ERROR(&nbCb, "Failed to fetch remote port");
+      SPutMsg(mBuf);
+      RETVALUE(RFAILED);
+    }
+    ipIdx++;
+  }
+  ipPktFields->remPort = (ipPkt[0] << 8) + ipPkt[1];
+
+  RETVALUE(ROK);
+}
 
 /** @brief This function handles the incoming Uplink PCAP data indication.
  *
@@ -1231,7 +1436,7 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
   NbDamUeCb *ueCb = NULLP;
   U8 ipPkt[NB_PACKET_SIZE] = {0};
   U8 drbId;
-  MsgLen ipIdx = 1; // Start from 1st index-DSCP
+  MsgLen ipIdx = 0;
   NbIpPktFields ipPktFields = {0};
 
   EgtUEvnt *eguEvtMsg;
@@ -1245,79 +1450,20 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
     RETVALUE(ROK);
   }
 
-  /* Fetch ToS or DSCP*/
+  /* Fetch Version field*/
   if ((SExamMsg(&ipPkt[0], mBuf, ipIdx) != ROK)) {
-    NB_LOG_ERROR(&nbCb, "Failed to fetch ToS");
+    NB_LOG_ERROR(&nbCb, "Failed to fetch IP version");
     SPutMsg(mBuf);
     RETVALUE(RFAILED);
   }
-  /* Tos or DSCP*/
-  ipPktFields.srvClass = ipPkt[0];
-  /* Skip 9 bytes to fetch the protocol ID*/
-  ipIdx = 9;
-  /* Fetch protocol Id*/
-  if ((SExamMsg(&ipPkt[0], mBuf, ipIdx) != ROK)) {
-    NB_LOG_ERROR(&nbCb, "Failed to fetch protocol Id");
-    SPutMsg(mBuf);
-    RETVALUE(RFAILED);
+  U8 ipVersion = (ipPkt[0] >> 4);
+  ipPktFields.ipVersion = ipVersion;
+  if (ipVersion == NB_IPV4_VERSION) {
+    nbProcIpv4Packet(mBuf, &ipPktFields);
+  } else if (ipVersion == NB_IPV6_VERSION) {
+    nbProcIpv6Packet(mBuf, &ipPktFields);
   }
-  ipPktFields.proto_id = ipPkt[0];
-
-  /* Skip 12 bytes for Local IPv4 address*/
-  ipIdx = 12;
-  U8 idx = 0;
-  /* Fetch IPv4 local address*/
-  for (idx = 0; idx < 4; idx++) {
-    if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
-      NB_LOG_ERROR(&nbCb, "Failed to fetch IPv4 local address");
-      SPutMsg(mBuf);
-      RETVALUE(RFAILED);
-    }
-    ipIdx++;
-  }
-
-  /* Local IPv4 address*/
-  ipPktFields.locIpv4Addr =
-      (ipPkt[0] << 24) + (ipPkt[1] << 16) + (ipPkt[2] << 8) + ipPkt[3];
-
-  /* Skip 16 bytes for remote IPv4 address*/
-  ipIdx = 16;
-  /* Remote IPv4 address*/
-  for (idx = 0; idx < 4; idx++) {
-    if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
-      NB_LOG_ERROR(&nbCb, "Failed to fetch remote IPv4 address");
-      SPutMsg(mBuf);
-      RETVALUE(RFAILED);
-    }
-    ipIdx++;
-  }
-
-  ipPktFields.remIpv4Addr =
-      (ipPkt[0] << 24) + (ipPkt[1] << 16) + (ipPkt[2] << 8) + ipPkt[3];
-
-  /* Local port*/
-  ipIdx = 20;
-  for (idx = 0; idx < 2; idx++) {
-    if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
-      NB_LOG_ERROR(&nbCb, "Failed to fetch local port");
-      SPutMsg(mBuf);
-      RETVALUE(RFAILED);
-    }
-    ipIdx++;
-  }
-  ipPktFields.locPort = (ipPkt[0] << 8) + ipPkt[1];
-
-  /* Remote port*/
-  ipIdx = 22;
-  for (idx = 0; idx < 2; idx++) {
-    if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
-      NB_LOG_ERROR(&nbCb, "Failed to fetch remote port");
-      SPutMsg(mBuf);
-      RETVALUE(RFAILED);
-    }
-    ipIdx++;
-  }
-  ipPktFields.remPort = (ipPkt[0] << 8) + ipPkt[1];
+  
   /* get the ueCb */
   ueCb = nbDamGetueCbkeyUeIp(&ipPktFields, &drbId);
   if (ueCb == NULLP) {
@@ -2248,6 +2394,14 @@ PRIVATE S16 nbMatchPf(NbPktFilterList *tftPf, NbIpPktFields *ipPktFields)
     }
   }
 
+  /* IPv6 remote address*/
+  if (tftPf->presence_mask & IPV6_REM_ADDR_PKT_FLTR_MASK) {
+    if (cmMemcmp(tftPf->remIpv6Addr.ipv6_addr, ipPktFields->remIpv6Addr, NB_IPV6_ADDRESS_LEN)) {
+      NB_LOG_DEBUG(&nbCb, "IPv6 remote address did not match\n");
+      RETVALUE(RFAILED);
+    }
+  }
+
   /* Protocol ID*/
   if (tftPf->presence_mask & PROTO_ID_PKT_FLTR_MASK) {
     if (tftPf->proto_id != ipPktFields->proto_id) {
@@ -2349,8 +2503,9 @@ PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId)
           ROK);) {
     /* Fetch the pdnCb*/
     if (ROK ==
-        (cmHashListFind(&((ueCb)->pdnCb), (U8 *)&(ipPktFields->locIpv4Addr),
-                        sizeof(U32), 0, (PTR *)&pdnCb))) {
+        (cmHashListFind(&((ueCb)->pdnCb), ((ipPktFields->ipVersion == NB_IPV4_VERSION) ? (U8 *)&(ipPktFields->locIpv4Addr) :
+        (ipPktFields->localIpv6Addr)),
+         (ipPktFields->ipVersion == NB_IPV4_VERSION) ? sizeof(U32) : NB_IPV6_ADDRESS_LEN, 0, (PTR *)&pdnCb))) {
       NB_LOG_DEBUG(&nbCb, "pdncb found\n");
       ueIpMatchFound = TRUE;
       /* Fetch TFT Packet Filter list*/
