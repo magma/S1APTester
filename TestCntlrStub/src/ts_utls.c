@@ -229,6 +229,7 @@ int TC_msg_recv(int msgid, int timeout)
    FwErabRelCmd_t     *tfwErabRelCmdInfo = NULL;
    ueNasNonDelRsp_t   *tfwNasNonDelRsp = NULL;
    FwNbIntCtxSetupInd_t *tfwIntCtxSetupInd = NULL;
+   uePdnDisconnFail_t *tfwPdnDisconnFail = NULL;
 
    printf("[Stub] %s:%s():%d: Entering\n", __FILE__, __FUNCTION__, __LINE__);
    printf("[Stub] TC_msg_recv(): msgid=%d\n", msgid);
@@ -1763,12 +1764,12 @@ int tsSendResetReq(unsigned int resetType, int numOfUes, unsigned char *ueLst)
       ((ResetReq*)msgptr)->cause.causeType = 1;
       ((ResetReq*)msgptr)->cause.causeVal = 1;
 
-      ((ResetReq*)msgptr)->u.partialRst.numOfConn = numOfUes;
-      ((ResetReq*)msgptr)->u.partialRst.ueIdLst = malloc(numOfUes);
-      memcpy(((ResetReq*)msgptr)->u.partialRst.ueIdLst, ueLst, numOfUes);
+      ((ResetReq*)msgptr)->r.partialRst.numOfConn = numOfUes;
+      ((ResetReq*)msgptr)->r.partialRst.ueIdLst = malloc(numOfUes);
+      memcpy(((ResetReq*)msgptr)->r.partialRst.ueIdLst, ueLst, numOfUes);
 
       tfwApi(RESET_REQ, msgptr);
-      free(((ResetReq*)msgptr)->u.partialRst.ueIdLst);
+      free(((ResetReq*)msgptr)->r.partialRst.ueIdLst);
       free(msgptr);
    }
 
