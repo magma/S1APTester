@@ -6112,6 +6112,12 @@ PRIVATE Void _fill_pf_comp(U8 idx, UeCb *ueCb, NbuUeIpInfoRsp *ueIpInfoRsp)
           (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].ipv4.ip4[2] << 8) +
           (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].ipv4.ip4[3]);
     }
+
+    if (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].ipv6.pres) {
+      ueIpInfoRsp->pfList[pf_idx].presenceMask |= IPV6_REM_ADDR_PKT_FLTR_MASK;
+      cmMemcpy(ueIpInfoRsp->pfList[pf_idx].remoteIpv6Addr,
+        ueCb->ueRabCb[itrn].tft.pfList[pf_idx].ipv6.ip6, CM_ESM_IPV6_SIZE);
+    }
     if (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].protId.pres) {
       ueIpInfoRsp->pfList[pf_idx].presenceMask |= PROTO_ID_PKT_FLTR_MASK;
       ueIpInfoRsp->pfList[pf_idx].protId =

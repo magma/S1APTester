@@ -22,6 +22,8 @@
 *********************************************************************21*/
 #include "tft.h"
 
+#define CM_NB_IPV6_ADDR_LEN 16 
+
 typedef struct _nbuSTmsi
 {
    Bool                      pres;
@@ -173,7 +175,7 @@ typedef struct _nbuUeIpInfoUpdt
 {
    U8 ueId;
    U8 bearerId;
-   U8 ipv6Addr[16];
+   U8 ipv6Addr[CM_NB_IPV6_ADDR_LEN];
 } NbuUeIpInfoUpdt;
 
 typedef struct _uePagingMsg
@@ -204,6 +206,7 @@ typedef struct _tftPfs {
   U8 preced;           /* Precedence */
   U32 ipv4Mask;        /* Ipv4 Address mask*/
   U32 remoteIpv4;      /* Ipv4 Address */
+  U8 remoteIpv6Addr[CM_NB_IPV6_ADDR_LEN];
   U8 protId;           /* Protocol Identifier */
   U16 localPort;       /* Local  Port Identifier */
   U16 locPortRangeLow; /* Local port range*/

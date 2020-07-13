@@ -533,6 +533,10 @@ PRIVATE S16 nbAddPfs(NbPdnCb *pdnCb, NbDamTnlInfo *tnlInfo)
       tftPf->remIpv4Addr.ipv4_addr_mask = tnlInfo->tft.pfList[itrn].ipv4Mask;
       tftPf->remIpv4Addr.ipv4_addr = tnlInfo->tft.pfList[itrn].remoteIpv4;
     }
+    if (presence_mask & IPV6_REM_ADDR_PKT_FLTR_MASK) {
+      cmMemcpy(tftPf->remIpv6Addr.ipv6_addr, tnlInfo->tft.pfList[itrn].remoteIpv6Addr,
+        NB_IPV6_ADDRESS_LEN);
+    }
     if (presence_mask & PROTO_ID_PKT_FLTR_MASK) {
       tftPf->proto_id = tnlInfo->tft.pfList[itrn].protId;
     }
