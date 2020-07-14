@@ -421,26 +421,6 @@ PUBLIC S16 nbPrcDamUeDelCfm(U8 ueId)
    RETVALUE(ret);
 }
 
-PUBLIC Void print_ipv6_netaddr(const struct in6_addr *ipv6NetAddr) {
-  char str[40];
-  inet_ntop(AF_INET6, ipv6NetAddr, str, INET6_ADDRSTRLEN);
-
-#if 0
-  printf("\n ipv6NetAddr->s6_addr %x\n",ipv6NetAddr->s6_addr[0]);
-  sprintf(str,"%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x",
-    (int)ipv6NetAddr->s6_addr[0], (int)ipv6NetAddr->s6_addr[1],
-    (int)ipv6NetAddr->s6_addr[2], (int)ipv6NetAddr->s6_addr[3],
-    (int)ipv6NetAddr->s6_addr[4], (int)ipv6NetAddr->s6_addr[5],
-    (int)ipv6NetAddr->s6_addr[6], (int)ipv6NetAddr->s6_addr[7],
-    (int)ipv6NetAddr->s6_addr[8], (int)ipv6NetAddr->s6_addr[9],
-    (int)ipv6NetAddr->s6_addr[10], (int)ipv6NetAddr->s6_addr[11],
-    (int)ipv6NetAddr->s6_addr[12], (int)ipv6NetAddr->s6_addr[13],
-    (int)ipv6NetAddr->s6_addr[14], (int)ipv6NetAddr->s6_addr[15]);
-#endif
-    
-    printf("\n ipv6 Network Addr %s\n",str);
-}
-
 PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U8 bearerId,
                              NbuUeIpInfoRsp *rsp)
 {
@@ -476,18 +456,12 @@ PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U8 bearerId,
           cmInetAddr(rsp->Ip4Addr, &ueIp4Addr);
           ueIp4Addr = CM_INET_NTOH_U32(ueIp4Addr);
           tnlInfo->pdnIp4Addr = ueIp4Addr;
-          printf("*** In nbCreateUeTunnReq converted ipv4 %u\n", tnlInfo->pdnIp4Addr);
         } 
         if ((rsp->pdnType == NB_PDN_IPV6) || (rsp->pdnType == NB_PDN_IPV4V6)) {
           // Convert IPv6 address string to in6_addr and copy to tnlInfo.
           struct in6_addr ipv6_addr;
-          printf("*** In nbCreateUeTunnReq rsp->Ip6Addr %s\n", rsp->Ip6Addr);
           inet_pton(AF_INET6, rsp->Ip6Addr, &ipv6_addr);
           cmMemcpy(tnlInfo->pdnIp6Addr, ipv6_addr.s6_addr, sizeof(ipv6_addr.s6_addr));
-          printf("*** In nbCreateUeTunnReq converted ipv4 %u\n", tnlInfo->pdnIp4Addr);
-          for (int i=0;i<sizeof(ipv6_addr.s6_addr);i++) {
-            printf("tnlInfo->pdnIp6Addr %x\n", tnlInfo->pdnIp6Addr[i]);
-          }
         }
  
         nbCpyCmTptAddr(&tnlInfo->dstAddr, &(tunInfo->sgwAddr));
@@ -498,7 +472,6 @@ PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U8 bearerId,
           tnlInfo->tft.num_pf = rsp->noOfPfs;
           cmMemcpy(tnlInfo->tft.pfList, rsp->pfList, sizeof(rsp->pfList));
         }
-        printf("*** Before nbIfmDamTnlCreatReq \n");
         RETVALUE(nbIfmDamTnlCreatReq(tnlInfo));
       }
     }

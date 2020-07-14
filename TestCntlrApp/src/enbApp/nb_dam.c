@@ -589,7 +589,6 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
   U8 ret = RFAILED;
   NbPdnCb *pdnCb = NULL;
 
-  printf("Inside nbAddPdnCb pdn type %d\n", tnlInfo->pdnType);
   if (tnlInfo->pdnType == NB_PDN_IPV4) {
     ret = (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp4Addr),
                              sizeof(U32), 0, (PTR *)&pdnCb));
@@ -633,11 +632,9 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
         NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for pdnCb");
         RETVALUE(RFAILED);
       }
-      printf("Added pdnIp4Addr into hash list %u\n", tnlInfo->pdnIp4Addr);
     }
     if ((tnlInfo->pdnType == NB_PDN_IPV6) || (tnlInfo->pdnType == NB_PDN_IPV4V6)) {
       cmMemcpy(pdnCb->pdnIp6Addr,tnlInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr));
-      printf("Memcpy done\n");
       /* Insert pdncb*/
       if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCb,
                                 (U8 *)&tnlInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr))) {
@@ -645,7 +642,6 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
         NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for pdnCb");
         RETVALUE(RFAILED);
       }
-      printf("PDN cb insert success for IPV6 addr %s\n", pdnCb->pdnIp6Addr);
     }
   }
   RETVALUE(ROK);
@@ -847,7 +843,6 @@ PRIVATE Void nbGenerateIpv6Hdr(CmIpv6Hdr *ip6Hdr, U8 *ip6Addr)
    */
   cmMemcpy(ip6Hdr->ip6_src, ip6Addr, NB_IPV6_ADDRESS_LEN);
   for (int i=0;i<NB_IPV6_ADDRESS_LEN;i++) 
-  printf("In ip6Hdr->ip6_src %x \n", ip6Hdr->ip6_src[i]);
   RETVOID;
 }
 
@@ -870,23 +865,17 @@ PRIVATE Void nbPackIpv6HdrRtrSolicit(CmIpv6Hdr *ipv6Hdr, Icmpv6RouterSolicit *ro
  U8 *buff, U8 *idx)
 {
   U8 pru[200];
-  printf("**** idx %u\n", *idx);
   buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_flow;
   buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_flow >> 8;
   buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_flow >> 16;
   buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_flow >> 24;
-  printf("In nbPackIpv6HdrRtrSolicit, packed version field idx %d\n", (*idx));
   // Payload length
   buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_plen >> 8;
   buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_plen;
-  printf("In nbPackIpv6HdrRtrSolicit, packed Payload length field\n");
   // Next header type
   buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_nxt;
-  printf("In nbPackIpv6HdrRtrSolicit, packed Next header\n");
   // Hop limi as per RFC 4861
   buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_hlim;
-  printf("In nbPackIpv6HdrRtrSolicit, packed Hop limit\n");
-  printf("In nbPackIpv6HdrRtrSolicit idx %d\n", *idx);
   // Source address
   cmMemcpy(&buff[(*idx)], ipv6Hdr->ip6_src, NB_IPV6_ADDRESS_LEN);
   (*idx) += NB_IPV6_ADDRESS_LEN;
@@ -894,7 +883,6 @@ PRIVATE Void nbPackIpv6HdrRtrSolicit(CmIpv6Hdr *ipv6Hdr, Icmpv6RouterSolicit *ro
   cmMemcpy(&buff[(*idx)], ipv6Hdr->ip6_dst,NB_IPV6_ADDRESS_LEN); 
   (*idx) += NB_IPV6_ADDRESS_LEN;
 
-  //printf("In nbPackIpv6HdrRtrSolicit, packed dst addr %s\n", buff[*idx]);
   // Pack Router Solicit message
   buff[(*idx)++] = routerSolicit->type;
   buff[(*idx)++] = routerSolicit->code;
@@ -904,7 +892,6 @@ PRIVATE Void nbPackIpv6HdrRtrSolicit(CmIpv6Hdr *ipv6Hdr, Icmpv6RouterSolicit *ro
   buff[(*idx)++] = routerSolicit->reserved;
   buff[(*idx)++] = routerSolicit->reserved;
   buff[(*idx)++] = routerSolicit->reserved;
-  printf("In nbPackIpv6HdrRtrSolicit, packed RS\n");
   RETVOID;
 }
 
@@ -935,19 +922,15 @@ PRIVATE S16 nbSendIcmpv6RouterSolicit(U8 *ip6Addr, NbDamTnlCb *tnlCb)
   U8 idx = 0;
 
   // Populate IPv6 header
-  printf("ip6Addr %s\n", ip6Addr);
   nbGenerateIpv6Hdr(&ipv6Hdr, ip6Addr);
-  printf("nbGenerateIpv6Hdr success\n");
   // Populate Router Solicit message
   nbGenerateRouterSolicit(&routerSolicit, &ipv6Hdr);
-  printf("nbGenerateRouterSolicit success\n");
 
   /* Pack Ipv6 hdr and Router Solicit into buffer
    * This is needed because eGTP data request requires
    * mBuf format
    */
   nbPackIpv6HdrRtrSolicit(&ipv6Hdr, &routerSolicit, buff, &idx);
-  printf("nbPackIpv6HdrRtrSolicit success\n");
   // Assign memory to mBuf
   SGetMsg(DFLT_REGION, DFLT_POOL, &mBuf);
   if(mBuf == NULLP) {
@@ -960,19 +943,15 @@ PRIVATE S16 nbSendIcmpv6RouterSolicit(U8 *ip6Addr, NbDamTnlCb *tnlCb)
     RETVOID;
   }
 
-  printf("SAddPstMsgMult success\n");
   if(ROK != nbFillEgtpDatMsg(tnlCb, &eguEvtMsg, EGT_GTPU_MSG_GPDU)) {
     NB_FREEMBUF(mBuf);
     RETVALUE(ROK);
   }
-  printf("nbFillEgtpDatMsg success\n");
   egMsg = eguEvtMsg->u.egMsg;
   egMsg->u.mBuf = mBuf;
 
-  printf("Before NbIfmEgtpEguDatReq\n");
   /* Trigger EGTP Data Req */
   NbIfmEgtpEguDatReq(eguEvtMsg);
-  printf("NbIfmEgtpEguDatReq success\n");
 
   
   RETVALUE(ROK);
@@ -1098,7 +1077,6 @@ NbDamTnlInfo                 *tnlInfo
      }
    } else if (tnlInfo->pdnType == NB_PDN_IPV6) {
      cmMemcpy(ipInfo->pdnIp6Addr, tnlInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr));
-     printf("In nbDamAddTunnel pdn type %d ipv6 addr %s\n", tnlInfo->pdnType, ipInfo->pdnIp6Addr);
      if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ipInfo,
                      (U8 *)&ipInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr)))
      {
@@ -1115,9 +1093,7 @@ NbDamTnlInfo                 *tnlInfo
         NB_LOG_ERROR(&nbCb, "Failed to Insert ipv4 address into ipInfo");
         RETVALUE(RFAILED);
      }
-     printf("In nbDamAddTunnel pdn type %d added ipv4 addr %u\n", tnlInfo->pdnType, ipInfo->pdnIp4Addr);
      cmMemcpy(ipInfo->pdnIp6Addr, tnlInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr));
-     printf("In nbDamAddTunnel pdn type %d added ipv6 addr %s\n", tnlInfo->pdnType, ipInfo->pdnIp6Addr);
      if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ipInfo,
                      (U8 *)&ipInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr)))
      {
@@ -1136,7 +1112,6 @@ NbDamTnlInfo                 *tnlInfo
   if (nbDamAddTunnelAtGtp(tnlCb) == ROK) {
     if ((tnlInfo->pdnType == NB_PDN_IPV6) || (tnlInfo->pdnType == NB_PDN_IPV4V6)) {
       // Send ICMPv6 Router Solicit message
-      printf("*** Sending ICMPv6 Router Solicit message %s****\n", ipInfo->pdnIp6Addr);
       if (nbSendIcmpv6RouterSolicit(ipInfo->pdnIp6Addr, tnlCb) != ROK) {
         NB_LOG_ERROR(&nbCb, "Failed to send Router Solicit message for Interface id %s \n",
           ipInfo->pdnIp6Addr);
@@ -1637,7 +1612,6 @@ EgtUEvnt                     *eguMsg
    /* mark for ue data received */
    ueCb->dataRcvd = TRUE;   
 
-   //printf("msgType in nbDamEgtpDatInd %x teid %x\n", eguMsg->u.egMsg->msgHdr.msgType, lclTeid);
    if(eguMsg->u.egMsg->msgHdr.msgType == EGT_GTPU_MSG_SUPP_EXT_HDR_NTF)
    {
       NB_LOG_ERROR(&nbCb,"Received EGTP HDR NOTIFY");

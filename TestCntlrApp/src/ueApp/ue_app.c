@@ -6182,7 +6182,6 @@ PRIVATE Void ueAppFormIpv4Addr(NbuUeIpInfoRsp *ueIpInfoRsp, CmEsmPdnAdd *pdn_add
   U8 ip_addr[20] = {0};
   U32 counter = 0;
   U8 idx = 0;
-  printf("Forming IPv4 address\n"); 
   for (counter = 0; counter < (pdn_addr->len - 1); counter++) {
     itoa(pdn_addr->addrInfo[counter], temp, 10);
       for (cnt = 0; (itrn < 20) && (temp[cnt] != '\0') && (cnt < 19);
@@ -6214,7 +6213,6 @@ PRIVATE Void ueAppFormIpv4Addr(NbuUeIpInfoRsp *ueIpInfoRsp, CmEsmPdnAdd *pdn_add
 PRIVATE Void ueAppFormIpv6Addr(NbuUeIpInfoRsp *ueIpInfoRsp, CmEsmPdnAdd *pdn_addr)
 {
   U8 ip6_str[INET6_ADDRSTRLEN];
-  printf("Forming IPv6 address\n"); 
   // Form IPv6 address string by prepending Link local address-fe80::
   sprintf(ip6_str,"%s::%02x%02x:%02x%02x:%02x%02x:%02x%02x",
     "fe80",
@@ -6223,7 +6221,6 @@ PRIVATE Void ueAppFormIpv6Addr(NbuUeIpInfoRsp *ueIpInfoRsp, CmEsmPdnAdd *pdn_add
     (int)pdn_addr->addrInfo[4], (int)pdn_addr->addrInfo[5],
     (int)pdn_addr->addrInfo[6], (int)pdn_addr->addrInfo[7]);
 
-  printf("After sprintf %s\n", ip6_str);
   cmMemcpy(ueIpInfoRsp->Ip6Addr, ip6_str, INET6_ADDRSTRLEN);
   RETVOID;
 }
@@ -6260,7 +6257,6 @@ PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId,
       }
     }
   }
-  printf("** Pruthvi in populateIpInfo  %d\n", pdn_addr->pdnType);
   // Construct IP address
   if ((pdn_addr != NULLP) && pdn_addr->pres) {
     if (pdn_addr->pdnType == CM_ESM_PDN_IPV4) {
@@ -6903,7 +6899,6 @@ PRIVATE S16 uefillDefEsmInfoToUeCb
       cmMemcpy((U8 *)&params->pAddr.addrInfo, (U8 *)&actReq->pAddr.addrInfo,
             CM_ESM_MAX_LEN_PDN_ADDRESS);
       for (int i =0; i<sizeof(actReq->pAddr.addrInfo);i++) {
-      printf("*** Pruthvi In def bearer req pdn type %d pdn addr %x\n", params->pAddr.pdnType, params->pAddr.addrInfo[i]);
       }
    }
    else

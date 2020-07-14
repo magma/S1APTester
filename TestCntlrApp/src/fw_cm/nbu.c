@@ -2206,7 +2206,6 @@ NbuUeIpInfoReq *msg;
    switch(pst->selector)
    {
       case NBU_SEL_LC:
-      printf("In case NBU_SEL_LC\n");
 #ifdef LCNBU
          ret1 = cmPkUeIpInfoReq(msg, EVTNBUUEIPINFOREQ,mBuf);
 #if(ERRCLASS & ERRCLS_ADD_RES)
@@ -2223,7 +2222,6 @@ NbuUeIpInfoReq *msg;
 #endif
 #ifdef LWLCNBU
       case NBU_SEL_LWLC:
-      printf("In case NBU_SEL_LWLC\n");
          CMCHKPKLOG(cmPkPtr, (PTR)msg, mBuf, ENBU016, pst);
          break;
 #endif
@@ -2300,7 +2298,6 @@ Buffer *mBuf;
       {
 #ifdef LCNBU
          case NBU_SEL_LC:
-            printf("In cmUnPkNbuUeIpInfoReq in case NBU_SEL_LC\n");
             ret1 = cmUnPkUeIpInfoReq((NbuUeIpInfoReq *)&msg,mBuf);
 #if(ERRCLASS & ERRCLS_DEBUG)
             if(ret1 != ROK)
@@ -2316,7 +2313,6 @@ Buffer *mBuf;
 #endif
 #ifdef LWLCNBU
          case  NBU_SEL_LWLC:
-            printf("In cmUnPkNbuUeIpInfoReq in case NBU_SEL_LWLC\n");
             CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &msg, mBuf, (ErrVal)ENBU025, pst);
             break;
 #endif
