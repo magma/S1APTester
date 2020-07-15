@@ -23,7 +23,9 @@ EXTERN S16 nbS1apFillEutranCgi(S1apPdu*, SztEUTRAN_CGI*, EnbCb*);
 EXTERN S16 nbS1apFillEutranCgi(S1apPdu*, SztEUTRAN_CGI*);
 #endif
 EXTERN S16 NbHandleInitialUeMsg(NbuInitialUeMsg*);
-EXTERN S16 nbCreateUeTunnReq(U8, U8, NbuUeIpInfoRsp *);
+EXTERN S16 nbCreateUeTunnReq(U8 ueId, U8 bearerId,
+                             U32 ueIp4Addr, U8* ipv6_addr, NbuUeIpInfoRsp *rsp);
+//EXTERN S16 nbCreateUeTunnReq(U8, U8, NbuUeIpInfoRsp *);
 #ifdef MULTI_ENB_SUPPORT
 PRIVATE S16 nbS1apBldInitUePdu(NbUeCb*, NbTai*, TknStrOSXL*, S1apPdu**, U32,
       NbuSTmsi, EnbCb*);
@@ -498,20 +500,27 @@ PUBLIC S16 NbHandleUeIpInfoRsp(NbuUeIpInfoRsp *rsp)
 {
   U8 ueId;
   U8 bearerId;
+  U8 *ueIp6Addr = NULLP;
+  U32 ueIp4Addr = 0;
 
   ueId = rsp->ueId;
   bearerId = rsp->bearerId;
   if ((rsp->pdnType == NB_PDN_IPV4) || (rsp->pdnType == NB_PDN_IPV4V6)) {
-    U32 ueIp4Addr = 0;
     cmInetAddr(rsp->Ip4Addr, &ueIp4Addr);
     ueIp4Addr = CM_INET_NTOH_U32(ueIp4Addr);
     if (rsp->berType == DEFAULT_BER) {
       nbAppCfgrPdnAssignedAddr(ueId, ueIp4Addr);
     }
   }
+  if ((rsp->pdnType == NB_PDN_IPV6) || (rsp->pdnType == NB_PDN_IPV4V6)) {
+    struct in6_addr ipv6_addr;
+    NB_ALLOC(&ueIp6Addr, NB_IPV6_ADDRESS_LEN); 
+    inet_pton(AF_INET6, rsp->Ip6Addr, &ipv6_addr);
+    cmMemcpy(ueIp6Addr, ipv6_addr.s6_addr, NB_IPV6_ADDRESS_LEN);
+  }
  /* set the datrcvd flag for ue */
   nbDamSetDatFlag(ueId);
-  RETVALUE(nbCreateUeTunnReq(ueId, bearerId, rsp));
+  RETVALUE(nbCreateUeTunnReq(ueId, bearerId, ueIp4Addr, ueIp6Addr, rsp));
 }
 
 PUBLIC Void nbHandleUeIpInfoReq(U8 ueId,U8 bearerId)

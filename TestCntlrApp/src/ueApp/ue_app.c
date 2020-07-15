@@ -6182,7 +6182,13 @@ PRIVATE Void ueAppFormIpv4Addr(NbuUeIpInfoRsp *ueIpInfoRsp, CmEsmPdnAdd *pdn_add
   U8 ip_addr[20] = {0};
   U32 counter = 0;
   U8 idx = 0;
-  for (counter = 0; counter < (pdn_addr->len - 1); counter++) {
+  U8 offset = 0;
+  /* In case of CM_ESM_PDN_IPV4V6 pdn_addr contains IPv6 addr
+   * followed by IPv4 address. Hence skip first 8 bytes*/
+  if (pdn_addr->pdnType == CM_ESM_PDN_IPV4V6) {
+    offset = 8;
+  }
+  for (counter = offset; counter < (pdn_addr->len - 1); counter++) {
     itoa(pdn_addr->addrInfo[counter], temp, 10);
       for (cnt = 0; (itrn < 20) && (temp[cnt] != '\0') && (cnt < 19);
         itrn++, cnt++)

@@ -43,7 +43,7 @@ PUBLIC S16 NbEnbDropInitCtxtSetup(NbDropInitCtxtSetup *dropInitCtxtSetup);
 PUBLIC S16 nbDelUeCb(U8 ueId);
 PUBLIC S16 nbUeTnlCreatCfm(U8, U32);
 PUBLIC S16 nbPrcDamUeDelCfm(U8);
-PUBLIC S16 nbCreateUeTunnReq(U8, U8, NbuUeIpInfoRsp *);
+PUBLIC S16 nbCreateUeTunnReq(U8, U8, U32, U8*, NbuUeIpInfoRsp *);
 PUBLIC S16 NbEnbUeRelReqHdl(NbUeCntxtRelReq*);
 PUBLIC S16 NbEnbResetReqHdl(NbResetRequest *resetReq);
 /*PUBLIC S16 NbEnbErabRelIndHdl(NbErabRelInd *erabRelInd);*/
@@ -422,7 +422,7 @@ PUBLIC S16 nbPrcDamUeDelCfm(U8 ueId)
 }
 
 PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U8 bearerId,
-                             NbuUeIpInfoRsp *rsp)
+                             U32 ueIp4Addr, U8* ipv6_addr, NbuUeIpInfoRsp *rsp)
 {
   U8 idx = 0;
   U8 num_tft = 0;
@@ -452,16 +452,10 @@ PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U8 bearerId,
         tnlInfo->pdnType = rsp->pdnType;
 
         if ((rsp->pdnType == NB_PDN_IPV4) || (rsp->pdnType == NB_PDN_IPV4V6)) {
-          U32 ueIp4Addr;
-          cmInetAddr(rsp->Ip4Addr, &ueIp4Addr);
-          ueIp4Addr = CM_INET_NTOH_U32(ueIp4Addr);
           tnlInfo->pdnIp4Addr = ueIp4Addr;
         } 
-        if ((rsp->pdnType == NB_PDN_IPV6) || (rsp->pdnType == NB_PDN_IPV4V6)) {
-          // Convert IPv6 address string to in6_addr and copy to tnlInfo.
-          struct in6_addr ipv6_addr;
-          inet_pton(AF_INET6, rsp->Ip6Addr, &ipv6_addr);
-          cmMemcpy(tnlInfo->pdnIp6Addr, ipv6_addr.s6_addr, sizeof(ipv6_addr.s6_addr));
+        if ((ipv6_addr) && ((rsp->pdnType == NB_PDN_IPV6) || (rsp->pdnType == NB_PDN_IPV4V6))) {
+          cmMemcpy(tnlInfo->pdnIp6Addr, ipv6_addr, NB_IPV6_ADDRESS_LEN);
         }
  
         nbCpyCmTptAddr(&tnlInfo->dstAddr, &(tunInfo->sgwAddr));
