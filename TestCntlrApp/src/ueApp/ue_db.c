@@ -195,10 +195,8 @@ PUBLIC S16 ueDbmFetchUe(U8 ueId, PTR *ueCb)
    ret = cmHashListFind(&ueAppCb->ueLstCp, (U8 *)&ueId, 
          sizeof(ueId), 0, (PTR *)&ueCb1);
       
-//   printf("Pruthvi in UEHASHLIST\n");
    RETVALUE(ret);
 #else
-//   printf("Pruthvi in else\n");
    for(cnt = 0; cnt < ueAppCb->numOfUesInLst; cnt++)
    {
       if((ueAppCb->ueCbLst[cnt])->ueId == ueId)
@@ -208,7 +206,6 @@ PUBLIC S16 ueDbmFetchUe(U8 ueId, PTR *ueCb)
       }
    }
 #endif
-//   printf("Pruthvi ueDbmFetchUe %x\n", ueCb);
    RETVALUE(RFAILED);
 }
 

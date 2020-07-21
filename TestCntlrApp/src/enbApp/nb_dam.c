@@ -573,21 +573,20 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
                              sizeof(U32), 0, (PTR *)&pdnCb));
   } else if (tnlInfo->pdnType == NB_PDN_IPV6) {
     ret = (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp6Addr),
-                             (NB_IPV6_ADDRESS_LEN/2), 0, (PTR *)&pdnCb));
+                             NB_IPV6_ADDRESS_LEN, 0, (PTR *)&pdnCb));
   } else if (tnlInfo->pdnType == NB_PDN_IPV4V6) {
     ret = (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp4Addr),
                              sizeof(U32), 0, (PTR *)&pdnCb));
     if (ret == ROK) {
       ret = (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp6Addr),
-                             (NB_IPV6_ADDRESS_LEN/2), 0, (PTR *)&pdnCb));
+                             NB_IPV6_ADDRESS_LEN, 0, (PTR *)&pdnCb));
     }
   }
   if (ret == ROK) {
     /* Sort and add Packet Filter/s */
     if (tnlInfo->tft.num_pf) {
       if (ROK != (nbAddPfs(pdnCb, tnlInfo))) {
-        /*NB_LOG_ERROR(&nbCb, "Failed to add Packet Filters for pdn addr %s",
-                     ((tnlInfo->pdnType == NB_PDN_IPV4) ? (tnlInfo->pdnIp4Addr) : (tnlInfo->pdnType == NB_PDN_IPV6) ? (tnlInfo->pdnIp6Addr) : (tnlInfo->pdnType == NB_PDN_IPV4V6) ? (tnlInfo->pdnIp4Addr) "%s", (tnlInfo->pdnIp6Addr) : NULL));*/
+        NB_LOG_ERROR(&nbCb, "Failed to add Packet Filters\n");
         RETVALUE(RFAILED);
       }
     }
@@ -760,7 +759,7 @@ PRIVATE Void nbGenerateRouterSolicit(Icmpv6RouterSolicit *routerSolicit, CmIpv6H
 
   /* Populate the pseudo header for checksum calculation as per RFC 2463.
    * pseudo header contains IPv6 Src+Dst address, length of Router Solicit msg
-   * as 32 Bit wide field + next header type + Router Solict message
+   * as 32 Bit wide field + 3 bytes of 0 + next header type + Router Solict message
    */
   // IPv6 src address
   cmMemcpy(psdhdr, ipv6Hdr->ip6_src, NB_IPV6_ADDRESS_LEN);
@@ -804,9 +803,9 @@ PRIVATE Void nbGenerateIpv6Hdr(CmIpv6Hdr *ip6Hdr, U8 *ip6Addr)
   struct in6_addr ipv6_src;
   struct in6_addr ipv6_dst;
   //Router Multicast address
-  U8 dst_addr_sz = sizeof(ROUTER_MCAST_ADDR);
-  U8 temp_dst_addr[dst_addr_sz];
-  strcpy(temp_dst_addr,ROUTER_MCAST_ADDR);
+  //U8 dst_addr_sz = sizeof(ROUTER_MCAST_ADDR);
+  //U8 temp_dst_addr[dst_addr_sz];
+  //strcpy(temp_dst_addr,ROUTER_MCAST_ADDR);
   // Version:6, Priority/Traffic Class:0, Flow Label:0
   ip6Hdr->ip6_ctlun.ip6_un1.ip6_un1_flow = htonl((6 << 28) | (0 << 20) | 0);
   // Payload length
@@ -816,7 +815,8 @@ PRIVATE Void nbGenerateIpv6Hdr(CmIpv6Hdr *ip6Hdr, U8 *ip6Addr)
   // Hop limit as per RFC 4861
   ip6Hdr->ip6_ctlun.ip6_un1.ip6_un1_hlim = HOP_LIMIT;
   // Destination address - All router multicast address
-  inet_pton(AF_INET6, temp_dst_addr, &ipv6_dst);
+  //inet_pton(AF_INET6, temp_dst_addr, &ipv6_dst);
+  inet_pton(AF_INET6, ROUTER_MCAST_ADDR, &ipv6_dst);
   cmMemcpy(ip6Hdr->ip6_dst, ipv6_dst.s6_addr, NB_IPV6_ADDRESS_LEN);
   /* Source address - link-local IPv6 address(fe80::) +
    * UE IPv6 network identifier received from NW
@@ -852,7 +852,7 @@ PRIVATE Void nbPackIpv6HdrRtrSolicit(CmIpv6Hdr *ipv6Hdr, Icmpv6RouterSolicit *ro
   buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_plen;
   // Next header type
   buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_nxt;
-  // Hop limi as per RFC 4861
+  // Hop limit as per RFC 4861
   buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_hlim;
   // Source address
   cmMemcpy(&buff[(*idx)], ipv6Hdr->ip6_src, NB_IPV6_ADDRESS_LEN);
@@ -893,7 +893,7 @@ PRIVATE S16 nbSendIcmpv6RouterSolicit(U8 *ip6Addr, NbDamTnlCb *tnlCb)
   Icmpv6RouterSolicit routerSolicit;
   CmIpv6Hdr ipv6Hdr;
   Buffer *mBuf = NULLP;
-  U8 buff[1024] = {0};
+  U8 buff[NB_DAM_EGTP_MSG_SZ] = {0};
   EgtUEvnt *eguEvtMsg;
   EgUMsg *egMsg;
   U8 idx = 0;
@@ -1098,12 +1098,13 @@ NbDamTnlInfo                 *tnlInfo
       NbPdnCb *pdnCb = NULL;
       // Send Router Solicit only for default bearer
       if(cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp6Addr),
-        (NB_IPV6_ADDRESS_LEN/2), 0, (PTR *)&pdnCb) == ROK) {
+        NB_IPV6_ADDRESS_LEN, 0, (PTR *)&pdnCb) == ROK) {
         if (pdnCb->lnkEpsBearId == tnlInfo->tft.lnkEpsBearId) {
           // Send ICMPv6 Router Solicit message
           if (nbSendIcmpv6RouterSolicit(ip6Info->pdnIp6Addr, tnlCb) != ROK) {
             NB_LOG_ERROR(&nbCb, "Failed to send Router Solicit message for Interface id %s \n",
             ip6Info->pdnIp6Addr);
+            RETVALUE(RFAILED);
           }
         }
       }
@@ -1277,7 +1278,7 @@ PRIVATE S16 nbProcIpv4Packet(Buffer *mBuf, NbIpPktFields *ipPktFields)
   RETVALUE(ROK);
 }
 
-/** @brief This function handles the incoming Uplink PCAP IPv6 packet.
+/** @brief This function handles the incoming Uplink IPv6 packet.
  *
  * @details
  *
@@ -1664,15 +1665,15 @@ EgtUEvnt                     *eguMsg
     * the message
     */
    if ((eguMsg->u.egMsg->msgHdr.msgType == EGT_GTPU_MSG_GPDU) &&
-     (flatBuf[0] == 0x60) && (flatBuf[6] == IPPROTO_ICMPV6)
+     ((flatBuf[0]>> 4) == NB_IPV6_VERSION) && (flatBuf[6] == IPPROTO_ICMPV6)
      && (flatBuf[40] == ICMPV6_TYPE_ROUTER_ADV)) {
      // index-80 = Start of IPv6 prefix
      if(ROK == nbProcRouterAdv(ueCb, rbId, flatBuf[80])) {
-       NB_LOG_DEBUG(&nbCb,"Successfully processed ICMPV6_TYPE_ROUTER_ADV for ueId %u\n",
+       NB_LOG_DEBUG(&nbCb, "Successfully processed ICMPV6_TYPE_ROUTER_ADV for ueId %u\n",
          ueId);
        RETVALUE(ROK);
      } else {
-       NB_LOG_ERROR(&nbCb,"Failed to process ICMPV6_TYPE_ROUTER_ADV for ueId %u\n",
+       NB_LOG_ERROR(&nbCb, "Failed to process ICMPV6_TYPE_ROUTER_ADV for ueId %u\n",
         ueId);
      }
      RETVALUE(RFAILED);
@@ -2478,7 +2479,7 @@ PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId)
     /* Fetch the pdnCb*/
     if (ROK ==
         (cmHashListFind(&((ueCb)->pdnCb), ((ipPktFields->ipVersion == NB_IPV4_VERSION) ? (U8 *)&(ipPktFields->locIpv4Addr) :
-        (ipPktFields->localIpv6Addr)),
+        (U8 *)&(ipPktFields->localIpv6Addr)),
          (ipPktFields->ipVersion == NB_IPV4_VERSION) ? sizeof(U32) : NB_IPV6_ADDRESS_LEN, 0, (PTR *)&pdnCb))) {
       NB_LOG_DEBUG(&nbCb, "pdncb found\n");
       ueIpMatchFound = TRUE;

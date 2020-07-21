@@ -453,11 +453,12 @@ PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U8 bearerId,
 
         if ((rsp->pdnType == NB_PDN_IPV4) || (rsp->pdnType == NB_PDN_IPV4V6)) {
           tnlInfo->pdnIp4Addr = ueIp4Addr;
-        } 
+        }
         if ((ipv6_addr) && ((rsp->pdnType == NB_PDN_IPV6) || (rsp->pdnType == NB_PDN_IPV4V6))) {
           cmMemcpy(tnlInfo->pdnIp6Addr, ipv6_addr, NB_IPV6_ADDRESS_LEN);
+          NB_FREE(ipv6_addr, sizeof(ipv6_addr));
         }
- 
+
         nbCpyCmTptAddr(&tnlInfo->dstAddr, &(tunInfo->sgwAddr));
         nbCpyCmTptAddr(&tnlInfo->srcAddr, &(nbCb.datAppAddr));
         tnlInfo->tft.lnkEpsBearId = rsp->lnkEpsBearId;

@@ -866,11 +866,7 @@ PUBLIC S16 nbAppCfgrPdnAssignedAddr
    RETVALUE(ret);
 }/* nbAppCfgrPdnAssignedAddr */
 
-PUBLIC S16 nbAppCfgrPdnAssignedAddrIpv6
-(
- U8 ueId,
- U8 *ipv6Addr
-)
+PUBLIC S16 nbAppCfgrPdnAssignedAddrIpv6(U8 ueId, U8 *ipv6Addr)
 {
    S16 ret;
    UeDataCb *ueDatCb = NULLP;
@@ -878,16 +874,12 @@ PUBLIC S16 nbAppCfgrPdnAssignedAddrIpv6
    U8 idx1 = 0;
    NbAppDataRouteCb *ipInfo = NULLP;
 
-   for(idx = 0; idx < ueCnt; idx++)
-   {
-      if((ueDataCbLst[idx] != NULLP) &&(ueDataCbLst[idx]->ueId == ueId))
-      {
+   for(idx = 0; idx < ueCnt; idx++) {
+      if((ueDataCbLst[idx] != NULLP) &&(ueDataCbLst[idx]->ueId == ueId)) {
          ueDatCb = ueDataCbLst[idx];
-         for(idx1 = 0; idx1 < ueDatCb->noOfIpsAssigned; idx1++)
-         {
+         for(idx1 = 0; idx1 < ueDatCb->noOfIpsAssigned; idx1++) {
             if((ueDatCb->ipInfo[idx1]!= NULLP) && \
-                  (cmMemcmp(ueDatCb->ipInfo[idx1]->ip6AddrStr, ipv6Addr, NB_IPV6_ADDRESS_LEN)))
-            {
+                  (cmMemcmp(ueDatCb->ipInfo[idx1]->ip6AddrStr, ipv6Addr, NB_IPV6_ADDRESS_LEN))) {
                NB_LOG_ERROR(&nbCb,"nbAppCfgrPdnAssignedAddr: IPv6 PDN Address is already assigned "\
                      "for UeId %d", ueId);
                RETVALUE(RFAILED);
@@ -896,11 +888,9 @@ PUBLIC S16 nbAppCfgrPdnAssignedAddrIpv6
          break;
       }
    }
-   if((ueDatCb == NULLP) && (ueCnt < NB_MAX_UE_SUPPORT_FOR_DATA))
-   { 
+   if((ueDatCb == NULLP) && (ueCnt < NB_MAX_UE_SUPPORT_FOR_DATA)) {
       NBAPP_ALLOC(&ueDatCb, sizeof(UeDataCb));
-      if(ueDatCb == NULLP)
-      {
+      if(ueDatCb == NULLP) {
          NB_LOG_ERROR(&nbCb,"Failed to allocate memory for ueDatCb");
          RETVALUE(RFAILED);
       }
@@ -911,15 +901,13 @@ PUBLIC S16 nbAppCfgrPdnAssignedAddrIpv6
    }
 
    NBAPP_ALLOC(&ipInfo,sizeof(NbAppDataRouteCb));
-   if(ipInfo == NULLP)
-   {
+   if(ipInfo == NULLP) {
       NB_LOG_ERROR(&nbCb,"Failed to allocate memory for ipInfo");
       RETVALUE(RFAILED);
    }
    cmMemset((U8 *)ipInfo,0, sizeof(NbAppDataRouteCb));
    cmMemcpy(ipInfo->ip6AddrStr, ipv6Addr, NB_IPV6_ADDRESS_LEN);
-   if(ueDatCb == NULLP)
-   {
+   if(ueDatCb == NULLP) {
       NB_LOG_ERROR(&nbCb, "ueDatCb is empty");
       RETVALUE(RFAILED);
    }

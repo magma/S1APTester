@@ -6902,15 +6902,12 @@ PRIVATE S16 uefillDefEsmInfoToUeCb
    {
       params->apn.pres = FALSE;
    }
-   if(actReq->pAddr.pres == TRUE)
-   {
+   if(actReq->pAddr.pres == TRUE) {
       params->pAddr.pres = TRUE;
       params->pAddr.len = actReq->pAddr.len;
       params->pAddr.pdnType = actReq->pAddr.pdnType;
       cmMemcpy((U8 *)&params->pAddr.addrInfo, (U8 *)&actReq->pAddr.addrInfo,
             CM_ESM_MAX_LEN_PDN_ADDRESS);
-      for (int i =0; i<sizeof(actReq->pAddr.addrInfo);i++) {
-      }
    }
    else
    {
@@ -8056,7 +8053,10 @@ PUBLIC S16 ueUiProcIpInfoUpdtMsg(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt)
    for (int idx=0; idx<UE_APP_MAX_DRBS; idx++) {
      if (ueCb->ueRabCb[idx].lnkEpsBearId == ipInfoUpdt->bearerId) {
        cmMemcpy(ueCb->ueRabCb[idx].ipv6Addr, ipInfoUpdt->ipv6Addr, sizeof(ipInfoUpdt->ipv6Addr));
-     }
+     } else {
+       UE_LOG_ERROR(ueAppCb, "Bearer id %u not found in ueRabCb \n", ipInfoUpdt->bearerId);
+       RETVALUE(RFAILED);
+    }
    }
    // Send message to Test controller
    tfwMsg = (UetMessage*)ueAlloc(sizeof(UetMessage));

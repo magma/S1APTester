@@ -2251,7 +2251,7 @@ PRIVATE S16 handleRouterAdvInd(Pst *pst, UeUetRouterAdv *uetRouterAdv)
 
   tfwUeRouterAdv->ueId = uetRouterAdv->ueId;
   tfwUeRouterAdv->bearerId = uetRouterAdv->bearerId;
-  // Convert IPv6 U8 arrary into : separate string for better readability
+  // Convert IPv6 U8 arrary into : separated string for better readability
   sprintf((char*) ipv6AddrStr,"%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x",
     (int)uetRouterAdv->ipv6Addr[0], (int)uetRouterAdv->ipv6Addr[1],
     (int)uetRouterAdv->ipv6Addr[2], (int)uetRouterAdv->ipv6Addr[3],

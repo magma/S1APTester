@@ -8,19 +8,19 @@
 
 /**********************************************************************
 
- 
-    Name:  LTE S1SIM - UE Application Module 
- 
+
+    Name:  LTE S1SIM - ENODEB Application Module
+
     Type:  C include file
- 
+
     Desc:  C source code for ICMPV6
- 
-    File:  icmpv6.h 
- 
-    Sid:   
- 
-    Prg:    
- 
+
+    File:  icmpv6.h
+
+    Sid:
+
+    Prg:
+
 **********************************************************************/
 #ifndef __ICMPV6H__
 #define __ICMPV6H__
