@@ -6112,7 +6112,6 @@ PRIVATE Void _fill_pf_comp(U8 idx, UeCb *ueCb, NbuUeIpInfoRsp *ueIpInfoRsp)
           (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].ipv4.ip4[2] << 8) +
           (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].ipv4.ip4[3]);
     }
-
     if (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].ipv6.pres) {
       ueIpInfoRsp->pfList[pf_idx].presenceMask |= IPV6_REM_ADDR_PKT_FLTR_MASK;
       cmMemcpy(ueIpInfoRsp->pfList[pf_idx].remoteIpv6Addr,
@@ -6218,7 +6217,12 @@ PRIVATE Void ueAppFormIpv4Addr(NbuUeIpInfoRsp *ueIpInfoRsp, CmEsmPdnAdd *pdn_add
  */
 PRIVATE Void ueAppFormIpv6Addr(NbuUeIpInfoRsp *ueIpInfoRsp, CmEsmPdnAdd *pdn_addr)
 {
+  UeAppCb *ueAppCb = NULLP;
   U8 ip6_str[INET6_ADDRSTRLEN];
+
+  UE_GET_CB(ueAppCb);
+  UE_LOG_ENTERFN(ueAppCb);
+
   // Form IPv6 address string by prepending Link local address-fe80::
   sprintf(ip6_str,"%s::%02x%02x:%02x%02x:%02x%02x:%02x%02x",
     "fe80",
@@ -6228,6 +6232,7 @@ PRIVATE Void ueAppFormIpv6Addr(NbuUeIpInfoRsp *ueIpInfoRsp, CmEsmPdnAdd *pdn_add
     (int)pdn_addr->addrInfo[6], (int)pdn_addr->addrInfo[7]);
 
   cmMemcpy(ueIpInfoRsp->Ip6Addr, ip6_str, INET6_ADDRSTRLEN);
+  UE_LOG_DEBUG(ueAppCb, "Sending ipv6 address %s to enbApp", ueIpInfoRsp->Ip6Addr);
   RETVOID;
 }
 

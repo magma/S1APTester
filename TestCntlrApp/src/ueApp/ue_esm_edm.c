@@ -2179,6 +2179,10 @@ CmEsmTft *tft;
                            CM_ESM_IPV6_SIZE  );
                      *indx += CM_ESM_IPV6_SIZE;
                      tft->pfList[count].len -= CM_ESM_IPV6_SIZE;
+
+                     // Skip IPv6 Mask
+                     *indx += CM_ESM_IPV6_SIZE;
+                     tft->pfList[count].len -= CM_ESM_IPV6_SIZE;
                      break;
                   }
                case CM_ESM_PF_CMPTYPE_PROT_ID:

@@ -315,29 +315,7 @@ PUBLIC S16 nbDamDelUe
    NbDamUeCb *ueCb = NULLP;
    NbIpInfo *ipInfo = NULLP;
    NbIpInfo *prevIpInfo = NULLP;
-   int i=0;
-#if 0
-   U8 idx;
-   for(idx = 0 ; idx < nbDamCb.crntUeIdx; idx++)
-   {
-      if((nbDamCb.ueCbs[idx] != NULLP) && (nbDamCb.ueCbs[idx]->ueId == ueId))
-      {
-         ueCb = nbDamCb.ueCbs[idx];
-         if(ueCb->numDrbs == 0)
-         {
-            NB_FREE(ueCb, sizeof(NbDamUeCb));
-            nbDamCb.ueCbs[idx] = NULLP;
-            nbDamCb.crntUeIdx--;
-         }
-         else
-         {
-            /* tunnel deletion is in progress */
-           ret = RFAILED; 
-         }
-         break;
-      } 
-   }
-#endif
+   
    if(ROK != (cmHashListFind(&(nbDamCb.ueCbs), (U8 *)&(ueId),
       sizeof(U8), 0, (PTR *)&ueCb)))
    {   
@@ -517,7 +495,7 @@ PRIVATE S16 nbSortAndAddPf(NbPdnCb *pdnCb, NbPktFilterList *tftPf)
  */
 PRIVATE S16 nbAddPfs(NbPdnCb *pdnCb, NbDamTnlInfo *tnlInfo)
 {
-  U8 presence_mask = 0;
+  U16 presence_mask = 0;
   NbPktFilterList *tftPf = NULL;
 
   for (U8 itrn = 0; itrn < tnlInfo->tft.num_pf; itrn++) {
@@ -595,13 +573,13 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
                              sizeof(U32), 0, (PTR *)&pdnCb));
   } else if (tnlInfo->pdnType == NB_PDN_IPV6) {
     ret = (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp6Addr),
-                             sizeof(tnlInfo->pdnIp6Addr), 0, (PTR *)&pdnCb));
+                             (NB_IPV6_ADDRESS_LEN/2), 0, (PTR *)&pdnCb));
   } else if (tnlInfo->pdnType == NB_PDN_IPV4V6) {
     ret = (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp4Addr),
                              sizeof(U32), 0, (PTR *)&pdnCb));
     if (ret == ROK) {
       ret = (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp6Addr),
-                             sizeof(tnlInfo->pdnIp6Addr), 0, (PTR *)&pdnCb));
+                             (NB_IPV6_ADDRESS_LEN/2), 0, (PTR *)&pdnCb));
     }
   }
   if (ret == ROK) {
@@ -635,10 +613,11 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
       }
     }
     if ((tnlInfo->pdnType == NB_PDN_IPV6) || (tnlInfo->pdnType == NB_PDN_IPV4V6)) {
-      cmMemcpy(pdnCb->pdnIp6Addr,tnlInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr));
+      /*NB_IPV6_ADDRESS_LEN/2 because only network id is present*/
+      cmMemcpy(pdnCb->pdnIp6Addr,tnlInfo->pdnIp6Addr, (NB_IPV6_ADDRESS_LEN/2));
       /* Insert pdncb*/
       if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCb,
-                                (U8 *)&tnlInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr))) {
+                                (U8 *)&tnlInfo->pdnIp6Addr, (NB_IPV6_ADDRESS_LEN/2))) {
         NB_FREE(pdnCb, sizeof(NbPdnCb))
         NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for pdnCb");
         RETVALUE(RFAILED);
@@ -658,7 +637,7 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
  *         Processing steps:
  *         - allocate a new EgtUEvnt
  *         - fill the src and dst addresses
- *         - fill the message header with default values and with the 
+ *         - fill the message header with default values and with the
  *           tnl info
  *
  *
@@ -714,7 +693,7 @@ U8                           msgType
  *     Function: checksum
  *
  *         Processing steps:
- *         - Computes ICMPv6 checksumi as per RFC 1071
+ *         - Computes ICMPv6 checksum as per RFC 1071
  *
  * @param[in]  phdr: Few IPv6 hdr fields +
                ICMPv6 message
@@ -747,7 +726,6 @@ PRIVATE U16 checksum (U16 *phdr, U8 len)
 
    // Checksum is one's compliment of sum.
    csum = ~sum;
-
    RETVALUE(csum);
 }
 
@@ -788,9 +766,9 @@ PRIVATE Void nbGenerateRouterSolicit(Icmpv6RouterSolicit *routerSolicit, CmIpv6H
   cmMemcpy(psdhdr, ipv6Hdr->ip6_src, NB_IPV6_ADDRESS_LEN);
   // IPv6 destination address
   cmMemcpy(psdhdr+NB_IPV6_ADDRESS_LEN, ipv6Hdr->ip6_dst, NB_IPV6_ADDRESS_LEN);
-  // Increment the idx  - length of IPv6 src+dst address
+  // Increment the idx  : length of IPv6 src+dst address
   idx += 2*NB_IPV6_ADDRESS_LEN;
-  // Payload length 4 bytes - Length of Icmpv6RouterSolicit
+  // Payload length 4 bytes : Length of Icmpv6RouterSolicit
   psdhdr[idx++] = 0;
   psdhdr[idx++] = 0;
   psdhdr[idx++] = rsLen >> 8;
@@ -817,7 +795,8 @@ PRIVATE Void nbGenerateRouterSolicit(Icmpv6RouterSolicit *routerSolicit, CmIpv6H
  *         Processing steps:
  *         - Populate IPv6 header fields
  *
- * @param[in]  ip6Addr : pointer to IPv6 header structure
+ * @param[in]  ip6Hdr : pointer to IPv6 header structure
+ * @param[in]  ip6Addr : IPv6 Link local address + network identifier
  * @return S16
  */
 PRIVATE Void nbGenerateIpv6Hdr(CmIpv6Hdr *ip6Hdr, U8 *ip6Addr)
@@ -827,23 +806,22 @@ PRIVATE Void nbGenerateIpv6Hdr(CmIpv6Hdr *ip6Hdr, U8 *ip6Addr)
   //Router Multicast address
   U8 dst_addr_sz = sizeof(ROUTER_MCAST_ADDR);
   U8 temp_dst_addr[dst_addr_sz];
-  strcpy(temp_dst_addr,ROUTER_MCAST_ADDR); 
+  strcpy(temp_dst_addr,ROUTER_MCAST_ADDR);
   // Version:6, Priority/Traffic Class:0, Flow Label:0
   ip6Hdr->ip6_ctlun.ip6_un1.ip6_un1_flow = htonl((6 << 28) | (0 << 20) | 0);
   // Payload length
   ip6Hdr->ip6_ctlun.ip6_un1.ip6_un1_plen = ROUTER_SOL_MSG_SIZE;
   // Next header type
   ip6Hdr->ip6_ctlun.ip6_un1.ip6_un1_nxt = IPPROTO_ICMPV6;
-  // Hop limi as per RFC 4861
+  // Hop limit as per RFC 4861
   ip6Hdr->ip6_ctlun.ip6_un1.ip6_un1_hlim = HOP_LIMIT;
   // Destination address - All router multicast address
-  inet_pton(AF_INET6, temp_dst_addr, &ipv6_dst); 
+  inet_pton(AF_INET6, temp_dst_addr, &ipv6_dst);
   cmMemcpy(ip6Hdr->ip6_dst, ipv6_dst.s6_addr, NB_IPV6_ADDRESS_LEN);
   /* Source address - link-local IPv6 address(fe80::) +
-   * UE IPv6 address received from NW
+   * UE IPv6 network identifier received from NW
    */
   cmMemcpy(ip6Hdr->ip6_src, ip6Addr, NB_IPV6_ADDRESS_LEN);
-  for (int i=0;i<NB_IPV6_ADDRESS_LEN;i++) 
   RETVOID;
 }
 
@@ -854,7 +832,7 @@ PRIVATE Void nbGenerateIpv6Hdr(CmIpv6Hdr *ip6Hdr, U8 *ip6Addr)
  *     Function: nbPackIpv6HdrRtrSolicit
  *
  *         Processing steps:
- *         - Pack IPv6 hdr and Router Solicit message fields to U8 buffer
+ *         - Pack IPv6 hdr and Router Solicit message fields to U8 array
  *
  * @param[in]  ip6Addr : pointer to IPv6 header structure
  * @param[in]  routerSolicit : Pointer to Icmpv6RouterSolicit
@@ -865,7 +843,6 @@ PRIVATE Void nbGenerateIpv6Hdr(CmIpv6Hdr *ip6Hdr, U8 *ip6Addr)
 PRIVATE Void nbPackIpv6HdrRtrSolicit(CmIpv6Hdr *ipv6Hdr, Icmpv6RouterSolicit *routerSolicit,
  U8 *buff, U8 *idx)
 {
-  U8 pru[200];
   buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_flow;
   buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_flow >> 8;
   buff[(*idx)++] = ipv6Hdr->ip6_ctlun.ip6_un1.ip6_un1_flow >> 16;
@@ -881,7 +858,7 @@ PRIVATE Void nbPackIpv6HdrRtrSolicit(CmIpv6Hdr *ipv6Hdr, Icmpv6RouterSolicit *ro
   cmMemcpy(&buff[(*idx)], ipv6Hdr->ip6_src, NB_IPV6_ADDRESS_LEN);
   (*idx) += NB_IPV6_ADDRESS_LEN;
   // Destination address
-  cmMemcpy(&buff[(*idx)], ipv6Hdr->ip6_dst,NB_IPV6_ADDRESS_LEN); 
+  cmMemcpy(&buff[(*idx)], ipv6Hdr->ip6_dst,NB_IPV6_ADDRESS_LEN);
   (*idx) += NB_IPV6_ADDRESS_LEN;
 
   // Pack Router Solicit message
@@ -905,7 +882,7 @@ PRIVATE Void nbPackIpv6HdrRtrSolicit(CmIpv6Hdr *ipv6Hdr, Icmpv6RouterSolicit *ro
  *         Processing steps:
  *         - Populate Router Solicit message
  *         - Populate IPv6 header
- *         - Trigger EGTP Data Req 
+ *         - Trigger EGTP Data Req
  *
  * @param[in]  tnlCb : new tunnelCb
  * @param[in]  ip6Addr: IPv6 Address
@@ -916,8 +893,7 @@ PRIVATE S16 nbSendIcmpv6RouterSolicit(U8 *ip6Addr, NbDamTnlCb *tnlCb)
   Icmpv6RouterSolicit routerSolicit;
   CmIpv6Hdr ipv6Hdr;
   Buffer *mBuf = NULLP;
-  //U8 buff[sizeof(Icmpv6RouterSolicit) + sizeof(CmIpv6Hdr)];
-  U8 buff[1024];
+  U8 buff[1024] = {0};
   EgtUEvnt *eguEvtMsg;
   EgUMsg *egMsg;
   U8 idx = 0;
@@ -927,7 +903,7 @@ PRIVATE S16 nbSendIcmpv6RouterSolicit(U8 *ip6Addr, NbDamTnlCb *tnlCb)
   // Populate Router Solicit message
   nbGenerateRouterSolicit(&routerSolicit, &ipv6Hdr);
 
-  /* Pack Ipv6 hdr and Router Solicit into buffer
+  /* Pack Ipv6 hdr and Router Solicit into U8 array
    * This is needed because eGTP data request requires
    * mBuf format
    */
@@ -937,7 +913,6 @@ PRIVATE S16 nbSendIcmpv6RouterSolicit(U8 *ip6Addr, NbDamTnlCb *tnlCb)
   if(mBuf == NULLP) {
     RETVOID;
   }
-
   // Convert buff to mbuf to be assigned to EGTP Data Req
   if(SAddPstMsgMult((Data *)buff, idx, mBuf) != ROK) {
     SPutMsg(mBuf);
@@ -954,7 +929,6 @@ PRIVATE S16 nbSendIcmpv6RouterSolicit(U8 *ip6Addr, NbDamTnlCb *tnlCb)
   /* Trigger EGTP Data Req */
   NbIfmEgtpEguDatReq(eguEvtMsg);
 
-  
   RETVALUE(ROK);
 }
 
@@ -1080,9 +1054,9 @@ NbDamTnlInfo                 *tnlInfo
    } else if (tnlInfo->pdnType == NB_PDN_IPV6) {
      NB_ALLOC(&(ip6Info), sizeof(NbIpInfo));
      ip6Info->drbId = rbId;
-     cmMemcpy(ipInfo->pdnIp6Addr, tnlInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr));
-     if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ipInfo,
-                     (U8 *)&ipInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr)))
+     cmMemcpy(ip6Info->pdnIp6Addr, tnlInfo->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr));
+     if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ip6Info,
+                     (U8 *)&ip6Info->pdnIp6Addr, sizeof(tnlInfo->pdnIp6Addr)))
      {
         NB_FREE(ueCb, sizeof(NbIpInfo))
         NB_LOG_ERROR(&nbCb, "Failed to Insert ipv6 address into ipInfo");
@@ -1119,11 +1093,19 @@ NbDamTnlInfo                 *tnlInfo
 
   /* Invoke GTP to add the tunnel here */
   if (nbDamAddTunnelAtGtp(tnlCb) == ROK) {
-    if ((tnlInfo->pdnType == NB_PDN_IPV6) || (tnlInfo->pdnType == NB_PDN_IPV4V6)) {
-      // Send ICMPv6 Router Solicit message
-      if (nbSendIcmpv6RouterSolicit(ip6Info->pdnIp6Addr, tnlCb) != ROK) {
-        NB_LOG_ERROR(&nbCb, "Failed to send Router Solicit message for Interface id %s \n",
-          ip6Info->pdnIp6Addr);
+    if (((tnlInfo->pdnType == NB_PDN_IPV6) || (tnlInfo->pdnType == NB_PDN_IPV4V6)) &&
+      (ip6Info)) {
+      NbPdnCb *pdnCb = NULL;
+      // Send Router Solicit only for default bearer
+      if(cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp6Addr),
+        (NB_IPV6_ADDRESS_LEN/2), 0, (PTR *)&pdnCb) == ROK) {
+        if (pdnCb->lnkEpsBearId == tnlInfo->tft.lnkEpsBearId) {
+          // Send ICMPv6 Router Solicit message
+          if (nbSendIcmpv6RouterSolicit(ip6Info->pdnIp6Addr, tnlCb) != ROK) {
+            NB_LOG_ERROR(&nbCb, "Failed to send Router Solicit message for Interface id %s \n",
+            ip6Info->pdnIp6Addr);
+          }
+        }
       }
     }
   } else {
@@ -1214,10 +1196,10 @@ NbDamDrbCb                  *drbCb
  *    -#Failure : RFAILED
  */
 PRIVATE S16 nbProcIpv4Packet(Buffer *mBuf, NbIpPktFields *ipPktFields)
-{ 
+{
   U8 ipPkt[NB_PACKET_SIZE] = {0};
   MsgLen ipIdx = 0;
-  
+
   /* Fetch ToS or DSCP*/
   if ((SExamMsg(&ipPkt[0], mBuf, ipIdx) != ROK)) {
     NB_LOG_ERROR(&nbCb, "Failed to fetch ToS");
@@ -1314,11 +1296,11 @@ PRIVATE S16 nbProcIpv4Packet(Buffer *mBuf, NbIpPktFields *ipPktFields)
  *    -#Failure : RFAILED
  */
 PRIVATE S16 nbProcIpv6Packet(Buffer *mBuf, NbIpPktFields *ipPktFields)
-{ 
+{
   U8 ipPkt[NB_PACKET_SIZE] = {0};
   MsgLen ipIdx = 0;
   U8 idx = 0;
- 
+
   /* Fetch ToS or DSCP*/
   for (idx = 0; idx < 2; idx++) {
     if ((SExamMsg(&ipPkt[idx], mBuf, ipIdx) != ROK)) {
@@ -1355,7 +1337,7 @@ PRIVATE S16 nbProcIpv6Packet(Buffer *mBuf, NbIpPktFields *ipPktFields)
     ipIdx++;
   }
 
-  /* Local IPv6 address is used only to verify if we have 
+  /* Local IPv6 address is used only to verify if there is a
    * a valid context for this UE
    */
   cmMemcpy(ipPktFields->localIpv6Addr, ipPkt, NB_IPV6_ADDRESS_LEN);
@@ -1451,7 +1433,7 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
   } else if (ipVersion == NB_IPV6_VERSION) {
     nbProcIpv6Packet(mBuf, &ipPktFields);
   }
-  
+
   /* get the ueCb */
   ueCb = nbDamGetueCbkeyUeIp(&ipPktFields, &drbId);
   if (ueCb == NULLP) {
@@ -1483,7 +1465,7 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
    RETVALUE(ROK);
 }
 
-/** @brief This function populates the NbuUeIpInfoUpdt message 
+/** @brief This function populates the NbuUeIpInfoUpdt message
  *
  * @details
  *
@@ -1581,7 +1563,7 @@ PRIVATE S16 nbProcRouterAdv(NbDamUeCb *ueCb, CmLteRbId drbId, U8 *buf)
  *     Function: nbDamEgtpDatInd
  *
  *         Processing steps:
- *         - derive the cellId, ueId, rbId from the teId of the incoming 
+ *         - derive the cellId, ueId, rbId from the teId of the incoming
  *           message and fill the CmLtePdcpId structure
  *         - get the tunnelCb
  *         - get the ueCb
@@ -1615,7 +1597,7 @@ EgtUEvnt                     *eguMsg
    ueId  = (lclTeid & 0x00ffff00) >> 8;
    rbId   = (lclTeid & 0x000000f8) >> 3;
 
-   /* get the ueCb */ 
+   /* get the ueCb */
    ueCb  = nbDamGetUe(ueId);
    if (ueCb == NULLP)
    {
@@ -1624,7 +1606,7 @@ EgtUEvnt                     *eguMsg
       RETVALUE(RFAILED);
    }
    /* mark for ue data received */
-   ueCb->dataRcvd = TRUE;   
+   ueCb->dataRcvd = TRUE;
 
    if(eguMsg->u.egMsg->msgHdr.msgType == EGT_GTPU_MSG_SUPP_EXT_HDR_NTF)
    {
@@ -1646,9 +1628,9 @@ EgtUEvnt                     *eguMsg
 
    if ( ROK != (cmHashListFind(&(ueCb->drbs), (U8 *)&(rbId),
                sizeof(U8),0,(PTR *)&drbCb)))
-   {    
+   {
       RETVALUE(RFAILED);
-   }    
+   }
    if(drbCb)
    {
       tnlCb = drbCb->tnlInfo;
@@ -1665,7 +1647,7 @@ EgtUEvnt                     *eguMsg
    {
       NB_LOG_ERROR(&nbCb,"In correct buffer len [%d]", len);
       RETVALUE(RFAILED);
-   } 
+   }
 
    NB_ALLOC(&flatBuf, len);
    if (flatBuf == NULLP)
