@@ -22,7 +22,7 @@
 *********************************************************************21*/
 #include "tft.h"
 
-#define CM_NB_IPV6_ADDR_LEN 16 
+#define CM_NB_IPV6_ADDR_LEN 16
 
 typedef struct _nbuSTmsi
 {

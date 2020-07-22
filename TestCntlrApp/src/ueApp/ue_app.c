@@ -6276,13 +6276,13 @@ PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId,
       ueAppFormIpv4Addr(ueIpInfoRsp, pdn_addr);
     } else if (pdn_addr->pdnType == CM_ESM_PDN_IPV6) {
       ueIpInfoRsp->pdnType = CM_ESM_PDN_IPV6;
-      // Convert IPv6 address arrary to ":" separated notation(x:x:x:x:x:x:x:x) 
+      // Convert IPv6 address arrary to ":" separated notation(x:x:x:x:x:x:x:x)
       ueAppFormIpv6Addr(ueIpInfoRsp, pdn_addr);
     } else if (pdn_addr->pdnType == CM_ESM_PDN_IPV4V6) {
       ueIpInfoRsp->pdnType = CM_ESM_PDN_IPV4V6;
       // Convert IPv4 address arrary to dotted notation(x.x.x.x)
       ueAppFormIpv4Addr(ueIpInfoRsp, pdn_addr);
-      // Convert IPv6 address arrary to ":" separated notation(x:x:x:x:x:x:x:x) 
+      // Convert IPv6 address arrary to ":" separated notation(x:x:x:x:x:x:x:x)
       ueAppFormIpv6Addr(ueIpInfoRsp, pdn_addr);
     }
   }

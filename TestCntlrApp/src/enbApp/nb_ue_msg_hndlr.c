@@ -513,7 +513,7 @@ PUBLIC S16 NbHandleUeIpInfoRsp(NbuUeIpInfoRsp *rsp)
   }
   if ((rsp->pdnType == NB_PDN_IPV6) || (rsp->pdnType == NB_PDN_IPV4V6)) {
     struct in6_addr ipv6_addr;
-    NB_ALLOC(&ueIp6Addr, NB_IPV6_ADDRESS_LEN); 
+    NB_ALLOC(&ueIp6Addr, NB_IPV6_ADDRESS_LEN);
     inet_pton(AF_INET6, rsp->Ip6Addr, &ipv6_addr);
     cmMemcpy(ueIp6Addr, ipv6_addr.s6_addr, NB_IPV6_ADDRESS_LEN);
   }

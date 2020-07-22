@@ -2226,7 +2226,7 @@ PRIVATE Void sendUeErabSetupReqFailedForBearers(
 }
 
 /*
-*  Fun:  handleRouterAdvInd 
+*  Fun:  handleRouterAdvInd
 *
 *  Desc: Sends the Router Advertisement indication to test controller
 *

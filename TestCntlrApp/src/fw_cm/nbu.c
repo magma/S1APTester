@@ -2372,7 +2372,7 @@ Buffer *mBuf;
  *
  *    Notes:  None
  *
- *    File:   nbu.c 
+ *    File:   nbu.c
  *
  */
 
@@ -2403,7 +2403,7 @@ PUBLIC S16 cmUnPkNbuUeIpInfoUpdt(NbuUeIpInfoUpdtHdl func, Pst *pst, Buffer *mBuf
  *
  *    Notes:  None
  *
- *    File:   nbu.c 
+ *    File:   nbu.c
  *
  */
 PUBLIC S16 cmPkNbuUeIpInfoUpdt(Pst *pst, NbuUeIpInfoUpdt *msg)
