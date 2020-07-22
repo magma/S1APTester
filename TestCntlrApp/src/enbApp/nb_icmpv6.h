@@ -37,6 +37,6 @@ typedef struct _routerSolicit {
   uint8_t code;
   uint16_t checksum;
   uint32_t reserved;
- } Icmpv6RouterSolicit;
+} Icmpv6RouterSolicit;
 
 #endif

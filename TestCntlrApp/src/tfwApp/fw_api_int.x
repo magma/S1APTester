@@ -1566,11 +1566,10 @@ typedef struct _FwErabSetupFailedTosetup {
   FwFailedErablist failedErablist[MAX_FAILED_ERABS];
 } FwErabSetupFailedTosetup;
 
-typedef struct ueRouterAdv
-{
-   U8 ueId;
-   U8 bearerId;
-   U8 ipv6Addr[FW_ESM_MAX_IPV6_LEN];
+typedef struct ueRouterAdv {
+  U8 ueId;
+  U8 bearerId;
+  U8 ipv6Addr[FW_ESM_MAX_IPV6_LEN];
 } ueRouterAdv_t;
 
 typedef FwErabRelCmd_t FwErabRelRsp_t;

@@ -171,11 +171,10 @@ typedef struct _nbuUeIpInfoReq
    U8 bearerId;
 }NbuUeIpInfoReq;
 
-typedef struct _nbuUeIpInfoUpdt
-{
-   U8 ueId;
-   U8 bearerId;
-   U8 ipv6Addr[CM_NB_IPV6_ADDR_LEN];
+typedef struct _nbuUeIpInfoUpdt {
+  U8 ueId;
+  U8 bearerId;
+  U8 ipv6Addr[CM_NB_IPV6_ADDR_LEN];
 } NbuUeIpInfoUpdt;
 
 typedef struct _uePagingMsg
@@ -256,7 +255,7 @@ typedef S16 (*NbuUeIpInfoReqHdl) (Pst *, NbuUeIpInfoReq*);
 typedef S16 (*NbuUeIpInfoRspHdl) (Pst *, NbuUeIpInfoRsp*);
 typedef S16 (*NbuErabRelIndHdl)(Pst *, NbuErabRelIndList*);/*NbErabRelInd*);*/
 typedef S16 (*NbuNotifyPlmnInfoHdl) (Pst *, NbuNotifyPlmnInfo*);
-typedef S16 (*NbuUeIpInfoUpdtHdl) (Pst *, NbuUeIpInfoUpdt*);
+typedef S16 (*NbuUeIpInfoUpdtHdl)(Pst *, NbuUeIpInfoUpdt *);
 EXTERN S16 cmPkNbuInitialUeMsg(Pst *pst,NbuInitialUeMsg *req);
 EXTERN S16 cmPkNbuErabRelInd(Pst *pst, NbuErabRelIndList *);
 EXTERN S16 cmPkNbuUlNasMsg(Pst *pst,NbuUlNasMsg *msg);
@@ -289,7 +288,8 @@ EXTERN S16 cmUnPkNbuUeIpInfoReq (NbuUeIpInfoReqHdl func,Pst *pst,Buffer *mBuf);
 EXTERN S16 cmUnPkNbuUeIpInfoRsp (NbuUeIpInfoRspHdl func,Pst *pst,Buffer *mBuf);
 EXTERN S16 cmUnPkNbuErabsRelInfo(NbuErabsRelInfoMsgHdl func, Pst *pst, Buffer *mBuf);
 EXTERN S16 cmUnPkNbuNotifyPlmnInfo (NbuNotifyPlmnInfoHdl func,Pst *pst,Buffer *mBuf);
-EXTERN S16 cmUnPkNbuUeIpInfoUpdt (NbuUeIpInfoUpdtHdl func,Pst *pst,Buffer *mBuf);
+EXTERN S16 cmUnPkNbuUeIpInfoUpdt(NbuUeIpInfoUpdtHdl func, Pst *pst,
+                                 Buffer *mBuf);
 
 /********************************************************************30**
 

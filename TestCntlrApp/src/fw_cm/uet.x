@@ -45,9 +45,9 @@ extern "C" {
 #define UE_ESM_MAX_CONT_ID 10
 
 #define CM_ESM_IPV4_SIZE   4
-#define CM_ESM_IPV6_SIZE   16
+#define CM_ESM_IPV6_SIZE 16
 #define CM_ESM_IP_SEC_SIZE  4
-#define  CM_ESM_IPV6_FLOW_LABEL_SIZE 3
+#define CM_ESM_IPV6_FLOW_LABEL_SIZE 3
 #define CM_ESM_TFT_MAX_PARAM_BUF 10
 #define CM_ESM_MAX_PKT_FILTERS 10
 #define CM_ESM_TFT_MAX_TFT_BUF 50
@@ -893,12 +893,11 @@ typedef struct _ueUetErabSetupFailedTosetup {
   UetFailedErablist failedErablist[MAX_FAILED_ERABS];
 } UeUetErabSetupFailedTosetup;
 
-typedef struct _ueUetRouterAdv
-{
-   U8 ueId;
-   U8 bearerId;
-   U8 ipv6Addr[CM_ESM_IPV6_SIZE];
-}UeUetRouterAdv;
+typedef struct _ueUetRouterAdv {
+  U8 ueId;
+  U8 bearerId;
+  U8 ipv6Addr[CM_ESM_IPV6_SIZE];
+} UeUetRouterAdv;
 
 typedef struct _uetMessage
 {

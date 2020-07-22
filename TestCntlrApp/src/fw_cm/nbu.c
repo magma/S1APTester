@@ -2376,20 +2376,20 @@ Buffer *mBuf;
  *
  */
 
-PUBLIC S16 cmUnPkNbuUeIpInfoUpdt(NbuUeIpInfoUpdtHdl func, Pst *pst, Buffer *mBuf)
-{
-   S16 ret = ROK;
-   NbuUeIpInfoReq *msg = NULLP;
+PUBLIC S16 cmUnPkNbuUeIpInfoUpdt(NbuUeIpInfoUpdtHdl func, Pst *pst,
+                                 Buffer *mBuf) {
+  S16 ret = ROK;
+  NbuUeIpInfoReq *msg = NULLP;
 
-   TRC3(cmUnPkNbuUeIpInfoUpdt)
-   CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &msg, mBuf, (ErrVal)ENBU025, pst);
-   SPutMsg(mBuf);
+  TRC3(cmUnPkNbuUeIpInfoUpdt)
+  CMCHKUNPKLOG(cmUnpkPtr, (PTR *)&msg, mBuf, (ErrVal)ENBU025, pst);
+  SPutMsg(mBuf);
 #ifdef LWLCNBU
-   ret = (*func)(pst, msg);
-   SPutSBuf(pst->region, pst->pool, (Data *) msg, sizeof(NbuUeIpInfoUpdt));
-   RETVALUE(ret);
+  ret = (*func)(pst, msg);
+  SPutSBuf(pst->region, pst->pool, (Data *)msg, sizeof(NbuUeIpInfoUpdt));
+  RETVALUE(ret);
 #else
-   RETVALUE((*func)(pst, &msg));
+  RETVALUE((*func)(pst, &msg));
 #endif
 }
 
@@ -2406,24 +2406,23 @@ PUBLIC S16 cmUnPkNbuUeIpInfoUpdt(NbuUeIpInfoUpdtHdl func, Pst *pst, Buffer *mBuf
  *    File:   nbu.c
  *
  */
-PUBLIC S16 cmPkNbuUeIpInfoUpdt(Pst *pst, NbuUeIpInfoUpdt *msg)
-{
+PUBLIC S16 cmPkNbuUeIpInfoUpdt(Pst *pst, NbuUeIpInfoUpdt *msg) {
   S16 ret;
   Buffer *mBuf;
   mBuf = NULLP;
   TRC3(cmPkNbuUeIpInfoUpdt)
 
-  if((ret = SGetMsg(pst->region, pst->pool, &mBuf)) != ROK) {
+  if ((ret = SGetMsg(pst->region, pst->pool, &mBuf)) != ROK) {
 #if (ERRCLASS & ERRCLS_ADD_RES)
-    SLogError(pst->srcEnt, pst->srcInst, pst->srcProcId,
-    __FILE__, __LINE__, (ErrCls)ERRCLS_ADD_RES,
-    (ErrVal)ENBU014, (ErrVal)0, "SGetMsg() failed");
+    SLogError(pst->srcEnt, pst->srcInst, pst->srcProcId, __FILE__, __LINE__,
+              (ErrCls)ERRCLS_ADD_RES, (ErrVal)ENBU014, (ErrVal)0,
+              "SGetMsg() failed");
 #endif /*  ERRCLASS & ERRCLS_ADD_RES  */
     RETVALUE(ret);
   }
   CMCHKPKLOG(cmPkPtr, (PTR)msg, mBuf, ENBU016, pst);
   pst->event = (Event)EVTNBUUEIPINFOUPDT;
-  RETVALUE(SPstTsk(pst,mBuf));
+  RETVALUE(SPstTsk(pst, mBuf));
 }
 
 /*

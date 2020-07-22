@@ -160,7 +160,7 @@ PRIVATE S16 ueAppEmmHndlInSecModecmd(CmNasEvnt *evnt, UeCb *ueCb);
 PRIVATE S16 ueAppEsmHndlIncActDefBearerReq(UeEsmCb*, CmNasEvnt*, UeCb*,U8*,U8);
 PRIVATE S16 ueAppEmmHndlInAttachAccept(CmNasEvnt *evnt, UeCb  *ueCb);
 EXTERN S16 ueUiProcIpInfoReqMsg(UeCb * p_ueCb, U8 bearerId);
-EXTERN S16 ueUiProcIpInfoUpdtMsg(UeCb * p_ueCb, NbuUeIpInfoUpdt *);
+EXTERN S16 ueUiProcIpInfoUpdtMsg(UeCb *p_ueCb, NbuUeIpInfoUpdt *);
 PRIVATE S16 ueAppEsmHndlOutEsmInformationRsp(UeEsmCb *esmCb, CmNasEvnt *evnt);
 #if 0
 PRIVATE S16 handleUeCntxtRcvdIndFromEnb(UeCb *ueCb);
@@ -6115,7 +6115,8 @@ PRIVATE Void _fill_pf_comp(U8 idx, UeCb *ueCb, NbuUeIpInfoRsp *ueIpInfoRsp)
     if (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].ipv6.pres) {
       ueIpInfoRsp->pfList[pf_idx].presenceMask |= IPV6_REM_ADDR_PKT_FLTR_MASK;
       cmMemcpy(ueIpInfoRsp->pfList[pf_idx].remoteIpv6Addr,
-        ueCb->ueRabCb[itrn].tft.pfList[pf_idx].ipv6.ip6, CM_ESM_IPV6_SIZE);
+               ueCb->ueRabCb[itrn].tft.pfList[pf_idx].ipv6.ip6,
+               CM_ESM_IPV6_SIZE);
     }
     if (ueCb->ueRabCb[itrn].tft.pfList[pf_idx].protId.pres) {
       ueIpInfoRsp->pfList[pf_idx].presenceMask |= PROTO_ID_PKT_FLTR_MASK;
@@ -6175,8 +6176,8 @@ PRIVATE Void _fill_pf_comp(U8 idx, UeCb *ueCb, NbuUeIpInfoRsp *ueIpInfoRsp)
  *
  */
 
-PRIVATE Void ueAppFormIpv4Addr(NbuUeIpInfoRsp *ueIpInfoRsp, CmEsmPdnAdd *pdn_addr)
-{
+PRIVATE Void ueAppFormIpv4Addr(NbuUeIpInfoRsp *ueIpInfoRsp,
+                               CmEsmPdnAdd *pdn_addr) {
   U8 temp[20] = {0}, itrn = 0, cnt = 0;
   U8 ip_addr[20] = {0};
   U32 counter = 0;
@@ -6189,13 +6190,13 @@ PRIVATE Void ueAppFormIpv4Addr(NbuUeIpInfoRsp *ueIpInfoRsp, CmEsmPdnAdd *pdn_add
   }
   for (counter = offset; counter < (pdn_addr->len - 1); counter++) {
     itoa(pdn_addr->addrInfo[counter], temp, 10);
-      for (cnt = 0; (itrn < 20) && (temp[cnt] != '\0') && (cnt < 19);
-        itrn++, cnt++)
-        ip_addr[itrn] = temp[cnt];
-      if (counter != (pdn_addr->len - 2) && (itrn < 20))
-        ip_addr[itrn++] = '.';
-      if (counter == (pdn_addr->len - 2) && (itrn < 20))
-        ip_addr[itrn] = '\0';
+    for (cnt = 0; (itrn < 20) && (temp[cnt] != '\0') && (cnt < 19);
+         itrn++, cnt++)
+      ip_addr[itrn] = temp[cnt];
+    if (counter != (pdn_addr->len - 2) && (itrn < 20))
+      ip_addr[itrn++] = '.';
+    if (counter == (pdn_addr->len - 2) && (itrn < 20))
+      ip_addr[itrn] = '\0';
   }
   strcpy(ueIpInfoRsp->Ip4Addr, ip_addr);
   RETVOID;
@@ -6215,8 +6216,8 @@ PRIVATE Void ueAppFormIpv4Addr(NbuUeIpInfoRsp *ueIpInfoRsp, CmEsmPdnAdd *pdn_add
  *       File:  ue_app.c
  *
  */
-PRIVATE Void ueAppFormIpv6Addr(NbuUeIpInfoRsp *ueIpInfoRsp, CmEsmPdnAdd *pdn_addr)
-{
+PRIVATE Void ueAppFormIpv6Addr(NbuUeIpInfoRsp *ueIpInfoRsp,
+                               CmEsmPdnAdd *pdn_addr) {
   UeAppCb *ueAppCb = NULLP;
   U8 ip6_str[INET6_ADDRSTRLEN];
 
@@ -6224,15 +6225,14 @@ PRIVATE Void ueAppFormIpv6Addr(NbuUeIpInfoRsp *ueIpInfoRsp, CmEsmPdnAdd *pdn_add
   UE_LOG_ENTERFN(ueAppCb);
 
   // Form IPv6 address string by prepending Link local address-fe80::
-  sprintf(ip6_str,"%s::%02x%02x:%02x%02x:%02x%02x:%02x%02x",
-    "fe80",
-    (int)pdn_addr->addrInfo[0], (int)pdn_addr->addrInfo[1],
-    (int)pdn_addr->addrInfo[2], (int)pdn_addr->addrInfo[3],
-    (int)pdn_addr->addrInfo[4], (int)pdn_addr->addrInfo[5],
-    (int)pdn_addr->addrInfo[6], (int)pdn_addr->addrInfo[7]);
+  sprintf(ip6_str, "%s::%02x%02x:%02x%02x:%02x%02x:%02x%02x", "fe80",
+          (int)pdn_addr->addrInfo[0], (int)pdn_addr->addrInfo[1],
+          (int)pdn_addr->addrInfo[2], (int)pdn_addr->addrInfo[3],
+          (int)pdn_addr->addrInfo[4], (int)pdn_addr->addrInfo[5],
+          (int)pdn_addr->addrInfo[6], (int)pdn_addr->addrInfo[7]);
 
   cmMemcpy(ueIpInfoRsp->Ip6Addr, ip6_str, INET6_ADDRSTRLEN);
-  UE_LOG_DEBUG(ueAppCb, "Sending ipv6 address %s to enbApp", ueIpInfoRsp->Ip6Addr);
+  UE_LOG_DEBUG(ueAppCb, "Sending ipv6 address %s to enbApp", ip6_str);
   RETVOID;
 }
 
@@ -7084,24 +7084,20 @@ PRIVATE S16 ueAppEsmHndlIncActDefBearerReq
    /* update bearer Id */
    esmCb->bId = evnt->m.esmEvnt->bearerId;
 
-   /* Update pdn address in ue context */
-   selfAddr = &(ueCb->ueCtxt.selfAddr);
-   pAddr    = &evnt->m.esmEvnt->u.actReq.pAddr;
+  /* Update pdn address in ue context */
+  selfAddr = &(ueCb->ueCtxt.selfAddr);
+  pAddr = &evnt->m.esmEvnt->u.actReq.pAddr;
 
-   if((pAddr->pdnType == CM_ESM_PDN_IPV4) || (pAddr->pdnType == CM_ESM_PDN_IPV4V6))
-   {
-      selfAddr->type = CM_IPV4ADDR_TYPE;
-      selfAddr->u.ipv4NetAddr = (((U32)(pAddr->addrInfo[0]) << 24) |
-            ((U32)(pAddr->addrInfo[1]) << 16) |
-            ((U32)(pAddr->addrInfo[2]) << 8) |
-            (U32)(pAddr->addrInfo[3]));
-   }
-   else
-   {
+  if ((pAddr->pdnType == CM_ESM_PDN_IPV4) ||
+      (pAddr->pdnType == CM_ESM_PDN_IPV4V6)) {
+    selfAddr->type = CM_IPV4ADDR_TYPE;
+    selfAddr->u.ipv4NetAddr =
+        (((U32)(pAddr->addrInfo[0]) << 24) | ((U32)(pAddr->addrInfo[1]) << 16) |
+         ((U32)(pAddr->addrInfo[2]) << 8) | (U32)(pAddr->addrInfo[3]));
+  } else {
 #ifdef IPV6_SUPPORTED
-      selfAddr->type = CM_IPV6ADDR_TYPE;
-      cmMemcpy((U8 *)&selfAddr->u.ipv6NetAddr, (U8 *)pAddr->addrInfo,
-            pAddr->len);
+    selfAddr->type = CM_IPV6ADDR_TYPE;
+    cmMemcpy((U8 *)&selfAddr->u.ipv6NetAddr, (U8 *)pAddr->addrInfo, pAddr->len);
 #endif
    }
 
@@ -8043,34 +8039,36 @@ PUBLIC S16 ueUiProcErabsInfoMsg(Pst *pst, NbuErabsInfo *pNbuErabsInfo)
    UE_LOG_EXITFN(ueAppCb, ret);
 }
 
-PUBLIC S16 ueUiProcIpInfoUpdtMsg(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt)
-{
-   UeAppCb *ueAppCb = NULLP;
-   UetMessage *tfwMsg = NULLP;
-   UE_GET_CB(ueAppCb);
-   UE_LOG_ENTERFN(ueAppCb);
-   // Update the IPv6 address to ueAppCb
-   for (int idx=0; idx<UE_APP_MAX_DRBS; idx++) {
-     if (ueCb->ueRabCb[idx].lnkEpsBearId == ipInfoUpdt->bearerId) {
-       cmMemcpy(ueCb->ueRabCb[idx].ipv6Addr, ipInfoUpdt->ipv6Addr, sizeof(ipInfoUpdt->ipv6Addr));
-     } else {
-       UE_LOG_ERROR(ueAppCb, "Bearer id %u not found in ueRabCb \n", ipInfoUpdt->bearerId);
-       RETVALUE(RFAILED);
+PUBLIC S16 ueUiProcIpInfoUpdtMsg(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt) {
+  UeAppCb *ueAppCb = NULLP;
+  UetMessage *tfwMsg = NULLP;
+  UE_GET_CB(ueAppCb);
+  UE_LOG_ENTERFN(ueAppCb);
+  // Update the IPv6 address to ueAppCb
+  for (int idx = 0; idx < UE_APP_MAX_DRBS; idx++) {
+    if (ueCb->ueRabCb[idx].lnkEpsBearId == ipInfoUpdt->bearerId) {
+      cmMemcpy(ueCb->ueRabCb[idx].ipv6Addr, ipInfoUpdt->ipv6Addr,
+               sizeof(ipInfoUpdt->ipv6Addr));
+    } else {
+      UE_LOG_ERROR(ueAppCb, "Bearer id %u not found in ueRabCb \n",
+                   ipInfoUpdt->bearerId);
+      RETVALUE(RFAILED);
     }
-   }
-   // Send message to Test controller
-   tfwMsg = (UetMessage*)ueAlloc(sizeof(UetMessage));
-   tfwMsg->msg.ueUetRouterAdv.ueId = ueCb->ueId;
-   tfwMsg->msg.ueUetRouterAdv.bearerId  = ipInfoUpdt->bearerId;
-   cmMemcpy(tfwMsg->msg.ueUetRouterAdv.ipv6Addr, ipInfoUpdt->ipv6Addr, sizeof(ipInfoUpdt->ipv6Addr));
-   tfwMsg->msgType = UE_ICMPV6_ROUTER_ADV_TYPE;
-   if (ueSendToTfwApp(tfwMsg, &ueAppCb->fwPst) != ROK) {
-     UE_LOG_ERROR(ueAppCb, "Sending ICMPV6 ROUTER ADVERTISEMENT to "\
-       "TFWAPP failed");
-     RETVALUE(RFAILED);
-   }
-   UE_LOG_DEBUG(ueAppCb, "Sent ICMPV6 ROUTER ADVERTISEMENT to tfwApp \n");
-   RETVALUE(ROK);
+  }
+  // Send message to Test controller
+  tfwMsg = (UetMessage *)ueAlloc(sizeof(UetMessage));
+  tfwMsg->msg.ueUetRouterAdv.ueId = ueCb->ueId;
+  tfwMsg->msg.ueUetRouterAdv.bearerId = ipInfoUpdt->bearerId;
+  cmMemcpy(tfwMsg->msg.ueUetRouterAdv.ipv6Addr, ipInfoUpdt->ipv6Addr,
+           sizeof(ipInfoUpdt->ipv6Addr));
+  tfwMsg->msgType = UE_ICMPV6_ROUTER_ADV_TYPE;
+  if (ueSendToTfwApp(tfwMsg, &ueAppCb->fwPst) != ROK) {
+    UE_LOG_ERROR(ueAppCb, "Sending ICMPV6 ROUTER ADVERTISEMENT to "
+                          "TFWAPP failed");
+    RETVALUE(RFAILED);
+  }
+  UE_LOG_DEBUG(ueAppCb, "Sent ICMPV6 ROUTER ADVERTISEMENT to tfwApp \n");
+  RETVALUE(ROK);
 }
 
 PUBLIC S16 ueUiProcIpInfoReqMsg(UeCb *p_ueCb, U8 bearerId)

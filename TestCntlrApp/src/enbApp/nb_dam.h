@@ -200,13 +200,12 @@ typedef struct nbDamDrbCb
  * - Bool           isFullCfg      indicate the need for full configuration for the UE
  */
 
-typedef struct nbIpInfo
-{
-   CmHashListEnt             ueHashEnt;
-   U8    drbId;
-   U32   pdnIp4Addr;
-   U8    pdnIp6Addr[NB_IPV6_ADDRESS_LEN];
-}NbIpInfo;
+typedef struct nbIpInfo {
+  CmHashListEnt ueHashEnt;
+  U8 drbId;
+  U32 pdnIp4Addr;
+  U8 pdnIp6Addr[NB_IPV6_ADDRESS_LEN];
+} NbIpInfo;
 
 /**
  * @brief This structure contains IPv4 address
@@ -250,8 +249,8 @@ typedef struct nbIpPktFields {
   /* Local IPv6 address is used only to verify if we have
    * a valid context for this UE
    */
-  U8  localIpv6Addr[NB_IPV6_ADDRESS_LEN];
-  U8  remIpv6Addr[NB_IPV6_ADDRESS_LEN];
+  U8 localIpv6Addr[NB_IPV6_ADDRESS_LEN];
+  U8 remIpv6Addr[NB_IPV6_ADDRESS_LEN];
   U16 locPort;
   U16 remPort;
   U8 proto_id;
@@ -309,7 +308,7 @@ typedef struct nbPktFilterList {
 typedef struct nbPdnCb {
   CmHashListEnt ueHashEnt;
   U32 pdnIp4Addr;
-  U8  pdnIp6Addr[NB_IPV6_ADDRESS_LEN];
+  U8 pdnIp6Addr[NB_IPV6_ADDRESS_LEN];
   U32 lnkEpsBearId;
   CmLListCp tftPfList;
 } NbPdnCb;

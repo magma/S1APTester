@@ -23,8 +23,8 @@ EXTERN S16 nbS1apFillEutranCgi(S1apPdu*, SztEUTRAN_CGI*, EnbCb*);
 EXTERN S16 nbS1apFillEutranCgi(S1apPdu*, SztEUTRAN_CGI*);
 #endif
 EXTERN S16 NbHandleInitialUeMsg(NbuInitialUeMsg*);
-EXTERN S16 nbCreateUeTunnReq(U8 ueId, U8 bearerId,
-                             U32 ueIp4Addr, U8* ipv6_addr, NbuUeIpInfoRsp *rsp);
+EXTERN S16 nbCreateUeTunnReq(U8 ueId, U8 bearerId, U32 ueIp4Addr, U8 *ipv6_addr,
+                             NbuUeIpInfoRsp *rsp);
 #ifdef MULTI_ENB_SUPPORT
 PRIVATE S16 nbS1apBldInitUePdu(NbUeCb*, NbTai*, TknStrOSXL*, S1apPdu**, U32,
       NbuSTmsi, EnbCb*);
@@ -495,8 +495,7 @@ PUBLIC S16 nbS1apFillEutranCgi
    RETVALUE(ROK);
 }
 
-PUBLIC S16 NbHandleUeIpInfoRsp(NbuUeIpInfoRsp *rsp)
-{
+PUBLIC S16 NbHandleUeIpInfoRsp(NbuUeIpInfoRsp *rsp) {
   U8 ueId;
   U8 bearerId;
   U8 *ueIp6Addr = NULLP;
