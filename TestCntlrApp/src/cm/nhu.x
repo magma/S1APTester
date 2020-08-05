@@ -73,7 +73,7 @@ typedef U8 NhuPdcpId;
  * @brief NhuCrnti
    Crnti. Required to create an UE context. 
 */
-typedef U32 NhuCrnti;      
+typedef U32 NhuCrnti;
 
 /**
  * @brief NhuCellId

@@ -1495,7 +1495,7 @@ typedef struct UeAuthRejInd
 }ueAuthRejInd_t;
 
 typedef struct UeAuthFailure {
-  U8 ue_Id;
+  U32 ue_Id;
   U8 cause;
   U8 auts[TFW_AUTS_LEN];
 } ueAuthFailure_t;

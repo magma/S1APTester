@@ -816,7 +816,7 @@ PRIVATE S16 ueProcUeAuthResp(UetMessage *tfwMsg, Pst *pst)
  */
 PRIVATE S16 ueProcUeAuthFailure(UetMessage *tfwMsg, Pst *pst) {
   S16 ret = ROK;
-  U16 ueId;
+  U32 ueId;
 
   UeAppCb *ueAppCb = NULLP;
   UeCb *ueCb = NULLP;

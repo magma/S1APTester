@@ -842,7 +842,7 @@ typedef struct _ueUetAuthRejInd
 }UeUetAuthRejInd;
 
 typedef struct _ueUetAuthFailure {
-  U8 ueId;
+  U32 ueId;
   U8 cause;
   U8 auts[14];
 } UeUetAuthFailure;
