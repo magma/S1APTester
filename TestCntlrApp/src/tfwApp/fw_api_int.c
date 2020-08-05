@@ -1569,11 +1569,11 @@ PUBLIC S16 handleResetRequest(ResetReq *data)
    {
       msgReq->t.resetReq.u.partialRst.numOfConn = data->r.partialRst.numOfConn;
       FW_ALLOC_MEM(fwCb, &msgReq->t.resetReq.u.partialRst.ueIdLst,
-            msgReq->t.resetReq.u.partialRst.numOfConn);
+            msgReq->t.resetReq.u.partialRst.numOfConn*sizeof(U32));
 
       cmMemcpy(msgReq->t.resetReq.u.partialRst.ueIdLst,
             data->r.partialRst.ueIdLst,
-            msgReq->t.resetReq.u.partialRst.numOfConn);
+            msgReq->t.resetReq.u.partialRst.numOfConn*sizeof(U32));
    }
    else
    {
