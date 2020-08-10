@@ -2245,6 +2245,8 @@ PRIVATE S16 handleRouterAdvInd(Pst *pst, UeUetRouterAdv *uetRouterAdv) {
   FW_GET_CB(fwCb);
   FW_LOG_ENTERFN(fwCb);
 
+  FW_LOG_DEBUG(fwCb, "Recieved Router Adv Indication for ueId %u",
+               uetRouterAdv->ueId);
   FW_ALLOC_MEM(fwCb, &tfwUeRouterAdv, sizeof(ueRouterAdv_t));
 
   tfwUeRouterAdv->ueId = uetRouterAdv->ueId;

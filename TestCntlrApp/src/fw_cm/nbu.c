@@ -2370,7 +2370,7 @@ Buffer *mBuf;
  *
  *    Ret:    ROK  -ok
  *
- *    Notes:  None
+ *    Notes:  This msg contains complete ipv6 addr
  *
  *    File:   nbu.c
  *

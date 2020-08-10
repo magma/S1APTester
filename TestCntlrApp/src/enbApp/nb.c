@@ -442,6 +442,9 @@ PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U8 bearerId, U32 ueIp4Addr, U8 *ipv6_addr,
     for (idx = 0; idx < ueCb->tunnIdx; idx++) {
       if (ROK != (cmHashListFind(&(ueCb->tunnInfo), (U8 *)&(berId), sizeof(U32),
                                  0, (PTR *)&tunInfo))) {
+        if (ipv6_addr) {
+          NB_FREE(ipv6_addr, sizeof(ipv6_addr));
+        }
         RETVALUE(RFAILED);
       } else {
         tnlInfo->tnlId.drbId = tunInfo->bearerId;

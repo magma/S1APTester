@@ -461,6 +461,7 @@ PUBLIC S16 UeLiNbuUeIpInfoUpdt(Pst *pst, NbuUeIpInfoUpdt *p_ueMsg) {
 
   /* sanity check */
   if (!pst || !p_ueMsg) {
+    UE_LOG_ERROR(ueAppCb, "[UEAPP]: pst||p_ueMsg is NULL ueId = %d", ueId);
     RETVALUE(ret);
   } /* end of if pst or p_ueMsg are not valid pointers */
 
@@ -474,7 +475,8 @@ PUBLIC S16 UeLiNbuUeIpInfoUpdt(Pst *pst, NbuUeIpInfoUpdt *p_ueMsg) {
 
   /* process the received received */
   if ((ret = ueUiProcIpInfoUpdtMsg(ueCb, p_ueMsg)) != ROK) {
-    UE_LOG_ERROR(ueAppCb, "Failed to process IP Info Update message");
+    UE_LOG_ERROR(ueAppCb, "Failed to process IP Info Update message for ue %d",
+                 ueId);
     ret = RFAILED;
   } /* end of if processing the message fails */
   RETVALUE(ret);

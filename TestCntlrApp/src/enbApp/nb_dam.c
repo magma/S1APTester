@@ -564,7 +564,7 @@ PRIVATE S16 nbAddPfs(NbPdnCb *pdnCb, NbDamTnlInfo *tnlInfo) {
  */
 PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
 {
-  U8 ret = RFAILED;
+  S16 ret = RFAILED;
   NbPdnCb *pdnCb = NULL;
 
   if (tnlInfo->pdnType == NB_PDN_IPV4) {
@@ -905,17 +905,18 @@ PRIVATE S16 nbSendIcmpv6RouterSolicit(U8 *ip6Addr, NbDamTnlCb *tnlCb) {
   // Assign memory to mBuf
   SGetMsg(DFLT_REGION, DFLT_POOL, &mBuf);
   if (mBuf == NULLP) {
-    RETVOID;
+    RETVALUE(RFAILED);
   }
   // Convert buff to mbuf to be assigned to EGTP Data Req
   if (SAddPstMsgMult((Data *)buff, idx, mBuf) != ROK) {
     SPutMsg(mBuf);
-    RETVOID;
+    RETVALUE(RFAILED);
   }
 
   if (ROK != nbFillEgtpDatMsg(tnlCb, &eguEvtMsg, EGT_GTPU_MSG_GPDU)) {
+    NB_LOG_ERROR(&nbCb, "Failed to fill Router Solicit GTP message");
     NB_FREEMBUF(mBuf);
-    RETVALUE(ROK);
+    RETVALUE(RFAILED);
   }
   egMsg = eguEvtMsg->u.egMsg;
   egMsg->u.mBuf = mBuf;
@@ -1021,17 +1022,20 @@ NbDamTnlInfo                 *tnlInfo
     RETVALUE(RFAILED);
   }
   /* Create the tunnel */
-  if (tnlInfo->pdnType == NB_PDN_IPV4) {
+  switch (tnlInfo->pdnType) {
+  case NB_PDN_IPV4:
     NB_ALLOC(&(ipInfo), sizeof(NbIpInfo));
     ipInfo->drbId = rbId;
     ipInfo->pdnIp4Addr = tnlInfo->pdnIp4Addr;
     if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ipInfo,
                                 (U8 *)&ipInfo->pdnIp4Addr, sizeof(U32))) {
-      NB_FREE(ueCb, sizeof(NbIpInfo))
-      NB_LOG_ERROR(&nbCb, "Failed to Insert ipv4 address into ipInfo");
+      NB_FREE(ipInfo, sizeof(NbIpInfo))
+      NB_LOG_ERROR(&nbCb, "Failed to Insert ipv4 address into ipInfo %x",
+                   ipInfo->pdnIp4Addr);
       RETVALUE(RFAILED);
     }
-  } else if (tnlInfo->pdnType == NB_PDN_IPV6) {
+    break;
+  case NB_PDN_IPV6:
     NB_ALLOC(&(ip6Info), sizeof(NbIpInfo));
     ip6Info->drbId = rbId;
     cmMemcpy(ip6Info->pdnIp6Addr, tnlInfo->pdnIp6Addr,
@@ -1039,18 +1043,20 @@ NbDamTnlInfo                 *tnlInfo
     if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ip6Info,
                                 (U8 *)&ip6Info->pdnIp6Addr,
                                 sizeof(tnlInfo->pdnIp6Addr))) {
-      NB_FREE(ueCb, sizeof(NbIpInfo))
+      NB_FREE(ipInfo, sizeof(NbIpInfo))
       NB_LOG_ERROR(&nbCb, "Failed to Insert ipv6 address into ipInfo");
       RETVALUE(RFAILED);
     }
-  } else if (tnlInfo->pdnType == NB_PDN_IPV4V6) {
+    break;
+  case NB_PDN_IPV4V6:
     NB_ALLOC(&(ipInfo), sizeof(NbIpInfo));
     ipInfo->drbId = rbId;
     ipInfo->pdnIp4Addr = tnlInfo->pdnIp4Addr;
     if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ipInfo,
                                 (U8 *)&ipInfo->pdnIp4Addr, sizeof(U32))) {
-      NB_FREE(ueCb, sizeof(NbIpInfo))
-      NB_LOG_ERROR(&nbCb, "Failed to Insert ipv4 address into ipInfo");
+      NB_FREE(ipInfo, sizeof(NbIpInfo))
+      NB_LOG_ERROR(&nbCb, "Failed to Insert ipv4 address into ipInfo %x",
+                   ipInfo->pdnIp4Addr);
       RETVALUE(RFAILED);
     }
     NB_ALLOC(&(ip6Info), sizeof(NbIpInfo));
@@ -1060,10 +1066,14 @@ NbDamTnlInfo                 *tnlInfo
     if (ROK != cmHashListInsert(&(ueCb->ipInfo), (PTR)ip6Info,
                                 (U8 *)&ip6Info->pdnIp6Addr,
                                 sizeof(tnlInfo->pdnIp6Addr))) {
-      NB_FREE(ueCb, sizeof(NbIpInfo))
+      NB_FREE(ipInfo, sizeof(NbIpInfo))
       NB_LOG_ERROR(&nbCb, "Failed to Insert ipv6 address into ipInfo");
       RETVALUE(RFAILED);
     }
+    break;
+  default:
+    NB_LOG_ERROR(&nbCb, "Invalid pdn type in nbDamAddTunnel for ue %d", ueId);
+    RETVALUE(RFAILED);
   }
 
   NB_LOG_DEBUG(&nbCb, "Successfully created PdnCb\n");
@@ -1412,7 +1422,7 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
     RETVALUE(ROK);
   }
 
-  /* Fetch Version field*/
+  // Fetch Version field
   if ((SExamMsg(&ipPkt[0], mBuf, ipIdx) != ROK)) {
     NB_LOG_ERROR(&nbCb, "Failed to fetch IP version");
     SPutMsg(mBuf);
@@ -1421,21 +1431,27 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
   U8 ipVersion = (ipPkt[0] >> 4);
   ipPktFields.ipVersion = ipVersion;
   if (ipVersion == NB_IPV4_VERSION) {
-    nbProcIpv4Packet(mBuf, &ipPktFields);
+    if (ROK != (nbProcIpv4Packet(mBuf, &ipPktFields))) {
+      NB_FREEMBUF(mBuf);
+      RETVALUE(RFAILED);
+    }
   } else if (ipVersion == NB_IPV6_VERSION) {
-    nbProcIpv6Packet(mBuf, &ipPktFields);
+    if (ROK != (nbProcIpv6Packet(mBuf, &ipPktFields))) {
+      NB_FREEMBUF(mBuf);
+      RETVALUE(RFAILED);
+    }
   }
 
-  /* get the ueCb */
+  // get the ueCb
   ueCb = nbDamGetueCbkeyUeIp(&ipPktFields, &drbId);
   if (ueCb == NULLP) {
     NB_FREEMBUF(mBuf);
     RETVALUE(RFAILED);
   }
 
-  /* mark for ue data received */
+  // mark for ue data received
   ueCb->dataRcvd = TRUE;
-  /* get the tunnel Cb */
+  // get the tunnel Cb
   if (ROK != (cmHashListFind(&(ueCb->drbs), (U8 *)&(drbId), sizeof(U8), 0,
                              (PTR *)&drbCb))) {
     RETVALUE(RFAILED);
@@ -1452,7 +1468,7 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
    egMsg = eguEvtMsg->u.egMsg;
    egMsg->u.mBuf = mBuf;
 
-   /* Trigger EGTP Data Req */
+   // Trigger EGTP Data Req
    NbIfmEgtpEguDatReq(eguEvtMsg);
    RETVALUE(ROK);
 }
@@ -1476,6 +1492,12 @@ PRIVATE S16 nbUpdateIpInfo(U8 ueId, U8 *ipv6Addr, U32 lnkEpsBearId) {
   NbuUeIpInfoUpdt *msg = NULLP;
 
   NB_ALLOC(&msg, sizeof(NbuUeIpInfoUpdt));
+  if (msg == NULLP) {
+    NB_LOG_ERROR(
+        &nbCb, "Failed to allocate memory for Ip Info Update message for ue %u",
+        ueId);
+    RETVALUE(RFAILED);
+  }
   msg->ueId = ueId;
   msg->bearerId = lnkEpsBearId;
   cmMemcpy(msg->ipv6Addr, ipv6Addr, NB_IPV6_ADDRESS_LEN);
@@ -1483,6 +1505,7 @@ PRIVATE S16 nbUpdateIpInfo(U8 ueId, U8 *ipv6Addr, U32 lnkEpsBearId) {
   /* Send Ip Info Update message to UEAPP */
   ret = cmPkNbuUeIpInfoUpdt(&nbCb.ueAppPst, msg);
   if (ret != ROK) {
+    NB_FREE(msg, sizeof(NbuUeIpInfoUpdt));
     NB_LOG_ERROR(&nbCb, "Failed To Send Ue Ip Info Update message to UeApp %u",
                  ueId);
   }
@@ -1524,13 +1547,15 @@ PRIVATE S16 nbProcRouterAdv(NbDamUeCb *ueCb, CmLteRbId drbId, U8 *buf) {
         // Prepend 8 bytes of IPv6 prefix to pdnCb->pdnIp6Addir
         cmMemcpy(pdnCb->pdnIp6Addr, buf, NB_IPV6_ADDRESS_LEN / 2);
         // Copy the interface id from tempIp6Add
-        cmMemcpy(pdnCb->pdnIp6Addr[8], tempIp6Add, NB_IPV6_ADDRESS_LEN / 2);
+        cmMemcpy(&pdnCb->pdnIp6Addr[8], tempIp6Add, NB_IPV6_ADDRESS_LEN / 2);
         // Update ipInfo->pdnIp6Addr
         cmMemcpy(ipInfo->pdnIp6Addr, pdnCb->pdnIp6Addr, NB_IPV6_ADDRESS_LEN);
         // Update UeDataCb
         if (nbAppCfgrPdnAssignedAddrIpv6(ueCb->ueId, ipInfo->pdnIp6Addr) !=
             ROK) {
-          NB_LOG_ERROR(&nbCb, "Failed to update UeDataCb for drbId %u", drbId);
+          NB_LOG_ERROR(&nbCb,
+                       "Failed to update UeDataCb for drbId %u for ue %d",
+                       drbId, ueCb->ueId);
           RETVALUE(ret);
         }
         // Send the updated IPv6 address to UE
@@ -1538,7 +1563,8 @@ PRIVATE S16 nbProcRouterAdv(NbDamUeCb *ueCb, CmLteRbId drbId, U8 *buf) {
             nbUpdateIpInfo(ueCb->ueId, pdnCb->pdnIp6Addr, pdnCb->lnkEpsBearId);
         RETVALUE(ret);
       } else {
-        NB_LOG_ERROR(&nbCb, "pdnCb not found for drbId %u", drbId);
+        NB_LOG_ERROR(&nbCb, "pdnCb not found for drbId %u for ue %d", drbId,
+                     ueCb->ueId);
         RETVALUE(ret);
       }
     }
@@ -1655,6 +1681,7 @@ PUBLIC S16 nbDamEgtpDatInd(Pst *pst, EgtUEvnt *eguMsg) {
           ueId);
       RETVALUE(ROK);
     } else {
+      NB_FREE(flatBuf, len);
       NB_LOG_ERROR(&nbCb,
                    "Failed to process ICMPV6_TYPE_ROUTER_ADV for ueId %u\n",
                    ueId);

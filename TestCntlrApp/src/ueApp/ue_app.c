@@ -6178,8 +6178,9 @@ PRIVATE Void _fill_pf_comp(U8 idx, UeCb *ueCb, NbuUeIpInfoRsp *ueIpInfoRsp)
 
 PRIVATE Void ueAppFormIpv4Addr(NbuUeIpInfoRsp *ueIpInfoRsp,
                                CmEsmPdnAdd *pdn_addr) {
-  U8 temp[20] = {0}, itrn = 0, cnt = 0;
-  U8 ip_addr[20] = {0};
+#define IPV4_BUF_SZ 20
+  U8 temp[IPV4_BUF_SZ] = {0}, itrn = 0, cnt = 0;
+  U8 ip_addr[IPV4_BUF_SZ] = {0};
   U32 counter = 0;
   U8 idx = 0;
   U8 offset = 0;
@@ -6190,12 +6191,13 @@ PRIVATE Void ueAppFormIpv4Addr(NbuUeIpInfoRsp *ueIpInfoRsp,
   }
   for (counter = offset; counter < (pdn_addr->len - 1); counter++) {
     itoa(pdn_addr->addrInfo[counter], temp, 10);
-    for (cnt = 0; (itrn < 20) && (temp[cnt] != '\0') && (cnt < 19);
+    for (cnt = 0; (itrn < IPV4_BUF_SZ) && (temp[cnt] != '\0') &&
+                  (cnt < (IPV4_BUF_SZ - 1));
          itrn++, cnt++)
       ip_addr[itrn] = temp[cnt];
-    if (counter != (pdn_addr->len - 2) && (itrn < 20))
+    if (counter != (pdn_addr->len - 2) && (itrn < IPV4_BUF_SZ))
       ip_addr[itrn++] = '.';
-    if (counter == (pdn_addr->len - 2) && (itrn < 20))
+    if (counter == (pdn_addr->len - 2) && (itrn < IPV4_BUF_SZ))
       ip_addr[itrn] = '\0';
   }
   strcpy(ueIpInfoRsp->Ip4Addr, ip_addr);
@@ -6902,12 +6904,21 @@ PRIVATE S16 uefillDefEsmInfoToUeCb
    {
       params->apn.pres = FALSE;
    }
+   if (actReq->pAddr.pres == TRUE) {
+     params->pAddr.pres = TRUE;
+     params->pAddr.len = actReq->pAddr.len;
+     params->pAddr.pdnType = actReq->pAddr.pdnType;
+     cmMemcpy((U8 *)&params->pAddr.addrInfo, (U8 *)&actReq->pAddr.addrInfo,
+              sizeof(actReq->pAddr.addrInfo));
+   } else {
+     params->pAddr.pres = FALSE;
+   }
    if(actReq->pAddr.pres == TRUE) {
       params->pAddr.pres = TRUE;
       params->pAddr.len = actReq->pAddr.len;
       params->pAddr.pdnType = actReq->pAddr.pdnType;
       cmMemcpy((U8 *)&params->pAddr.addrInfo, (U8 *)&actReq->pAddr.addrInfo,
-            CM_ESM_MAX_LEN_PDN_ADDRESS);
+            sizeof(actReq->pAddr.addrInfo));
    }
    else
    {
@@ -7084,23 +7095,24 @@ PRIVATE S16 ueAppEsmHndlIncActDefBearerReq
    /* update bearer Id */
    esmCb->bId = evnt->m.esmEvnt->bearerId;
 
-  /* Update pdn address in ue context */
-  selfAddr = &(ueCb->ueCtxt.selfAddr);
-  pAddr = &evnt->m.esmEvnt->u.actReq.pAddr;
+   /* Update pdn address in ue context */
+   selfAddr = &(ueCb->ueCtxt.selfAddr);
+   pAddr = &evnt->m.esmEvnt->u.actReq.pAddr;
 
-  if ((pAddr->pdnType == CM_ESM_PDN_IPV4) ||
-      (pAddr->pdnType == CM_ESM_PDN_IPV4V6)) {
-    selfAddr->type = CM_IPV4ADDR_TYPE;
-    selfAddr->u.ipv4NetAddr =
-        (((U32)(pAddr->addrInfo[0]) << 24) | ((U32)(pAddr->addrInfo[1]) << 16) |
-         ((U32)(pAddr->addrInfo[2]) << 8) | (U32)(pAddr->addrInfo[3]));
-  } else {
+   if(pAddr->pdnType == CM_ESM_PDN_IPV4)
+   {
+      selfAddr->u.ipv4NetAddr = (((U32)(pAddr->addrInfo[0]) << 24) |
+            ((U32)(pAddr->addrInfo[1]) << 16) |
+            ((U32)(pAddr->addrInfo[2]) << 8) |
+            (U32)(pAddr->addrInfo[3]));
+   }
+   else
+   {
 #ifdef IPV6_SUPPORTED
-    selfAddr->type = CM_IPV6ADDR_TYPE;
-    cmMemcpy((U8 *)&selfAddr->u.ipv6NetAddr, (U8 *)pAddr->addrInfo, pAddr->len);
+      cmMemcpy((U8 *)&selfAddr->u.ipv6NetAddr, (U8 *)pAddr->addrInfo,
+            pAddr->len);
 #endif
    }
-
    ret = ueAppGetDrb(ueCb, &drbId);
    if (ret != ROK)
    {
@@ -8049,9 +8061,10 @@ PUBLIC S16 ueUiProcIpInfoUpdtMsg(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt) {
     if (ueCb->ueRabCb[idx].lnkEpsBearId == ipInfoUpdt->bearerId) {
       cmMemcpy(ueCb->ueRabCb[idx].ipv6Addr, ipInfoUpdt->ipv6Addr,
                sizeof(ipInfoUpdt->ipv6Addr));
+      break;
     } else {
-      UE_LOG_ERROR(ueAppCb, "Bearer id %u not found in ueRabCb \n",
-                   ipInfoUpdt->bearerId);
+      UE_LOG_ERROR(ueAppCb, "Bearer id %u not found in ueRabCb for ue %u\n",
+                   ipInfoUpdt->bearerId, ueCb->ueId);
       RETVALUE(RFAILED);
     }
   }

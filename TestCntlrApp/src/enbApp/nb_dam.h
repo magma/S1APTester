@@ -236,6 +236,10 @@ typedef struct {
  * - U32           locIpv4Addr      Local IPv4 address
  * - U32           remIpv4Addr      Remote IPv4 addr
  * - U8            localIpv6Addr    Local IPv6 addr
+ *                 Local IPv6 address is used only to
+ *                 verify if we have
+ *                 a valid context for this UE
+ *
  * - U8            remIpv6Addr      Remote IPv6 addr
  * - U16           locPort          Single local port
  * - U16           remPort          Single remote port
@@ -246,9 +250,6 @@ typedef struct {
 typedef struct nbIpPktFields {
   U32 locIpv4Addr;
   U32 remIpv4Addr;
-  /* Local IPv6 address is used only to verify if we have
-   * a valid context for this UE
-   */
   U8 localIpv6Addr[NB_IPV6_ADDRESS_LEN];
   U8 remIpv6Addr[NB_IPV6_ADDRESS_LEN];
   U16 locPort;
