@@ -1022,8 +1022,7 @@ NbDamTnlInfo                 *tnlInfo
     RETVALUE(RFAILED);
   }
   /* Create the tunnel */
-  switch (tnlInfo->pdnType) {
-  case NB_PDN_IPV4:
+  if (tnlInfo->pdnType == NB_PDN_IPV4) {
     NB_ALLOC(&(ipInfo), sizeof(NbIpInfo));
     ipInfo->drbId = rbId;
     ipInfo->pdnIp4Addr = tnlInfo->pdnIp4Addr;
@@ -1034,8 +1033,7 @@ NbDamTnlInfo                 *tnlInfo
                    ipInfo->pdnIp4Addr);
       RETVALUE(RFAILED);
     }
-    break;
-  case NB_PDN_IPV6:
+  } else if (tnlInfo->pdnType == NB_PDN_IPV6) {
     NB_ALLOC(&(ip6Info), sizeof(NbIpInfo));
     ip6Info->drbId = rbId;
     cmMemcpy(ip6Info->pdnIp6Addr, tnlInfo->pdnIp6Addr,
@@ -1045,10 +1043,10 @@ NbDamTnlInfo                 *tnlInfo
                                 sizeof(tnlInfo->pdnIp6Addr))) {
       NB_FREE(ipInfo, sizeof(NbIpInfo))
       NB_LOG_ERROR(&nbCb, "Failed to Insert ipv6 address into ipInfo");
+      printIpv6Addr(tnlInfo->pdnIp6Addr);
       RETVALUE(RFAILED);
     }
-    break;
-  case NB_PDN_IPV4V6:
+  } else if (tnlInfo->pdnType == NB_PDN_IPV4V6) {
     NB_ALLOC(&(ipInfo), sizeof(NbIpInfo));
     ipInfo->drbId = rbId;
     ipInfo->pdnIp4Addr = tnlInfo->pdnIp4Addr;
@@ -1068,12 +1066,9 @@ NbDamTnlInfo                 *tnlInfo
                                 sizeof(tnlInfo->pdnIp6Addr))) {
       NB_FREE(ipInfo, sizeof(NbIpInfo))
       NB_LOG_ERROR(&nbCb, "Failed to Insert ipv6 address into ipInfo");
+      printIpv6Addr(tnlInfo->pdnIp6Addr);
       RETVALUE(RFAILED);
     }
-    break;
-  default:
-    NB_LOG_ERROR(&nbCb, "Invalid pdn type in nbDamAddTunnel for ue %d", ueId);
-    RETVALUE(RFAILED);
   }
 
   NB_LOG_DEBUG(&nbCb, "Successfully created PdnCb\n");
