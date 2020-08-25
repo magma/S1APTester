@@ -3268,6 +3268,7 @@ PRIVATE S16 nbBuildIntCtxtSetupRsp
    NbS1ConCb                                        *s1ConCb = ueCb->s1ConCb;
    SztSuccessfulOutcome                             *succOut;
    U8                                               succIdx = 0;
+   U8                                               failIdx = 0;
    U8 numSuccErabs = 0;
 
    NB_ALLOCEVNT(&initCtxtRspPdu, sizeof(S1apPdu));
@@ -3282,7 +3283,7 @@ PRIVATE S16 nbBuildIntCtxtSetupRsp
    nbFillTknU32(&(succOut->procedureCode), Sztid_InitCntxtSetup);
    nbFillTknU32(&(succOut->criticality), SztCriticalityrejectEnum);
 
-   numComp = 4;
+   numComp = 5;
    initCtxtRsp = &succOut->value.u.sztInitCntxtSetupResp;
    nbFillTknU8(&(initCtxtRsp->pres), PRSNT_NODEF);
 
@@ -3328,10 +3329,24 @@ PRIVATE S16 nbBuildIntCtxtSetupRsp
       RETVALUE(RFAILED);
    }
    /* fill the bearer details */
+   U8 itr = 0;
+   Bool found = FALSE;
    for(idx = 0 ; idx < numComp; idx ++)
    {
       SztE_RABSetupItemCtxtSURes *erabIe;
-
+      if (nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].flag) {
+        for (itr = 0; itr < nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].numFailedErabs; itr++) {
+          if (erabInfo->erabs[idx].erabId == nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].failedErabs[itr]) {
+            printf("erabid present in failed list %d\n", erabInfo->erabs[idx].erabId);
+            found = TRUE;
+            break;
+          }
+        }
+        if (found) {
+          continue;
+        }
+      }
+      printf("Adding erabid %d to ICS rsp\n", erabInfo->erabs[idx].erabId);
       ie1 = &(ie->value.u.sztE_RABSetupLstCtxtSURes.member[succIdx++]);
       erabIe = &(ie1->value.u.sztE_RABSetupItemCtxtSURes);
       nbFillTknU8(&(ie1->pres), PRSNT_NODEF);
@@ -3363,9 +3378,41 @@ PRIVATE S16 nbBuildIntCtxtSetupRsp
       }
       erabIe->iE_Extns.noComp.pres = NOTPRSNT;
    }
+   printf("****** flag %d\n", nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].flag);
+   if (nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].flag) {
+     SztProtIE_SingleCont_E_RABItemIEs *failedErabItem;
+     InitCtxtSetupRspFailedErabs failedRab = {0};
+     // E-RAB failed to Setup List
+     ie = &initCtxtRsp->protocolIEs.member[crntIe++];
+     nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+     nbFillTknU32(&(ie->id), Sztid_E_RABFailedToSetupLstCtxtSURes);
+     nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+     if ((cmGetMem(initCtxtRspPdu,
+                   ((nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].numFailedErabs) *
+                    sizeof(SztProtIE_SingleCont_E_RABItemIEs)),
+                   (Ptr *)&ie->value.u.sztE_RABLst.member)) != ROK) {
+       NB_LOG_ERROR(&nbCb, "Failed to allocate memory. cmGetMem failed");
+       RETVALUE(RFAILED);
+     }
+     printf("numFailedErabs %d\n", nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].numFailedErabs);
+     for (idx = 0; idx < nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].numFailedErabs; idx++) {
+       SztE_RABItem *rabIE;
+       failedErabItem = &(ie->value.u.sztE_RABLst.member[failIdx++]);
+       nbFillTknU8(&(failedErabItem->pres), PRSNT_NODEF);
+       nbFillTknU32(&(failedErabItem->id), Sztid_E_RABItem);
+       nbFillTknU32(&(failedErabItem->criticality), SztCriticalityignoreEnum);
+       rabIE = &(failedErabItem->value.u.sztE_RABItem);
+       nbFillTknU8(&(rabIE->pres), PRSNT_NODEF);
+       nbFillTknU32(&(rabIE->e_RAB_ID), nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].failedErabs[idx]);
+       nbS1apFillCause(&(rabIE->cause), &nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].cause);
+     }
+     nbFillTknU16(&(ie->value.u.sztE_RABLst.noComp), nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].numFailedErabs);
+   }
+
    nbFillTknU16(&(initCtxtRsp->protocolIEs.noComp), crntIe);
    *s1apPdu = initCtxtRspPdu;
-
+   printf("ICS encoded\n");
+   nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].flag = FALSE;
    RETVALUE(ROK);
 }
 

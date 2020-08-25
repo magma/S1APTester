@@ -429,6 +429,17 @@ typedef struct _dropICSSndCtxtRelCfg
    U32 causeType;
    U32 causeVal;
 }DropICSSndCtxtRelCfg;
+
+typedef struct _InitCtxtSetupFailedErabs
+{
+#define MAX_FAILED_ERABS 11
+#define CAUSE_TRANSPORT_RESOURCE_UNAVAILABLE 0
+   Bool flag;
+   U32  numFailedErabs;
+   U8   failedErabs[MAX_FAILED_ERABS];
+   NbUeMsgCause cause;
+}InitCtxtSetupRspFailedErabs;
+
 typedef struct _EnbCb
 {
    CmHashListEnt nbHashEnt;
@@ -479,6 +490,7 @@ typedef struct _nbCb
    DelayInitCtxtSetupRspCfg  delayInitCtxtSetupRsp[NB_MAX_UE_SUPPORTED];
    DropICSSndCtxtRelCfg      dropICSSndCtxtRel[NB_MAX_UE_SUPPORTED];
    DelayUeCtxtRelCmpCfg      delayUeCtxtRelCmp[NB_MAX_UE_SUPPORTED];
+   InitCtxtSetupRspFailedErabs  initCtxtSetupFailedErabs[NB_MAX_UE_SUPPORTED];
 #ifdef MULTI_ENB_SUPPORT
    Bool                      x2HoDone;
 #endif
