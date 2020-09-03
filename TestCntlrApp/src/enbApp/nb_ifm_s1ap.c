@@ -381,7 +381,11 @@ SuId                         suId,
 SztStaInd                    *sztSta
 )
 {
-   RETVALUE(ROK);
+  // Inform TFW App if sctp association is down
+  if (sztSta->status == SZT_STATUS_ASSOC_DOWN) {
+    nbUiSendAssocDownIndToUser();
+  }
+  RETVALUE(ROK);
 } /* End of UzLiSztStaInd */
 
 

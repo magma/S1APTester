@@ -1137,6 +1137,7 @@ SztConReq *conReq;
 #endif /*  ERRCLASS & ERRCLS_ADD_RES  */
     }
     CMCHKPKLOG(SPkS16, suId, mBuf, ESZT035, pst);
+    printf("*** In cmPkSztConReq EVTSZTCONREQ\n");
     pst->event = (Event) EVTSZTCONREQ;
     RETVALUE(SPstTsk(pst,mBuf));
 } /*end of function cmPkSztConReq */
@@ -1779,6 +1780,7 @@ SztDatEvntReq *DatReq;
 #endif /*  ERRCLASS & ERRCLS_ADD_RES  */
     }
     CMCHKPKLOG(SPkS16, suId, mBuf, ESZT095, pst);
+    printf("****In cmPkSztDatReq\n");
     pst->event = (Event) EVTSZTDATREQ;
     RETVALUE(SPstTsk(pst,mBuf));
 } /*end of function cmPkSztDatReq */

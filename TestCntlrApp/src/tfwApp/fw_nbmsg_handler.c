@@ -492,7 +492,29 @@ PUBLIC S16 sendNbAppMmeConfigTrfToTstCntlr(FwNbMmeConfigTrnsf_t *rsp)
    FW_FREE_MEM(fwCb, msg, sizeof(FwNbMmeConfigTrnsf_t));
    FW_LOG_EXITFN(fwCb, ret);
 } /* sendNbAppMmeConfigTrfToTstCntlr */
- 
+
+/*
+ *       Fun: handleNwInitAssocDown
+ *
+ *
+ *       Desc: This function handles MME initiated
+ *             sctp shutdown/abort message
+ *
+ *       Ret:  ROK - ok; RFAILED - failed
+ *
+ *
+ *       File:  fw_nbmsg_handler.c
+ */
+PUBLIC Void handleNwInitAssocDown()
+{
+  FwCb *fwCb = NULLP;
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+  fwCb->nbState = NB_CONFIG_DONE;
+  FW_LOG_EXITFNVOID(fwCb);
+} /* handleNwInitAssocDown */
+
 /*
  *
  *       Fun: handleNbAppMsg
@@ -573,6 +595,11 @@ PUBLIC S16 handleNbAppMsg
          FW_LOG_DEBUG(fwCb, "Recieved NB_MME_CONFIG_TRF from EnodeB");
          sendNbAppMmeConfigTrfToTstCntlr(&nbRspMsg->t.mmeConfigTrnsf);
          break;        
+      case NB_NW_INITIATED_ASSOC_DOWN:
+         FW_LOG_DEBUG(fwCb, "Recieved NB_NW_INITIATED_ASSOC_DOWN from EnodeB");
+         handleNwInitAssocDown();
+         break;
+
       default:
          FW_LOG_ERROR(fwCb, "Recieved Invalid event from EnodeB");
          break;

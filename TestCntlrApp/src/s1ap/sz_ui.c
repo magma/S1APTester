@@ -818,7 +818,6 @@ SztConReq *conReq;     /*  connect sdus */
 
 #endif
 
-
    if ((ret = szNdbAllocConCb(&conCb, peer)) != ROK)
    {
       SZ_SEND_LCL_ERR_IND(PRSNT_NODEF, conReq->u.suConnId,
@@ -1415,7 +1414,6 @@ SztDatEvntReq *datEvnt;   /*  cn st sdus */
    TRC3(SzUiSztDatReq);
 
    conCb = NULLP;
-
 #ifdef SS_MULTIPLE_PROCS
    if(((SGetXxCb(pst->dstProcId,pst->dstEnt,pst->dstInst,(Void **)&szCbPtr))
                 !=ROK)||( szCbPtr == NULLP))
@@ -1471,6 +1469,7 @@ SztDatEvntReq *datEvnt;   /*  cn st sdus */
 
    if (ret != ROK)
    {
+      printf("szValidateSdus failed\n");
       /* Error Indication to the user */
       SZ_SEND_LCL_ERR_IND(PRSNT_NODEF, datEvnt->spConnId, 
                           uSapCb, SZT_CAUSE_UNEXP_MSG, 0);
@@ -1482,6 +1481,7 @@ SztDatEvntReq *datEvnt;   /*  cn st sdus */
    /* established */
    if ((ret = szNdbGetConCb(datEvnt->spConnId, &conCb)) != ROK)
    {
+      printf("szNdbGetConCb failed\n");
       /* Error Indication to the user */
       SZ_SEND_LCL_ERR_IND(PRSNT_NODEF, datEvnt->spConnId, uSapCb, 
                           SZT_CAUSE_INV_CONID, datEvnt->spConnId);

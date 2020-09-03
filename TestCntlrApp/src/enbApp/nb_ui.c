@@ -31,6 +31,7 @@
 #include "nb_traffic_handler.x"
 #include "nb_utils.h"
 
+EXTERN U8 uesLocalRel;
 EXTERN S16 NbUiNbuHdlUeIpInfoRsp(Pst*, NbuUeIpInfoRsp*);
 EXTERN S16 NbHandleInitialUeMsg(NbuInitialUeMsg*);
 EXTERN S16 NbHandleUeIpInfoRsp(NbuUeIpInfoRsp*);
@@ -952,3 +953,61 @@ PUBLIC S16 nbUiSendMmeConfigTrfToUser(NbMmeConfigTrnsf *mmeConfigTrnsf)
 
    RETVALUE(ROK);
 } /* nbUiSendMmeConfigTrfToUser */
+
+PUBLIC Void nbUiSendAssocDownIndToUser() {
+  NbtResponse *rsp = NULLP;
+  Pst pst;
+  NbUeCb *ueCb = NULLP, *prev = NULLP;
+  NbMmeCb *mmeCb = NULLP;
+
+  NB_LOG_ENTERFN(&nbCb);
+  mmeCb = &nbCb.mmeInfo;
+  if (mmeCb == NULLP) {
+    RETVOID;
+  }
+
+  NB_ALLOC(&rsp, sizeof(NbtResponse));
+  if (rsp == NULLP) {
+    NB_LOG_ERROR(&nbCb,"Failed to allocate memory for NbtResponse");
+    RETVOID;
+  }
+  rsp->msgType     = NB_NW_INITIATED_ASSOC_DOWN;
+  SM_SET_ZERO(&pst, sizeof(Pst));
+
+  pst.selector  = 0;
+  pst.srcEnt    = ENTNB;
+  pst.dstEnt    = ENTFW;
+  pst.srcProcId = 0;
+  pst.dstProcId = 0;
+  pst.region = smCfgCb.init.region;
+  pst.pool = smCfgCb.init.pool;
+  pst.srcInst = 0;
+
+  // Change the state in order to process new S1 SETUP REQ
+  smCfgCb.smState = NB_SM_STATE_AWAIT_S1_CON;
+  mmeCb->state = NB_MME_INITED;
+  if(ROK != cmPkNbtMsgRsp(&pst, rsp)) {
+    NB_LOG_ERROR(&nbCb,"Failed to send message to TFW App");
+  }
+  // flag to inform enbApp that it is local release
+  uesLocalRel = TRUE;
+
+  while (cmHashListGetNext(&(nbCb.ueCbLst), (PTR)prev, (PTR *)&ueCb) == ROK) {
+    NB_LOG_DEBUG(&nbCb, "Found ueCb->ueId=%d in HashList", ueCb->ueId);
+    /* Inform the UeApp about UE context release */
+    NB_LOG_DEBUG(&nbCb, "Inform UE to release context");
+    if (ROK != nbSendS1RelIndToUeApp(ueCb->ueId)) {
+      NB_LOG_ERROR(&nbCb, "Failed to send Release Indication to UeApp");
+    }
+
+    /* Trigger ueCb deletion in DAM */
+    NB_LOG_DEBUG(&nbCb, "Passing UE Delete Indication to DAM");
+    if (ROK != nbIfmDamUeDelReq(ueCb->ueId)) {
+      NB_LOG_ERROR(&nbCb, "Failed to send UE Delete Indication to DAM");
+    }
+    prev = NULLP;
+    /* Delete hash list entry for ueCb */
+    cmHashListDelete(&(nbCb.ueCbLst), (PTR)ueCb);
+  }
+} /* nbUiSendAssocDownIndToUser */
+
