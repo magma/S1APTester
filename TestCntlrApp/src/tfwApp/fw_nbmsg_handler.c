@@ -505,8 +505,7 @@ PUBLIC S16 sendNbAppMmeConfigTrfToTstCntlr(FwNbMmeConfigTrnsf_t *rsp)
  *
  *       File:  fw_nbmsg_handler.c
  */
-PUBLIC Void handleNwInitAssocDown()
-{
+PUBLIC Void handleNwInitAssocDown() {
   FwCb *fwCb = NULLP;
 
   FW_GET_CB(fwCb);
@@ -599,7 +598,6 @@ PUBLIC S16 handleNbAppMsg
          FW_LOG_DEBUG(fwCb, "Recieved NB_NW_INITIATED_ASSOC_DOWN from EnodeB");
          handleNwInitAssocDown();
          break;
-
       default:
          FW_LOG_ERROR(fwCb, "Recieved Invalid event from EnodeB");
          break;

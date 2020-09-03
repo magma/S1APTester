@@ -968,15 +968,15 @@ PUBLIC Void nbUiSendAssocDownIndToUser() {
 
   NB_ALLOC(&rsp, sizeof(NbtResponse));
   if (rsp == NULLP) {
-    NB_LOG_ERROR(&nbCb,"Failed to allocate memory for NbtResponse");
+    NB_LOG_ERROR(&nbCb, "Failed to allocate memory for NbtResponse");
     RETVOID;
   }
-  rsp->msgType     = NB_NW_INITIATED_ASSOC_DOWN;
+  rsp->msgType = NB_NW_INITIATED_ASSOC_DOWN;
   SM_SET_ZERO(&pst, sizeof(Pst));
 
-  pst.selector  = 0;
-  pst.srcEnt    = ENTNB;
-  pst.dstEnt    = ENTFW;
+  pst.selector = 0;
+  pst.srcEnt = ENTNB;
+  pst.dstEnt = ENTFW;
   pst.srcProcId = 0;
   pst.dstProcId = 0;
   pst.region = smCfgCb.init.region;
@@ -986,8 +986,8 @@ PUBLIC Void nbUiSendAssocDownIndToUser() {
   // Change the state in order to process new S1 SETUP REQ
   smCfgCb.smState = NB_SM_STATE_AWAIT_S1_CON;
   mmeCb->state = NB_MME_INITED;
-  if(ROK != cmPkNbtMsgRsp(&pst, rsp)) {
-    NB_LOG_ERROR(&nbCb,"Failed to send message to TFW App");
+  if (ROK != cmPkNbtMsgRsp(&pst, rsp)) {
+    NB_LOG_ERROR(&nbCb, "Failed to send message to TFW App");
   }
   // flag to inform enbApp that it is local release
   uesLocalRel = TRUE;
