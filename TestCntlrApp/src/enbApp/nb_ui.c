@@ -954,6 +954,7 @@ PUBLIC S16 nbUiSendMmeConfigTrfToUser(NbMmeConfigTrnsf *mmeConfigTrnsf)
    RETVALUE(ROK);
 } /* nbUiSendMmeConfigTrfToUser */
 
+// Post a message to tfw app
 PUBLIC Void nbUiSendAssocDownIndToUser() {
   NbtResponse *rsp = NULLP;
   Pst pst;
@@ -988,14 +989,13 @@ PUBLIC Void nbUiSendAssocDownIndToUser() {
   mmeCb->state = NB_MME_INITED;
   if (ROK != cmPkNbtMsgRsp(&pst, rsp)) {
     NB_LOG_ERROR(&nbCb, "Failed to send message to TFW App");
+    RETVOID;
   }
   // flag to inform enbApp that it is local release
   uesLocalRel = TRUE;
 
   while (cmHashListGetNext(&(nbCb.ueCbLst), (PTR)prev, (PTR *)&ueCb) == ROK) {
-    NB_LOG_DEBUG(&nbCb, "Found ueCb->ueId=%d in HashList", ueCb->ueId);
     /* Inform the UeApp about UE context release */
-    NB_LOG_DEBUG(&nbCb, "Inform UE to release context");
     if (ROK != nbSendS1RelIndToUeApp(ueCb->ueId)) {
       NB_LOG_ERROR(&nbCb, "Failed to send Release Indication to UeApp");
     }

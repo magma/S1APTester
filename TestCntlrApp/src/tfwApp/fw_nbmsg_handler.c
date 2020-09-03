@@ -500,10 +500,10 @@ PUBLIC S16 sendNbAppMmeConfigTrfToTstCntlr(FwNbMmeConfigTrnsf_t *rsp)
  *       Desc: This function handles MME initiated
  *             sctp shutdown/abort message
  *
- *       Ret:  ROK - ok; RFAILED - failed
+ *       Ret:  Void
  *
  *
- *       File:  fw_nbmsg_handler.c
+ *       File: fw_nbmsg_handler.c
  */
 PUBLIC Void handleNwInitAssocDown() {
   FwCb *fwCb = NULLP;
@@ -593,7 +593,7 @@ PUBLIC S16 handleNbAppMsg
       case NB_MME_CONFIG_TRANSFER:
          FW_LOG_DEBUG(fwCb, "Recieved NB_MME_CONFIG_TRF from EnodeB");
          sendNbAppMmeConfigTrfToTstCntlr(&nbRspMsg->t.mmeConfigTrnsf);
-         break;        
+         break;
       case NB_NW_INITIATED_ASSOC_DOWN:
          FW_LOG_DEBUG(fwCb, "Recieved NB_NW_INITIATED_ASSOC_DOWN from EnodeB");
          handleNwInitAssocDown();
