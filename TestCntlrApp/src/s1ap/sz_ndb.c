@@ -250,6 +250,7 @@ SzConCb    **connectionCb;
       "szNdbGetConCb(conId = %ld)\n", conId));
 #endif
 #endif
+
    found = cmHashListFind(&szCb.lclConCp, (U8 *)&conId, 
                     sizeof (SzConRefNo), 0, (PTR *)connectionCb);
 
