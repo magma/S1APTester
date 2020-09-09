@@ -4009,6 +4009,13 @@ PRIVATE S16 ueProcUeDetachRequest
       UE_LOG_ERROR(ueAppCb, "Sending Detach Request message failed");
       UE_LOG_EXITFN(ueAppCb, ret);
    }
+   /* Free all the DRBs allocated for this ueId */
+   UE_LOG_DEBUG(ueAppCb, "Freeing all the DRBs allocated for ueId: %d", ueId);
+   for (U8 idx = 0; idx < UE_APP_MAX_DRBS; idx++) {
+     cmMemset((U8 *)&(ueCb->ueRabCb[idx]), 0, sizeof(ueCb->ueRabCb[idx]));
+     ueCb->drbs[idx] = UE_APP_DRB_AVAILABLE;
+     ueCb->numRabs--;
+   }
 
    UE_LOG_EXITFN(ueAppCb, ret);
 } /* ueProcUeDetachRequest */
@@ -7863,9 +7870,10 @@ PUBLIC S16 ueUiProcErabsRelInfoMsg(Pst *pst, NbuErabsRelInfo *pNbuErabsRelInfo)
 
    UE_LOG_EXITFN(ueAppCb, ret);
 }
+
 PUBLIC S16 ueUiProcErabsInfoMsg(Pst *pst, NbuErabsInfo *pNbuErabsInfo)
 {
-   int i = 0;
+   int idx = 0;
    S16 ret = ROK;
    U32 ueId;
    UeAppCb *ueAppCb = NULLP;
@@ -7895,60 +7903,61 @@ PUBLIC S16 ueUiProcErabsInfoMsg(Pst *pst, NbuErabsInfo *pNbuErabsInfo)
      ret = ueSendUeRadCapInd(ueCb);
    }
    if (pNbuErabsInfo->erabInfo) {
-     for (i = 0; i < pNbuErabsInfo->erabInfo->numOfErab; i++) {
-       nasPdu = &pNbuErabsInfo->erabInfo->rabCbs[i].nasPdu;
-       /* Decoding the PDU */
-       ret = ueAppEdmDecode(nasPdu, &ueEvnt);
-       if (ret != ROK) {
-         UE_LOG_ERROR(ueAppCb, "NAS pdu decoding failed");
-         ret = RFAILED;
-         RETVALUE(ret);
-       }
-       if (ueEvnt == NULLP) {
-         UE_LOG_ERROR(ueAppCb, "ueEvnt is NULL");
-         RETVALUE(RFAILED);
-       }
-       if ((CM_NAS_SEC_HDR_TYPE_INT_PRTD_ENC == ueEvnt->secHT) ||
-           (CM_NAS_SEC_HDR_TYPE_INT_PRTD_ENC_NEW_SEC_CTXT == ueEvnt->secHT)) {
-         srcMsg.val = nasPdu->val;
-         srcMsg.len = nasPdu->len;
-         ret = ueAppVldDwnlnkSec(&ueCb->secCtxt, &srcMsg, &dstMsg);
-         if (ROK != ret) {
-           UE_LOG_ERROR(ueAppCb, "Uplink security validation failed \n");
-           /*Ignore the event*/
-           ueEvnt->pdu = NULLP;
-           CM_FREE_NASEVNT(&ueEvnt);
-           RETVALUE(RFAILED);
-         }
-
-         cmMemcpy((U8 *)&nasMsg, (CONSTANT U8 *)nasPdu,
-                  sizeof(NhuDedicatedInfoNAS));
-         nasMsg.val = dstMsg.val;
-         nasMsg.len = dstMsg.len;
-         ret = ueAppEdmDecode(&nasMsg, &ueEvnt);
-         if (ROK != ret) {
-           UE_LOG_ERROR(ueAppCb, "Uplink NAS message decode failed\n");
-           RETVALUE(ret); /* Should we send Failure back to eNB */
+     for (idx = 0; idx < pNbuErabsInfo->erabInfo->numOfErab; idx++) {
+       nasPdu = &pNbuErabsInfo->erabInfo->rabCbs[idx].nasPdu;
+       if (nasPdu->val) {
+         /* Decoding the PDU */
+         ret = ueAppEdmDecode(nasPdu, &ueEvnt);
+         if (ret != ROK) {
+           UE_LOG_ERROR(ueAppCb, "NAS pdu decoding failed");
+           RETVALUE(ret);
          }
          if (ueEvnt == NULLP) {
            UE_LOG_ERROR(ueAppCb, "ueEvnt is NULL");
            RETVALUE(RFAILED);
          }
-       }
+         if ((CM_NAS_SEC_HDR_TYPE_INT_PRTD_ENC == ueEvnt->secHT) ||
+             (CM_NAS_SEC_HDR_TYPE_INT_PRTD_ENC_NEW_SEC_CTXT == ueEvnt->secHT)) {
+           srcMsg.val = nasPdu->val;
+           srcMsg.len = nasPdu->len;
+           ret = ueAppVldDwnlnkSec(&ueCb->secCtxt, &srcMsg, &dstMsg);
+           if (ROK != ret) {
+             UE_LOG_ERROR(ueAppCb, "Uplink security validation failed \n");
+             /*Ignore the event*/
+             ueEvnt->pdu = NULLP;
+             CM_FREE_NASEVNT(&ueEvnt);
+             RETVALUE(RFAILED);
+           }
 
-       /* Handle the incoming events */
-       if (ueEvnt->protDisc == CM_EMM_PD) {
-         ret = ueAppEmmHdlIncUeEvnt(ueEvnt, ueCb);
-       } else if (ueEvnt->protDisc == CM_ESM_PD) {
-         ret = ueAppEsmHdlIncUeEvnt(ueEvnt, ueCb, FALSE);
-       }
-       if (ret != ROK) {
-         UE_LOG_ERROR(ueAppCb, "Handling Initial UE Event failed");
-         ret = RFAILED;
-       }
+           cmMemcpy((U8 *)&nasMsg, (CONSTANT U8 *)nasPdu,
+                    sizeof(NhuDedicatedInfoNAS));
+           nasMsg.val = dstMsg.val;
+           nasMsg.len = dstMsg.len;
+           ret = ueAppEdmDecode(&nasMsg, &ueEvnt);
+           if (ROK != ret) {
+             UE_LOG_ERROR(ueAppCb, "Uplink NAS message decode failed\n");
+             RETVALUE(ret); /* Should we send Failure back to eNB */
+           }
+           if (ueEvnt == NULLP) {
+             UE_LOG_ERROR(ueAppCb, "ueEvnt is NULL");
+             RETVALUE(RFAILED);
+           }
+         }
 
-       ueFree((U8 *)nasPdu->val, nasPdu->len * sizeof(U8));
-       CM_FREE_NASEVNT(&ueEvnt);
+         /* Handle the incoming events */
+         if (ueEvnt->protDisc == CM_EMM_PD) {
+           ret = ueAppEmmHdlIncUeEvnt(ueEvnt, ueCb);
+         } else if (ueEvnt->protDisc == CM_ESM_PD) {
+           ret = ueAppEsmHdlIncUeEvnt(ueEvnt, ueCb, FALSE);
+         }
+         if (ret != ROK) {
+           UE_LOG_ERROR(ueAppCb, "Handling Initial UE Event failed");
+           ret = RFAILED;
+         }
+
+         ueFree((U8 *)nasPdu->val, nasPdu->len * sizeof(U8));
+         CM_FREE_NASEVNT(&ueEvnt);
+       }
      }
    }
    if (pNbuErabsInfo->failedErabList &&

@@ -376,8 +376,6 @@ PUBLIC S16 nbSendErabsInfo(NbUeCb *ueCb, NbErabLst *erabInfo,
   U8 idx = 0;
   S16 ret = ROK;
   NbuErabsInfo *msg = NULLP;
-  U8 nasPduPres = FALSE;
-  U8 sendErabFailedNotification = FALSE;
 
   NB_ALLOC(&msg, sizeof(NbuErabsInfo));
   msg->ueId = ueCb->ueId;
@@ -392,7 +390,6 @@ PUBLIC S16 nbSendErabsInfo(NbUeCb *ueCb, NbErabLst *erabInfo,
   for (idx = 0; idx < erabInfo->noOfComp; idx++) {
     msg->erabInfo->rabCbs[idx].erabId = erabInfo->erabs[idx].erabId;
     if (erabInfo->erabs[idx].nasPdu) {
-      nasPduPres = TRUE;
       NB_ALLOC(&msg->erabInfo->rabCbs[idx].nasPdu.val,
                ((erabInfo->erabs[idx].nasPdu->len + 1) * sizeof(U8)));
       msg->erabInfo->rabCbs[idx].nasPdu.pres = TRUE;
@@ -405,7 +402,6 @@ PUBLIC S16 nbSendErabsInfo(NbUeCb *ueCb, NbErabLst *erabInfo,
   /* set the datrcvd flag for ue */
   nbDamSetDatFlag(ueCb->ueId);
   if (failedErabInfo && (failedErabInfo->noOfComp > 0)) {
-    sendErabFailedNotification = TRUE;
     NB_ALLOC(&msg->failedErabList, sizeof(NbuFailedErabLst));
     msg->failedErabList->noOfFailedErabs = failedErabInfo->noOfComp;
     NB_ALLOC(&msg->failedErabList->failedErabs,
@@ -425,7 +421,8 @@ PUBLIC S16 nbSendErabsInfo(NbUeCb *ueCb, NbErabLst *erabInfo,
     }
   }
   /* Send the Erab Info Indication to UEAPP */
-  if (nasPduPres || sendErabFailedNotification) {
+  if ((erabInfo->noOfComp > 0) ||
+      (failedErabInfo && (failedErabInfo->noOfComp > 0))) {
     ret = cmPkNbuErabsInfo(&nbCb.ueAppPst, msg);
     if (ret != ROK) {
       printf("Failed to send Initial Context Setup Indication to UeApp\n");
