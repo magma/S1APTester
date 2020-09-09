@@ -310,7 +310,7 @@ typedef struct _ueAppCb
    CmHashListCp     ueLstCp; /*!< Hashlist of UeCb */
 #else
    UeCb             *ueCbLst[UE_APP_MAX_NUM_OF_UES];
-   U32               numOfUesInLst;
+   U32              numOfUesInLst;
 #endif
 }UeAppCb;
 

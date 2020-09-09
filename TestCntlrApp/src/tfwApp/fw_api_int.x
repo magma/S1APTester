@@ -973,7 +973,7 @@ typedef struct _fwCriticalityDiag
 typedef struct fwNbErrIndMsg
 {
    U8   isUeAssoc;
-   U32   ue_Id;
+   U32  ue_Id;
    ErrCause cause;
    FwCriticalityDiag criticalityDiag;
 }fwNbErrIndMsg_t;
@@ -1179,7 +1179,7 @@ typedef struct _ueEsmTft
 
 typedef struct ueBearerAllocReq
 {
-   U32              ue_Id;
+   U32             ue_Id;
    U8              bearerId;
    U8              lnkEpsBearerId;
    ue_Esm_Eps_Qos  qos;
@@ -1242,7 +1242,7 @@ typedef struct ueActDedBearCtxtAcc
 
 typedef struct ueActDedBearCtxtRej
 {
-   U32                   ue_Id;
+   U32                  ue_Id;
    U8                   bearerId;
    U8                   esmCause;
 }UeActDedBearCtxtRej_t;

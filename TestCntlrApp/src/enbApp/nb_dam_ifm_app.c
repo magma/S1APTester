@@ -325,7 +325,7 @@ PUBLIC S16 nbIfmDamNbTnlDelCfm
  */
 PUBLIC Void nbIfmDamNbCtxtRel
 (
-U32                     ueId,
+U32                    ueId,
 U8                     causeVal,
 U8                     CauseType
 )

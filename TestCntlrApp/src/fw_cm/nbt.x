@@ -274,7 +274,7 @@ typedef struct _nbCriticalityDiag
 typedef struct _nbErrIndMsg
 {
    U8          isUeAssoc;
-   U32          ue_Id;
+   U32         ue_Id;
    U8          causePres;
    FailCause   cause;
    NbCriticalityDiag criticalityDiag;

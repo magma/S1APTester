@@ -265,7 +265,7 @@ PUBLIC S16 UeLiNbuUeInactvInd
 )
 {
    S16   ret = RFAILED;
-   U32    ueId = 0;
+   U32   ueId = 0;
    UeAppCb *ueAppCb = NULLP;
    UeCb *ueCb = NULLP;
 
@@ -389,7 +389,7 @@ PUBLIC S16 UeLiNbuUeIpInfoReq
 )
 {
    S16   ret = RFAILED;
-   U32    ueId;
+   U32   ueId;
    UeAppCb *ueAppCb=NULLP;
    UeCb *ueCb = NULLP;
    U8 bearerId = 0;
@@ -444,7 +444,7 @@ PUBLIC S16 UeLiNbuNotifyPlmnInfo
 )
 {
    S16   ret = RFAILED;
-   U32    ueId;
+   U32   ueId;
    UeAppCb *ueAppCb=NULLP;
    UeCb *ueCb = NULLP;
    U8 plmn_idx;

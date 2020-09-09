@@ -217,7 +217,7 @@ PUBLIC Void nbDamTnlMgmtCfm
 )
 {
    NbDamTnlCb                *tnlCb = NULLP;
-   U32                        ueId;
+   U32                       ueId;
    U8                        rbId;
    NbDamUeCb                 *ueCb;
    NbDamDrbCb                *drbCb;

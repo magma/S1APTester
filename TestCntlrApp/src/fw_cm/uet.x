@@ -114,7 +114,7 @@ typedef struct _ueUetErrInd
 {
    U32            msgType;
    U32            errCode;
-   U32            ueId[UE_IMSI_LENGTH]; 
+   U32            ueId[UE_IMSI_LENGTH];
 }UeUetErrInd;
 
 typedef struct _ueUetAppCfReq
@@ -718,7 +718,7 @@ typedef struct ueEsmTft
 }UeEsmTft;
 typedef struct _ueUetBearerAllocReq
 {
-   U32                  ueId;
+   U32                 ueId;
    U8                  bearerId;
    U8                  lnkEpsBearerId;
    UeEsmEpsQos         epsQos;

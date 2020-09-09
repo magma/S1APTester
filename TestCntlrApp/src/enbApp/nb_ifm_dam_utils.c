@@ -674,7 +674,7 @@ Buffer *mBuf;
 * Function:cmPkUeDelReq 
 * 
 * @param[in]   Pst *  pst
-* @param[in]   U32 ueId 
+* @param[in]   U32 ueId
 * @return   S16
 *  -# ROK
 **/
@@ -866,7 +866,7 @@ Buffer *mBuf;
 * Function: cmPkDamSendCtxtRel 
 *
 * @param[in] Pst      *pst
-* @param[in] U32       ueId 
+* @param[in] U32      ueId
 * @param[in] U8       causeVal
 * @param[in] U8       causeTyp 
 * @return   S16

@@ -508,7 +508,7 @@ EgtUEvnt                     *eguMsg
 
    TRC2(NbIfmEgtpEguErrInd);
 #if 0
-   U32  ueIdx;
+   U32 ueIdx;
    U8  tnlType;
    U32 lclTeid;
    lclTeid = eguMsg->u.errInd.localTeid;

@@ -191,7 +191,7 @@ typedef struct _ueEmmSecModeCmd
 /* Security Mode Complete message structure */
 typedef struct _ueEmmSecModeCmp
 {
-  U32 ueId; 
+  U32 ueId;
   /* TODO */
 }UeEmmSecModeCmp;
 
