@@ -882,8 +882,9 @@ PRIVATE S16 nbBldResetReq
             resetIe->value.u.sztUE_assocLogS1_ConItem.mME_UE_S1AP_ID.pres =
 	           NOTPRSNT;
 	 }
-         nbFillTknU32(&(resetIe->value.u.sztUE_assocLogS1_ConItem.\
-                  eNB_UE_S1AP_ID), resetMsgInfo->enbUeS1apIdLst[cnt] && 0xFF);
+         nbFillTknU32(
+             &(resetIe->value.u.sztUE_assocLogS1_ConItem.eNB_UE_S1AP_ID),
+             resetMsgInfo->enbUeS1apIdLst[cnt] & 0xFF);
 
          resetIe->value.u.sztUE_assocLogS1_ConItem.iE_Extns.\
             noComp.pres = NOTPRSNT;
@@ -1296,8 +1297,7 @@ PUBLIC S16 nbProcPagingMsg
  *       RFAILED : not able to process the ERAB Release Cmd message due to
  *       memory lack.
  */
-PUBLIC S16 nbProcErabRelCmd(S1apPdu *s1apErabRlsCmd) 
-{
+PUBLIC S16 nbProcErabRelCmd(S1apPdu *s1apErabRlsCmd) {
   S16 retVal = ROK;
   U16 numComp = 0;
   U16 cnt = 0;
