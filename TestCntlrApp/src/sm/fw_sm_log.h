@@ -54,7 +54,7 @@ do {\
    if(((_smCb).init.dbgMask >= LSM_LOGLVL_TRACE))\
    {\
       logLevN(LSM_LOGLVL_TRACE, FW_SM_MODULE_NAME, __FILE__,__LINE__,\
-            "Entering %s()", __FUNCTION__);\
+            "Entering %s()", __func__);\
    }\
 } while(0)
 
@@ -64,7 +64,7 @@ do {\
    if(((_smCb).init.dbgMask >= LSM_LOGLVL_TRACE))\
    {\
       logLevN(LSM_LOGLVL_TRACE, FW_SM_MODULE_NAME, __FILE__,__LINE__,\
-            "Exiting %s(), [Return %d]", __FUNCTION__, _ret);\
+            "Exiting %s(), [Return %d]", __func__, _ret);\
    }\
    return _ret;\
 } while(0)
@@ -75,7 +75,7 @@ do {\
    if((_smCb).init.dbgMask >= LSM_LOGLVL_TRACE)\
    {\
       logLevN(LSM_LOGLVL_TRACE, FW_SM_MODULE_NAME, __FILE__,__LINE__,\
-            "Exiting %s()", __FUNCTION__);\
+            "Exiting %s()", __func__);\
    }\
    return;\
 } while(0)

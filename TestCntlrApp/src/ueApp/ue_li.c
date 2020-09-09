@@ -8,19 +8,19 @@
 
 /**********************************************************************
 
- 
-    Name:  LTE S1SIM - UE Application Module 
- 
+
+    Name:  LTE S1SIM - UE Application Module
+
     Type:  C ource file
- 
+
     Desc:  C source code for APIs towards lower interface.
- 
+
     File:  ue_li.c
- 
-    Sid:   
- 
-    Prg:   
- 
+
+    Sid:
+
+    Prg:
+
 **********************************************************************/
 
 #include <stdbool.h>
@@ -237,7 +237,7 @@ PUBLIC S16 UeLiNbuPagingMsg
    {
       /* if the message is valid, then de-allocate the
        * memory to avoid memory leak
-       */      
+       */
       if(p_ueMsg)
       {
          if ((ret = ueFree((U8*)p_ueMsg, sizeof(UePagingMsg))) != ROK )
@@ -328,17 +328,6 @@ PUBLIC S16 UeLiNbuS1RelInd(Pst *pst,            /* Post structure */
     UE_LOG_ERROR(ueAppCb, "UeCb doesn't exist for ueId = %d", ueId);
     RETVALUE(ret);
   }
-
-  /* Free all the DRBs allocated for this ueId */
-  UE_LOG_DEBUG(ueAppCb, "Freeing all the DRBs allocated for ueId: %d", ueId);
-  for (U8 idx = 0; idx < UE_APP_MAX_DRBS; idx++) {
-    if (ueCb->drbs[idx] == UE_APP_DRB_INUSE) {
-      cmMemset((U8 *)&(ueCb->ueRabCb[idx]), 0, sizeof(ueCb->ueRabCb[idx]));
-      ueCb->drbs[idx] = UE_APP_DRB_AVAILABLE;
-      ueCb->numRabs--;
-    }
-  }
-
   /* change the ue state to idle */
   ueCb->ecmCb.state = UE_ECM_IDLE;
 
@@ -347,7 +336,7 @@ PUBLIC S16 UeLiNbuS1RelInd(Pst *pst,            /* Post structure */
 
 PUBLIC S16 ueSendInitialUeMsg(NbuInitialUeMsg *pInitialUeMsg, Pst *pst)
 {
-   S16 ret = ROK; 
+   S16 ret = ROK;
    UeAppCb *ueAppCb;
 
    UE_GET_CB(ueAppCb);
@@ -355,7 +344,7 @@ PUBLIC S16 ueSendInitialUeMsg(NbuInitialUeMsg *pInitialUeMsg, Pst *pst)
 
    UE_LOG_DEBUG(ueAppCb, "Sending Initial UE message to EnodeB APP");
 
-   ret = UeLiNbuInitialUeMsg(pst, pInitialUeMsg); 
+   ret = UeLiNbuInitialUeMsg(pst, pInitialUeMsg);
    if (ret != ROK)
    {
       UE_LOG_ERROR(ueAppCb, "Sending Dat Req to NB failed");
@@ -364,7 +353,7 @@ PUBLIC S16 ueSendInitialUeMsg(NbuInitialUeMsg *pInitialUeMsg, Pst *pst)
 }
 PUBLIC S16 ueSendErabRelInd(NbuErabRelIndList *pErabRel, Pst *pst)
 {
-   S16 ret = ROK; 
+   S16 ret = ROK;
    UeAppCb *ueAppCb;
 
    UE_GET_CB(ueAppCb);
@@ -372,7 +361,7 @@ PUBLIC S16 ueSendErabRelInd(NbuErabRelIndList *pErabRel, Pst *pst)
 
    UE_LOG_DEBUG(ueAppCb, "Sending Erab Release Indication to EnodeB APP");
 
-   ret = UeLiNbuErabRelInd(pst, pErabRel); 
+   ret = UeLiNbuErabRelInd(pst, pErabRel);
    if (ret != ROK)
    {
       UE_LOG_ERROR(ueAppCb, "Sending Dat Req to NB failed");
@@ -388,7 +377,7 @@ PUBLIC S16 ueSendUlNasMsgToNb(NbuUlNasMsg *pUlNasMsg, Pst *pst)
    UE_LOG_ENTERFN(ueAppCb);
 
    UE_LOG_DEBUG(ueAppCb, "Sending UE UL NAS message to EnodeB APP");
-   ret = UeLiNbuUlNasMsgDatRsp(pst, pUlNasMsg); 
+   ret = UeLiNbuUlNasMsgDatRsp(pst, pUlNasMsg);
 
    RETVALUE(ret);
 }
@@ -443,7 +432,7 @@ PUBLIC S16 ueSendUlRrcMsgToNb(NbuUlRrcMsg *pUlRrcMsg, Pst *pst)
    UE_LOG_ENTERFN(ueAppCb);
 
    UE_LOG_DEBUG(ueAppCb, "Sending UE UL RRC message to EnodeB APP");
-   ret = UeLiNbuUlRrcMsgDatRsp(pst, pUlRrcMsg); 
+   ret = UeLiNbuUlRrcMsgDatRsp(pst, pUlRrcMsg);
 
    RETVALUE(ret);
 }
