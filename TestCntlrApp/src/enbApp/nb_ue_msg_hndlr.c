@@ -325,16 +325,15 @@ PRIVATE S16 nbS1apBldInitUePdu
    RETVALUE(ROK);
 }
 
-PUBLIC S16 nbSendErabsRelInfo
-(
- NbErabRelLst *erabInfo
+PUBLIC S16 nbSendErabsRelInfo(
+ NbErabRelLst *erabInfo, U8 ueId
 )
 {
    U8 idx  = 0;
    S16 ret = ROK;
    NbuErabsRelInfo *msg = NULLP;
    NB_ALLOC(&msg, sizeof(NbuErabsRelInfo));
-   msg->ueId = erabInfo->enbUeS1apId;
+   msg->ueId = ueId;
    /* pack and send to ue */
    NB_ALLOC(&msg->erabInfo, sizeof(NbuErabRelLst));
    msg->erabInfo->numOfErab = erabInfo->numOfErabIds;

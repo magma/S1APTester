@@ -711,7 +711,7 @@ EXTERN S16 nbBuildAndSendResetRequest(NbResetMsgInfo *resetMsgInfo);
 EXTERN S16 nbBuildAndSendErabRelInd(U32 enbUeS1apId, U32 mmeUeS1apId,
       U8 numOfErabIds, U8 *erabIdLst);
 
-EXTERN S16 nbBuildAndSendErabRelRsp(U32 enbUeS1apId, U32 mmeUeS1apId,
+EXTERN S16 nbBuildAndSendErabRelRsp(NbUeCb *ueCb, U32 enbUeS1apId, U32 mmeUeS1apId,
       U8 numOfErabIdsRlsd, U8 *rlsdErabIdLst, U8 numOfErabIdsRlsFld,
       U8 *rlsFldErabLst);
 
@@ -811,7 +811,7 @@ EXTERN S16 nbPrcInitPdu(U32 peerId, S1apPdu *pdu);
 
 PUBLIC S16 nbProcPagingMsg(S1apPdu *s1apPagMsg);
 
-PUBLIC S16 nbProcErabRelCmd(S1apPdu *s1apErabRlsCmd);
+PUBLIC S16 nbProcErabRelCmd(S1apPdu *s1apErabRlsCmd, NbUeCb *ueCb);
 
 PUBLIC Bool nbIsTaiPresent(SztTAILst *taiLst);
 
@@ -822,7 +822,7 @@ PUBLIC S16 nbUpdateUePagInfo(S1apPdu *s1apPagMsg, NbPagingMsgInfo *uePagingInfo,
 
 PUBLIC S16 nbUiBuildAndSendNasNonDlvryIndToTfw( U8 ueId );
 
-EXTERN S16 nbSendErabsRelInfo(NbErabRelLst *erabInfo);
+EXTERN S16 nbSendErabsRelInfo(NbErabRelLst *erabInfo, U8 ueId);
 
 EXTERN  S16 nbNotifyPlmnInfo(U8 ueId, NbPlmnId plmnId);
 /* Broadcasted PLMN List */
