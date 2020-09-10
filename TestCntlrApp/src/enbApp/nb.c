@@ -1132,8 +1132,7 @@ PUBLIC S16 NbEnbDelayInitCtxtSetupRsp(NbDelayICSRsp *delayICSRsp)
  *
  * Function: NbEnbHandleInitCtxtSetupRspFailedErabs
  *
- *
- * @param[in]  NbInitCtxtSetupFailedErabs
+ * @param[in]  pointer to NbInitCtxtSetupFailedErabs
  * @return  S16
  *          -# Success : ROK
  */
@@ -1146,8 +1145,6 @@ PUBLIC S16 NbEnbHandleInitCtxtSetupRspFailedErabs(
     RETVALUE(RFAILED);
   }
 
-  nbCb.initCtxtSetupFailedErabs[(icsRspFailedErabs->ueId) - 1].flag =
-      icsRspFailedErabs->flag;
   nbCb.initCtxtSetupFailedErabs[(icsRspFailedErabs->ueId) - 1].numFailedErabs =
       icsRspFailedErabs->numFailedErabs;
   for (idx = 0; idx < icsRspFailedErabs->numFailedErabs; idx++) {

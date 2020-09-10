@@ -2239,7 +2239,7 @@ PUBLIC S16 tfwApi
         if (fwCb->nbState == ENB_IS_UP) {
           handleUeInitCtxtSetupRspFailedErabs((UeInitCtxtSetupFailedErabs *)msg);
         } else {
-          FW_LOG_ERROR(fwCb, "Initial context setup Fail:ENBAPP IS NOT UP");
+          FW_LOG_ERROR(fwCb, "ICS for failed erabs:ENBAPP IS NOT UP");
           ret = RFAILED;
         }
         break;
@@ -3016,7 +3016,7 @@ PRIVATE Void handleDropUeInitCtxtSetupReq(UeDropInitCtxtSetup* data)
  *
  *   Fun:   handleUeInitCtxtSetupRspFailedErabs
  *
- *   Desc:  This function is used to hsnle failed erabs
+ *   Desc:  This function is used to handle failed erabs
  *
  *   Ret:   None
  *
@@ -3042,9 +3042,8 @@ handleUeInitCtxtSetupRspFailedErabs(UeInitCtxtSetupFailedErabs *data) {
     RETVOID;
   }
 
-  msgReq->msgType = NB_DELAY_INIT_CTXT_SETUP_RSP_FAILED_ERABS;
+  msgReq->msgType = NB_INIT_CTXT_SETUP_RSP_FAILED_ERABS;
   msgReq->t.initCtxtSetupRspFailedErabs.ueId = data->ue_Id;
-  msgReq->t.initCtxtSetupRspFailedErabs.flag = data->flag;
   msgReq->t.initCtxtSetupRspFailedErabs.numFailedErabs = data->numFailedErabs;
   for (idx = 0; idx < data->numFailedErabs; idx++) {
     msgReq->t.initCtxtSetupRspFailedErabs.failedErabs[idx] =

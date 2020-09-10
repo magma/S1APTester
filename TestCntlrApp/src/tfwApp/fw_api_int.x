@@ -1327,7 +1327,6 @@ typedef struct ueDelayInitCtxtSetupRsp
 }UeDelayInitCtxtSetupRsp;
 typedef struct ueInitCtxtSetupFailedErabs {
   U8 ue_Id;
-  Bool flag;
   U8 numFailedErabs;
   U8 failedErabs[MAX_FAILED_ERABS];
 } UeInitCtxtSetupFailedErabs;

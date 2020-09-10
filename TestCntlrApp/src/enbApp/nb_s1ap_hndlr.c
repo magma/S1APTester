@@ -3308,9 +3308,10 @@ PRIVATE S16 nbBuildIntCtxtSetupRsp
 
    numComp = erabInfo->noOfComp;
 
-   numSuccErabs = numComp - (nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].numFailedErabs);
+   U8 numFailedErabs = nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].numFailedErabs;
+   numSuccErabs = numComp - numFailedErabs;
    NB_LOG_DEBUG(&nbCb, "numSuccErabs %d\n", numSuccErabs);
-   NB_LOG_DEBUG(&nbCb, "numFailedErabs %d\n", nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].numFailedErabs);
+   NB_LOG_DEBUG(&nbCb, "numFailedErabs %d\n", numFailedErabs);
 
    if (cmGetMem(initCtxtRspPdu,
             (numSuccErabs * sizeof(SztProtIE_SingleCont_E_RABSetupItemCtxtSUResIEs)),
@@ -3324,7 +3325,6 @@ PRIVATE S16 nbBuildIntCtxtSetupRsp
    /* fill the bearer details */
    U8 itr = 0;
    Bool found = FALSE;
-   U8 numFailedErabs = nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].numFailedErabs;
    for(idx = 0 ; idx < numComp; idx ++)
    {
       if (numFailedErabs > 0) {

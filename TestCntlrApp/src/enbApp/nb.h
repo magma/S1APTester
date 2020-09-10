@@ -433,7 +433,6 @@ typedef struct _dropICSSndCtxtRelCfg
 typedef struct _InitCtxtSetupFailedErabs {
 #define MAX_FAILED_ERABS 11
 #define CAUSE_TRANSPORT_RESOURCE_UNAVAILABLE 0
-  Bool flag;
   U32 numFailedErabs;
   U8 failedErabs[MAX_FAILED_ERABS];
   NbUeMsgCause cause;

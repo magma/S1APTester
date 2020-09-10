@@ -186,7 +186,7 @@ PUBLIC S16 NbUiNbtMsgReq
             break;
             
          }
-      case NB_DELAY_INIT_CTXT_SETUP_RSP_FAILED_ERABS: {
+      case NB_INIT_CTXT_SETUP_RSP_FAILED_ERABS: {
         if (ROK != NbEnbHandleInitCtxtSetupRspFailedErabs(
                        &req->t.initCtxtSetupRspFailedErabs)) {
           NB_LOG_ERROR(&nbCb,
