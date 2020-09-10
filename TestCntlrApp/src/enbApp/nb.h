@@ -430,15 +430,14 @@ typedef struct _dropICSSndCtxtRelCfg
    U32 causeVal;
 }DropICSSndCtxtRelCfg;
 
-typedef struct _InitCtxtSetupFailedErabs
-{
+typedef struct _InitCtxtSetupFailedErabs {
 #define MAX_FAILED_ERABS 11
 #define CAUSE_TRANSPORT_RESOURCE_UNAVAILABLE 0
-   Bool flag;
-   U32  numFailedErabs;
-   U8   failedErabs[MAX_FAILED_ERABS];
-   NbUeMsgCause cause;
-}InitCtxtSetupRspFailedErabs;
+  Bool flag;
+  U32 numFailedErabs;
+  U8 failedErabs[MAX_FAILED_ERABS];
+  NbUeMsgCause cause;
+} InitCtxtSetupRspFailedErabs;
 
 typedef struct _EnbCb
 {
@@ -711,9 +710,10 @@ EXTERN S16 nbBuildAndSendResetRequest(NbResetMsgInfo *resetMsgInfo);
 EXTERN S16 nbBuildAndSendErabRelInd(U32 enbUeS1apId, U32 mmeUeS1apId,
       U8 numOfErabIds, U8 *erabIdLst);
 
-EXTERN S16 nbBuildAndSendErabRelRsp(NbUeCb *ueCb, U32 enbUeS1apId, U32 mmeUeS1apId,
-      U8 numOfErabIdsRlsd, U8 *rlsdErabIdLst, U8 numOfErabIdsRlsFld,
-      U8 *rlsFldErabLst);
+EXTERN S16 nbBuildAndSendErabRelRsp(NbUeCb *ueCb, U32 enbUeS1apId,
+                                    U32 mmeUeS1apId, U8 numOfErabIdsRlsd,
+                                    U8 *rlsdErabIdLst, U8 numOfErabIdsRlsFld,
+                                    U8 *rlsFldErabLst);
 
 EXTERN S16 nbBuildAndSendS1AbortReq(NbMmeId mmeId, U8 cause);
 

@@ -260,53 +260,43 @@ PUBLIC S16 nbBuildAndSendErabRelInd
    RETVALUE(ROK);
 } /* nbBuildAndSendErabRelInd */
 
-PUBLIC S16 nbBuildAndSendErabRelRsp
-(
- NbUeCb *ueCb,
- U32 enbUeS1apId,
- U32 mmeUeS1apId,
- U8 numOfErabIdsRlsd,
- U8 *rlsdErabIdLst,
- U8 numOfErabIdsRlsFld,
- U8 *rlsFldErabLst
-)
-{
-   //SztUDatEvnt uDatEvnt;
-   SztDatEvntReq erabRelRsp = {0};
-   NbMmeCb *mmeCb = NULLP;
-   S1apPdu *erabRelPdu = NULLP;
+PUBLIC S16 nbBuildAndSendErabRelRsp(NbUeCb *ueCb, U32 enbUeS1apId,
+                                    U32 mmeUeS1apId, U8 numOfErabIdsRlsd,
+                                    U8 *rlsdErabIdLst, U8 numOfErabIdsRlsFld,
+                                    U8 *rlsFldErabLst) {
+  // SztUDatEvnt uDatEvnt;
+  SztDatEvntReq erabRelRsp = {0};
+  NbMmeCb *mmeCb = NULLP;
+  S1apPdu *erabRelPdu = NULLP;
 
-   NB_SET_ZERO(&erabRelRsp, sizeof(SztDatEvntReq));
+  NB_SET_ZERO(&erabRelRsp, sizeof(SztDatEvntReq));
 
-   mmeCb = &nbCb.mmeInfo;
-   if(mmeCb == NULLP)
-   {
-      RETVALUE(RFAILED);
-   }
+  mmeCb = &nbCb.mmeInfo;
+  if (mmeCb == NULLP) {
+    RETVALUE(RFAILED);
+  }
 
-   if (!ueCb) {
-     NB_LOG_ERROR(&nbCb, "UeCb is NULL ");
-     RETVALUE(RFAILED);
-   }
+  if (!ueCb) {
+    NB_LOG_ERROR(&nbCb, "UeCb is NULL ");
+    RETVALUE(RFAILED);
+  }
 
-   if(nbBldErabRelRsp(&(erabRelPdu), enbUeS1apId, mmeUeS1apId,
-            numOfErabIdsRlsd, rlsdErabIdLst, numOfErabIdsRlsFld,
-            rlsFldErabLst) != ROK)
-   {
-      RETVALUE(RFAILED);
-   }
+  if (nbBldErabRelRsp(&(erabRelPdu), enbUeS1apId, mmeUeS1apId, numOfErabIdsRlsd,
+                      rlsdErabIdLst, numOfErabIdsRlsFld,
+                      rlsFldErabLst) != ROK) {
+    RETVALUE(RFAILED);
+  }
 
-   NbS1ConCb                 *s1apCon = ueCb->s1ConCb;
-   erabRelRsp.spConnId = s1apCon->spConnId;
-   erabRelRsp.pdu      = erabRelPdu;
+  NbS1ConCb *s1apCon = ueCb->s1ConCb;
+  erabRelRsp.spConnId = s1apCon->spConnId;
+  erabRelRsp.pdu = erabRelPdu;
 
-   if ((NbIfmS1apDatReq(&erabRelRsp)) != ROK)
-   {
-      NB_LOG_ERROR(&nbCb, "Failed to send Erab Release Response ");
-      RETVALUE(RFAILED);
-   }
+  if ((NbIfmS1apDatReq(&erabRelRsp)) != ROK) {
+    NB_LOG_ERROR(&nbCb, "Failed to send Erab Release Response ");
+    RETVALUE(RFAILED);
+  }
 
-   RETVALUE(ROK);
+  RETVALUE(ROK);
 } /* nbBuildAndSendErabRelRsp */
 
 

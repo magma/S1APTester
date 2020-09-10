@@ -103,7 +103,8 @@ PRIVATE Void handleMultiEnbConfigReq(multiEnbConfigReq_t* data);
 PUBLIC Void handleX2HoTriggerReq(NbX2HOTriggerReq* data);
 PRIVATE Void handlPdnDisconnectReq(uepdnDisconnectReq_t *data);
 EXTERN Void fwHndlPdnDisconnTmrExp(PTR cb);
-PRIVATE Void handleUeInitCtxtSetupRspFailedErabs(UeInitCtxtSetupFailedErabs* data);
+PRIVATE Void
+handleUeInitCtxtSetupRspFailedErabs(UeInitCtxtSetupFailedErabs *data);
 PUBLIC FwCb gfwCb;
 
 /* Adding UEID, epsupdate type, active flag into linked list for
@@ -2233,21 +2234,16 @@ PUBLIC S16 tfwApi
          }
          break;
       }
-      case UE_SET_INIT_CTXT_SETUP_RSP_FAILED_ERABS:
-      {
-         FW_LOG_DEBUG(fwCb, "Received initial context setup for failed erabs");
-         if (fwCb->nbState == ENB_IS_UP)
-         {
-            handleUeInitCtxtSetupRspFailedErabs((UeInitCtxtSetupFailedErabs*)msg);
-         }
-         else
-         {
-            FW_LOG_ERROR(fwCb, "Initial context setup Fail:ENBAPP IS NOT UP");
-            ret = RFAILED;
-         }
-         break;
+      case UE_SET_INIT_CTXT_SETUP_RSP_FAILED_ERABS: {
+        FW_LOG_DEBUG(fwCb, "Received initial context setup for failed erabs");
+        if (fwCb->nbState == ENB_IS_UP) {
+          handleUeInitCtxtSetupRspFailedErabs((UeInitCtxtSetupFailedErabs *)msg);
+        } else {
+          FW_LOG_ERROR(fwCb, "Initial context setup Fail:ENBAPP IS NOT UP");
+          ret = RFAILED;
+        }
+        break;
       }
-
       case UE_SET_DELAY_UE_CTXT_REL_CMP:
       {
          FW_LOG_DEBUG(fwCb, "Process Delay CRC Request ");
@@ -3029,35 +3025,33 @@ PRIVATE Void handleDropUeInitCtxtSetupReq(UeDropInitCtxtSetup* data)
  *   File:  fw_api_int.c
  *
  */
-PRIVATE Void handleUeInitCtxtSetupRspFailedErabs(UeInitCtxtSetupFailedErabs* data)
-{
-   FwCb *fwCb = NULLP;
-   NbtRequest *msgReq = NULLP;
-   U8 idx = 0;
+PRIVATE Void
+handleUeInitCtxtSetupRspFailedErabs(UeInitCtxtSetupFailedErabs *data) {
+  FwCb *fwCb = NULLP;
+  NbtRequest *msgReq = NULLP;
+  U8 idx = 0;
 
-   FW_GET_CB(fwCb);
-   FW_LOG_ENTERFN(fwCb);
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
 
-   if(SGetSBuf(fwCb->init.region, fwCb->init.pool,
-       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK)
-   {
-      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
-   }
-   else
-   {
-      FW_LOG_ERROR(fwCb, "Failed to allocate memory");
-      RETVOID;
-   }
+  if (SGetSBuf(fwCb->init.region, fwCb->init.pool, (Data **)&msgReq,
+               (Size)sizeof(NbtRequest)) == ROK) {
+    cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
+  } else {
+    FW_LOG_ERROR(fwCb, "Failed to allocate memory");
+    RETVOID;
+  }
 
-   msgReq->msgType = NB_DELAY_INIT_CTXT_SETUP_RSP_FAILED_ERABS;
-   msgReq->t.initCtxtSetupRspFailedErabs.ueId = data->ue_Id;
-   msgReq->t.initCtxtSetupRspFailedErabs.flag = data->flag;
-   msgReq->t.initCtxtSetupRspFailedErabs.numFailedErabs = data->numFailedErabs;
-   for (idx = 0;idx < data->numFailedErabs; idx++) {
-     msgReq->t.initCtxtSetupRspFailedErabs.failedErabs[idx] = data->failedErabs[idx];
-   }
-   fwSendToNbApp(msgReq);
-   RETVOID;
+  msgReq->msgType = NB_DELAY_INIT_CTXT_SETUP_RSP_FAILED_ERABS;
+  msgReq->t.initCtxtSetupRspFailedErabs.ueId = data->ue_Id;
+  msgReq->t.initCtxtSetupRspFailedErabs.flag = data->flag;
+  msgReq->t.initCtxtSetupRspFailedErabs.numFailedErabs = data->numFailedErabs;
+  for (idx = 0; idx < data->numFailedErabs; idx++) {
+    msgReq->t.initCtxtSetupRspFailedErabs.failedErabs[idx] =
+        data->failedErabs[idx];
+  }
+  fwSendToNbApp(msgReq);
+  RETVOID;
 }
 
 /*

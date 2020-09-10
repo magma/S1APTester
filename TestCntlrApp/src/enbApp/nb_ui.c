@@ -45,7 +45,7 @@ EXTERN S16 NbEnbNasNonDel(NbNasNonDel *nasNonDel);
 EXTERN S16 NbEnbInitCtxtSetupFail(NbInitCtxtSetupFail*);
 EXTERN S16 NbEnbDropInitCtxtSetup(NbDropInitCtxtSetup*);
 EXTERN S16 NbEnbDelayInitCtxtSetupRsp(NbDelayICSRsp*);
-EXTERN S16 NbEnbHandleInitCtxtSetupRspFailedErabs(NbInitCtxtSetupFailedErabs*);
+EXTERN S16 NbEnbHandleInitCtxtSetupRspFailedErabs(NbInitCtxtSetupFailedErabs *);
 EXTERN S16 NbEnbUeCtxtRelForInitCtxtSetup(NbSendUeCtxtRelForICSRsp*);
 EXTERN S16 nbUiSendIntCtxtSetupDrpdIndToUser(U8 ueId);
 EXTERN S16 NbEnbDelayUeCtxtRelCmp(NbDelayUeCtxtRelCmp*);
@@ -186,16 +186,14 @@ PUBLIC S16 NbUiNbtMsgReq
             break;
             
          }
-
-      case NB_DELAY_INIT_CTXT_SETUP_RSP_FAILED_ERABS:
-         {
-            if(ROK != NbEnbHandleInitCtxtSetupRspFailedErabs(&req->t.initCtxtSetupRspFailedErabs)) {
-               NB_LOG_ERROR(&nbCb, "Failed to process NbEnbHandleInitCtxtSetupRspFailedErabs");
-            }
-            break;
-         }
-
-
+      case NB_DELAY_INIT_CTXT_SETUP_RSP_FAILED_ERABS: {
+        if (ROK != NbEnbHandleInitCtxtSetupRspFailedErabs(
+                       &req->t.initCtxtSetupRspFailedErabs)) {
+          NB_LOG_ERROR(&nbCb,
+                       "Failed to process NbEnbHandleInitCtxtSetupRspFailedErabs");
+        }
+        break;
+      }
       case NB_DELAY_UE_CTXT_REL_CMP:
          {
             if(ROK != NbEnbDelayUeCtxtRelCmp(&req->t.delayUeCtxtRelCmp))
