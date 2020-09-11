@@ -192,6 +192,13 @@ typedef struct _nbConfigCfm
  CfgFailCause cause;
 }NbConfigCfm;
 
+typedef struct _NbUeS1apIdPair
+{
+   U32 ueId;
+   U32 enbUeS1apId;
+   U32 mmeUeS1apId;
+} NbUeS1apIdPair;
+
 typedef struct _nbRelCause
 {
    U8 causeType;
@@ -217,8 +224,8 @@ typedef struct _nbCompleteReset
 
 typedef struct _mnPartialReset
 {
-   U16 numOfConn;
-   U32 *ueIdLst;
+   U32 numOfConn;
+   NbUeS1apIdPair *ueS1apIdPairList;
 }NbPartialReset;
 
 typedef struct _nbCause
