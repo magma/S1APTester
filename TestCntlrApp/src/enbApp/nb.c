@@ -821,42 +821,44 @@ PUBLIC S16 NbEnbUeRelReqHdl
    RETVALUE(nbSndCtxtRelReq(relReq->ueId,&cause));
 } /* NbEnbUeRelReqHdl */
 
-PRIVATE S16 getS1apInfoFrmUeId
-(
- U8 *ueIdLst,
- U16 numOfUes,
- NbResetMsgInfo *resetMsg
-)
-{
-   U16 cnt = 0;
-   U8 ueId = 0;
-   NbUeCb *ueCb = NULLP;
+PRIVATE S16 getS1apInfoFrmUeId(NbUeS1apIdPair *ueS1apIdPairList, U16 numOfUes,
+                               NbResetMsgInfo *resetMsg) {
+  U16 cnt = 0;
+  U8 ueId = 0;
+  NbUeCb *ueCb = NULLP;
 
-   NB_LOG_ENTERFN(&nbCb);
+  NB_LOG_ENTERFN(&nbCb);
 
-   if(ueIdLst == NULLP)
-   {
-      NB_LOG_ERROR(&nbCb, "UE Id List is empty");
-      NB_LOG_EXITFN(&nbCb, RFAILED);
-   }
+  if (ueS1apIdPairList == NULLP) {
+    NB_LOG_ERROR(&nbCb, "UE Id List is empty");
+    NB_LOG_EXITFN(&nbCb, RFAILED);
+  }
 
-   resetMsg->s1apIdCnt = numOfUes;
-   NB_ALLOC(&resetMsg->enbUeS1apIdLst, sizeof(U32) * numOfUes);
-   NB_ALLOC(&resetMsg->mmeUeS1apIdLst, sizeof(U32) * numOfUes);
+  resetMsg->s1apIdCnt = numOfUes;
+  NB_ALLOC(&resetMsg->enbUeS1apIdLst, sizeof(U32) * numOfUes);
+  NB_ALLOC(&resetMsg->mmeUeS1apIdLst, sizeof(U32) * numOfUes);
 
-   for(cnt = 0; cnt < numOfUes; cnt++)
-   {
-      ueId = ueIdLst[cnt];
-      if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueId),
-      sizeof(U8),0,(PTR *)&ueCb)))
-      {
-         NB_LOG_ERROR(&nbCb, "UeCb not found for UeId %d", ueIdLst[cnt]);
+  for (cnt = 0; cnt < numOfUes; cnt++) {
+    ueId = ueS1apIdPairList[cnt].ueId;
+    if (ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueId), sizeof(U8), 0,
+                               (PTR *)&ueCb))) {
+      NB_LOG_ERROR(&nbCb, "UeCb not found for UeId %d",
+                   ueS1apIdPairList[cnt].ueId);
+    } else {
+      if (ueS1apIdPairList[cnt].enbUeS1apId) {
+        resetMsg->enbUeS1apIdLst[cnt] = ueS1apIdPairList[cnt].enbUeS1apId;
+      } else {
+        resetMsg->enbUeS1apIdLst[cnt] = ueCb->s1ConCb->enb_ue_s1ap_id;
       }
-      resetMsg->enbUeS1apIdLst[cnt] = ueCb->s1ConCb->enb_ue_s1ap_id;
-      resetMsg->mmeUeS1apIdLst[cnt] = ueCb->s1ConCb->mme_ue_s1ap_id;
-   }
+      if (ueS1apIdPairList[cnt].mmeUeS1apId) {
+        resetMsg->mmeUeS1apIdLst[cnt] = ueS1apIdPairList[cnt].mmeUeS1apId;
+      } else {
+        resetMsg->mmeUeS1apIdLst[cnt] = ueCb->s1ConCb->mme_ue_s1ap_id;
+      }
+    }
+  }
 
-   RETVALUE(ROK);
+  RETVALUE(ROK);
 } /* getS1apInfoFrmUeId */
 
 PUBLIC S16 NbEnbResetReqHdl
@@ -882,27 +884,29 @@ PUBLIC S16 NbEnbResetReqHdl
    uesLocalRel = TRUE;
    if(resetMsgInfo.type == NB_PARTIAL_RESET)
    {
-      if(getS1apInfoFrmUeId(resetReq->u.partialRst.ueIdLst,
-            resetReq->u.partialRst.numOfConn, &resetMsgInfo) != ROK)
-      {
-         NB_LOG_ERROR(&nbCb, "Failed to fetch UE Info using UeId");
-         NB_FREE(resetReq->u.partialRst.ueIdLst, resetReq->u.partialRst.numOfConn);
-         RETVALUE(RFAILED);
-      }
+     if (getS1apInfoFrmUeId(resetReq->u.partialRst.ueS1apIdPairList,
+                            resetReq->u.partialRst.numOfConn,
+                            &resetMsgInfo) != ROK) {
+       NB_LOG_ERROR(&nbCb, "Failed to fetch UE Info using UeId");
+       NB_FREE(resetReq->u.partialRst.ueS1apIdPairList,
+               resetReq->u.partialRst.numOfConn);
+       RETVALUE(RFAILED);
+     }
       for(idx = 0 ; idx < resetReq->u.partialRst.numOfConn ; idx ++)
       {
-        if(ret != nbSendS1RelIndToUeApp(resetReq->u.partialRst.ueIdLst[idx]))
-        {
-         NB_LOG_ERROR(&nbCb, "Failed to send Release Indication to UeApp");
-         RETVALUE(RFAILED);
+        if (ret != nbSendS1RelIndToUeApp(
+                       resetReq->u.partialRst.ueS1apIdPairList[idx].ueId)) {
+          NB_LOG_ERROR(&nbCb, "Failed to send Release Indication to UeApp");
+          RETVALUE(RFAILED);
         }
-        if(ret != nbIfmDamUeDelReq(resetReq->u.partialRst.ueIdLst[idx]))
-        {
-         NB_LOG_ERROR(&nbCb, "Failed to send UE Delete Indication to DAM");
-         RETVALUE(RFAILED);
+        if (ret != nbIfmDamUeDelReq(
+                       resetReq->u.partialRst.ueS1apIdPairList[idx].ueId)) {
+          NB_LOG_ERROR(&nbCb, "Failed to send UE Delete Indication to DAM");
+          RETVALUE(RFAILED);
         }
       }
-      NB_FREE(resetReq->u.partialRst.ueIdLst, resetReq->u.partialRst.numOfConn);
+      NB_FREE(resetReq->u.partialRst.ueS1apIdPairList,
+              resetReq->u.partialRst.numOfConn);
    }
    else
    {

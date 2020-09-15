@@ -1416,6 +1416,13 @@ typedef struct ueRadCapUpd
    radio_Cpblty radioCap_pr;
 }ueRadCapUpd_t;
 
+typedef struct _UeS1apIdPair
+{
+   U8 ueId;
+   U32 enbUeS1apId;
+   U32 mmeUeS1apId;
+} UeS1apIdPair;
+
 typedef enum
 {
    COMPLETE_RESET = 0,
@@ -1431,7 +1438,7 @@ typedef struct _CompleteReset
 typedef struct _PartialReset
 {
    U16 numOfConn;
-   U8 *ueIdLst;
+   UeS1apIdPair *ueS1apIdPairList;
 }PartialReset;
 
 typedef struct _cause
