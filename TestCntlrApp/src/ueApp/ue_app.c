@@ -86,14 +86,14 @@ EXTERN S16 ueSendToTfwApp(UetMessage*, Pst*);
 EXTERN S16 ueSendInitialUeMsg(NbuInitialUeMsg*, Pst*);
 EXTERN S16 ueSendUlNasMsgToNb(NbuUlNasMsg*, Pst*);
 EXTERN S16 ueSendUlRrcMsgToNb(NbuUlRrcMsg*, Pst*);
-EXTERN S16 ueDbmFetchUe(U8, PTR*);
+EXTERN S16 ueDbmFetchUe(U32, PTR*);
 EXTERN S16 ueDbmAddUe(UeCb*);
 EXTERN S16 ueDbmDelAllUe(Void);
 EXTERN S16 ueDbmInit(Void);
 EXTERN S16 ueDbmDeInit(Void);
 EXTERN S16 ueAppBldAndSndIpAddrToNb(U8, U8*, U8, Pst*);
 EXTERN S16 ueDbmFetchUeWithS_TMSI(UePagingMsg*, PTR*);
-EXTERN S16 ueDbmDelUe(UeAppCb*, U8);
+EXTERN S16 ueDbmDelUe(UeAppCb*, U32);
 EXTERN S16 ueUiProcErabsInfoMsg(Pst*, NbuErabsInfo*);
 EXTERN S16 ueAppBldAndSndIpInfoRspToNb(UeCb*, U8, Pst*);
 PUBLIC S16 ueSendErabRelInd(NbuErabRelIndList*, Pst*);
@@ -660,7 +660,7 @@ PRIVATE S16 ueAppSndAuthResponse(UeCb *ueCb, UeSQN sqnRcvd,UeSQN maxSqnRcvd,UeRa
 PRIVATE S16 ueProcUeIdentResp(UetMessage *tfwMsg, Pst *pst)
 {
    S16 ret = ROK;
-   U16 ueId;
+   U32 ueId;
    UeAppCb *ueAppCb = NULLP;
    UeCb *ueCb = NULLP;
 
@@ -704,7 +704,7 @@ PRIVATE S16 ueProcUeIdentResp(UetMessage *tfwMsg, Pst *pst)
 PRIVATE S16 ueProcUeAuthResp(UetMessage *tfwMsg, Pst *pst)
 {
    S16 ret = ROK;
-   U16 ueId;
+   U32 ueId;
    UeSQN sqnRcvd    = {0};
    UeSQN maxSqnRcvd = {0};
    UeRand randRcvd  = {0};
@@ -816,7 +816,7 @@ PRIVATE S16 ueProcUeAuthResp(UetMessage *tfwMsg, Pst *pst)
  */
 PRIVATE S16 ueProcUeAuthFailure(UetMessage *tfwMsg, Pst *pst) {
   S16 ret = ROK;
-  U16 ueId;
+  U32 ueId;
 
   UeAppCb *ueAppCb = NULLP;
   UeCb *ueCb = NULLP;
@@ -1991,7 +1991,7 @@ PRIVATE S16 ueProcUeAttachReq(UetMessage *p_ueMsg, Pst *pst)
    UeEmmDrxPrm    *drxParm;
    Bool eti = FALSE;
    S16     ret = ROK;
-   U16     ueId;
+   U32     ueId;
    UeAppCb *ueAppCb = NULLP;
    UeCb    *ueCb = NULLP;
    NhuDedicatedInfoNAS nasEncPdu;
@@ -2139,7 +2139,7 @@ PRIVATE S16 ueProcUeTauRequest(UetMessage *p_ueMsg, Pst *pst)
 {
    U8 isPlainMsg = TRUE;
    S16     ret = ROK;
-   U16     ueId = 0;
+   U32     ueId = 0;
    UeAppCb *ueAppCb = NULLP;
    UeCb    *ueCb = NULLP;
    UeAppMsg srcMsg;
@@ -2256,7 +2256,7 @@ PRIVATE S16 ueProcUeTauComplete(UetMessage *p_ueMsg, Pst *pst)
 {
    U8 isPlainMsg = TRUE;
    S16 ret = ROK;
-   U16 ueId;
+   U32 ueId;
    UeAppCb *ueAppCb = NULLP;
    UeCb *ueCb = NULLP;
    UeAppMsg srcMsg;
@@ -3412,7 +3412,7 @@ PRIVATE S16 ueAppSndAttachComplete(UeCb *ueCb)
 PRIVATE S16 ueProcUeAttachComplete(UetMessage *p_ueMsg, Pst *pst)
 {
    S16 ret = ROK;
-   U8  ueId;
+   U32  ueId;
    UeAppCb *ueAppCb = NULLP;
    UeCb *ueCb = NULLP;
 
@@ -3449,7 +3449,7 @@ PRIVATE S16 ueProcUeAttachComplete(UetMessage *p_ueMsg, Pst *pst)
 PRIVATE S16 ueProcUeAttachCompleteWithActvDfltBerCtxtRej(UetMessage *p_ueMsg, Pst *pst)
 {
    S16 ret = ROK;
-   U8  ueId;
+   U32  ueId;
    UeAppCb *ueAppCb = NULLP;
    UeCb *ueCb = NULLP;
 
@@ -3488,7 +3488,7 @@ PRIVATE S16 ueProcUeAttachCompleteWithActvDfltBerCtxtRej(UetMessage *p_ueMsg, Ps
 PRIVATE S16 ueProcUeAttachFail(UetMessage *p_ueMsg, Pst *pst)
 {
    S16 ret = ROK;
-   U8  ueId;
+   U32  ueId;
    UeAppCb *ueAppCb = NULLP;
 
    UE_GET_CB(ueAppCb);
@@ -3527,7 +3527,7 @@ PRIVATE S16 ueProcUeAttachFail(UetMessage *p_ueMsg, Pst *pst)
 PRIVATE S16 ueProcUeSecModeRejectCmd(UetMessage *p_ueMsg, Pst *pst)
 {
    S16 ret = ROK;
-   U16 ueId;
+   U32 ueId;
    UeAppCb *ueAppCb = NULLP;
    UeCb *ueCb = NULLP;
    U8           cause;
@@ -3620,7 +3620,7 @@ PRIVATE S16 ueProcUeSecModeRejectCmd(UetMessage *p_ueMsg, Pst *pst)
 PRIVATE S16 ueProcUeSecModeCmdComplete(UetMessage *p_ueMsg, Pst *pst)
 {
    S16 ret = ROK;
-   U16 ueId;
+   U32 ueId;
    UeAppCb *ueAppCb = NULLP;
    UeCb *ueCb = NULLP;
    UeAppMsg     srcMsg;
@@ -3973,7 +3973,7 @@ PRIVATE S16 ueProcUeDetachRequest
 )
 {
    S16 ret = ROK;
-   U8  ueId;
+   U32  ueId;
    U8 detCause;
    UeAppCb *ueAppCb = NULLP;
    UeCb *ueCb = NULLP;
@@ -4244,7 +4244,7 @@ PRIVATE S16 ueProcUeTrigDetachAcc
 )
 {
    S16 ret = ROK;
-   U8  ueId;
+   U32  ueId;
    UeAppCb *ueAppCb = NULLP;
    UeCb *ueCb = NULLP;
 
@@ -4327,7 +4327,7 @@ PRIVATE S16 ueProcErabRelInd
    S16 ret = ROK;
    UeAppCb *ueAppCb = NULLP;
    UeCb *ueCb = NULLP;
-   U16 ueId;
+   U32 ueId;
 
    UE_GET_CB(ueAppCb);
    UE_LOG_ENTERFN(ueAppCb);
@@ -4637,7 +4637,7 @@ PRIVATE S16 ueProcUePdnConReq
 )
 {
    S16 ret = ROK;
-   U8  ueId = 0;
+   U32  ueId = 0;
    U8 isPlainMsg = TRUE;
    UeAppMsg srcMsg;
    UeAppMsg dstMsg;
@@ -5087,7 +5087,7 @@ PRIVATE S16 ueProcUeServiceRequest
 )
 {
    S16 ret = ROK;
-   U8  ueId = 0;
+   U32  ueId = 0;
    U32 mTmsi = 0;
    U8 rrcCause = 0;
    UeAppCb *ueAppCb = NULLP;
@@ -5176,7 +5176,7 @@ PRIVATE S16 ueProcUeRadCapUpdateReq
 )
 {
    S16 ret = ROK;
-   U8  ueId = 0;
+   U32  ueId = 0;
    UeAppCb *ueAppCb = NULLP;
    UeCb *ueCb = NULLP;
 
@@ -5315,7 +5315,7 @@ PRIVATE S16 ueAppSndEmmStatus(UeCb *ueCb, U8 cause)
 PRIVATE S16 ueProcUeEmmStatus(UetMessage *p_ueMsg, Pst *pst)
 {
    S16 ret = ROK;
-   U8  ueId;
+   U32  ueId;
    UeAppCb *ueAppCb = NULLP;
    UeCb *ueCb = NULLP;
 
@@ -7594,7 +7594,7 @@ PRIVATE S16 ueAppEmmHdlIncUeEvnt(CmNasEvnt *ueEvnt, UeCb *ueCb)
 PUBLIC S16 ueUiProcessNbMsg(NbuDlNasMsg *pNbDlMsg, Pst *pst)
 {
    S16 ret = ROK;
-   U8 ueId;
+   U32 ueId;
    UeAppCb *ueAppCb = NULLP;
    UeCb *ueCb = NULLP;
    UeAppMsg     srcMsg;
@@ -7781,7 +7781,7 @@ PUBLIC S16 ueUiProcErabsRelInfoMsg(Pst *pst, NbuErabsRelInfo *pNbuErabsRelInfo)
 {
    int i = 0;
    S16 ret = ROK;
-   U16 ueId;
+   U32 ueId;
    UeAppCb *ueAppCb = NULLP;
    UeAppMsg     srcMsg;
    UeAppMsg     dstMsg;
@@ -7875,7 +7875,7 @@ PUBLIC S16 ueUiProcErabsInfoMsg(Pst *pst, NbuErabsInfo *pNbuErabsInfo)
 {
    int idx = 0;
    S16 ret = ROK;
-   U16 ueId;
+   U32 ueId;
    UeAppCb *ueAppCb = NULLP;
    UeAppMsg     srcMsg;
    UeAppMsg     dstMsg;
@@ -7999,7 +7999,7 @@ PRIVATE S16 ueProcUeBearResAllocReq
 )
 {
    CmNasEvnt           *reqEvnt = NULLP;
-   U16 ueId;
+   U32 ueId;
    U8                   isPlainMsg   = TRUE;
    UeCb *ueCb = NULLP;
    S16 ret;
@@ -8111,7 +8111,7 @@ PRIVATE S16 ueProcUeDeActvBerAcc
  Pst *pst
 )
 {
-   U16 ueId;
+   U32 ueId;
    UeCb *ueCb = NULLP;
    S16 ret;
    UeAppCb *ueAppCb;
@@ -8154,7 +8154,7 @@ PRIVATE S16 ueProcUeActvDedBerAcc
  Pst *pst
 )
 {
-   U16 ueId;
+   U32 ueId;
    UeCb *ueCb = NULLP;
    S16 ret;
    UeAppCb *ueAppCb;
@@ -8199,7 +8199,7 @@ PRIVATE S16 ueProcUeActvDedBerRej
  Pst *pst
 )
 {
-   U16 ueId;
+   U32 ueId;
    U8  bearerId;
    U8 esmCause;
    UeCb *ueCb = NULLP;
@@ -9145,7 +9145,7 @@ PRIVATE S16 ueAppUtlBldEsmInformationRsp
 PRIVATE S16 ueProcUeEsmInformationRsp(UetMessage *p_ueMsg, Pst *pst)
 {
    S16 ret = ROK;
-   U8  ueId = 0;
+   U32  ueId = 0;
    U8 isPlainMsg = TRUE;
    UeAppMsg srcMsg;
    UeAppMsg dstMsg;
@@ -9310,7 +9310,7 @@ PRIVATE S16 ueAppUtlBldStandAlonePdnDisconnectReq
  */
 PRIVATE S16 ueProcUePdnDisconnectReq(UetMessage *p_ueMsg, Pst *pst) {
   S16 ret = ROK;
-  U8 ueId = 0;
+  U32 ueId = 0;
   U8 isPlainMsg = TRUE;
   UeAppMsg srcMsg;
   UeAppMsg dstMsg;

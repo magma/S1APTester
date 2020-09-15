@@ -94,14 +94,14 @@ EXTERN S16 ueUiProcessNbMsg(NbuDlNasMsg *, Pst *);
 PUBLIC S16 ueSendUlNasMsgToNb(NbuUlNasMsg *pUlNasMsg, Pst *pst);
 PUBLIC S16 ueSendUlRrcMsgToNb(NbuUlRrcMsg *pUlRrcMsg, Pst *pst);
 
-EXTERN S16 ueDbmFetchUe(U8 ueId, PTR *ueCb);
+EXTERN S16 ueDbmFetchUe(U32 ueId, PTR *ueCb);
 EXTERN S16 UeLiNbuInitialUeMsg(Pst *pst, NbuInitialUeMsg *msg);
 EXTERN S16 UeLiNbuUlNasMsgDatRsp(Pst *pst, NbuUlNasMsg *msg);
 EXTERN S16 UeLiNbuSendUeIpInfo(Pst *pst,NbuUeIpInfoRsp   *ueInfo);
 EXTERN S16 ueUiProcIpInfoReqMsg(UeCb * p_ueCb, U8 bearerId);
 EXTERN S16 ueAppBldAndSndIpInfoRspToNb(UeCb *ueCb,U8 bearerId, Pst *pst);
 EXTERN S16 UeLiNbuUeIpInfoReq(Pst *pst,NbuUeIpInfoReq  *p_ueMsg);
-EXTERN S16 ueSendUeIpInfoRsp(U8 ueId,U8 bearedId, S8 * ipAddr);
+EXTERN S16 ueSendUeIpInfoRsp(U32 ueId,U8 bearedId, S8 * ipAddr);
 EXTERN Void populateIpInfo(UeCb *ueCb, U8 bearerId, NbuUeIpInfoRsp *);
 
 EXTERN S16 UeLiNbuPagingMsg(Pst *pst, UePagingMsg  *p_ueMsg);
@@ -265,7 +265,7 @@ PUBLIC S16 UeLiNbuUeInactvInd
 )
 {
    S16   ret = RFAILED;
-   U8    ueId = 0;
+   U32   ueId = 0;
    UeAppCb *ueAppCb = NULLP;
    UeCb *ueCb = NULLP;
 
@@ -309,7 +309,7 @@ PUBLIC S16 UeLiNbuS1RelInd(Pst *pst,            /* Post structure */
                            NbuS1RelInd *p_ueMsg /* request message */
 ) {
   S16 ret = RFAILED;
-  U8 ueId = 0;
+  U32 ueId = 0;
   UeAppCb *ueAppCb = NULLP;
   UeCb *ueCb = NULLP;
 
@@ -389,7 +389,7 @@ PUBLIC S16 UeLiNbuUeIpInfoReq
 )
 {
    S16   ret = RFAILED;
-   U8    ueId;
+   U32   ueId;
    UeAppCb *ueAppCb=NULLP;
    UeCb *ueCb = NULLP;
    U8 bearerId = 0;
@@ -444,7 +444,7 @@ PUBLIC S16 UeLiNbuNotifyPlmnInfo
 )
 {
    S16   ret = RFAILED;
-   U8    ueId;
+   U32   ueId;
    UeAppCb *ueAppCb=NULLP;
    UeCb *ueCb = NULLP;
    U8 plmn_idx;

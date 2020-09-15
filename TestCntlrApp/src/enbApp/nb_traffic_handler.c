@@ -77,7 +77,7 @@ typedef struct nbAppDataRoutCb
 
 typedef struct _ueDataCb
 {
-   U8 ueId;
+   U32 ueId;
    NbAppDataRouteCb   *ipInfo[11];
    U8 noOfIpsAssigned;
 }UeDataCb;
@@ -769,14 +769,14 @@ PRIVATE S16 nbAppSendArpReqPkt
 
 PUBLIC S16 nbAppCfgrPdnAssignedAddr
 (
- U8 ueId,
+ U32 ueId,
  U32 pdnAsgndAddr
 )
 {
    S16 ret;
    UeDataCb *ueDatCb = NULLP;
    U8 ipAddr[NB_APP_MAX_IP_ADDR_LEN];
-   U8 idx = 0;
+   U32 idx = 0;
    U8 idx1 = 0;
    NbAppDataRouteCb *ipInfo = NULLP;
 
@@ -867,10 +867,10 @@ PUBLIC S16 nbAppCfgrPdnAssignedAddr
 
 PUBLIC Void nbRelCntxtInTrafficHandler
 (
- U8 ueId
+ U32 ueId
 )
 {
-   U8 idx = 0;
+   U32 idx = 0;
    U8 idx1;
    UeDataCb *ueDatCb = NULLP;
 

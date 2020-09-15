@@ -105,7 +105,7 @@
 #ifdef MULTI_ENB_SUPPORT_ENABLE
 #define MULTI_ENB_SUPPORT
 #endif
-#define MAX_UE_INST 255
+#define MAX_UE_INST 32768
 #define MAX_ENB_INST 1000
 
 /* error checking, choose none or one */

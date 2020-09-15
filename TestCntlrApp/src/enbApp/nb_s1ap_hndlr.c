@@ -31,14 +31,14 @@
 #include "nbt.x"
 
 EXTERN U8 uesLocalRel;
-EXTERN S16 nbUiSendIntCtxtSetupDrpdIndToUser(U8 ueId);
+EXTERN S16 nbUiSendIntCtxtSetupDrpdIndToUser(U32 ueId);
 PUBLIC S16 nbCtxtRelSndRlsCmpl(NbUeCb*);
 PUBLIC S16 nbProcessDlNasMsg(NbUeCb*, S1apPdu*, U8);
 PUBLIC S16 nbGetTai(NbTai*);
 #ifdef MULTI_ENB_SUPPORT
-PUBLIC U32  nbGetUeLclTeid(U8, U32, U32);
+PUBLIC U32  nbGetUeLclTeid(U32, U32, U32);
 #else
-PUBLIC U32  nbGetUeLclTeid(U8, U32);
+PUBLIC U32  nbGetUeLclTeid(U32, U32);
 #endif
 PUBLIC S16 nbGetErabInfoFrmIntCnxt(NbUeCb*, SztE_RABToBeSetupLstCtxtSUReq*,
       NbErabLst**);
@@ -72,8 +72,8 @@ PUBLIC S16  NbBuildAndSndErrIndMsg(NbErrIndMsg *s1ErrInd);
 PUBLIC S16 sendNonDelFlag(NbUeCb *ueCb, SztNAS_PDU *pdu, NbUeMsgCause *cause);
 PUBLIC S16 sendInitCtxtSetupFailRsp(NbUeCb *ueCb, NbUeMsgCause *cause);
 PRIVATE S16 nbSendUeCtxtRelReqAsICSRsp(NbUeCb *ueCb);
-PRIVATE S16 nbStartDelayTimerForICSRsp(U8 ueId,NbErabLst *erabInfo);
-PRIVATE S16 nbStartDelayTimerForUeCtxRel(U8 ueId);
+PRIVATE S16 nbStartDelayTimerForICSRsp(U32 ueId,NbErabLst *erabInfo);
+PRIVATE S16 nbStartDelayTimerForUeCtxRel(U32 ueId);
 PUBLIC S16 nbHandleDelayTimerForUeCtxRelComplExpiry(NbDelayUeCtxtRelCmpCb *ueCtxtRelCmpCb);
 PUBLIC S16 nbPrcPathSwReqAck(NbUeCb *ueCb,S1apPdu *pdu);
 EXTERN S16 nbUiSendPathSwReqAckToUser(NbPathSwReqAck *nbpathSwReqAck);
@@ -293,7 +293,7 @@ PUBLIC S16 nbBuildAndSendErabRelRsp
 
 
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&enbUeS1apId,
-				   sizeof(U8),0,(PTR *)&ueCb)))
+				   sizeof(U32),0,(PTR *)&ueCb)))
    {
 	   NB_LOG_ERROR(&nbCb, "Failed to Find UeCb");
 	   RETVALUE(RFAILED);
@@ -1364,7 +1364,7 @@ PUBLIC S16 nbProcErabRelCmd(S1apPdu *s1apErabRlsCmd) {
   /*for(cnt = 0; cnt < nbCb.crntUeIdx; cnt++)
   {
   }*/
-  cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(enbUeS1apId), sizeof(U8), 0,
+  cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(enbUeS1apId), sizeof(U32), 0,
                  (PTR *)(&ueCb));
   for (cnt = 0; cnt < numOfErabIdsRlsd; cnt++) {
     U32 bearerId = erabRelCmd.erabIdLst[cnt];
@@ -1576,7 +1576,7 @@ PUBLIC S16 nbUpdateUePagInfo
    U16                    memberIdx = 0;
    TknBStr32              *ueIdxBitStr = NULLP;
    U16                    numCompPagMsg = 0;
-   U16                    ueId = 0;
+   U32                    ueId = 0;
    U8                     idx1, idx2;
    U16                    memberId;
 
@@ -2456,7 +2456,7 @@ PUBLIC S16 nbPrcS1apRelInd
  SztRelInd   *relInd
 )
 {
-   U8 ueIdx = 0;
+   U32 ueIdx = 0;
    S16 retVal = ROK;
    U8 msgType = NB_S1_REL_IND;
    NbUeCb *ueCb = NULLP;
@@ -2466,7 +2466,7 @@ PUBLIC S16 nbPrcS1apRelInd
    ueCb  = nbCb.ueCbLst[ueIdx];
 #endif
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueIdx),
-      sizeof(U8),0,(PTR *)&ueCb)))
+      sizeof(U32),0,(PTR *)&ueCb)))
    {
       RETVALUE(RFAILED);
    }
@@ -2481,7 +2481,7 @@ PUBLIC S16 nbPrcS1apConCfm
  SztConCfm   *conCfm
 )
 {
-   U8 ueIdx = 0;
+   U32 ueIdx = 0;
    S16 retVal = ROK;
    U8 msgType = NB_S1_CON_CFM;
    NbUeCb *ueCb = NULLP;
@@ -2491,7 +2491,7 @@ PUBLIC S16 nbPrcS1apConCfm
    ueCb  = nbCb.ueCbLst[ueIdx];
 #endif
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueIdx),
-      sizeof(U8),0,(PTR *)&ueCb)))
+      sizeof(U32),0,(PTR *)&ueCb)))
    {
       RETVALUE(RFAILED);
    }
@@ -2506,7 +2506,7 @@ PUBLIC S16 nbPrcS1DatInd
  SztDatEvntInd   *s1DatInd
 )
 {
-   U8 ueIdx = 0;
+   U32 ueIdx = 0;
    S16 retVal = ROK;
    U8 msgType = NB_S1_DAT_IND;
    NbUeCb *ueCb = NULLP;
@@ -2516,7 +2516,7 @@ PUBLIC S16 nbPrcS1DatInd
    ueCb =  nbCb.ueCbLst[ueIdx];
 #endif
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueIdx),
-      sizeof(U8),0,(PTR *)&ueCb)))
+      sizeof(U32),0,(PTR *)&ueCb)))
    {
       RETVALUE(RFAILED);
    }
@@ -3531,9 +3531,9 @@ PUBLIC S16 nbGetTai
 
 
 #ifdef MULTI_ENB_SUPPORT
-PUBLIC U32  nbGetUeLclTeid(U8 ueId, U32 rabId, U32 enbId)
+PUBLIC U32  nbGetUeLclTeid(U32 ueId, U32 rabId, U32 enbId)
 #else
-PUBLIC U32  nbGetUeLclTeid(U8 ueId, U32 rabId)
+PUBLIC U32  nbGetUeLclTeid(U32 ueId, U32 rabId)
 #endif
 {
    U32 lclTeId = 0;
@@ -3725,8 +3725,8 @@ PRIVATE S16 nbFillErrIndMsg(NbErrIndMsg *s1ErrInd,S1apPdu **errIndPdu)
 
    U16 numComp = 0;
    S16 ret = 0;
-   U8 ueId = 0;
-   U8 idx = 0;
+   U32 ueId = 0;
+   U32 idx = 0;
    NbUeCb *ueCb = NULLP;
    NbS1ConCb *s1apConCb = NULLP;
 
@@ -3756,7 +3756,7 @@ PRIVATE S16 nbFillErrIndMsg(NbErrIndMsg *s1ErrInd,S1apPdu **errIndPdu)
    {
       ueId = s1ErrInd->ue_Id;
       if(ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueId),
-              sizeof(U8), 0, (PTR *)&ueCb)))
+              sizeof(U32), 0, (PTR *)&ueCb)))
       {
          NB_LOG_ERROR(&nbCb, "ueCb not found for UeId %d", ueId);
          RETVALUE(RFAILED);
@@ -3884,7 +3884,7 @@ PRIVATE S16 nbFillErrIndMsg(NbErrIndMsg *s1ErrInd,S1apPdu **errIndPdu)
    }
    RETVALUE(ROK);
 }
-PRIVATE S16 nbStartDelayTimerForUeCtxRel(U8 ueId)
+PRIVATE S16 nbStartDelayTimerForUeCtxRel(U32 ueId)
 {
    S16 retVal = RFAILED;
    NbDelayUeCtxtRelCmpCb *ueCtxtRelCmp = NULLP;
@@ -3894,7 +3894,7 @@ PRIVATE S16 nbStartDelayTimerForUeCtxRel(U8 ueId)
    retVal = nbStartTmr((PTR)ueCtxtRelCmp, NB_TMR_DELAY_UE_CTX_REL_COMP, nbCb.delayUeCtxtRelCmp[ueId - 1].tmrVal);
    RETVALUE(retVal);
 }
-PRIVATE S16 nbStartDelayTimerForICSRsp(U8 ueId,NbErabLst *erabInfo)
+PRIVATE S16 nbStartDelayTimerForICSRsp(U32 ueId,NbErabLst *erabInfo)
 {
   S16 retVal = RFAILED;
   NbDelayICSRspCb *icsRspCb = NULLP;
@@ -3915,7 +3915,7 @@ PUBLIC S16 nbHandleDelayTimerForICSExpiry(NbDelayICSRspCb *icsRspCb)
    NbErabLst *erabInfo = NULLP;
 
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(icsRspCb->ueId),
-      sizeof(U8),0,(PTR *)&ueCb)))
+      sizeof(U32),0,(PTR *)&ueCb)))
    {
       NB_LOG_ERROR(&nbCb, "Failed to Find UeCb");
       RETVALUE(RFAILED);
@@ -3975,7 +3975,7 @@ PUBLIC S16 nbHandleDelayTimerForUeCtxRelComplExpiry(NbDelayUeCtxtRelCmpCb *ueCtx
    S16 retVal = RFAILED;
    NbUeCb *ueCb = NULLP;
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueCtxtRelCmp->ueId),
-				   sizeof(U8),0,(PTR *)&ueCb)))
+				   sizeof(U32),0,(PTR *)&ueCb)))
    {
 	   NB_LOG_ERROR(&nbCb, "Failed to Find UeCb");
 	   RETVALUE(RFAILED);

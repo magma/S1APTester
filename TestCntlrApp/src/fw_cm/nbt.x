@@ -194,7 +194,7 @@ typedef struct _nbConfigCfm
 
 typedef struct _NbUeS1apIdPair
 {
-   U8 ueId;
+   U32 ueId;
    U32 enbUeS1apId;
    U32 mmeUeS1apId;
 } NbUeS1apIdPair;
@@ -206,7 +206,7 @@ typedef struct _nbRelCause
 }NbRelCause;
 typedef struct _nbUeCntxtRelReq
 {
-   U16 ueId;
+   U32 ueId;
    NbRelCause cause;
 }NbUeCntxtRelReq;
 
@@ -224,7 +224,7 @@ typedef struct _nbCompleteReset
 
 typedef struct _mnPartialReset
 {
-   U16 numOfConn;
+   U32 numOfConn;
    NbUeS1apIdPair *ueS1apIdPairList;
 }NbPartialReset;
 
@@ -248,8 +248,8 @@ typedef struct _resetRequest
 typedef struct _nbResetRequest
 {
    U8 status;
-   U16 numOfUes;
-   U8 *ueIdLst;
+   U32 numOfUes;
+   U32 *ueIdLst;
 }NbResetAckldg;
 
 typedef struct _nbCriticalityDiag_IE_Item
@@ -281,7 +281,7 @@ typedef struct _nbCriticalityDiag
 typedef struct _nbErrIndMsg
 {
    U8          isUeAssoc;
-   U8          ue_Id;
+   U32         ue_Id;
    U8          causePres;
    FailCause   cause;
    NbCriticalityDiag criticalityDiag;
@@ -294,7 +294,7 @@ typedef struct _nbSctpAbortReqMsg
 
 typedef struct _nbErabRelInd
 {
-   U8 ueId;
+   U32 ueId;
    U8 numOfErabIds;
    U8 *erabIdLst;
 }NbErabRelInd;
@@ -303,7 +303,7 @@ typedef NbErabRelInd NbErabRelReq;
 
 typedef struct _nbErabRelCmd
 {
-   U8 ueId;
+   U32 ueId;
    U32 mmeUeS1apId;
    U32 enbUeS1apId;
    U8 numOfErabIds;
@@ -313,7 +313,7 @@ typedef struct _nbErabRelCmd
 
 typedef struct _nbErabRelRsp
 {
-   U8 ueId;
+   U32 ueId;
    U32 mmeUeS1apId;
    U32 enbUeS1apId;
    U8 numOfErabIds;
@@ -323,27 +323,27 @@ typedef struct _nbErabRelRsp
 
 typedef struct _nbUeCtxRelInd
 {
-   U8 ueId;
+   U32 ueId;
 }NbUeCtxRelInd;
 typedef struct _nbIntCtxtSetUpInd
 {
-   U8 ueId;
+   U32 ueId;
    U8 status;
 }NbIntCtxtSetUpInd;
 typedef struct _nbIntCtxtSetUpDrpdInd
 {
-   U8 ueId;
+   U32 ueId;
 }NbIntCtxtSetUpDrpdInd;
 typedef struct _nbNasNonDel
 {
-   U8 ueId;
+   U32 ueId;
    Bool flag;
    U32 causeType;
    U32 causeVal;
 }NbNasNonDel;
 typedef struct _nbInitCtxtSetupFail
 {
-   U8 ueId;
+   U32 ueId;
    Bool initCtxtSetupFailInd;
    U32 causeType;
    U32 causeVal;
@@ -351,34 +351,34 @@ typedef struct _nbInitCtxtSetupFail
 
 typedef struct _nbDropInitCtxtSetup
 {
-   U8 ueId;
+   U32 ueId;
    Bool isDropICSEnable;
    U32 tmrVal;
 }NbDropInitCtxtSetup;
 typedef struct _nbDelayICSRsp
 {
-   U8 ueId;
+   U32 ueId;
    Bool isDelayICSRsp;
    U32 tmrVal;
 }NbDelayICSRsp;
 
 typedef struct _nbDelayUeCtxtRelCmp
 {
-   U8 ueId;
+   U32 ueId;
    Bool isDelayUeCtxtRelCmp;
    U32 tmrVal;
 }NbDelayUeCtxtRelCmp;
 
 typedef struct _nbSendUeCtxtRelForICSRsp
 {
-   U8 ueId;
+   U32 ueId;
    U32 causeType;
    U32 causeVal;
    Bool sndICSRspUeCtxtRel;
 }NbSendUeCtxtRelForICSRsp;
 typedef struct _nbNasNonDelRsp
 {
-   U8 ueId;
+   U32 ueId;
 }NbNasNonDelRsp;
 typedef struct _nbmultiEnbCfgParam
 {
@@ -397,12 +397,12 @@ typedef struct _nbMultiEnbConfigReq
 
 typedef struct _nbX2HOTriggerReq
 {
-   U8 ueId;
+   U32 ueId;
 }NbX2HOTriggerReq;
 
 typedef struct _nbPathSwReqAck
 {
-   U8 ueId;
+   U32 ueId;
    U32 mmeUeS1apId;
    U32 enbUeS1apId;
    U32 ncc;
@@ -411,13 +411,13 @@ typedef struct _nbPathSwReqAck
 
 typedef struct _nbTunDelReq
 {
-   U8 ueId;
+   U32 ueId;
    U32 bearerId;
 }NbTunDelReq;
 
 typedef struct _nbEnbConfigTrnsf
 {
-   U8 ueId;
+   U32 ueId;
 }NbEnbConfigTrnsf;
 
 typedef struct _nbMmeConfigTrnsf
@@ -486,8 +486,8 @@ EXTERN S16 NbUiNbtMsgReq(Pst *pst, NbtMsg *req);
 EXTERN Void nbUiSendSuccessResponseToUser(NbMsgTypes msgType);
 EXTERN S16 NbEnbCfgReqHdl(NbConfigReq   *cfg);
 EXTERN S16 nbUiSendResetAckToUser(NbResetAckldg *resetAck);
-EXTERN S16 nbUiSendUeCtxRelIndToUser(U8 ueId);
-EXTERN S16 nbUiSendIntCtxtSetupIndToUser(U8 ueId, U8 status);
+EXTERN S16 nbUiSendUeCtxRelIndToUser(U32 ueId);
+EXTERN S16 nbUiSendIntCtxtSetupIndToUser(U32 ueId, U8 status);
 EXTERN S16 nbUiSendErabRelCmdInfoToUser(NbErabRelCmd *erabRelInfo);
 /********************************************************************30**
 

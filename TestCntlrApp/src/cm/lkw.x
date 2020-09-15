@@ -268,7 +268,7 @@ typedef struct kwL2MeasReqInfo
 
       struct 
       {
-         U16 numUes;
+         U32 numUes;
          struct 
          {
             U8           numQci;           /*!<number of qCI to take measurement for */

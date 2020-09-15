@@ -108,7 +108,7 @@ PUBLIC FwCb gfwCb;
 /* Adding UEID, epsupdate type, active flag into linked list for
  * TAU request
  */
-PRIVATE Void insertUeCb(U8 ueid, U8 epsUpdType, U8 flag, UeIdCb *ueIdCb)
+PRIVATE Void insertUeCb(U32 ueid, U8 epsUpdType, U8 flag, UeIdCb *ueIdCb)
 {
    FwCb *fwCb = NULLP;
    FW_GET_CB(fwCb);
@@ -609,7 +609,7 @@ PUBLIC S16 handlRadCapUpd(ueRadCapUpd_t *data)
 }
 
 /* Adding UEID into linked list for END TO END ATTACH */
-PRIVATE Void insert_ue_entry(U8 ueid, UeIdCb *ueIdCb)
+PRIVATE Void insert_ue_entry(U32 ueid, UeIdCb *ueIdCb)
 {
    FwCb *fwCb = NULLP;
    FW_GET_CB(fwCb);
