@@ -2065,235 +2065,205 @@ PUBLIC S16 nbS1apBldUeCapIndPdu
 }
 
 /** @brief This function is responsible for parsing the Initial Context Setup
-*         Request message and store the information into the internal data
-*         structure.
-*
-* @details
-*
-*     Function: nbInitCtxtPrcSetup
-*
-*         Processing steps:
-*         - for the number of IEs present in the message
-*         - parse the IE and store the information into the internal data
-*           structure
-*
-* @param[in]  transCb : transaction information
-* @return S16
-*    -#Success : ROK
-*    -#Failure : RFAILED
-*/
-PRIVATE S16 nbHandleInitCtxtPrcSetup
-(
- NbUeCb *ueCb,
- S1apPdu *pdu
-)
-{
-   NbErabLst                             *erabInfo = NULLP;
-   U16                                   cnt = 0;
-   S16                                   retVal = RFAILED;
-   NbUeMsgCause                          cause;
-   U8 idx;
-   SztInitiatingMsg                      *initMsg = NULLP;
-   SztProtIE_Field_InitCntxtSetupRqstIEs *ie = NULLP;
-   SztProtIE_Cont_InitCntxtSetupRqstIEs  *protIes = NULLP;
-   SztE_RABToBeSetupLstCtxtSUReq         *s1ErabLst = NULLP;
-   Bool ueRadCapRcvd = FALSE;
+ *         Request message and store the information into the internal data
+ *         structure.
+ *
+ * @details
+ *
+ *     Function: nbInitCtxtPrcSetup
+ *
+ *         Processing steps:
+ *         - for the number of IEs present in the message
+ *         - parse the IE and store the information into the internal data
+ *           structure
+ *
+ * @param[in]  transCb : transaction information
+ * @return S16
+ *    -#Success : ROK
+ *    -#Failure : RFAILED
+ */
+PRIVATE S16 nbHandleInitCtxtPrcSetup(NbUeCb *ueCb, S1apPdu *pdu) {
+  NbErabLst *erabInfo = NULLP;
+  U16 cnt = 0;
+  S16 retVal = RFAILED;
+  NbUeMsgCause cause;
+  U8 idx;
+  SztInitiatingMsg *initMsg = NULLP;
+  SztProtIE_Field_InitCntxtSetupRqstIEs *ie = NULLP;
+  SztProtIE_Cont_InitCntxtSetupRqstIEs *protIes = NULLP;
+  SztE_RABToBeSetupLstCtxtSUReq *s1ErabLst = NULLP;
+  Bool ueRadCapRcvd = FALSE;
 
-   /* Parse and process the received IEs */
-   initMsg = &(pdu->pdu.val.initiatingMsg);
-   protIes = &initMsg->value.u.sztInitCntxtSetupRqst.protocolIEs;
+  /* Parse and process the received IEs */
+  initMsg = &(pdu->pdu.val.initiatingMsg);
+  protIes = &initMsg->value.u.sztInitCntxtSetupRqst.protocolIEs;
 
-   for (cnt = 0; cnt < protIes->noComp.val; cnt++)
-   {
-      ie = &(protIes->member[cnt]);
-      switch(ie->id.val)
-      {
-         case Sztid_MME_UE_S1AP_ID:
-            {
-               ueCb->s1ConCb->mme_ue_s1ap_id = ie->value.u.\
-                                               sztid_MME_UE_S1AP_ID.val;
-               break;
-            }
-         case Sztid_eNB_UE_S1AP_ID:
-            {
-               ueCb->s1ConCb->enb_ue_s1ap_id = ie->value.u.\
-                                               sztENB_UE_S1AP_ID.val;
-               break;
-            }
-         case Sztid_uEaggregateMaxBitrate:
-            {
-               break;
-            }
-         case Sztid_E_RABToBeSetupLstCtxtSUReq:
-            {
-               s1ErabLst = &ie->value.u.sztE_RABToBeSetupLstCtxtSUReq;
-               if((retVal = nbGetErabInfoFrmIntCnxt(ueCb, s1ErabLst,
-                           &erabInfo)) != ROK)
-               {
-                  NB_LOG_ERROR(&nbCb, "processing ERABs failed");
-                  RETVALUE(RFAILED);
-               }
-               break;
-            }
-         case Sztid_UESecurCapabilities:
-            {
+  for (cnt = 0; cnt < protIes->noComp.val; cnt++) {
+    ie = &(protIes->member[cnt]);
+    switch (ie->id.val) {
+    case Sztid_MME_UE_S1AP_ID: {
+      ueCb->s1ConCb->mme_ue_s1ap_id = ie->value.u.sztid_MME_UE_S1AP_ID.val;
+      break;
+    }
+    case Sztid_eNB_UE_S1AP_ID: {
+      ueCb->s1ConCb->enb_ue_s1ap_id = ie->value.u.sztENB_UE_S1AP_ID.val;
+      break;
+    }
+    case Sztid_uEaggregateMaxBitrate: {
+      break;
+    }
+    case Sztid_E_RABToBeSetupLstCtxtSUReq: {
+      s1ErabLst = &ie->value.u.sztE_RABToBeSetupLstCtxtSUReq;
+      if ((retVal = nbGetErabInfoFrmIntCnxt(ueCb, s1ErabLst, &erabInfo)) !=
+          ROK) {
+        NB_LOG_ERROR(&nbCb, "processing ERABs failed");
+        RETVALUE(RFAILED);
+      }
+      break;
+    }
+    case Sztid_UESecurCapabilities: {
 #ifdef MULTI_ENB_SUPPORT
-	       U32 idx = 0;
-	       U16 temp = ie->value.u.sztUESecurCapabilities.encryptionAlgorithms.val[idx++];
-               ueCb->encryptionAlgo |= temp << 8;
-	       temp = ie->value.u.sztUESecurCapabilities.encryptionAlgorithms.val[idx];
-               ueCb->encryptionAlgo |= temp;
+      U32 idx = 0;
+      U16 temp =
+          ie->value.u.sztUESecurCapabilities.encryptionAlgorithms.val[idx++];
+      ueCb->encryptionAlgo |= temp << 8;
+      temp = ie->value.u.sztUESecurCapabilities.encryptionAlgorithms.val[idx];
+      ueCb->encryptionAlgo |= temp;
 
-	       idx = 0;
-	       temp = 0;
-	       temp = ie->value.u.sztUESecurCapabilities.integrityProtectionAlgorithms.val[idx++];
-	       ueCb->integrityAlgo |= temp << 8;
-	       temp = ie->value.u.sztUESecurCapabilities.integrityProtectionAlgorithms.val[idx];
-	       ueCb->integrityAlgo |= temp;
+      idx = 0;
+      temp = 0;
+      temp = ie->value.u.sztUESecurCapabilities.integrityProtectionAlgorithms
+                 .val[idx++];
+      ueCb->integrityAlgo |= temp << 8;
+      temp = ie->value.u.sztUESecurCapabilities.integrityProtectionAlgorithms
+                 .val[idx];
+      ueCb->integrityAlgo |= temp;
 #endif
-               break;
-            }
-         case Sztid_SecurKey:
-            {
-               break;
-            }
-         case Sztid_UERadioCapblty:
-            {
-               ueRadCapRcvd = TRUE;
-               break;
-            }
-         case Sztid_CSFallbackIndicator:
-            {
-               break;
-            }
-         case Sztid_CSGMembershipStatus:
-            {
-               break;
-            }
-         case Sztid_RegisteredLAI:
-            {
-               break;
-            }
-         case Sztid_GUMMEI_ID:
-            {
-               break;
-            }
-         case Sztid_MME_UE_S1AP_ID_2:
-            {
-               break;
-            }
-         case Sztid_HovrRestrnLst:
-            {
-               break;
-            }
-         case Sztid_ManagementBasedMDTAllowed:
-            {
-               break;
-            }
-         case Sztid_SubscriberProfileIDforRFP:
-            {
-            }
-            break;
-         default:
-            break;
-      }
-   }
+      break;
+    }
+    case Sztid_SecurKey: {
+      break;
+    }
+    case Sztid_UERadioCapblty: {
+      ueRadCapRcvd = TRUE;
+      break;
+    }
+    case Sztid_CSFallbackIndicator: {
+      break;
+    }
+    case Sztid_CSGMembershipStatus: {
+      break;
+    }
+    case Sztid_RegisteredLAI: {
+      break;
+    }
+    case Sztid_GUMMEI_ID: {
+      break;
+    }
+    case Sztid_MME_UE_S1AP_ID_2: {
+      break;
+    }
+    case Sztid_HovrRestrnLst: {
+      break;
+    }
+    case Sztid_ManagementBasedMDTAllowed: {
+      break;
+    }
+    case Sztid_SubscriberProfileIDforRFP: {
+    } break;
+    default:
+      break;
+    }
+  }
 
-   ueCb->s1ConCb->s1apConnState = NB_S1AP_CONNECTED;
-   if(erabInfo != NULLP)
-   {
-      if(nbCb.initCtxtSetupFail[(ueCb->ueId) - 1].initCtxtSetupFailInd == TRUE)
-      {
-         cause.causeTyp = nbCb.initCtxtSetupFail[(ueCb->ueId) - 1].causeType;
-         cause.causeVal = nbCb.initCtxtSetupFail[(ueCb->ueId) - 1].causeVal;
-         if(ROK != sendInitCtxtSetupFailRsp(ueCb, &cause))
-         {
-            NB_LOG_DEBUG(&nbCb,"Failed to Sending Initial Context Setup Failure message to MME");
-         }
-         NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
-         NB_FREE(erabInfo, sizeof(NbErabLst));
+  ueCb->s1ConCb->s1apConnState = NB_S1AP_CONNECTED;
+  if (erabInfo != NULLP) {
+    if (nbCb.initCtxtSetupFail[(ueCb->ueId) - 1].initCtxtSetupFailInd == TRUE) {
+      cause.causeTyp = nbCb.initCtxtSetupFail[(ueCb->ueId) - 1].causeType;
+      cause.causeVal = nbCb.initCtxtSetupFail[(ueCb->ueId) - 1].causeVal;
+      if (ROK != sendInitCtxtSetupFailRsp(ueCb, &cause)) {
+        NB_LOG_DEBUG(
+            &nbCb,
+            "Failed to Sending Initial Context Setup Failure message to MME");
       }
-      else if(nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isDropICSEnable == TRUE)
-      {
-         if(nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isICSReqDropped == FALSE)
-         {
-            nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isICSReqDropped = TRUE;
-            /* start timr to release the UE context locally */
-            cmInitTimers(&nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].timer, 1);
-            if(retVal != nbStartTmr((PTR)ueCb,NB_TMR_LCL_UE_CTXT_REL_REQ,\
-                  nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].tmrVal))
-            {
-               RETVALUE(retVal);
-            }
-            /* send indication to tfwApp for dropping the Initial Context Setup Req */
-            retVal = nbUiSendIntCtxtSetupDrpdIndToUser(ueCb->ueId);
-            if(retVal != ROK)
-            {
-               NB_LOG_ERROR(&nbCb, "Failed to Send Initial Context Setup"\
-                                 "Dropped Indiaction to User");
-            }
-         }
-         NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
-         NB_FREE(erabInfo, sizeof(NbErabLst));
+      NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
+      NB_FREE(erabInfo, sizeof(NbErabLst));
+    } else if (nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isDropICSEnable ==
+               TRUE) {
+      if (nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isICSReqDropped == FALSE) {
+        nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isICSReqDropped = TRUE;
+        /* start timr to release the UE context locally */
+        cmInitTimers(&nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].timer, 1);
+        if (retVal !=
+            nbStartTmr((PTR)ueCb, NB_TMR_LCL_UE_CTXT_REL_REQ,
+                       nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].tmrVal)) {
+          RETVALUE(retVal);
+        }
+        /* send indication to tfwApp for dropping the Initial Context Setup Req
+         */
+        retVal = nbUiSendIntCtxtSetupDrpdIndToUser(ueCb->ueId);
+        if (retVal != ROK) {
+          NB_LOG_ERROR(&nbCb, "Failed to Send Initial Context Setup"
+                              "Dropped Indiaction to User");
+        }
       }
-      else if(nbCb.dropICSSndCtxtRel[(ueCb->ueId) - 1].sndICSRspUeCtxtRel == TRUE)
-      {
-         retVal = nbSendUeCtxtRelReqAsICSRsp(ueCb);
-         NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
-         NB_FREE(erabInfo, sizeof(NbErabLst));
-      }
-      else
-      {
-         if( nbCb.delayInitCtxtSetupRsp[(ueCb->ueId) - 1].delayICSRsp != TRUE)
-         {
-            /* send the s1-context resp to mme and nas pdu to ue */
-            retVal = nbBuildAndSendIntCtxtSetupRsp(ueCb, erabInfo);
-            if(retVal != ROK)
-            {
-               NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
-               NB_FREE(erabInfo, sizeof(NbErabLst));
-               RETVALUE(RFAILED);
-            }
-            retVal = nbSendErabsInfo(ueCb, erabInfo, NULL, ueRadCapRcvd);
-            // Send UeIpInfoReq message to ueApp only for successful bearers
-            if (nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].numFailedErabs > 0) {
-              Bool found = FALSE;
-              for (idx = 0; idx < erabInfo->noOfComp; idx++) {
-                for (U8 failed_idx = 0;  failed_idx < nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].numFailedErabs; failed_idx ++) {
-                  if (erabInfo->erabs[idx].erabId == nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].failedErabs[failed_idx]) {
-                    found = TRUE;
-                    break;
-                  }
-                }
-                if (found) {
-                  found = FALSE;
-                  continue;
-                }
-                nbHandleUeIpInfoReq(ueCb->ueId,erabInfo->erabs[idx].erabId);
-              }
-              nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].numFailedErabs = 0;
-            } else {
-              for(idx = 0; idx < erabInfo->noOfComp; idx++) {
-               nbHandleUeIpInfoReq(ueCb->ueId,erabInfo->erabs[idx].erabId);
+      NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
+      NB_FREE(erabInfo, sizeof(NbErabLst));
+    } else if (nbCb.dropICSSndCtxtRel[(ueCb->ueId) - 1].sndICSRspUeCtxtRel ==
+               TRUE) {
+      retVal = nbSendUeCtxtRelReqAsICSRsp(ueCb);
+      NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
+      NB_FREE(erabInfo, sizeof(NbErabLst));
+    } else {
+      if (nbCb.delayInitCtxtSetupRsp[(ueCb->ueId) - 1].delayICSRsp != TRUE) {
+        /* send the s1-context resp to mme and nas pdu to ue */
+        retVal = nbBuildAndSendIntCtxtSetupRsp(ueCb, erabInfo);
+        if (retVal != ROK) {
+          NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
+          NB_FREE(erabInfo, sizeof(NbErabLst));
+          RETVALUE(RFAILED);
+        }
+        retVal = nbSendErabsInfo(ueCb, erabInfo, NULL, ueRadCapRcvd);
+        // Send UeIpInfoReq message to ueApp only for successful bearers
+        if (nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].numFailedErabs > 0) {
+          Bool found = FALSE;
+          for (idx = 0; idx < erabInfo->noOfComp; idx++) {
+            for (U8 failed_idx = 0;
+                 failed_idx <
+                 nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].numFailedErabs;
+                 failed_idx++) {
+              if (erabInfo->erabs[idx].erabId ==
+                  nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1]
+                      .failedErabs[failed_idx]) {
+                found = TRUE;
+                break;
               }
             }
-            NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
-            NB_FREE(erabInfo, sizeof(NbErabLst));
-         }
-         else
-         {
-            retVal = nbSendErabsInfo(ueCb, erabInfo, NULL, ueRadCapRcvd);
-            /* do the ip-query  ueapp for received bearers */
-            for(idx = 0; idx < erabInfo->noOfComp; idx++)
-            {
-               nbHandleUeIpInfoReq(ueCb->ueId,erabInfo->erabs[idx].erabId);
+            if (found) {
+              found = FALSE;
+              continue;
             }
-            nbStartDelayTimerForICSRsp(ueCb->ueId,erabInfo);
-
-         }
+            nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId);
+          }
+          nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].numFailedErabs = 0;
+        } else {
+          for (idx = 0; idx < erabInfo->noOfComp; idx++) {
+            nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId);
+          }
+        }
+        NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
+        NB_FREE(erabInfo, sizeof(NbErabLst));
+      } else {
+        retVal = nbSendErabsInfo(ueCb, erabInfo, NULL, ueRadCapRcvd);
+        /* do the ip-query  ueapp for received bearers */
+        for (idx = 0; idx < erabInfo->noOfComp; idx++) {
+          nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId);
+        }
+        nbStartDelayTimerForICSRsp(ueCb->ueId, erabInfo);
       }
-   }
-   RETVALUE(retVal);
+    }
+  }
+  RETVALUE(retVal);
 }
 
 PRIVATE S16 nbHandleRabSetupMsg(NbUeCb *ueCb, S1apPdu *pdu) {
