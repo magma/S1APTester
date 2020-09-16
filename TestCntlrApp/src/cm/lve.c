@@ -311,7 +311,7 @@ Buffer *mBuf;
           break;
        case LVE_USTA_DGNVAL_CELLUEID :
           CMCHKPK(SPkU16, param->u.s.cellId,mBuf);
-          CMCHKPK(SPkU16, param->u.s.ueId,mBuf);
+          CMCHKPK(SPkU32, param->u.s.ueId,mBuf);
           break; 
        default:
           break;
@@ -1083,7 +1083,7 @@ Buffer *mBuf;
           CMCHKUNPK(SUnpkS16, &param->u.sapId,mBuf);
           break;
        case LVE_USTA_DGNVAL_CELLUEID :
-          CMCHKUNPK(SUnpkU16, &param->u.s.ueId,mBuf);
+          CMCHKUNPK(SUnpkU32, &param->u.s.ueId,mBuf);
           CMCHKUNPK(SUnpkU16, &param->u.s.cellId,mBuf);
           break; 
        default:

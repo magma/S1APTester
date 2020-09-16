@@ -720,7 +720,7 @@ CzStsUnion u;
 struct CzUeInfo
 {
  U32 peerId;            /**< Peer Identifier */
- U16 ueId;              /**< UE Identifier */
+ U32 ueId;              /**< UE Identifier */
 };
 
 union CzUstaDgnUnion

@@ -513,7 +513,7 @@ typedef struct cmEsmBearResModReq
 /* Esm information request */
 typedef struct cmEsmInfoReq
 {
-   U8 ueId;
+   U32 ueId;
 }CmEsmInfoReq;
 
 /* Esm information response */

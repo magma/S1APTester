@@ -109,7 +109,7 @@ PUBLIC S16 handlePagingInd( Pst *pst,  UetMessage *uetPagingtInd);
 PUBLIC S16 sendUePagingIndToTstCntlr(UetMessage *uetPagingInd);
 PRIVATE S16 handleNwInitDetachReqInd(Pst *pst, UetMessage *uetNwinitDetachInd);
 PUBLIC S16 sendUeNwInitDetachReqIndToTstCntlr(UetMessage *uetNwInitDetachInd);
-PRIVATE Void delete_ue_entries(U8);
+PRIVATE Void delete_ue_entries(U32);
 PRIVATE S16 handleAndSendActDedBerReqInd (Pst *pst, UetMessage *msgreq);
 PRIVATE S16 handleAndSendDeActvBerReqInd (Pst *pst, UetMessage *msgreq);
 PRIVATE S16 handleEmmInformation ( Pst *pst,  UetMessage *ueEmmInformation);
@@ -989,7 +989,7 @@ PUBLIC S16 handleTauAcceptInd
 }
 
 /* Deleting the ueid entries from the linked list */
-PRIVATE Void delete_ue_entries(U8 ueId)
+PRIVATE Void delete_ue_entries(U32 ueId)
 {
    FwCb *fwCb = NULLP;
    CmLList  *tmpNode = NULLP;

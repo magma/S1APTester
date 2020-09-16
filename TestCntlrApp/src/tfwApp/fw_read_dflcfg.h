@@ -49,7 +49,7 @@ typedef struct _ueAppCfgCb
 
 typedef struct _ueCfgCb
 {
-   U8 ueId;       /*ue identity*/
+   U32 ueId;       /*ue identity*/
    U8 imsi[16];       /*Mobile subscriber identity*/
    U8 imei[16];       /*Mobile equipment identity*/
    U8 NASCyphCfg;          /*eea0, eea1, eea2*/

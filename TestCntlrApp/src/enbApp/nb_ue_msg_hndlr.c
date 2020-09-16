@@ -65,7 +65,7 @@ PUBLIC S16 NbHandleInitialUeMsg
    U8 offset  = 0;
    S16 ret = 0;
    if ( ROK == (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(initialUeMsg->ueId),
-      sizeof(U8),0,(PTR *)&ueCb)))
+      sizeof(U32),0,(PTR *)&ueCb)))
    {
    } else {
    NB_ALLOC(&ueCb, sizeof(NbUeCb))
@@ -173,7 +173,7 @@ PUBLIC S16 NbHandleInitialUeMsg
 #endif
 
    if (ROK != cmHashListInsert(&(nbCb.ueCbLst),(PTR)ueCb,
-                     (U8 *) &ueCb->ueId,sizeof(U8)))
+                     (U8 *) &ueCb->ueId,sizeof(U32)))
    {
       NB_FREE(ueCb, sizeof(NbUeCb))
       NB_FREE(s1apConCb, sizeof(NbS1ConCb));
@@ -444,7 +444,7 @@ PUBLIC S16 nbSendErabsInfo(NbUeCb *ueCb, NbErabLst *erabInfo,
 
 PUBLIC S16 nbSendS1RelIndToUeApp
 (
- U8 ueId
+ U32 ueId
 )
 {
    S16 ret = ROK;
@@ -493,7 +493,7 @@ PUBLIC S16 nbS1apFillEutranCgi
 PUBLIC S16 NbHandleUeIpInfoRsp(NbuUeIpInfoRsp *rsp)
 {
   U32 ueIpAddr = 0;
-  U8 ueId;
+  U32 ueId;
   U8 bearerId;
 
   ueId = rsp->ueId;
@@ -508,7 +508,7 @@ PUBLIC S16 NbHandleUeIpInfoRsp(NbuUeIpInfoRsp *rsp)
   RETVALUE(nbCreateUeTunnReq(ueId, ueIpAddr, bearerId, rsp));
 }
 
-PUBLIC Void nbHandleUeIpInfoReq(U8 ueId,U8 bearerId)
+PUBLIC Void nbHandleUeIpInfoReq(U32 ueId,U8 bearerId)
 {
    S16 ret             = ROK;
    NbuUeIpInfoReq *msg = NULLP;
@@ -525,7 +525,7 @@ PUBLIC Void nbHandleUeIpInfoReq(U8 ueId,U8 bearerId)
    }
 }
 
-PUBLIC S16 nbNotifyPlmnInfo(U8 ueId, NbPlmnId plmnId )
+PUBLIC S16 nbNotifyPlmnInfo(U32 ueId, NbPlmnId plmnId )
 {
   S16 ret = ROK;
   U8      pLMNId[3];

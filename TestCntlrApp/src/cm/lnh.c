@@ -522,7 +522,7 @@ Buffer *mBuf;
           break;
        case LNH_USTA_DGNVAL_CELLUEID :
           CMCHKPK(SPkU16, param->u.cellUeId.cellId,mBuf);
-          CMCHKPK(SPkU16, param->u.cellUeId.ueId,mBuf);
+          CMCHKPK(SPkU32, param->u.cellUeId.ueId,mBuf);
           break; 
        default:
           break;
@@ -2086,7 +2086,7 @@ Buffer *mBuf;
           CMCHKUNPK(SUnpkU8, &param->u.tId,mBuf);
           break;
        case LNH_USTA_DGNVAL_CELLUEID :
-          CMCHKUNPK(SUnpkU16, &param->u.cellUeId.ueId,mBuf);
+          CMCHKUNPK(SUnpkU32, &param->u.cellUeId.ueId,mBuf);
           CMCHKUNPK(SUnpkU16, &param->u.cellUeId.cellId,mBuf);
           break; 
        default:

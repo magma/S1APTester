@@ -333,7 +333,7 @@ Buffer *mBuf;     /* message buffer */
 #endif
 {
    TRC2(cmUnpkUmtsCrnti)
-   CMCHKUNPK(SUnpkU16, ueId , mBuf); 
+   CMCHKUNPK(SUnpkU32, ueId , mBuf);
    RETVALUE(ROK);
 }
 
@@ -859,7 +859,7 @@ Buffer *mBuf;
 #endif
 {
 TRC2(cmPkUmtsCrnti)
-CMCHKPK(SPkU16, *ueId, mBuf);
+CMCHKPK(SPkU32, *ueId, mBuf);
 RETVALUE(ROK);
 }
 

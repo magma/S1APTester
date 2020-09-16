@@ -98,7 +98,7 @@ typedef struct _nasPdnApn
 /* UE Attach request message structure */
 typedef struct _ueAttachReq
 {
-     U8 ueId;
+     U32 ueId;
      U8 attachType;
      U8 pdnType;
      U32 oldGuti; /*Check*/
@@ -146,7 +146,7 @@ typedef struct _ueAuthPrmXRES
 /* Auth Request Indication message structure */
 typedef struct _ueAuthReq
 {
-   U8 ueId;
+   U32 ueId;
    UeAuthPrmRAND authRAND;
    UeAuthPrmAUTHN authUTHN;
    UeNasKsi nasKasme;
@@ -158,21 +158,21 @@ typedef struct _ueAuthReq
 /* Attach Complete message structure */
 typedef struct _ueEmmAttachComplete
 {
-  U8 ueId;
+  U32 ueId;
   /* TODO */
 }UeEmmAttachComplete;
 
 /* Attach Accept message structure */
 typedef struct _ueEmmAttachAccept 
 {
-   U8 ueId;
+   U32 ueId;
   /* TODO */
 }UeEmmAttachAccept;
 
 /* Auth Response message structure */
 typedef struct _ueEmmAuthRsp
 {
-  U8 ueId;
+  U32 ueId;
   UeAuthPrmRAND authRAND;
   UeAuthPrmAUTHN authAUTHN;
   UeNasKsi nasKasme;
@@ -184,28 +184,28 @@ typedef struct _ueEmmAuthRsp
 /* Security Mode Command message structure */
 typedef struct _ueEmmSecModeCmd
 {
-   U8 ueId;
+   U32 ueId;
   /* TODO */
 }UeEmmSecModeCmd;
 
 /* Security Mode Complete message structure */
 typedef struct _ueEmmSecModeCmp
 {
-  U8 ueId; 
+  U32 ueId;
   /* TODO */
 }UeEmmSecModeCmp;
 
 /* Detach Request message structure */
 typedef struct _ueEmmDetachReq
 {
-  U8 ueId;
+  U32 ueId;
   /* TODO */
 }UeEmmDetachReq;
 
 /* Detach Accept message structure */
 typedef struct _ueEmmDetachAccept
 {
-  U8 ueId;
+  U32 ueId;
   /* TODO */
 }UeEmmDetachAccept;
 
