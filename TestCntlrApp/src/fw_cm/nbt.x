@@ -46,6 +46,7 @@ typedef enum _nbMsgTypes
    NB_DROP_INIT_CTXT_SETUP,
    NB_INIT_CTXT_SETUP_DROPPD_IND,
    NB_DELAY_INIT_CTXT_SETUP_RSP,
+   NB_INIT_CTXT_SETUP_RSP_FAILED_ERABS,
    NB_SEND_UE_CTXT_REL_FOR_ICS,
    NB_DELAY_UE_CTXT_REL_CMP,
    NB_MULTI_ENB_CONFIG_REQ,
@@ -355,6 +356,14 @@ typedef struct _nbDropInitCtxtSetup
    Bool isDropICSEnable;
    U32 tmrVal;
 }NbDropInitCtxtSetup;
+
+typedef struct _nbInitCtxtSetupFailedErabs {
+  U8 ueId;
+  U8 numFailedErabs;
+#define MAX_FAILED_ERABS 11
+  U8 failedErabs[MAX_FAILED_ERABS];
+} NbInitCtxtSetupFailedErabs;
+
 typedef struct _nbDelayICSRsp
 {
    U32 ueId;
@@ -451,6 +460,7 @@ typedef struct _nbtMsg
       NbInitCtxtSetupFail initCtxtSetupFail;
       NbDropInitCtxtSetup dropInitCtxtSetup;
       NbDelayICSRsp      delayInitCtxtSetupRsp;
+      NbInitCtxtSetupFailedErabs initCtxtSetupRspFailedErabs;
       NbSendUeCtxtRelForICSRsp sendUeCtxtRelForICS;
       NbNasNonDel    nasNondel;
       NbNasNonDelRsp  nasNondelRsp;

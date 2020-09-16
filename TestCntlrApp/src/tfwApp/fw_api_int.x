@@ -120,7 +120,8 @@ typedef enum {
    UE_PDN_DISCONNECT_TIMEOUT_IND,
    UE_PDN_DISCONNECT_REJ,
    UE_FW_ERAB_SETUP_REQ_FAILED_FOR_ERABS,
-   UE_AUTH_FAILURE
+   UE_AUTH_FAILURE,
+   UE_SET_INIT_CTXT_SETUP_RSP_FAILED_ERABS
 }tfwCmd;
 
 typedef enum
@@ -1324,6 +1325,11 @@ typedef struct ueDelayInitCtxtSetupRsp
    U32 tmrVal;
    Bool flag;
 }UeDelayInitCtxtSetupRsp;
+typedef struct ueInitCtxtSetupFailedErabs {
+  U8 ue_Id;
+  U8 numFailedErabs;
+  U8 failedErabs[MAX_FAILED_ERABS];
+} UeInitCtxtSetupFailedErabs;
 typedef struct ueDelayUeCtxtRelCmp
 {
    U32 ue_Id;
