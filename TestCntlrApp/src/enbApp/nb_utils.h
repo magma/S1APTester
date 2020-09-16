@@ -47,7 +47,7 @@ EXTERN S16 nbGetUeIdFromS1apId
 (
  U32 enbUeS1apId,
  U32 mmeUeS1apId,
- U8 *ueId
+ U32 *ueId
 );
 
 EXTERN S16 nbFillTknStrOSXL(

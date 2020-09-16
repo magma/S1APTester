@@ -32,7 +32,7 @@
 
 EXTERN Void nbIfmDamNbSendLmAlarm(U16, U16, U16);
 EXTERN Void  nbDamTnlCreatReq(NbDamTnlInfo*);
-EXTERN NbDamUeCb* nbDamGetUe(U8 ueId);
+EXTERN NbDamUeCb* nbDamGetUe(U32 ueId);
 
 /** @brief This function is used to configure the Data Application Module.
  *
@@ -197,7 +197,7 @@ PUBLIC S16 nbIfmDamNbTnlCreatReq
 
 PUBLIC S16 nbIfmDamHandleUeCntxtRelReq
 (
- U16 ueId,
+ U32 ueId,
  U8 causeVal,
  U8 CauseType
 )
@@ -278,7 +278,7 @@ PUBLIC S16 nbIfmDamNbTnlDelCfm
 )
 {
    Pst *pst;
-   U8 ueId  = (lclTeid & 0x00ffff00) >> 8;
+   U32 ueId  = (lclTeid & 0x00ffff00) >> 8;
 
    TRC2(nbIfmDamNbTnlDelCfm);
    if(status == LCM_PRIM_OK)
@@ -325,7 +325,7 @@ PUBLIC S16 nbIfmDamNbTnlDelCfm
  */
 PUBLIC Void nbIfmDamNbCtxtRel
 (
-U8                     ueId,
+U32                    ueId,
 U8                     causeVal,
 U8                     CauseType
 )

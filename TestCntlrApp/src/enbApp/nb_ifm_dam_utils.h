@@ -117,5 +117,5 @@ EXTERN Void cmUnpkDamCntrlReq(Pst *pst,Buffer *mBuf);
 EXTERN Void cmUnpkDamCfgCfm(Pst *pst,Buffer *mBuf);
 EXTERN Void cmUnpkDamCntrlCfm(Pst *pst,Buffer *mBuf);
 EXTERN Void cmUnPkUeDelCfm(Pst *pst,Buffer *mBuf);
-EXTERN S16 cmPkUeDelCfm(Pst*, U8);
+EXTERN S16 cmPkUeDelCfm(Pst*, U32);
 #endif /* __NBIFMDAMUTL_H__ */

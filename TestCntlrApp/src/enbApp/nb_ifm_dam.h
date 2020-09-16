@@ -237,11 +237,11 @@ EXTERN S16 nbIfmDamCfgCfm(LnbMngmt*, CmStatus*);
 EXTERN S16 nbIfmDamTnlCreatReq(NbDamTnlInfo*);
 EXTERN Void wrIfmDamWrCntrlReq(LnbMngmt *cfg);
 EXTERN Void wrIfmDamWrCfgReq(LnbMngmt *cfg);
-EXTERN S16 nbIfmDamUeDelReq(U8);
+EXTERN S16 nbIfmDamUeDelReq(U32);
 EXTERN S16 nbIfmDamErabDelReq(Void *);
 EXTERN S16 nbIfmDamUeDelCfm(U32, U16, U16);
-EXTERN Void nbIfmDamNbUeDelReq(U8);
-EXTERN S16 nbIfmDamUeRelReq(U16, U8);
+EXTERN Void nbIfmDamNbUeDelReq(U32);
+EXTERN S16 nbIfmDamUeRelReq(U32, U8);
 
 EXTERN Void  wrIfmDamSendAlarmInd(U16 category,U16 event,U16 cause);
 EXTERN S16 wrIfmDamCfgReq(LnbMngmt *cfg);
@@ -278,7 +278,7 @@ EXTERN S16 wrIfmDamChngTnlState(NbDamTnlStInfo *tnlStInfo);
 EXTERN S16 wrDamTnlStChngReq(NbDamTnlStInfo *tnlStInfo);
 
 /* Primitive to start end marker timer                                    */
-EXTERN S16 wrDamStartEndMrkrTmr(U16 cellId, U16 ueId);
+EXTERN S16 wrDamStartEndMrkrTmr(U16 cellId, U32 ueId);
 
 EXTERN S16 wrUmmPrcEgtpErrInd(U32 lclTeid, U32 numDrbs, U16 crnti);
 
@@ -305,10 +305,10 @@ EXTERN S16 wrIfmDamReestabReq(U32 transId, U16 cellId, U16 ocrnti, U16 ncrnti);
 /* RLC_DL_MAX_RETX fix */
 EXTERN S16 wrIfmDamWrReCfgReq(U32 transId,U16 cellId,U16 crnti);
 EXTERN S16 wrIfmDamReCfgReq(U32 transId,U16 cellId,U16 crnti);
-EXTERN S16 wrIfmDamStopUeTmr(U16 cellId,U16 ueId);
-EXTERN S16 wrDamStopUeTmr (U16 cellId,U16 ueId);
+EXTERN S16 wrIfmDamStopUeTmr(U16 cellId,U32 ueId);
+EXTERN S16 wrDamStopUeTmr (U16 cellId,U32 ueId);
 EXTERN S16 wrIfmDamStartInactivityTimer(U16 cellId,U16 crnti);
-EXTERN S16 wrIfmDamSetDataRcvdFlag(U16 cellId, U16 ueId);/*ccpu00138576*/
+EXTERN S16 wrIfmDamSetDataRcvdFlag(U16 cellId, U32 ueId);/*ccpu00138576*/
 
 
 #ifdef __cplusplus

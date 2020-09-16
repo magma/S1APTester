@@ -65,7 +65,7 @@ PUBLIC S16 NbHandleInitialUeMsg
    U8 offset  = 0;
    S16 ret = 0;
    if ( ROK == (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(initialUeMsg->ueId),
-      sizeof(U8),0,(PTR *)&ueCb)))
+      sizeof(U32),0,(PTR *)&ueCb)))
    {
    } else {
    NB_ALLOC(&ueCb, sizeof(NbUeCb))
@@ -173,7 +173,7 @@ PUBLIC S16 NbHandleInitialUeMsg
 #endif
 
    if (ROK != cmHashListInsert(&(nbCb.ueCbLst),(PTR)ueCb,
-                     (U8 *) &ueCb->ueId,sizeof(U8)))
+                     (U8 *) &ueCb->ueId,sizeof(U32)))
    {
       NB_FREE(ueCb, sizeof(NbUeCb))
       NB_FREE(s1apConCb, sizeof(NbS1ConCb));
@@ -376,8 +376,6 @@ PUBLIC S16 nbSendErabsInfo(NbUeCb *ueCb, NbErabLst *erabInfo,
   U8 idx = 0;
   S16 ret = ROK;
   NbuErabsInfo *msg = NULLP;
-  U8 nasPduPres = FALSE;
-  U8 sendErabFailedNotification = FALSE;
 
   NB_ALLOC(&msg, sizeof(NbuErabsInfo));
   msg->ueId = ueCb->ueId;
@@ -392,7 +390,6 @@ PUBLIC S16 nbSendErabsInfo(NbUeCb *ueCb, NbErabLst *erabInfo,
   for (idx = 0; idx < erabInfo->noOfComp; idx++) {
     msg->erabInfo->rabCbs[idx].erabId = erabInfo->erabs[idx].erabId;
     if (erabInfo->erabs[idx].nasPdu) {
-      nasPduPres = TRUE;
       NB_ALLOC(&msg->erabInfo->rabCbs[idx].nasPdu.val,
                ((erabInfo->erabs[idx].nasPdu->len + 1) * sizeof(U8)));
       msg->erabInfo->rabCbs[idx].nasPdu.pres = TRUE;
@@ -405,7 +402,6 @@ PUBLIC S16 nbSendErabsInfo(NbUeCb *ueCb, NbErabLst *erabInfo,
   /* set the datrcvd flag for ue */
   nbDamSetDatFlag(ueCb->ueId);
   if (failedErabInfo && (failedErabInfo->noOfComp > 0)) {
-    sendErabFailedNotification = TRUE;
     NB_ALLOC(&msg->failedErabList, sizeof(NbuFailedErabLst));
     msg->failedErabList->noOfFailedErabs = failedErabInfo->noOfComp;
     NB_ALLOC(&msg->failedErabList->failedErabs,
@@ -425,7 +421,8 @@ PUBLIC S16 nbSendErabsInfo(NbUeCb *ueCb, NbErabLst *erabInfo,
     }
   }
   /* Send the Erab Info Indication to UEAPP */
-  if (nasPduPres || sendErabFailedNotification) {
+  if ((erabInfo->noOfComp > 0) ||
+      (failedErabInfo && (failedErabInfo->noOfComp > 0))) {
     ret = cmPkNbuErabsInfo(&nbCb.ueAppPst, msg);
     if (ret != ROK) {
       printf("Failed to send Initial Context Setup Indication to UeApp\n");
@@ -448,7 +445,7 @@ PUBLIC S16 nbSendErabsInfo(NbUeCb *ueCb, NbErabLst *erabInfo,
 
 PUBLIC S16 nbSendS1RelIndToUeApp
 (
- U8 ueId
+ U32 ueId
 )
 {
    S16 ret = ROK;
@@ -497,7 +494,7 @@ PUBLIC S16 nbS1apFillEutranCgi
 PUBLIC S16 NbHandleUeIpInfoRsp(NbuUeIpInfoRsp *rsp)
 {
   U32 ueIpAddr = 0;
-  U8 ueId;
+  U32 ueId;
   U8 bearerId;
 
   ueId = rsp->ueId;
@@ -512,7 +509,7 @@ PUBLIC S16 NbHandleUeIpInfoRsp(NbuUeIpInfoRsp *rsp)
   RETVALUE(nbCreateUeTunnReq(ueId, ueIpAddr, bearerId, rsp));
 }
 
-PUBLIC Void nbHandleUeIpInfoReq(U8 ueId,U8 bearerId)
+PUBLIC Void nbHandleUeIpInfoReq(U32 ueId,U8 bearerId)
 {
    S16 ret             = ROK;
    NbuUeIpInfoReq *msg = NULLP;
@@ -529,7 +526,7 @@ PUBLIC Void nbHandleUeIpInfoReq(U8 ueId,U8 bearerId)
    }
 }
 
-PUBLIC S16 nbNotifyPlmnInfo(U8 ueId, NbPlmnId plmnId )
+PUBLIC S16 nbNotifyPlmnInfo(U32 ueId, NbPlmnId plmnId )
 {
   S16 ret = ROK;
   U8      pLMNId[3];

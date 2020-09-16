@@ -4880,7 +4880,7 @@ Buffer *mBuf;
 
    TRC3(cmPkCzUeInfo)
 
-   CMCHKPK(SPkU16, param->ueId, mBuf);
+   CMCHKPK(SPkU32, param->ueId, mBuf);
    CMCHKPK(SPkU32, param->peerId, mBuf);
    RETVALUE(ROK);
 }
@@ -4921,7 +4921,7 @@ Buffer *mBuf;
    TRC3(cmUnpkCzUeInfo)
 
    CMCHKUNPK(SUnpkU32, &param->peerId, mBuf);
-   CMCHKUNPK(SUnpkU16, &param->ueId, mBuf);
+   CMCHKUNPK(SUnpkU32, &param->ueId, mBuf);
    RETVALUE(ROK);
 }
 

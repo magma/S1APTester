@@ -64,12 +64,12 @@ EXTERN S16 cmUnPkUeCntxtRelReq(Pst*, Buffer*);
 
 EXTERN S16 cmPkTnlCreatReq(Pst*, NbDamTnlInfo*);
 
-EXTERN S16 cmPkUeDelReq(Pst*, U8);
+EXTERN S16 cmPkUeDelReq(Pst*, U32);
 
 EXTERN S16 cmPkErabDelReq(Pst*, Void*);
 
-EXTERN S16 cmPkDamSendCtxtRel (Pst*, U8, U8, U8);
+EXTERN S16 cmPkDamSendCtxtRel (Pst*, U32, U8, U8);
 
-EXTERN S16 cmPkUeCntxtRelReq(Pst*, U16, U8);
+EXTERN S16 cmPkUeCntxtRelReq(Pst*, U32, U8);
 /* Pack Function Prototype */
 #endif

@@ -182,8 +182,8 @@ typedef struct nluUeInfo
    NluUeEvent         event;  /*!< indicate what type of events either add new 
                                    UE or delete UE*/
    NluEcgi            ecgi;   /*!< ECGI, cell to which the UE is attached */
-   U16                crnti;  /*!< Unique identity of the UE */
-   U16                oldCrnti;  /*!< Old Unique identity of the UE */
+   U32                crnti;  /*!< Unique identity of the UE */
+   U32                oldCrnti;  /*!< Old Unique identity of the UE */
 }NluUeInfo;
 
 EXTERN S16 NlUiNluUeInd   ARGS((
@@ -215,7 +215,7 @@ typedef struct nluNghCellMeasRpt
 typedef struct nluUeMeasRpt
 {
    NluEcgi            ecgi;   /*!< ECGI, unique Identity of the eNB */
-   U16                crnti;  /*!< Unique identity of the UE */
+   U32                crnti;  /*!< Unique identity of the UE */
 #if 0   
    S16                nghCellRsrp;  /*!< RSRP of neighbor cell*/
    S16                servCellRsrp;  /*!< serv cell RSRP*/

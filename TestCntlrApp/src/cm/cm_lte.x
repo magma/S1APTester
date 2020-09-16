@@ -30,7 +30,7 @@
 #include <cm_lte.h>
 /* Packing Defines */
 #define cmPkLteRbId              SPkU8
-#define cmPkLteRnti              SPkU16
+#define cmPkLteRnti              SPkU32
 #define cmPkLteCellId            SPkU16
 #define cmPkLteRlcMode           SPkU8
 #define cmPkLteLcId              SPkU8
@@ -39,7 +39,7 @@
 
 /* Unpacking Defines */
 #define cmUnpkLteRbId            SUnpkU8
-#define cmUnpkLteRnti            SUnpkU16
+#define cmUnpkLteRnti            SUnpkU32
 #define cmUnpkLteCellId          SUnpkU16
 #define cmUnpkLteRlcMode         SUnpkU8
 #define cmUnpkLteLcId            SUnpkU8
@@ -74,7 +74,7 @@ typedef U8    CmLteRbId;
 typedef U16   CmLteCellId;
 
 /** @brief RNTI */
-typedef U16   CmLteRnti;
+typedef U32   CmLteRnti;
 
 /** @brief Mode Type TM/UM/AM */
 typedef U8    CmLteRlcMode;

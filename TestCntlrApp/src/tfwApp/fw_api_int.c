@@ -108,7 +108,7 @@ PUBLIC FwCb gfwCb;
 /* Adding UEID, epsupdate type, active flag into linked list for
  * TAU request
  */
-PRIVATE Void insertUeCb(U8 ueid, U8 epsUpdType, U8 flag, UeIdCb *ueIdCb)
+PRIVATE Void insertUeCb(U32 ueid, U8 epsUpdType, U8 flag, UeIdCb *ueIdCb)
 {
    FwCb *fwCb = NULLP;
    FW_GET_CB(fwCb);
@@ -609,7 +609,7 @@ PUBLIC S16 handlRadCapUpd(ueRadCapUpd_t *data)
 }
 
 /* Adding UEID into linked list for END TO END ATTACH */
-PRIVATE Void insert_ue_entry(U8 ueid, UeIdCb *ueIdCb)
+PRIVATE Void insert_ue_entry(U32 ueid, UeIdCb *ueIdCb)
 {
    FwCb *fwCb = NULLP;
    FW_GET_CB(fwCb);
@@ -1568,12 +1568,14 @@ PUBLIC S16 handleResetRequest(ResetReq *data)
    else if(msgReq->t.resetReq.rstType == NB_PARTIAL_RESET)
    {
       msgReq->t.resetReq.u.partialRst.numOfConn = data->r.partialRst.numOfConn;
-      FW_ALLOC_MEM(fwCb, &msgReq->t.resetReq.u.partialRst.ueIdLst,
-            msgReq->t.resetReq.u.partialRst.numOfConn);
+      FW_ALLOC_MEM(
+          fwCb, &msgReq->t.resetReq.u.partialRst.ueS1apIdPairList,
+          sizeof(NbUeS1apIdPair) * msgReq->t.resetReq.u.partialRst.numOfConn);
 
-      cmMemcpy(msgReq->t.resetReq.u.partialRst.ueIdLst,
-            data->r.partialRst.ueIdLst,
-            msgReq->t.resetReq.u.partialRst.numOfConn);
+      cmMemcpy(
+          msgReq->t.resetReq.u.partialRst.ueS1apIdPairList,
+          data->r.partialRst.ueS1apIdPairList,
+          sizeof(NbUeS1apIdPair) * msgReq->t.resetReq.u.partialRst.numOfConn);
    }
    else
    {

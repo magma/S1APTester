@@ -675,7 +675,7 @@ typedef struct ueAppConfigCompleteInd
 
 typedef struct ueConfig
 {
-   U8 ue_id;
+   U32 ue_id;
    U8 imsiLen;
    U8 imsi[15];
    U8 imei[16];
@@ -693,7 +693,7 @@ typedef struct ueConfig
 
 typedef struct ueRadCapConfig
 {
-   U8 ue_id;
+   U32 ue_id;
    Bool snd_ueCapInd;
    Bool upd_ueCapInfo;
    U16 rrcMsgLen;
@@ -708,7 +708,7 @@ typedef struct ueConfigCompleteInd
 
 typedef struct ueAttachRequest
 {
-   U8 ue_Id;
+   U32 ue_Id;
    U8 mIdType;
    U8 epsAttachType;
    U8 useOldSecCtxt;
@@ -724,7 +724,7 @@ typedef struct ueAttachRequest
 
 typedef struct ueAuthReqInd
 {
-   U8 ue_Id;
+   U32 ue_Id;
    U8 randm[16];
    U8 autn[16];
    U8 sqn[6];
@@ -747,7 +747,7 @@ typedef struct ueRandRcvd
 
 typedef struct ueAuthResp
 {
-   U8 ue_Id;
+   U32 ue_Id;
    ueSqnRcvd_t sqnRcvd;
    ueSqnRcvd_t maxSqnRcvd;
    Bool nonEPSAuthFail; /* Simulate Auth Resp with Cause #26 - non-EPS authentication unacceptable*/
@@ -756,7 +756,7 @@ typedef struct ueAuthResp
 
 typedef struct ueSecModeCmdInd
 {
-   U8 ue_Id;
+   U32 ue_Id;
    U8 nas_cyp_cfg;
    U8 nas_int_prot_cfg;
    U8 kasme[MAX_KASME_KEY];
@@ -767,12 +767,12 @@ typedef struct ueSecModeCmdInd
 
 typedef struct ueSecModeComplete
 {
-   U8 ue_Id;
+   U32 ue_Id;
 }ueSecModeComplete_t;
 
 typedef struct ueSecModeReject
 {
-   U8 ue_Id;
+   U32 ue_Id;
    U8 cause;
 }ueSecModeReject_t;
 
@@ -844,7 +844,7 @@ typedef struct ueEsmInfo
 
 typedef struct ueAttachAccept
 {
-   U8 ue_Id;
+   U32 ue_Id;
    U8 eps_Atch_resp;
    U16 t3412;
    cmGUTI guti;
@@ -859,18 +859,18 @@ typedef struct ueAttachAccept
 
 typedef struct ueAttachComplete
 {
-   U8 ue_Id;
+   U32 ue_Id;
 }ueAttachComplete_t;
 /*This message sent along with attach complete */
 typedef struct ueActvDfltEpsBearerCtxtRej
 {
-   U8 ue_Id;
+   U32 ue_Id;
    U8 bearerId;
    U8 cause;
 }ueActvDfltEpsBearerCtxtRej_t;
 typedef struct ueAttachFail
 {
-   U8 ueId;
+   U32 ueId;
    U8 ueState;
    U16 reason;
 }ueAttachFail_t;
@@ -883,7 +883,7 @@ typedef enum ueDetachType
 
 typedef struct ueDetachReq
 {
-   U8 ue_Id;
+   U32 ue_Id;
    ueDetachType_t ueDetType;
 }uedetachReq_t;
 
@@ -896,7 +896,7 @@ typedef enum ueNwInitDetType
 
 typedef struct ueNwInitDetachReq
 {
-   U8 ue_Id;
+   U32 ue_Id;
    ueNwInitDetType_t Type;
    U8 cause;
 }ueNwInitdetachReq_t;
@@ -909,7 +909,7 @@ typedef struct ueMtmsi
 
 typedef struct ueServiceReq
 {
-   U8 ue_Id;
+   U32 ue_Id;
    ueMtmsi_t ueMtmsi;
    U8 rrcCause;
 }ueserviceReq_t;
@@ -922,12 +922,12 @@ typedef struct _relCause
 
 typedef struct ueCntxtRelReq
 {
-   U8 ue_Id;
+   U32 ue_Id;
    RelCause cause;
 }ueCntxtRelReq_t;
 
 typedef struct uepdnConReq {
-  U8 ue_Id;
+  U32 ue_Id;
   U8 reqType;
   pdn_Type pdnType_pr;
   pdn_APN pdnAPN_pr;
@@ -935,7 +935,7 @@ typedef struct uepdnConReq {
 } uepdnConReq_t;
 
 typedef struct uepdnDisconnectReq {
-  U8 ue_Id;
+  U32 ue_Id;
   U8 epsBearerId;
 } uepdnDisconnectReq_t;
 
@@ -973,7 +973,7 @@ typedef struct _fwCriticalityDiag
 typedef struct fwNbErrIndMsg
 {
    U8   isUeAssoc;
-   U8   ue_Id;
+   U32  ue_Id;
    ErrCause cause;
    FwCriticalityDiag criticalityDiag;
 }fwNbErrIndMsg_t;
@@ -994,7 +994,7 @@ typedef struct _ue_Pdn_Info
 
 typedef struct uepdnConRsp
 {
-   U8 ue_Id;
+   U32 ue_Id;
    U8 status;
    union
    {  pdnConRejInfo_t conRejInfo;
@@ -1004,46 +1004,46 @@ typedef struct uepdnConRsp
 
 typedef struct uePdnConTimeOutInd
 {
-   U8 ue_Id;
+   U32 ue_Id;
 }uePdnConTimeOutInd_t;
 
 typedef struct ueServiceRejInd
 {
-   U8 ue_Id;
+   U32 ue_Id;
    U8 cause;
 }ueServiceRejInd_t;
 
 typedef struct ueDetachAcceptInd
 {
-   U8 ue_Id;
+   U32 ue_Id;
 }ueDetachAcceptInd_t;
 
 typedef struct ueTrigDetachAcceptInd
 {
-   U8 ue_Id;
+   U32 ue_Id;
 }ueTrigDetachAcceptInd_t;
 
 typedef struct ueAttachRejInd
 {
-   U8 ue_Id;
+   U32 ue_Id;
    U8 cause;
 }ueAttachRejInd_t;
 
 typedef struct ueIdentityReqInd
 {
-   U8 ue_Id;
+   U32 ue_Id;
    U8 idType;
 }ueIdentityReqInd_t;
 
 typedef struct ueIdentityResp
 {
-   U8 ue_Id;
+   U32 ue_Id;
    U8 idType;
 }ueIdentityResp_t;
 
 typedef struct ueTauReq
 {
-   U8 ue_Id;
+   U32 ue_Id;
    ueMtmsi_t ueMtmsi;
    Eps_Updt_Type type;
    U8 Actv_flag;
@@ -1051,7 +1051,7 @@ typedef struct ueTauReq
 
 typedef struct ueTauAccept
 {
-   U8 ue_Id;
+   U32 ue_Id;
    cmGUTI guti;
    U8 epsUpdateRes;
    U8 gutiChanged;
@@ -1059,19 +1059,19 @@ typedef struct ueTauAccept
 
 typedef struct ueTauRejInd
 {
-   U8 ue_Id;
+   U32 ue_Id;
    U8 cause;
 }ueTauRejInd_t;
 
 typedef struct uePagingInd
 {
-   U8 ue_Id;
+   U32 ue_Id;
    U8 domain_Type;
 }uePagingInd_t;
 
 typedef struct ueTauComplete
 {
-   U8 ue_Id;
+   U32 ue_Id;
 }ueTauComplete_t;
 
 typedef struct ueFlush
@@ -1179,7 +1179,7 @@ typedef struct _ueEsmTft
 
 typedef struct ueBearerAllocReq
 {
-   U8              ue_Id;
+   U32             ue_Id;
    U8              bearerId;
    U8              lnkEpsBearerId;
    ue_Esm_Eps_Qos  qos;
@@ -1221,7 +1221,7 @@ typedef struct _EsmTxnId
 }ue_Esm_TxnId;
 typedef struct ueActDedBearCtxtReq
 {
-   U8                   ue_Id;
+   U32                  ue_Id;
    U8                   bearerId;
    ue_Esm_Eps_Qos       epsQos;
    ue_Esm_Tft           tft;
@@ -1236,27 +1236,27 @@ typedef struct ueActDedBearCtxtReq
 
 typedef struct ueActDedBearCtxtAcc
 {
-   U8                   ue_Id;
+   U32                  ue_Id;
    U8                   bearerId;
 }UeActDedBearCtxtAcc_t;
 
 typedef struct ueActDedBearCtxtRej
 {
-   U8                   ue_Id;
+   U32                  ue_Id;
    U8                   bearerId;
    U8                   esmCause;
 }UeActDedBearCtxtRej_t;
 
 typedef struct ueDeActvBearCtxtReq
 {
-   U8 ue_Id;
+   U32 ue_Id;
    U8 bearerId;
    U8 esmCause;
 }UeDeActvBearCtxtReq_t;
 
 typedef struct ueDeActvBearCtxtAcc
 {
-   U8 ue_Id;
+   U32 ue_Id;
    U8 bearerId;
 }UeDeActvBearCtxtAcc_t;
 
@@ -1300,46 +1300,46 @@ typedef enum
 }NasNonDelCauseValTport;
 typedef struct ueNasNonDel
 {
-   U8 ue_Id;
+   U32 ue_Id;
    Bool flag;
    NasNonDelCauseType causeType;
    U32 causeVal;
 }UeNasNonDel;
 typedef struct ueInitCtxtSetupFail
 {
-   U8 ue_Id;
+   U32 ue_Id;
    Bool flag;
    U8 causeType;
    U32 causeVal;
 }ueInitCtxtSetupFail;
 typedef struct ueDropInitCtxtSetup
 {
-   U8 ue_Id;
+   U32 ue_Id;
    Bool flag;
    U32 tmrVal;
 }UeDropInitCtxtSetup;
 typedef struct ueDelayInitCtxtSetupRsp
 {
-   U8 ue_Id;
+   U32 ue_Id;
    U32 tmrVal;
    Bool flag;
 }UeDelayInitCtxtSetupRsp;
 typedef struct ueDelayUeCtxtRelCmp
 {
-   U8 ue_Id;
+   U32 ue_Id;
    U32 tmrVal;
    Bool flag;
 }UeDelayUeCtxtRelCmp;
 typedef struct ueSetCtxtRelForInitCtxtSetup
 {
-   U8 ue_Id;
+   U32 ue_Id;
    U8 causeType;
    U32 causeVal;
    Bool flag;
 }UeSetCtxtRelForInitCtxtSetup;
 typedef struct ueNasNonDelRsp
 {
-   U8 ue_Id;
+   U32 ue_Id;
 }ueNasNonDelRsp_t;
 
 typedef struct _num_Of_Enbs
@@ -1405,10 +1405,17 @@ typedef struct _fwNbS1SetupRsp
 
 typedef struct ueRadCapUpd
 {
-   U8 ue_Id;
+   U32 ue_Id;
    Bool snd_S1AP;
    radio_Cpblty radioCap_pr;
 }ueRadCapUpd_t;
+
+typedef struct _UeS1apIdPair
+{
+   U32 ueId;
+   U32 enbUeS1apId;
+   U32 mmeUeS1apId;
+} UeS1apIdPair;
 
 typedef enum
 {
@@ -1424,8 +1431,8 @@ typedef struct _CompleteReset
 
 typedef struct _PartialReset
 {
-   U16 numOfConn;
-   U8 *ueIdLst;
+   U32 numOfConn;
+   UeS1apIdPair *ueS1apIdPairList;
 }PartialReset;
 
 typedef struct _cause
@@ -1448,20 +1455,20 @@ typedef struct _resetReq
 typedef struct _fwNbS1ResetAck
 {
    U8 status;
-   U16 numOfUes;
-   U8 *ueIdLst;
+   U32 numOfUes;
+   U32 *ueIdLst;
 }FwNbS1ResetAck_t;
 
 typedef struct _fwErabRelInd_t
 {
-   U8 ueId;
+   U32 ueId;
    U8 numOfErabIds;
    U8 *erabIdLst;
 }FwErabRelInd_t;
 
 typedef struct _fwFwErabRelCmd_t
 {
-   U8 ueId;
+   U32 ueId;
    U32 enbUeS1apId;
    U32 mmeUeS1apId;
    U8 numOfErabIds;
@@ -1470,51 +1477,51 @@ typedef struct _fwFwErabRelCmd_t
 
 typedef struct _fwNbUeCtxRelInd
 {
-   U8 ueId;
+   U32 ueId;
 }FwNbUeCtxRelInd_t;
 
 typedef struct _fwNbIntCtxSetupInd
 {
-   U8 ueId;
+   U32 ueId;
    U8 status;
 }FwNbIntCtxSetupInd_t;
 
 typedef struct _fwNbIntCtxSetupDrpdInd
 {
-   U8 ueId;
+   U32 ueId;
 }FwNbIntCtxSetupDrpdInd_t;
 
 typedef struct UeEmmInformation
 {
-   U8 ue_Id;
+   U32 ue_Id;
 }ueEmmInformation_t;
 
 typedef struct UeAuthRejInd
 {
-   U8 ue_Id;
+   U32 ue_Id;
 }ueAuthRejInd_t;
 
 typedef struct UeAuthFailure {
-  U8 ue_Id;
+  U32 ue_Id;
   U8 cause;
   U8 auts[TFW_AUTS_LEN];
 } ueAuthFailure_t;
 
 typedef struct UeEmmStatus
 {
-   U8 ue_Id;
+   U32 ue_Id;
    U8 cause;
 }ueEmmStatus_t;
 
 typedef struct UeEsmInformationReq
 {
-   U8 ue_Id;
+   U32 ue_Id;
    U8 tId;
 }ueEsmInformationReq_t;
 
 typedef struct UeEsmInformationRsp
 {
-   U8 ue_Id;
+   U32 ue_Id;
    U8 tId;
    pdn_APN  pdnAPN_pr;
 }ueEsmInformationRsp_t;
@@ -1535,7 +1542,7 @@ typedef struct MultiEnbConfigReq
 
 typedef struct _fwNbPathSwReqAck
 {
-   U8 ueId;
+   U32 ueId;
 }FwNbPathSwReqAck_t;
 
 typedef struct _fwNbMmeConfigTrnsf
@@ -1549,7 +1556,7 @@ typedef struct _fwNbMmeConfigTrnsf
 
 typedef struct uePdnDisconnFail
 {
-   U8 ueId;
+   U32 ueId;
 }uePdnDisconnFail_t;
 
 typedef struct _FwFailedErablist {
@@ -1559,7 +1566,7 @@ typedef struct _FwFailedErablist {
 } FwFailedErablist;
 
 typedef struct _FwErabSetupFailedTosetup {
-  U8 ueId;
+  U32 ueId;
   U8 noOfFailedErabs;
   FwFailedErablist failedErablist[MAX_FAILED_ERABS];
 } FwErabSetupFailedTosetup;

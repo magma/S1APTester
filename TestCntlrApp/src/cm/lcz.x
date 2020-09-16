@@ -760,7 +760,7 @@ typedef struct czPeerInfo
 typedef struct czUeInfo
 {
  U32 peerId;             /**< Peer identifier. */
- U16 ueId;               /**< UE identifier. */
+ U32 ueId;               /**< UE identifier. */
 }CzUeInfo;
 
 /** 

@@ -57,8 +57,8 @@ EXTERN UeAppCb gueAppCb;
 EXTERN S16 ueDbmAddUe(UeCb *ueCb);
 EXTERN S16 ueDbmInit(Void);
 EXTERN S16 ueDbmDeInit(Void);
-EXTERN S16 ueDbmDelUe(UeAppCb *, U8 ueId);
-EXTERN S16 ueDbmFetchUe(U8 ueId, PTR *ueCb);
+EXTERN S16 ueDbmDelUe(UeAppCb *, U32 ueId);
+EXTERN S16 ueDbmFetchUe(U32 ueId, PTR *ueCb);
 EXTERN S16 ueDbmDelAllUe(Void);
 EXTERN S16 ueDbmFetchUeWithS_TMSI(UePagingMsg *p_ueMsg, PTR *ueCb);
 
@@ -111,7 +111,7 @@ PUBLIC S16 ueDbmAddUe(UeCb *ueCb)
 
 #ifdef UEHASHLIST
    ret = cmHashListInsert(&(ueAppCb->ueLstCp), (PTR)ueCb,
-         (U8 *)&ueCb->ueId, sizeof(U8));
+         (U8 *)&ueCb->ueId, sizeof(U32));
    if (ret != ROK)
    {
       RETVALUE(ret);
@@ -124,14 +124,14 @@ PUBLIC S16 ueDbmAddUe(UeCb *ueCb)
    RETVALUE(ret);
 }
 
-PUBLIC S16 ueDbmDelUe(UeAppCb *ueAppCb, U8 ueId)
+PUBLIC S16 ueDbmDelUe(UeAppCb *ueAppCb, U32 ueId)
 {
    S16 ret =  ROK;
 #ifdef UEHASHLIST
    UeCb *ueCb = NULLP;
 #else
-   U8 cnt = 0;
-   U8 cnt2 = 0;
+   U32 cnt = 0;
+   U32 cnt2 = 0;
 #endif
    UE_GET_CB(ueAppCb);
 
@@ -180,14 +180,14 @@ PUBLIC S16 ueDbmDelUe(UeAppCb *ueAppCb, U8 ueId)
    RETVALUE(ret);
 }
 
-PUBLIC S16 ueDbmFetchUe(U8 ueId, PTR *ueCb)
+PUBLIC S16 ueDbmFetchUe(U32 ueId, PTR *ueCb)
 {
    UeAppCb *ueAppCb = NULLP;
 #ifdef UEHASHLIST
    S16 ret = ROK;
    UeCb *ueCb1 = (UeCb *)(*ueCb); 
 #else
-   U8 cnt = 0;
+   U32 cnt = 0;
 #endif
    UE_GET_CB(ueAppCb);
 
@@ -216,7 +216,7 @@ PUBLIC S16 ueDbmFetchUeWithS_TMSI(UePagingMsg *p_ueMsg, PTR *ueCb)
 #ifdef UEHASHLIST
    UeCb *ueCbEnt = NULLP;
 #else
-   U8 cnt = 0;
+   U32 cnt = 0;
 #endif
 
    UE_GET_CB(ueAppCb);
@@ -262,7 +262,7 @@ PUBLIC S16 ueDbmDelAllUe(Void)
 #ifdef UEHASHLIST
    UeCb *ueCb = NULLP;
 #else
-   U8 cnt = 0;
+   U32 cnt = 0;
 #endif
    UE_GET_CB(ueAppCb);
 
