@@ -105,6 +105,7 @@ PRIVATE Void handlPdnDisconnectReq(uepdnDisconnectReq_t *data);
 EXTERN Void fwHndlPdnDisconnTmrExp(PTR cb);
 PRIVATE Void
 handleUeInitCtxtSetupRspFailedErabs(UeInitCtxtSetupFailedErabs *data);
+PUBLIC S16 handleStdAloneActvDfltEpsBearerContextRej(ueActvDfltEpsBearerCtxtRej_t *data);
 PUBLIC FwCb gfwCb;
 
 /* Adding UEID, epsupdate type, active flag into linked list for
@@ -2392,7 +2393,12 @@ PUBLIC S16 tfwApi
         }
         break;
       }
-
+      case UE_STANDALONE_ACTV_DEFAULT_EPS_BEARER_CNTXT_REJECT:
+      {
+         FW_LOG_DEBUG(fwCb, "UE_STANDALONE_ACTV_DEFAULT_EPS_BEARER_CNTXT_REJECT message");
+	 handleStdAloneActvDfltEpsBearerContextRej((ueActvDfltEpsBearerCtxtRej_t*)msg);
+	 break;
+      }
      default:
       {
          FW_LOG_ERROR(fwCb, "Invalid Message");
@@ -3343,3 +3349,36 @@ PRIVATE Void handlPdnDisconnectReq(uepdnDisconnectReq_t *data) {
   }
   RETVOID;
 }
+/*
+ *
+ *   Fun:   handleStdAloneActvDfltEpsBearerContextRej
+ *
+ *   Desc:  This function is used to handle standalone Activate Default Eps Bearer context reject message
+ *          from Test Controller
+ *
+ *   Ret:   None
+ *
+ *   Notes: None
+ *
+ *   File:  fw_api_int.c
+ *
+ */
+PUBLIC S16 handleStdAloneActvDfltEpsBearerContextRej(ueActvDfltEpsBearerCtxtRej_t *data)
+{
+   FwCb *fwCb = NULLP;
+   UetMessage *uetMsg = NULLP;
+   UeEsmActDfltBearCtxtRej *ueActDfltBearCtxtRej = NULLP;
+   FW_GET_CB(fwCb);
+   FW_LOG_ENTERFN(fwCb);
+
+   FW_ALLOC_MEM(fwCb, &uetMsg, sizeof(UetMessage));
+   uetMsg->msgType = UE_STANDALONE_DEFAULT_EPS_BER_REJ;
+   ueActDfltBearCtxtRej = &uetMsg->msg.ueActDfltBerRej;
+
+   ueActDfltBearCtxtRej->ueId = data->ue_Id;
+   ueActDfltBearCtxtRej->bearerId = data->bearerId;
+   ueActDfltBearCtxtRej->esmCause = data->cause;
+   fwSendToUeApp(uetMsg);
+   FW_LOG_EXITFN(fwCb, ROK);
+}
+
