@@ -2757,6 +2757,176 @@ Buffer *mBuf;
 #endif
 }
 
+/*
+ *
+ *    Fun:    cmPkNbuUeIpInfoRej
+ *
+ *    Desc:   pack the Ue Ip Info rej msg
+ *
+ *    Ret:    ROK  -ok
+ *
+ *    Notes:  None
+ *
+ *    File:
+ *
+ */
+#ifdef ANSI
+PUBLIC S16 cmPkNbuUeIpInfoRej
+(
+ Pst *pst,
+ NbuUeIpInfoRej *msg
+)
+#else
+PUBLIC S16 cmPkNbuUeIpInfoRej (pst, msg)
+Pst *pst;
+NbuUeIpInfoRej *msg;
+#endif
+{
+   S16 ret1;
+   Buffer *mBuf;
+   mBuf = NULLP;
+   TRC3(cmPkNbuUeIpInfoRej)
+
+      if((ret1 = SGetMsg(pst->region, pst->pool, &mBuf)) != ROK)
+      {
+#if (ERRCLASS & ERRCLS_ADD_RES)
+         if(ret1 != ROK)
+         {
+            SLogError(pst->srcEnt, pst->srcInst, pst->srcProcId,
+                  __FILE__, __LINE__, (ErrCls)ERRCLS_ADD_RES,
+                  (ErrVal)ENBU014, (ErrVal)0, "SGetMsg() failed");
+         }
+#endif /*  ERRCLASS & ERRCLS_ADD_RES  */
+         RETVALUE(ret1);
+      }
+   switch(pst->selector)
+   {
+      case NBU_SEL_LC:
+#ifdef LCNBU
+         ret1 = cmPkUeIpInfoRej(msg, EVTNBUUEIPINFOREJ,mBuf);
+#if(ERRCLASS & ERRCLS_ADD_RES)
+         if(ret1 != ROK)
+         {
+            SPutMsg(mBuf);
+            SLogError(pst->srcEnt, pst->srcInst, pst->srcProcId,
+                  __FILE__, __LINE__, (ErrCls)ERRCLS_ADD_RES,
+                  (ErrVal)ENBU015, (ErrVal)ret1, "Packing failure");
+            RETVALUE( ret1 );
+         }
+#endif /*  ERRCLASS & ERRCLS_ADD_RES  */
+         break;
+#endif
+#ifdef LWLCNBU
+      case NBU_SEL_LWLC:
+         CMCHKPKLOG(cmPkPtr, (PTR)msg, mBuf, ENBU016, pst);
+         break;
+#endif
+     default:
+         break;
+   }
+   pst->event = (Event)EVTNBUUEIPINFOREJ;
+   RETVALUE(SPstTsk(pst,mBuf));
+}
+
+#ifdef LCNBU
+/*
+ *
+ *     Fun:     cmPkUeIpInfoRej
+ *
+ *     Desc:    pack NbuUeIpInfoRej
+ *
+ *     Ret:     ROK  -ok
+ *
+ *     Notes:   None
+ *
+ *     File:    nbu.c
+ *
+ */
+
+PRIVATE S16 cmPkUeIpInfoRej
+(
+NbuUeIpInfoRej *param,
+ Buffer *mBuf
+)
+{
+   TRC3(cmPkUeIpInfoRej)
+   RETVALUE(ROK);
+} /*end of function cmPkUeIpInfoRej*/
+
+#endif
+
+/*
+ *
+ *    Fun:    cmUnPkNbuUeIpInfoRej
+ *
+ *    Desc:   unpack NbuUeIpInfoRej Msg
+ *
+ *    Ret:    ROK  -ok
+ *
+ *    Notes:  None
+ *
+ *    File:   nbu.c
+ *
+ */
+
+#ifdef ANSI
+PUBLIC S16 cmUnPkNbuUeIpInfoRej
+(
+ NbuUeIpInfoRejHdl func,
+ Pst *pst,
+ Buffer *mBuf
+ )
+#else
+PUBLIC S16 cmUnPkNbuUeIpInfoRej(func, pst, mBuf)
+NbuUeIpInfoRejHdl  func;
+Pst *pst;
+Buffer *mBuf;
+#endif
+{
+#ifdef LWLCNBU
+   S16 ret1 = ROK;
+   NbuUeIpInfoRej *msg = NULLP;
+#else
+   NbuUeIpInfoRej msg;
+#endif
+
+   TRC3(cmUnPkNbuUeIpInfoRej)
+      switch(pst->selector)
+      {
+#ifdef LCNBU
+         case NBU_SEL_LC:
+            ret1 = cmUnPkUeIpInfoRej((NbuUeIpInfoRej *)&msg,mBuf);
+#if(ERRCLASS & ERRCLS_DEBUG)
+            if(ret1 != ROK)
+            {
+               SPutMsg(mBuf);
+               SLogError(pst->dstEnt, pst->dstInst, pst->dstProcId,
+                     __FILE__, __LINE__, (ErrCls)ERRCLS_DEBUG,
+                     (ErrVal)ENBU024, (ErrVal)ret1, "Unpacking failure");
+               RETVALUE( ret1 );
+            }
+#endif /*  ERRCLASS & ERRCLS_DEBUG   */
+            break;
+#endif
+#ifdef LWLCNBU
+         case  NBU_SEL_LWLC:
+            CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &msg, mBuf, (ErrVal)ENBU025, pst);
+            break;
+#endif
+         default:
+            break;
+      }
+
+   SPutMsg(mBuf);
+#ifdef LWLCNBU
+   ret1 = (*func)(pst, msg);
+   SPutSBuf(pst->region, pst->pool, (Data *) msg, sizeof(NbuUeIpInfoRej));
+   RETVALUE(ret1);
+#else
+   RETVALUE((*func)(pst, &msg));
+#endif
+}
+
 /********************************************************************30**
 
          End of file:

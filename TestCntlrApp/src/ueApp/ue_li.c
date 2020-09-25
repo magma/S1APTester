@@ -111,6 +111,7 @@ EXTERN S16 ueSendUeRadCapInd(UeCb *ueCb);
 EXTERN S16 ueSendErabRelInd(NbuErabRelIndList *pErabRel, Pst *pst);
 PUBLIC S16 UeLiNbuErabRelInd(Pst *pst,NbuErabRelIndList *msg);
 EXTERN S16 UeLiNbuNotifyPlmnInfo(Pst *pst,NbuNotifyPlmnInfo  *p_ueMsg);
+EXTERN S16 UeLiNbuSendUeIpInfoRej(Pst *pst,NbuUeIpInfoRej   *ueInfo);
 
 PUBLIC S16 ueAppBldAndSndIpInfoRspToNb(UeCb *ueCb, U8 bearerId, Pst *pst)
 {
@@ -477,5 +478,16 @@ PUBLIC S16 UeLiNbuNotifyPlmnInfo
         plmn_idx, ueCb->srvPlmn[plmn_idx]);
    }
    RETVALUE(ret);
+}
+
+PUBLIC S16 ueAppBldAndSndIpInfoRejToNb(UeCb *ueCb, U8 bearerId, Pst *pst)
+{
+  S16 ret = ROK;
+  NbuUeIpInfoRej *ueIpInfoRej = NULLP;
+  ueIpInfoRej = (NbuUeIpInfoRej *)ueAlloc(sizeof(NbuUeIpInfoRej));
+  ueIpInfoRej->ueId = ueCb->ueId;
+  ueIpInfoRej->bearerId = bearerId;
+  ret = UeLiNbuSendUeIpInfoRej(pst, ueIpInfoRej);
+  RETVALUE(ret);
 }
 

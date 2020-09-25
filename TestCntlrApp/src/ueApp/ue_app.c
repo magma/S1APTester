@@ -8005,6 +8005,7 @@ PUBLIC S16 ueUiProcIpInfoReqMsg(UeCb *p_ueCb, U8 bearerId)
    if (p_ueCb->is_actv_dflt_eps_ber_ctxt_rej) {
      p_ueCb->is_actv_dflt_eps_ber_ctxt_rej = FALSE;
      UE_LOG_DEBUG(ueAppCb, "Dropping IpInfoReqMsg as is_actv_dflt_eps_ber_ctxt_rej flag is set \n");
+     ueAppBldAndSndIpInfoRejToNb(p_ueCb, bearerId, &ueAppCb->nbPst);
      RETVALUE(ROK);
    }
    ueAppBldAndSndIpInfoRspToNb(p_ueCb, bearerId, &ueAppCb->nbPst);
