@@ -6799,7 +6799,6 @@ PRIVATE S16 uefillDefEsmInfoToUeCb
    UE_GET_CB(ueAppCb);
    UE_LOG_ENTERFN(ueAppCb);
    params = &ueCb->ueRabCb[drbId];
-   printf("Inside uefillDefEsmInfoToUeCb\n");
    actReq = &evnt->m.esmEvnt->u.actReq;
    ueCb->ueRabCb[drbId].drbId = drbId;
    ueCb->ueRabCb[drbId].epsBearerId = epsBearerId;
@@ -7186,7 +7185,6 @@ PRIVATE S16 ueAppEsmHdlIncUeEvnt
    {
       case CM_ESM_MSG_ACTV_DEF_BEAR_REQ:
          {
-            printf("In CM_ESM_MSG_ACTV_DEF_BEAR_REQ\n");
             ret = ueAppEsmHndlIncActDefBearerReq(esmCb, evnt, ueCb, &drbId,
                 esmMsg->bearerId);
             UE_LOG_DEBUG(ueAppCb, "Received CM_ESM_MSG_ACTV_DEF_BEAR_REQ: MSG");
