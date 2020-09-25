@@ -5532,12 +5532,12 @@ PUBLIC S16 ueUiProcessTfwMsg(UetMessage *p_ueMsg, Pst *pst)
         ret = ueProcUeAuthFailure(p_ueMsg, pst);
         break;
       }
-      case UE_STANDALONE_DEFAULT_EPS_BER_REJ:
-      {
-         UE_LOG_DEBUG(ueAppCb, "Received UE_STANDALONE_DEFAULT_EPS_BER_REJ from TFW");
-         ret = ueProcUeStandAloneActvDfltBerCtxtRej(p_ueMsg, pst);
+      case UE_STANDALONE_DEFAULT_EPS_BER_REJ: {
+        UE_LOG_DEBUG(ueAppCb,
+                     "Received UE_STANDALONE_DEFAULT_EPS_BER_REJ from TFW");
+        ret = ueProcUeStandAloneActvDfltBerCtxtRej(p_ueMsg, pst);
 
-         break;
+        break;
       }
       default:
       {
@@ -6989,70 +6989,58 @@ PRIVATE S16 uefillDefEsmInfoToUeCb
  *       File:  ue_app.c
  *
  */
-PRIVATE S16 ueAppEsmHndlIncActDefBearerReq
-(
- UeEsmCb *esmCb,
- CmNasEvnt *evnt,
- UeCb *ueCb,
- U8 *AllocDrbId,
- U8 epsBearerId
-)
-{
-   S16 ret = ROK;
-   UeAppCb *ueAppCb = NULLP;
-   CmInetNetAddr *selfAddr = NULLP;
-   CmEsmPdnAdd *pAddr = NULLP;
-   U8 drbId = 0;
+PRIVATE S16 ueAppEsmHndlIncActDefBearerReq(UeEsmCb *esmCb, CmNasEvnt *evnt,
+                                           UeCb *ueCb, U8 *AllocDrbId,
+                                           U8 epsBearerId) {
+  S16 ret = ROK;
+  UeAppCb *ueAppCb = NULLP;
+  CmInetNetAddr *selfAddr = NULLP;
+  CmEsmPdnAdd *pAddr = NULLP;
+  U8 drbId = 0;
 
-   UE_GET_CB(ueAppCb);
-   UE_LOG_ENTERFN(ueAppCb);
+  UE_GET_CB(ueAppCb);
+  UE_LOG_ENTERFN(ueAppCb);
 
-   UE_LOG_DEBUG(ueAppCb, "Activate default bearer request");
+  UE_LOG_DEBUG(ueAppCb, "Activate default bearer request");
 
-   /* Update procedure transaction state */
-   esmCb->pState = UE_ESM_ST_PROC_TXN_INACTIVE;
+  /* Update procedure transaction state */
+  esmCb->pState = UE_ESM_ST_PROC_TXN_INACTIVE;
 
-   /* update bearer Id */
-   esmCb->bId = evnt->m.esmEvnt->bearerId;
+  /* update bearer Id */
+  esmCb->bId = evnt->m.esmEvnt->bearerId;
 
-   ueAppUtlMovEsmCbTransToBid(esmCb, ueCb);
-   /* If is_actv_dflt_eps_ber_ctxt_rej flage is set
-    * do not create context for the bearer*/
-   if (ueCb->is_actv_dflt_eps_ber_ctxt_rej) {
-     RETVALUE(ROK);
-   }
-   /* Update pdn address in ue context */
-   selfAddr = &(ueCb->ueCtxt.selfAddr);
-   pAddr    = &evnt->m.esmEvnt->u.actReq.pAddr;
+  ueAppUtlMovEsmCbTransToBid(esmCb, ueCb);
+  /* If is_actv_dflt_eps_ber_ctxt_rej flage is set
+   * do not create context for the bearer*/
+  if (ueCb->is_actv_dflt_eps_ber_ctxt_rej) {
+    RETVALUE(ROK);
+  }
+  /* Update pdn address in ue context */
+  selfAddr = &(ueCb->ueCtxt.selfAddr);
+  pAddr = &evnt->m.esmEvnt->u.actReq.pAddr;
 
-   if(pAddr->pdnType == CM_ESM_PDN_IPV4)
-   {
-      selfAddr->u.ipv4NetAddr = (((U32)(pAddr->addrInfo[0]) << 24) |
-            ((U32)(pAddr->addrInfo[1]) << 16) |
-            ((U32)(pAddr->addrInfo[2]) << 8) |
-            (U32)(pAddr->addrInfo[3]));
-   }
-   else
-   {
+  if (pAddr->pdnType == CM_ESM_PDN_IPV4) {
+    selfAddr->u.ipv4NetAddr =
+        (((U32)(pAddr->addrInfo[0]) << 24) | ((U32)(pAddr->addrInfo[1]) << 16) |
+         ((U32)(pAddr->addrInfo[2]) << 8) | (U32)(pAddr->addrInfo[3]));
+  } else {
 #ifdef IPV6_SUPPORTED
-      cmMemcpy((U8 *)&selfAddr->u.ipv6NetAddr, (U8 *)pAddr->addrInfo,
-            pAddr->len);
+    cmMemcpy((U8 *)&selfAddr->u.ipv6NetAddr, (U8 *)pAddr->addrInfo, pAddr->len);
 #endif
-   }
+  }
 
-   ret = ueAppGetDrb(ueCb, &drbId);
-   if (ret != ROK)
-   {
-      UE_LOG_ERROR(ueAppCb, "DRB Cb not found");
-      RETVALUE(ret);
-   }
+  ret = ueAppGetDrb(ueCb, &drbId);
+  if (ret != ROK) {
+    UE_LOG_ERROR(ueAppCb, "DRB Cb not found");
+    RETVALUE(ret);
+  }
 
-   ueCb->numRabs++;
+  ueCb->numRabs++;
 
-   ret = uefillDefEsmInfoToUeCb(ueCb, evnt, (drbId - 1), epsBearerId);
+  ret = uefillDefEsmInfoToUeCb(ueCb, evnt, (drbId - 1), epsBearerId);
 
-   *AllocDrbId = drbId;
-   RETVALUE(ROK);
+  *AllocDrbId = drbId;
+  RETVALUE(ROK);
 } /* ueAppEsmHndlIncActDefBearerReq */
 
 PRIVATE S16 ueAppEsmHndlIncPdnConRej
@@ -7989,25 +7977,25 @@ PUBLIC S16 ueUiProcErabsInfoMsg(Pst *pst, NbuErabsInfo *pNbuErabsInfo)
    UE_LOG_EXITFN(ueAppCb, ret);
 }
 
-PUBLIC S16 ueUiProcIpInfoReqMsg(UeCb *p_ueCb, U8 bearerId)
-{
-   UeAppCb *ueAppCb = NULLP;
-   UE_GET_CB(ueAppCb);
-   UE_LOG_ENTERFN(ueAppCb);
+PUBLIC S16 ueUiProcIpInfoReqMsg(UeCb *p_ueCb, U8 bearerId) {
+  UeAppCb *ueAppCb = NULLP;
+  UE_GET_CB(ueAppCb);
+  UE_LOG_ENTERFN(ueAppCb);
 
-   p_ueCb->ecmCb.state = UE_ECM_CONNECTED;
-   /* enbApp creates a tunnel after receiving IpInfoRsp message.
-    * If is_actv_dflt_eps_ber_ctxt_rej flag is set, drop IpInfoReqMsg
-    * message so that enbApp does not create a tunnel for this bearer
-    */
-   if (p_ueCb->is_actv_dflt_eps_ber_ctxt_rej) {
-     p_ueCb->is_actv_dflt_eps_ber_ctxt_rej = FALSE;
-     UE_LOG_DEBUG(ueAppCb, "Dropping IpInfoReqMsg as is_actv_dflt_eps_ber_ctxt_rej flag is set \n");
-     ueAppBldAndSndIpInfoRejToNb(p_ueCb, bearerId, &ueAppCb->nbPst);
-     RETVALUE(ROK);
-   }
-   ueAppBldAndSndIpInfoRspToNb(p_ueCb, bearerId, &ueAppCb->nbPst);
-   RETVALUE(ROK);
+  p_ueCb->ecmCb.state = UE_ECM_CONNECTED;
+  /* enbApp creates a tunnel after receiving IpInfoRsp message.
+   * If is_actv_dflt_eps_ber_ctxt_rej flag is set, drop IpInfoReqMsg
+   * message so that enbApp does not create a tunnel for this bearer
+   */
+  if (p_ueCb->is_actv_dflt_eps_ber_ctxt_rej) {
+    p_ueCb->is_actv_dflt_eps_ber_ctxt_rej = FALSE;
+    UE_LOG_DEBUG(ueAppCb, "Dropping IpInfoReqMsg as "
+                          "is_actv_dflt_eps_ber_ctxt_rej flag is set \n");
+    ueAppBldAndSndIpInfoRejToNb(p_ueCb, bearerId, &ueAppCb->nbPst);
+    RETVALUE(ROK);
+  }
+  ueAppBldAndSndIpInfoRspToNb(p_ueCb, bearerId, &ueAppCb->nbPst);
+  RETVALUE(ROK);
 }
 
 /*
@@ -9544,29 +9532,30 @@ void ueSendErabSetupRspForFailedBearers(NbuErabsInfo *pNbuErabsInfo) {
  *       File:  ue_app.c
  *
  */
-PRIVATE S16 ueProcUeStandAloneActvDfltBerCtxtRej(UetMessage *p_ueMsg, Pst *pst)
-{
-   S16 ret = ROK;
-   U32  ueId;
-   UeAppCb *ueAppCb = NULLP;
-   UeCb *ueCb = NULLP;
+PRIVATE S16 ueProcUeStandAloneActvDfltBerCtxtRej(UetMessage *p_ueMsg,
+                                                 Pst *pst) {
+  S16 ret = ROK;
+  U32 ueId;
+  UeAppCb *ueAppCb = NULLP;
+  UeCb *ueCb = NULLP;
 
-   UE_GET_CB(ueAppCb);
-   UE_LOG_ENTERFN(ueAppCb);
-   UE_LOG_DEBUG(ueAppCb, "Processing standalone activate default EPS bearer context reject message from TFWAPP");
+  UE_GET_CB(ueAppCb);
+  UE_LOG_ENTERFN(ueAppCb);
+  UE_LOG_DEBUG(ueAppCb, "Processing standalone activate default EPS bearer "
+                        "context reject message from TFWAPP");
 
-   ueId = p_ueMsg->msg.ueActDfltBerRej.ueId;
-   ret = ueDbmFetchUe(ueId,(PTR*)&ueCb);
-   if( ret != ROK )
-   {
-      UE_LOG_ERROR(ueAppCb, "UeCb List NULL ueId = %d", ueId);
-      RETVALUE(ret);
-   }
-   /* mark as ue connected */
-   ueCb->is_actv_dflt_eps_ber_ctxt_rej = TRUE;
-   ueCb->actv_dflt_eps_bear_ctxt_reject_cause = p_ueMsg->msg.ueActDfltBerRej.esmCause;
+  ueId = p_ueMsg->msg.ueActDfltBerRej.ueId;
+  ret = ueDbmFetchUe(ueId, (PTR *)&ueCb);
+  if (ret != ROK) {
+    UE_LOG_ERROR(ueAppCb, "UeCb List NULL ueId = %d", ueId);
+    RETVALUE(ret);
+  }
+  /* mark as ue connected */
+  ueCb->is_actv_dflt_eps_ber_ctxt_rej = TRUE;
+  ueCb->actv_dflt_eps_bear_ctxt_reject_cause =
+      p_ueMsg->msg.ueActDfltBerRej.esmCause;
 
-   UE_LOG_EXITFN(ueAppCb, ret);
+  UE_LOG_EXITFN(ueAppCb, ret);
 }
 
 /*
@@ -9583,81 +9572,78 @@ PRIVATE S16 ueProcUeStandAloneActvDfltBerCtxtRej(UetMessage *p_ueMsg, Pst *pst)
  *
  */
 
-PRIVATE S16 ueAppBuildAndSendActDefltBerContextReject(UeCb *ueCb, U8 bearerId)
-{
-   S16 ret = ROK;
-   U8 isPlainMsg = TRUE;
-   UeAppMsg srcMsg;
-   UeAppMsg dstMsg;
-   UeAppCb *ueAppCb = NULLP;
-   CmNasEvnt           *bearerRejEvnt = NULLP;
-   NhuDedicatedInfoNAS nasEncPdu;
-   NbuUlNasMsg *nbUeBearerRejReq = NULLP;
+PRIVATE S16 ueAppBuildAndSendActDefltBerContextReject(UeCb *ueCb, U8 bearerId) {
+  S16 ret = ROK;
+  U8 isPlainMsg = TRUE;
+  UeAppMsg srcMsg;
+  UeAppMsg dstMsg;
+  UeAppCb *ueAppCb = NULLP;
+  CmNasEvnt *bearerRejEvnt = NULLP;
+  NhuDedicatedInfoNAS nasEncPdu;
+  NbuUlNasMsg *nbUeBearerRejReq = NULLP;
 
-   UE_GET_CB(ueAppCb);
-   UE_LOG_ENTERFN(ueAppCb);
+  UE_GET_CB(ueAppCb);
+  UE_LOG_ENTERFN(ueAppCb);
 
+  ret = ueAppUtlBldActDfltBerContextReject(ueCb, &bearerRejEvnt, bearerId);
+  if (ret != ROK) {
+    UE_LOG_ERROR(ueAppCb, "Building Activate Default Bearer Reject failed");
+    RETVALUE(ret);
+  }
 
-   ret = ueAppUtlBldActDfltBerContextReject(ueCb,&bearerRejEvnt,bearerId);
-   if (ret != ROK) {
-     UE_LOG_ERROR(ueAppCb, "Building Activate Default Bearer Reject failed");
-     RETVALUE(ret);
-   }
+  bearerRejEvnt->secHT = CM_NAS_SEC_HDR_TYPE_INT_PRTD_ENC;
+  if ((ret = ueAppEsmHdlOutUeEvnt(bearerRejEvnt, ueCb)) != ROK) {
+    UE_LOG_ERROR(ueAppCb, "Handling Activate Default Bearer Reject failed \n");
+    RETVALUE(RFAILED);
+  }
 
-   bearerRejEvnt->secHT = CM_NAS_SEC_HDR_TYPE_INT_PRTD_ENC;
-   if ((ret = ueAppEsmHdlOutUeEvnt(bearerRejEvnt,ueCb))!= ROK) {
-     UE_LOG_ERROR(ueAppCb, "Handling Activate Default Bearer Reject failed \n");
-     RETVALUE(RFAILED);
-   }
+  cmMemset((U8 *)&nasEncPdu, 0, sizeof(NhuDedicatedInfoNAS));
 
-   cmMemset((U8 *)&nasEncPdu, 0, sizeof(NhuDedicatedInfoNAS));
-
-   /* Encode the PDU */
-   ret = ueAppEdmEncode(bearerRejEvnt, &nasEncPdu);
-   if (ret != ROK) {
-      UE_LOG_ERROR(ueAppCb, "Activate Default Bearer Reject Failed");
+  /* Encode the PDU */
+  ret = ueAppEdmEncode(bearerRejEvnt, &nasEncPdu);
+  if (ret != ROK) {
+    UE_LOG_ERROR(ueAppCb, "Activate Default Bearer Reject Failed");
+    CM_FREE_NASEVNT(&bearerRejEvnt);
+    RETVALUE(ret);
+  }
+  /** Integrity Protected **/
+  if (CM_EMM_SEC_HDR_TYPE_PLAIN_NAS_MSG != bearerRejEvnt->secHT) {
+    isPlainMsg = FALSE;
+    srcMsg.val = nasEncPdu.val;
+    srcMsg.len = nasEncPdu.len;
+    ret = ueAppCmpUplnkSec(&ueCb->secCtxt, bearerRejEvnt->secHT, &srcMsg,
+                           &dstMsg);
+    if (ROK != ret) {
+      UE_LOG_ERROR(ueAppCb, "Uplink Security Failed");
+      EDM_FREE(nasEncPdu.val, CM_MAX_EMM_ESM_PDU);
+      bearerRejEvnt->pdu = NULLP;
       CM_FREE_NASEVNT(&bearerRejEvnt);
       RETVALUE(ret);
-   }
-   /** Integrity Protected **/
-   if (CM_EMM_SEC_HDR_TYPE_PLAIN_NAS_MSG != bearerRejEvnt->secHT) {
-     isPlainMsg = FALSE;
-     srcMsg.val = nasEncPdu.val;
-     srcMsg.len = nasEncPdu.len;
-     ret = ueAppCmpUplnkSec(&ueCb->secCtxt, bearerRejEvnt->secHT, &srcMsg,
-                             &dstMsg);
-     if (ROK != ret) {
-       UE_LOG_ERROR(ueAppCb, "Uplink Security Failed");
-       EDM_FREE(nasEncPdu.val, CM_MAX_EMM_ESM_PDU);
-       bearerRejEvnt->pdu = NULLP;
-       CM_FREE_NASEVNT(&bearerRejEvnt);
-       RETVALUE(ret);
-     }
-     EDM_FREE(nasEncPdu.val, CM_MAX_EMM_ESM_PDU);
-     nasEncPdu.val = dstMsg.val;
-     nasEncPdu.len = dstMsg.len;
-   }
-   CM_FREE_NASEVNT(&bearerRejEvnt);
+    }
+    EDM_FREE(nasEncPdu.val, CM_MAX_EMM_ESM_PDU);
+    nasEncPdu.val = dstMsg.val;
+    nasEncPdu.len = dstMsg.len;
+  }
+  CM_FREE_NASEVNT(&bearerRejEvnt);
 
-   nbUeBearerRejReq = (NbuUlNasMsg *)ueAlloc(sizeof(NbuUlNasMsg));
-   nbUeBearerRejReq->ueId = ueCb->ueId;
-   nbUeBearerRejReq->nasPdu.pres = TRUE;
-   nbUeBearerRejReq->nasPdu.len = nasEncPdu.len;
-   nbUeBearerRejReq->nasPdu.val = (U8 *)ueAlloc(nbUeBearerRejReq->nasPdu.len);
-   cmMemcpy((U8 *)nbUeBearerRejReq->nasPdu.val, nasEncPdu.val,
-         nbUeBearerRejReq->nasPdu.len);
+  nbUeBearerRejReq = (NbuUlNasMsg *)ueAlloc(sizeof(NbuUlNasMsg));
+  nbUeBearerRejReq->ueId = ueCb->ueId;
+  nbUeBearerRejReq->nasPdu.pres = TRUE;
+  nbUeBearerRejReq->nasPdu.len = nasEncPdu.len;
+  nbUeBearerRejReq->nasPdu.val = (U8 *)ueAlloc(nbUeBearerRejReq->nasPdu.len);
+  cmMemcpy((U8 *)nbUeBearerRejReq->nasPdu.val, nasEncPdu.val,
+           nbUeBearerRejReq->nasPdu.len);
 
-   if (isPlainMsg) {
-     EDM_FREE(nasEncPdu.val, CM_MAX_EMM_ESM_PDU);
-   }
+  if (isPlainMsg) {
+    EDM_FREE(nasEncPdu.val, CM_MAX_EMM_ESM_PDU);
+  }
 
-   ret = ueSendUlNasMsgToNb(nbUeBearerRejReq, &ueAppCb->nbPst);
-   if (ret != ROK) {
-     UE_LOG_ERROR(ueAppCb, "Sending Activate Default Berarer Reject to "\
-           "Enodeb Failed");
-     ret = RFAILED;
-   }
+  ret = ueSendUlNasMsgToNb(nbUeBearerRejReq, &ueAppCb->nbPst);
+  if (ret != ROK) {
+    UE_LOG_ERROR(ueAppCb, "Sending Activate Default Berarer Reject to "
+                          "Enodeb Failed");
+    ret = RFAILED;
+  }
 
-   UE_LOG_EXITFN(ueAppCb, ret);
+  UE_LOG_EXITFN(ueAppCb, ret);
 }
-

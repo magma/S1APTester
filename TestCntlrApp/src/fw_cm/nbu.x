@@ -249,7 +249,7 @@ typedef S16 (*NbuUeIpInfoReqHdl) (Pst *, NbuUeIpInfoReq*);
 typedef S16 (*NbuUeIpInfoRspHdl) (Pst *, NbuUeIpInfoRsp*);
 typedef S16 (*NbuErabRelIndHdl)(Pst *, NbuErabRelIndList*);/*NbErabRelInd*);*/
 typedef S16 (*NbuNotifyPlmnInfoHdl) (Pst *, NbuNotifyPlmnInfo*);
-typedef S16 (*NbuUeIpInfoRejHdl) (Pst *, NbuUeIpInfoRej*);
+typedef S16 (*NbuUeIpInfoRejHdl)(Pst *, NbuUeIpInfoRej *);
 EXTERN S16 cmPkNbuInitialUeMsg(Pst *pst,NbuInitialUeMsg *req);
 EXTERN S16 cmPkNbuErabRelInd(Pst *pst, NbuErabRelIndList *);
 EXTERN S16 cmPkNbuUlNasMsg(Pst *pst,NbuUlNasMsg *msg);
@@ -283,7 +283,7 @@ EXTERN S16 cmUnPkNbuUeIpInfoReq (NbuUeIpInfoReqHdl func,Pst *pst,Buffer *mBuf);
 EXTERN S16 cmUnPkNbuUeIpInfoRsp (NbuUeIpInfoRspHdl func,Pst *pst,Buffer *mBuf);
 EXTERN S16 cmUnPkNbuErabsRelInfo(NbuErabsRelInfoMsgHdl func, Pst *pst, Buffer *mBuf);
 EXTERN S16 cmUnPkNbuNotifyPlmnInfo (NbuNotifyPlmnInfoHdl func,Pst *pst,Buffer *mBuf);
-EXTERN S16 cmUnPkNbuUeIpInfoRej (NbuUeIpInfoRejHdl func,Pst *pst,Buffer *mBuf);
+EXTERN S16 cmUnPkNbuUeIpInfoRej(NbuUeIpInfoRejHdl func, Pst *pst, Buffer *mBuf);
 
 /********************************************************************30**
 

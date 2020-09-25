@@ -48,7 +48,7 @@ EXTERN S16 cmUnPkNbuUeIpInfoRsp(NbuUeIpInfoRspHdl, Pst*, Buffer*);
 
 EXTERN S16 NbUiNbtMsgReq(Pst *pst,NbtMsg *req);
 
-EXTERN S16 NbUiNbuHdlUeIpInfoRej(Pst*, NbuUeIpInfoRej*);
+EXTERN S16 NbUiNbuHdlUeIpInfoRej(Pst *, NbuUeIpInfoRej *);
 
 /*
  *

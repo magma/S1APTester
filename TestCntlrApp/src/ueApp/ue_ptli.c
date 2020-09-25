@@ -106,12 +106,11 @@ PRIVATE NbuUlRrcMsgHdl UeLiNbuUlRrcMsgDatRspMt[UE_MAX_NBU_SEL] = \
 #endif
 };
 
-PRIVATE NbuUeIpInfoRejHdl UeLiNbuUlUeInfoRejMt[UE_MAX_NBU_SEL] = \
-{
+PRIVATE NbuUeIpInfoRejHdl UeLiNbuUlUeInfoRejMt[UE_MAX_NBU_SEL] = {
 #ifdef LWLCFWLINBT
-   cmPkNbuUeIpInfoRej ,         /* 0 - loosely coupled */
+    cmPkNbuUeIpInfoRej, /* 0 - loosely coupled */
 #else
-   PtLiNbuUeInfoRej         /* 1 - tightly coupled, portable */
+    PtLiNbuUeInfoRej  /* 1 - tightly coupled, portable */
 #endif
 };
 
@@ -150,14 +149,7 @@ PUBLIC S16 PtLiNbuDatRsp
    return ROK;
 }
 
-PUBLIC S16 PtLiNbuUeInfoRej
-(
- Pst*     pst,
- NbuUeIpInfoRej  *msg
-)
-{
-   return ROK;
-}
+PUBLIC S16 PtLiNbuUeInfoRej(Pst *pst, NbuUeIpInfoRej *msg) { return ROK; }
 
 PUBLIC S16 UeLiNbuInitialUeMsg
 (
@@ -210,13 +202,8 @@ PUBLIC S16 UeLiNbuSendUeIpInfo
    RETVALUE(ROK);
 }
 
-PUBLIC S16 UeLiNbuSendUeIpInfoRej
-(
- Pst              *pst,
- NbuUeIpInfoRej   *ueInfo
-)
-{
-   (*UeLiNbuUlUeInfoRejMt[pst->selector])(pst, ueInfo);
+PUBLIC S16 UeLiNbuSendUeIpInfoRej(Pst *pst, NbuUeIpInfoRej *ueInfo) {
+  (*UeLiNbuUlUeInfoRejMt[pst->selector])(pst, ueInfo);
 
-   RETVALUE(ROK);
+  RETVALUE(ROK);
 }
