@@ -7010,7 +7010,7 @@ PRIVATE S16 ueAppEsmHndlIncActDefBearerReq(UeEsmCb *esmCb, CmNasEvnt *evnt,
   esmCb->bId = evnt->m.esmEvnt->bearerId;
 
   ueAppUtlMovEsmCbTransToBid(esmCb, ueCb);
-  /* If is_actv_dflt_eps_ber_ctxt_rej flage is set
+  /* If is_actv_dflt_eps_ber_ctxt_rej flag is set
    * do not create context for the bearer*/
   if (ueCb->is_actv_dflt_eps_ber_ctxt_rej) {
     RETVALUE(ROK);
@@ -7173,9 +7173,9 @@ PRIVATE S16 ueAppEsmHdlIncUeEvnt
    {
       case CM_ESM_MSG_ACTV_DEF_BEAR_REQ:
          {
+            UE_LOG_DEBUG(ueAppCb, "Received CM_ESM_MSG_ACTV_DEF_BEAR_REQ: MSG");
             ret = ueAppEsmHndlIncActDefBearerReq(esmCb, evnt, ueCb, &drbId,
                 esmMsg->bearerId);
-            UE_LOG_DEBUG(ueAppCb, "Received CM_ESM_MSG_ACTV_DEF_BEAR_REQ: MSG");
             CmEsmActDefBearCtxtReq *actReq = &evnt->m.esmEvnt->u.actReq;
            /* send as a standalone esm message:user expecting resonse */
             if((ret == ROK) && (rcvdAsPiggyBackd == FALSE))
@@ -7984,12 +7984,12 @@ PUBLIC S16 ueUiProcIpInfoReqMsg(UeCb *p_ueCb, U8 bearerId) {
 
   p_ueCb->ecmCb.state = UE_ECM_CONNECTED;
   /* enbApp creates a tunnel after receiving IpInfoRsp message.
-   * If is_actv_dflt_eps_ber_ctxt_rej flag is set, drop IpInfoReqMsg
+   * If is_actv_dflt_eps_ber_ctxt_rej flag is set, send IpInfoRej
    * message so that enbApp does not create a tunnel for this bearer
    */
   if (p_ueCb->is_actv_dflt_eps_ber_ctxt_rej) {
     p_ueCb->is_actv_dflt_eps_ber_ctxt_rej = FALSE;
-    UE_LOG_DEBUG(ueAppCb, "Dropping IpInfoReqMsg as "
+    UE_LOG_DEBUG(ueAppCb, "Sending IpInfoRej message as "
                           "is_actv_dflt_eps_ber_ctxt_rej flag is set \n");
     ueAppBldAndSndIpInfoRejToNb(p_ueCb, bearerId, &ueAppCb->nbPst);
     RETVALUE(ROK);
@@ -9550,7 +9550,6 @@ PRIVATE S16 ueProcUeStandAloneActvDfltBerCtxtRej(UetMessage *p_ueMsg,
     UE_LOG_ERROR(ueAppCb, "UeCb List NULL ueId = %d", ueId);
     RETVALUE(ret);
   }
-  /* mark as ue connected */
   ueCb->is_actv_dflt_eps_ber_ctxt_rej = TRUE;
   ueCb->actv_dflt_eps_bear_ctxt_reject_cause =
       p_ueMsg->msg.ueActDfltBerRej.esmCause;
