@@ -209,6 +209,7 @@ typedef enum _ueMsgTypes
    UE_PDN_DISCONNECT_REJ_TYPE,
    UE_ERAB_SETUP_REQ_FAILED_FOR_ERABS,
    UE_AUTH_FAILURE_TYPE,
+   UE_STANDALONE_DEFAULT_EPS_BER_REJ,
 }UeMsgTypes;
 
 typedef struct _ueEmmEpsAtchType

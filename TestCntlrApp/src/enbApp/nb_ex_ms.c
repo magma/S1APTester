@@ -48,6 +48,8 @@ EXTERN S16 cmUnPkNbuUeIpInfoRsp(NbuUeIpInfoRspHdl, Pst*, Buffer*);
 
 EXTERN S16 NbUiNbtMsgReq(Pst *pst,NbtMsg *req);
 
+EXTERN S16 NbUiNbuHdlUeIpInfoRej(Pst *, NbuUeIpInfoRej *);
+
 /*
  *
  *       Fun:    nbActvTsk
@@ -145,6 +147,11 @@ Buffer   *mBuf;
               cmUnPkNbuErabRelInd(NbUiNbuHdlErabRelInd, pst, mBuf);
               break;
             }
+            case EVTNBUUEIPINFOREJ: {
+              cmUnPkNbuUeIpInfoRej(NbUiNbuHdlUeIpInfoRej, pst, mBuf);
+              break;
+            }
+
             default:
                break;
          }
