@@ -1130,6 +1130,39 @@ PUBLIC S16 NbEnbDelayInitCtxtSetupRsp(NbDelayICSRsp *delayICSRsp)
 
    RETVALUE(ROK);
 }
+
+/*
+ * @details This function marks failed erabs to be sent in ICS Rsp
+ *
+ * Function: NbEnbHandleInitCtxtSetupRspFailedErabs
+ *
+ * @param[in]  pointer to NbInitCtxtSetupFailedErabs
+ * @return  S16
+ *          -# Success : ROK
+ */
+PUBLIC S16 NbEnbHandleInitCtxtSetupRspFailedErabs(
+    NbInitCtxtSetupFailedErabs *icsRspFailedErabs) {
+  NB_LOG_ENTERFN(&nbCb);
+  U8 idx;
+  if (NULLP == icsRspFailedErabs) {
+    NB_LOG_ERROR(&nbCb, "Recieved empty(NULL) request");
+    RETVALUE(RFAILED);
+  }
+
+  nbCb.initCtxtSetupFailedErabs[(icsRspFailedErabs->ueId) - 1].numFailedErabs =
+      icsRspFailedErabs->numFailedErabs;
+  for (idx = 0; idx < icsRspFailedErabs->numFailedErabs; idx++) {
+    nbCb.initCtxtSetupFailedErabs[(icsRspFailedErabs->ueId) - 1]
+        .failedErabs[idx] = icsRspFailedErabs->failedErabs[idx];
+  }
+  nbCb.initCtxtSetupFailedErabs[(icsRspFailedErabs->ueId) - 1].cause.causeTyp =
+      NB_CAUSE_TRANSPORT;
+  nbCb.initCtxtSetupFailedErabs[(icsRspFailedErabs->ueId) - 1].cause.causeVal =
+      CAUSE_TRANSPORT_RESOURCE_UNAVAILABLE;
+  RETVALUE(ROK);
+}
+
+
 /*
  * @details This function marked a ue for delay ue context release complete
  *

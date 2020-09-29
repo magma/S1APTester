@@ -579,8 +579,7 @@ PRIVATE S16 nbAddPfs(NbPdnCb *pdnCb, NbDamTnlInfo *tnlInfo)
  *    -#Success : ROK
  *    -#Failure : RFAILED
  */
-PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
-{
+PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo) {
   NbPdnCb *pdnCb = NULL;
 
   if (ROK == (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnAddr),
@@ -610,7 +609,7 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
     }
     /* Insert pdncb*/
     if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCb,
-                                (U8 *)&tnlInfo->pdnAddr, sizeof(U32))) {
+                                (U8 *)&pdnCb->pdnAddr, sizeof(U32))) {
       NB_FREE(pdnCb, sizeof(NbPdnCb))
       NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for pdnCb");
       RETVALUE(RFAILED);
