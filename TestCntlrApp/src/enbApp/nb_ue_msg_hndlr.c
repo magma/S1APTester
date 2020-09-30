@@ -32,6 +32,7 @@ PRIVATE S16 nbS1apBldInitUePdu(NbUeCb*, NbTai*, TknStrOSXL*, S1apPdu**, U32,
       NbuSTmsi);
 #endif
 EXTERN S16 NbHandleUeIpInfoRsp(NbuUeIpInfoRsp*);
+EXTERN S16 NbHandleUeIpInfoRej(NbuUeIpInfoRej *);
 
 /** @brief This function is called to handle RRC
 *         Setup Comlpete message received from UE.
@@ -552,4 +553,31 @@ PUBLIC S16 nbNotifyPlmnInfo(U32 ueId, NbPlmnId plmnId )
      ("Failed To Send Plmn Info To UeApp\n");
   }
   RETVALUE(ret);
+}
+
+// This function deletes the tunnInfo hash table entry for a particular bearer
+PUBLIC S16 NbHandleUeIpInfoRej(NbuUeIpInfoRej *rej) {
+  NbUeCb *ueCb = NULLP;
+  NbUeTunInfo *tunInfo = NULLP;
+
+  // Fetch ueCb
+  if (ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(rej->ueId), sizeof(U32),
+                             0, (PTR *)&ueCb))) {
+    NB_LOG_ERROR(&nbCb, "ueCb is NULL for ueId %d bearer %d \n", rej->ueId,
+                 rej->bearerId);
+    RETVALUE(RFAILED);
+  }
+
+  // Delete the tunnel hash table entry
+  cmHashListFind(&(ueCb->tunnInfo), (U8 *)&(rej->bearerId), sizeof(U32), 0,
+                 (PTR *)(&tunInfo));
+  if (tunInfo) {
+    cmHashListDelete(&(ueCb->tunnInfo), (PTR)(tunInfo));
+    NB_LOG_DEBUG(&nbCb, "Deleted tun info for bearer %d\n", rej->bearerId);
+  } else {
+    NB_LOG_ERROR(&nbCb, "Could not find tuninfo for ueId %d bearer %d \n",
+                 rej->ueId, rej->bearerId);
+    RETVALUE(RFAILED);
+  }
+  RETVALUE(ROK);
 }

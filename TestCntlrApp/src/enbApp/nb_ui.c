@@ -51,6 +51,7 @@ EXTERN S16 NbEnbUeCtxtRelForInitCtxtSetup(NbSendUeCtxtRelForICSRsp*);
 EXTERN S16 nbUiSendIntCtxtSetupDrpdIndToUser(U32 ueId);
 EXTERN S16 NbEnbDelayUeCtxtRelCmp(NbDelayUeCtxtRelCmp*);
 EXTERN S16 NbMultiEnbCfgReq(NbMultiEnbConfigReq*);
+EXTERN S16 NbUiNbuHdlUeIpInfoRej(Pst *, NbuUeIpInfoRej *);
 
 int atoi(const char *nptr);
 
@@ -1019,3 +1020,9 @@ PUBLIC Void nbUiSendAssocDownIndToUser() {
   }
 } /* nbUiSendAssocDownIndToUser */
 
+PUBLIC S16 NbUiNbuHdlUeIpInfoRej(Pst *pst, NbuUeIpInfoRej *rej) {
+  S16 retVal = ROK;
+
+  retVal = NbHandleUeIpInfoRej(rej);
+  RETVALUE(retVal);
+} /* NbUiNbuHdlUeIpInfoRej */
