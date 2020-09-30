@@ -61,6 +61,7 @@ EXTERN S16 UeLiNbuSendUeIpInfo(Pst *pst, NbuUeIpInfoRsp   *ueInfo);
 EXTERN S16 UeLiNbuUlRrcMsgDatRsp(Pst *pst,NbuUlRrcMsg *msg);
 EXTERN S16 UeLiNbuErabRelInd(Pst *pst,NbuErabRelIndList *msg);
 PUBLIC S16 PtLiNbuErabRelInd(Pst *pst,NbuErabRelIndList *msg);
+PUBLIC S16 PtLiNbuUeInfoRej(Pst *pst, NbuUeIpInfoRej *msg);
 
 PRIVATE NbuUeIpInfoRspHdl UeLiNbuUlUeInfoMt[UE_MAX_NBU_SEL] = \
 {
@@ -104,6 +105,16 @@ PRIVATE NbuUlRrcMsgHdl UeLiNbuUlRrcMsgDatRspMt[UE_MAX_NBU_SEL] = \
       PtLiNbuDatRsp           /* 1 - tightly coupled, portable */
 #endif
 };
+
+PRIVATE NbuUeIpInfoRejHdl UeLiNbuUlUeInfoRejMt[UE_MAX_NBU_SEL] = {
+#ifdef LWLCFWLINBT
+    cmPkNbuUeIpInfoRej, /* 0 - loosely coupled */
+#else
+    PtLiNbuUeInfoRej  /* 1 - tightly coupled, portable */
+#endif
+};
+
+
 PUBLIC S16 PtLiNbuUeInfo
 (
  Pst*     pst,
@@ -137,6 +148,9 @@ PUBLIC S16 PtLiNbuDatRsp
 {
    return ROK;
 }
+
+PUBLIC S16 PtLiNbuUeInfoRej(Pst *pst, NbuUeIpInfoRej *msg) { return ROK; }
+
 PUBLIC S16 UeLiNbuInitialUeMsg
 (
  Pst              *pst,
@@ -186,4 +200,10 @@ PUBLIC S16 UeLiNbuSendUeIpInfo
    (*UeLiNbuUlUeInfoMt[pst->selector])(pst, ueInfo);
 
    RETVALUE(ROK);
+}
+
+PUBLIC S16 UeLiNbuSendUeIpInfoRej(Pst *pst, NbuUeIpInfoRej *ueInfo) {
+  (*UeLiNbuUlUeInfoRejMt[pst->selector])(pst, ueInfo);
+
+  RETVALUE(ROK);
 }

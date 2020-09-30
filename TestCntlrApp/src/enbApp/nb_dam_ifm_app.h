@@ -39,8 +39,8 @@ EXTERN S16 nbIfmDamNbCfgCfm(LnbMngmt*, CmStatus*);
 EXTERN S16 nbIfmDamNbTnlCreatCfm(U8, U32);
 EXTERN S16 nbIfmDamNbTnlDelCfm(U8, U32);
 EXTERN S16 nbIfmDamNbTnlCreatReq(NbDamTnlInfo*);
-EXTERN Void nbIfmDamNbCtxtRel(U8, U8, U8);
-EXTERN S16 nbIfmDamHandleUeCntxtRelReq(U16, U8, U8);
+EXTERN Void nbIfmDamNbCtxtRel(U32, U8, U8);
+EXTERN S16 nbIfmDamHandleUeCntxtRelReq(U32, U8, U8);
 /* Functions called from dam file - end*/
 #ifdef __cplusplus
 }

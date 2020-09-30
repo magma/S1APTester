@@ -31,14 +31,14 @@
 #include "nbt.x"
 
 EXTERN U8 uesLocalRel;
-EXTERN S16 nbUiSendIntCtxtSetupDrpdIndToUser(U8 ueId);
+EXTERN S16 nbUiSendIntCtxtSetupDrpdIndToUser(U32 ueId);
 PUBLIC S16 nbCtxtRelSndRlsCmpl(NbUeCb*);
 PUBLIC S16 nbProcessDlNasMsg(NbUeCb*, S1apPdu*, U8);
 PUBLIC S16 nbGetTai(NbTai*);
 #ifdef MULTI_ENB_SUPPORT
-PUBLIC U32  nbGetUeLclTeid(U8, U32, U32);
+PUBLIC U32  nbGetUeLclTeid(U32, U32, U32);
 #else
-PUBLIC U32  nbGetUeLclTeid(U8, U32);
+PUBLIC U32  nbGetUeLclTeid(U32, U32);
 #endif
 PUBLIC S16 nbGetErabInfoFrmIntCnxt(NbUeCb*, SztE_RABToBeSetupLstCtxtSUReq*,
       NbErabLst**);
@@ -72,8 +72,8 @@ PUBLIC S16  NbBuildAndSndErrIndMsg(NbErrIndMsg *s1ErrInd);
 PUBLIC S16 sendNonDelFlag(NbUeCb *ueCb, SztNAS_PDU *pdu, NbUeMsgCause *cause);
 PUBLIC S16 sendInitCtxtSetupFailRsp(NbUeCb *ueCb, NbUeMsgCause *cause);
 PRIVATE S16 nbSendUeCtxtRelReqAsICSRsp(NbUeCb *ueCb);
-PRIVATE S16 nbStartDelayTimerForICSRsp(U8 ueId,NbErabLst *erabInfo);
-PRIVATE S16 nbStartDelayTimerForUeCtxRel(U8 ueId);
+PRIVATE S16 nbStartDelayTimerForICSRsp(U32 ueId,NbErabLst *erabInfo);
+PRIVATE S16 nbStartDelayTimerForUeCtxRel(U32 ueId);
 PUBLIC S16 nbHandleDelayTimerForUeCtxRelComplExpiry(NbDelayUeCtxtRelCmpCb *ueCtxtRelCmpCb);
 PUBLIC S16 nbPrcPathSwReqAck(NbUeCb *ueCb,S1apPdu *pdu);
 EXTERN S16 nbUiSendPathSwReqAckToUser(NbPathSwReqAck *nbpathSwReqAck);
@@ -260,58 +260,44 @@ PUBLIC S16 nbBuildAndSendErabRelInd
    RETVALUE(ROK);
 } /* nbBuildAndSendErabRelInd */
 
-PUBLIC S16 nbBuildAndSendErabRelRsp
-(
- U32 enbUeS1apId,
- U32 mmeUeS1apId,
- U8 numOfErabIdsRlsd,
- U8 *rlsdErabIdLst,
- U8 numOfErabIdsRlsFld,
- U8 *rlsFldErabLst
-)
-{
-   //SztUDatEvnt uDatEvnt;
-   SztDatEvntReq erabRelRsp = {0};
-   NbMmeCb *mmeCb = NULLP;
-   NbUeCb *ueCb = NULLP;
-   S1apPdu *erabRelPdu = NULLP;
+PUBLIC S16 nbBuildAndSendErabRelRsp(NbUeCb *ueCb, U32 enbUeS1apId,
+                                    U32 mmeUeS1apId, U8 numOfErabIdsRlsd,
+                                    U8 *rlsdErabIdLst, U8 numOfErabIdsRlsFld,
+                                    U8 *rlsFldErabLst) {
+  // SztUDatEvnt uDatEvnt;
+  SztDatEvntReq erabRelRsp = {0};
+  NbMmeCb *mmeCb = NULLP;
+  S1apPdu *erabRelPdu = NULLP;
 
-   NB_SET_ZERO(&erabRelRsp, sizeof(SztDatEvntReq));
+  NB_SET_ZERO(&erabRelRsp, sizeof(SztDatEvntReq));
 
-   mmeCb = &nbCb.mmeInfo;
-   if(mmeCb == NULLP)
-   {
-      RETVALUE(RFAILED);
-   }
+  mmeCb = &nbCb.mmeInfo;
+  if (mmeCb == NULLP) {
+    RETVALUE(RFAILED);
+  }
 
-   if(nbBldErabRelRsp(&(erabRelPdu), enbUeS1apId, mmeUeS1apId,
-            numOfErabIdsRlsd, rlsdErabIdLst, numOfErabIdsRlsFld,
-            rlsFldErabLst) != ROK)
-   {
-      RETVALUE(RFAILED);
-   }
+  if (!ueCb) {
+    NB_LOG_ERROR(&nbCb, "UeCb is NULL ");
+    RETVALUE(RFAILED);
+  }
 
+  if (nbBldErabRelRsp(&(erabRelPdu), enbUeS1apId, mmeUeS1apId, numOfErabIdsRlsd,
+                      rlsdErabIdLst, numOfErabIdsRlsFld,
+                      rlsFldErabLst) != ROK) {
+    RETVALUE(RFAILED);
+  }
 
-   if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&enbUeS1apId,
-				   sizeof(U8),0,(PTR *)&ueCb)))
-   {
-	   NB_LOG_ERROR(&nbCb, "Failed to Find UeCb");
-	   RETVALUE(RFAILED);
-   }
+  NbS1ConCb *s1apCon = ueCb->s1ConCb;
+  erabRelRsp.spConnId = s1apCon->spConnId;
+  erabRelRsp.pdu = erabRelPdu;
 
-   NbS1ConCb                 *s1apCon = ueCb->s1ConCb;
-   erabRelRsp.spConnId = s1apCon->spConnId;
-   erabRelRsp.pdu      = erabRelPdu;
+  if ((NbIfmS1apDatReq(&erabRelRsp)) != ROK) {
+    NB_LOG_ERROR(&nbCb, "Failed to send Erab Release Response ");
+    RETVALUE(RFAILED);
+  }
 
-   if ((NbIfmS1apDatReq(&erabRelRsp)) != ROK)
-   {
-      NB_LOG_ERROR(&nbCb, "Failed to send Erab Release Response ");
-      RETVALUE(RFAILED);
-   }
-
-   RETVALUE(ROK);
+  RETVALUE(ROK);
 } /* nbBuildAndSendErabRelRsp */
-
 
 /*
  *    @brief Build and send the S1 Abort Request.
@@ -882,8 +868,9 @@ PRIVATE S16 nbBldResetReq
             resetIe->value.u.sztUE_assocLogS1_ConItem.mME_UE_S1AP_ID.pres =
 	           NOTPRSNT;
 	 }
-         nbFillTknU32(&(resetIe->value.u.sztUE_assocLogS1_ConItem.\
-                  eNB_UE_S1AP_ID), resetMsgInfo->enbUeS1apIdLst[cnt] && 0xFF);
+         nbFillTknU32(
+             &(resetIe->value.u.sztUE_assocLogS1_ConItem.eNB_UE_S1AP_ID),
+             resetMsgInfo->enbUeS1apIdLst[cnt] & 0xFF);
 
          resetIe->value.u.sztUE_assocLogS1_ConItem.iE_Extns.\
             noComp.pres = NOTPRSNT;
@@ -1202,7 +1189,7 @@ S1apPdu                      *pdu
          nbProcPagingMsg(pdu);
          break;
       case Sztid_E_RABRls:
-         nbProcErabRelCmd(pdu);
+         nbProcErabRelCmd(pdu, NULL);
          break;
 #ifdef MULTI_ENB_SUPPORT
       case Sztid_MMEConfigTfr:
@@ -1296,8 +1283,7 @@ PUBLIC S16 nbProcPagingMsg
  *       RFAILED : not able to process the ERAB Release Cmd message due to
  *       memory lack.
  */
-PUBLIC S16 nbProcErabRelCmd(S1apPdu *s1apErabRlsCmd) 
-{
+PUBLIC S16 nbProcErabRelCmd(S1apPdu *s1apErabRlsCmd, NbUeCb *ueCb) {
   S16 retVal = ROK;
   U16 numComp = 0;
   U16 cnt = 0;
@@ -1309,7 +1295,6 @@ PUBLIC S16 nbProcErabRelCmd(S1apPdu *s1apErabRlsCmd)
   U32 mmeUeS1apId = 0;
   U8 numOfErabIdsRlsd = 0;
   SztNAS_PDU *nasPdu = NULLP;
-  NbUeCb *ueCb = NULLP;
   NbUeTunInfo *tunInfo = NULLP;
   NbErabRelReq *erabRelReq = NULLP;
 
@@ -1364,8 +1349,10 @@ PUBLIC S16 nbProcErabRelCmd(S1apPdu *s1apErabRlsCmd)
   /*for(cnt = 0; cnt < nbCb.crntUeIdx; cnt++)
   {
   }*/
-  cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(enbUeS1apId), sizeof(U8), 0,
+  if (!ueCb) {
+    cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(enbUeS1apId), sizeof(U8), 0,
                  (PTR *)(&ueCb));
+  }
   for (cnt = 0; cnt < numOfErabIdsRlsd; cnt++) {
     U32 bearerId = erabRelCmd.erabIdLst[cnt];
     retVal = cmHashListFind(&(ueCb->tunnInfo), (U8 *)&(bearerId), sizeof(U32),
@@ -1392,11 +1379,11 @@ PUBLIC S16 nbProcErabRelCmd(S1apPdu *s1apErabRlsCmd)
 
   if (erabRelCmd.nasPdu.pres == TRUE) {
     /* Need to send to UeApp */
-    retVal = nbSendErabsRelInfo(&erabRelCmd);
+    retVal = nbSendErabsRelInfo(&erabRelCmd, ueCb->ueId);
 
     /* Send Erab Rel Rsp message */
     retVal =
-        nbBuildAndSendErabRelRsp(enbUeS1apId, mmeUeS1apId, numOfErabIdsRlsd,
+        nbBuildAndSendErabRelRsp(ueCb, enbUeS1apId, mmeUeS1apId, numOfErabIdsRlsd,
                                  erabRelCmd.erabIdLst, 0, NULL);
   } else {
     /* Indicate the TFW about the recieved E-RAB Release command. */
@@ -1576,7 +1563,7 @@ PUBLIC S16 nbUpdateUePagInfo
    U16                    memberIdx = 0;
    TknBStr32              *ueIdxBitStr = NULLP;
    U16                    numCompPagMsg = 0;
-   U16                    ueId = 0;
+   U32                    ueId = 0;
    U8                     idx1, idx2;
    U16                    memberId;
 
@@ -2077,218 +2064,205 @@ PUBLIC S16 nbS1apBldUeCapIndPdu
 }
 
 /** @brief This function is responsible for parsing the Initial Context Setup
-*         Request message and store the information into the internal data
-*         structure.
-*
-* @details
-*
-*     Function: nbInitCtxtPrcSetup
-*
-*         Processing steps:
-*         - for the number of IEs present in the message
-*         - parse the IE and store the information into the internal data
-*           structure
-*
-* @param[in]  transCb : transaction information
-* @return S16
-*    -#Success : ROK
-*    -#Failure : RFAILED
-*/
-PRIVATE S16 nbHandleInitCtxtPrcSetup
-(
- NbUeCb *ueCb,
- S1apPdu *pdu
-)
-{
-   NbErabLst                             *erabInfo = NULLP;
-   U16                                   cnt = 0;
-   S16                                   retVal = RFAILED;
-   NbUeMsgCause                          cause;
-   U8 idx;
-   SztInitiatingMsg                      *initMsg = NULLP;
-   SztProtIE_Field_InitCntxtSetupRqstIEs *ie = NULLP;
-   SztProtIE_Cont_InitCntxtSetupRqstIEs  *protIes = NULLP;
-   SztE_RABToBeSetupLstCtxtSUReq         *s1ErabLst = NULLP;
-   Bool ueRadCapRcvd = FALSE;
+ *         Request message and store the information into the internal data
+ *         structure.
+ *
+ * @details
+ *
+ *     Function: nbInitCtxtPrcSetup
+ *
+ *         Processing steps:
+ *         - for the number of IEs present in the message
+ *         - parse the IE and store the information into the internal data
+ *           structure
+ *
+ * @param[in]  transCb : transaction information
+ * @return S16
+ *    -#Success : ROK
+ *    -#Failure : RFAILED
+ */
+PRIVATE S16 nbHandleInitCtxtPrcSetup(NbUeCb *ueCb, S1apPdu *pdu) {
+  NbErabLst *erabInfo = NULLP;
+  U16 cnt = 0;
+  S16 retVal = RFAILED;
+  NbUeMsgCause cause;
+  U8 idx;
+  SztInitiatingMsg *initMsg = NULLP;
+  SztProtIE_Field_InitCntxtSetupRqstIEs *ie = NULLP;
+  SztProtIE_Cont_InitCntxtSetupRqstIEs *protIes = NULLP;
+  SztE_RABToBeSetupLstCtxtSUReq *s1ErabLst = NULLP;
+  Bool ueRadCapRcvd = FALSE;
 
-   /* Parse and process the received IEs */
-   initMsg = &(pdu->pdu.val.initiatingMsg);
-   protIes = &initMsg->value.u.sztInitCntxtSetupRqst.protocolIEs;
+  /* Parse and process the received IEs */
+  initMsg = &(pdu->pdu.val.initiatingMsg);
+  protIes = &initMsg->value.u.sztInitCntxtSetupRqst.protocolIEs;
 
-   for (cnt = 0; cnt < protIes->noComp.val; cnt++)
-   {
-      ie = &(protIes->member[cnt]);
-      switch(ie->id.val)
-      {
-         case Sztid_MME_UE_S1AP_ID:
-            {
-               ueCb->s1ConCb->mme_ue_s1ap_id = ie->value.u.\
-                                               sztid_MME_UE_S1AP_ID.val;
-               break;
-            }
-         case Sztid_eNB_UE_S1AP_ID:
-            {
-               ueCb->s1ConCb->enb_ue_s1ap_id = ie->value.u.\
-                                               sztENB_UE_S1AP_ID.val;
-               break;
-            }
-         case Sztid_uEaggregateMaxBitrate:
-            {
-               break;
-            }
-         case Sztid_E_RABToBeSetupLstCtxtSUReq:
-            {
-               s1ErabLst = &ie->value.u.sztE_RABToBeSetupLstCtxtSUReq;
-               if((retVal = nbGetErabInfoFrmIntCnxt(ueCb, s1ErabLst,
-                           &erabInfo)) != ROK)
-               {
-                  NB_LOG_ERROR(&nbCb, "processing ERABs failed");
-                  RETVALUE(RFAILED);
-               }
-               break;
-            }
-         case Sztid_UESecurCapabilities:
-            {
+  for (cnt = 0; cnt < protIes->noComp.val; cnt++) {
+    ie = &(protIes->member[cnt]);
+    switch (ie->id.val) {
+    case Sztid_MME_UE_S1AP_ID: {
+      ueCb->s1ConCb->mme_ue_s1ap_id = ie->value.u.sztid_MME_UE_S1AP_ID.val;
+      break;
+    }
+    case Sztid_eNB_UE_S1AP_ID: {
+      ueCb->s1ConCb->enb_ue_s1ap_id = ie->value.u.sztENB_UE_S1AP_ID.val;
+      break;
+    }
+    case Sztid_uEaggregateMaxBitrate: {
+      break;
+    }
+    case Sztid_E_RABToBeSetupLstCtxtSUReq: {
+      s1ErabLst = &ie->value.u.sztE_RABToBeSetupLstCtxtSUReq;
+      if ((retVal = nbGetErabInfoFrmIntCnxt(ueCb, s1ErabLst, &erabInfo)) !=
+          ROK) {
+        NB_LOG_ERROR(&nbCb, "processing ERABs failed");
+        RETVALUE(RFAILED);
+      }
+      break;
+    }
+    case Sztid_UESecurCapabilities: {
 #ifdef MULTI_ENB_SUPPORT
-	       U32 idx = 0;
-	       U16 temp = ie->value.u.sztUESecurCapabilities.encryptionAlgorithms.val[idx++];
-               ueCb->encryptionAlgo |= temp << 8;
-	       temp = ie->value.u.sztUESecurCapabilities.encryptionAlgorithms.val[idx];
-               ueCb->encryptionAlgo |= temp;
+      U32 idx = 0;
+      U16 temp =
+          ie->value.u.sztUESecurCapabilities.encryptionAlgorithms.val[idx++];
+      ueCb->encryptionAlgo |= temp << 8;
+      temp = ie->value.u.sztUESecurCapabilities.encryptionAlgorithms.val[idx];
+      ueCb->encryptionAlgo |= temp;
 
-	       idx = 0;
-	       temp = 0;
-	       temp = ie->value.u.sztUESecurCapabilities.integrityProtectionAlgorithms.val[idx++];
-	       ueCb->integrityAlgo |= temp << 8;
-	       temp = ie->value.u.sztUESecurCapabilities.integrityProtectionAlgorithms.val[idx];
-	       ueCb->integrityAlgo |= temp;
+      idx = 0;
+      temp = 0;
+      temp = ie->value.u.sztUESecurCapabilities.integrityProtectionAlgorithms
+                 .val[idx++];
+      ueCb->integrityAlgo |= temp << 8;
+      temp = ie->value.u.sztUESecurCapabilities.integrityProtectionAlgorithms
+                 .val[idx];
+      ueCb->integrityAlgo |= temp;
 #endif
-               break;
-            }
-         case Sztid_SecurKey:
-            {
-               break;
-            }
-         case Sztid_UERadioCapblty:
-            {
-               ueRadCapRcvd = TRUE;
-               break;
-            }
-         case Sztid_CSFallbackIndicator:
-            {
-               break;
-            }
-         case Sztid_CSGMembershipStatus:
-            {
-               break;
-            }
-         case Sztid_RegisteredLAI:
-            {
-               break;
-            }
-         case Sztid_GUMMEI_ID:
-            {
-               break;
-            }
-         case Sztid_MME_UE_S1AP_ID_2:
-            {
-               break;
-            }
-         case Sztid_HovrRestrnLst:
-            {
-               break;
-            }
-         case Sztid_ManagementBasedMDTAllowed:
-            {
-               break;
-            }
-         case Sztid_SubscriberProfileIDforRFP:
-            {
-            }
-            break;
-         default:
-            break;
-      }
-   }
+      break;
+    }
+    case Sztid_SecurKey: {
+      break;
+    }
+    case Sztid_UERadioCapblty: {
+      ueRadCapRcvd = TRUE;
+      break;
+    }
+    case Sztid_CSFallbackIndicator: {
+      break;
+    }
+    case Sztid_CSGMembershipStatus: {
+      break;
+    }
+    case Sztid_RegisteredLAI: {
+      break;
+    }
+    case Sztid_GUMMEI_ID: {
+      break;
+    }
+    case Sztid_MME_UE_S1AP_ID_2: {
+      break;
+    }
+    case Sztid_HovrRestrnLst: {
+      break;
+    }
+    case Sztid_ManagementBasedMDTAllowed: {
+      break;
+    }
+    case Sztid_SubscriberProfileIDforRFP: {
+    } break;
+    default:
+      break;
+    }
+  }
 
-   ueCb->s1ConCb->s1apConnState = NB_S1AP_CONNECTED;
-   if(erabInfo != NULLP)
-   {
-      if(nbCb.initCtxtSetupFail[(ueCb->ueId) - 1].initCtxtSetupFailInd == TRUE)
-      {
-         cause.causeTyp = nbCb.initCtxtSetupFail[(ueCb->ueId) - 1].causeType;
-         cause.causeVal = nbCb.initCtxtSetupFail[(ueCb->ueId) - 1].causeVal;
-         if(ROK != sendInitCtxtSetupFailRsp(ueCb, &cause))
-         {
-            NB_LOG_DEBUG(&nbCb,"Failed to Sending Initial Context Setup Failure message to MME");
-         }
-         NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
-         NB_FREE(erabInfo, sizeof(NbErabLst));
+  ueCb->s1ConCb->s1apConnState = NB_S1AP_CONNECTED;
+  if (erabInfo != NULLP) {
+    if (nbCb.initCtxtSetupFail[(ueCb->ueId) - 1].initCtxtSetupFailInd == TRUE) {
+      cause.causeTyp = nbCb.initCtxtSetupFail[(ueCb->ueId) - 1].causeType;
+      cause.causeVal = nbCb.initCtxtSetupFail[(ueCb->ueId) - 1].causeVal;
+      if (ROK != sendInitCtxtSetupFailRsp(ueCb, &cause)) {
+        NB_LOG_DEBUG(
+            &nbCb,
+            "Failed to Sending Initial Context Setup Failure message to MME");
       }
-      else if(nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isDropICSEnable == TRUE)
-      {
-         if(nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isICSReqDropped == FALSE)
-         {
-            nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isICSReqDropped = TRUE;
-            /* start timr to release the UE context locally */
-            cmInitTimers(&nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].timer, 1);
-            if(retVal != nbStartTmr((PTR)ueCb,NB_TMR_LCL_UE_CTXT_REL_REQ,\
-                  nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].tmrVal))
-            {
-               RETVALUE(retVal);
-            }
-            /* send indication to tfwApp for dropping the Initial Context Setup Req */
-            retVal = nbUiSendIntCtxtSetupDrpdIndToUser(ueCb->ueId);
-            if(retVal != ROK)
-            {
-               NB_LOG_ERROR(&nbCb, "Failed to Send Initial Context Setup"\
-                                 "Dropped Indiaction to User");
-            }
-         }
-         NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
-         NB_FREE(erabInfo, sizeof(NbErabLst));
+      NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
+      NB_FREE(erabInfo, sizeof(NbErabLst));
+    } else if (nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isDropICSEnable ==
+               TRUE) {
+      if (nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isICSReqDropped == FALSE) {
+        nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isICSReqDropped = TRUE;
+        /* start timr to release the UE context locally */
+        cmInitTimers(&nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].timer, 1);
+        if (retVal !=
+            nbStartTmr((PTR)ueCb, NB_TMR_LCL_UE_CTXT_REL_REQ,
+                       nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].tmrVal)) {
+          RETVALUE(retVal);
+        }
+        /* send indication to tfwApp for dropping the Initial Context Setup Req
+         */
+        retVal = nbUiSendIntCtxtSetupDrpdIndToUser(ueCb->ueId);
+        if (retVal != ROK) {
+          NB_LOG_ERROR(&nbCb, "Failed to Send Initial Context Setup"
+                              "Dropped Indiaction to User");
+        }
       }
-      else if(nbCb.dropICSSndCtxtRel[(ueCb->ueId) - 1].sndICSRspUeCtxtRel == TRUE)
-      {
-         retVal = nbSendUeCtxtRelReqAsICSRsp(ueCb);
-         NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
-         NB_FREE(erabInfo, sizeof(NbErabLst));
+      NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
+      NB_FREE(erabInfo, sizeof(NbErabLst));
+    } else if (nbCb.dropICSSndCtxtRel[(ueCb->ueId) - 1].sndICSRspUeCtxtRel ==
+               TRUE) {
+      retVal = nbSendUeCtxtRelReqAsICSRsp(ueCb);
+      NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
+      NB_FREE(erabInfo, sizeof(NbErabLst));
+    } else {
+      if (nbCb.delayInitCtxtSetupRsp[(ueCb->ueId) - 1].delayICSRsp != TRUE) {
+        /* send the s1-context resp to mme and nas pdu to ue */
+        retVal = nbBuildAndSendIntCtxtSetupRsp(ueCb, erabInfo);
+        if (retVal != ROK) {
+          NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
+          NB_FREE(erabInfo, sizeof(NbErabLst));
+          RETVALUE(RFAILED);
+        }
+        retVal = nbSendErabsInfo(ueCb, erabInfo, NULL, ueRadCapRcvd);
+        // Send UeIpInfoReq message to ueApp only for successful bearers
+        if (nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].numFailedErabs > 0) {
+          Bool found = FALSE;
+          for (idx = 0; idx < erabInfo->noOfComp; idx++) {
+            for (U8 failed_idx = 0;
+                 failed_idx <
+                 nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].numFailedErabs;
+                 failed_idx++) {
+              if (erabInfo->erabs[idx].erabId ==
+                  nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1]
+                      .failedErabs[failed_idx]) {
+                found = TRUE;
+                break;
+              }
+            }
+            if (found) {
+              found = FALSE;
+              continue;
+            }
+            nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId);
+          }
+          nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].numFailedErabs = 0;
+        } else {
+          for (idx = 0; idx < erabInfo->noOfComp; idx++) {
+            nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId);
+          }
+        }
+        NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
+        NB_FREE(erabInfo, sizeof(NbErabLst));
+      } else {
+        retVal = nbSendErabsInfo(ueCb, erabInfo, NULL, ueRadCapRcvd);
+        /* do the ip-query  ueapp for received bearers */
+        for (idx = 0; idx < erabInfo->noOfComp; idx++) {
+          nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId);
+        }
+        nbStartDelayTimerForICSRsp(ueCb->ueId, erabInfo);
       }
-      else
-      {
-         if( nbCb.delayInitCtxtSetupRsp[(ueCb->ueId) - 1].delayICSRsp != TRUE)
-         {
-            /* send the s1-context resp to mme and nas pdu to ue */
-            retVal = nbBuildAndSendIntCtxtSetupRsp(ueCb, erabInfo);
-            if(retVal != ROK)
-            {
-               NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
-               NB_FREE(erabInfo, sizeof(NbErabLst));
-               RETVALUE(RFAILED);
-            }
-            retVal = nbSendErabsInfo(ueCb, erabInfo, NULL, ueRadCapRcvd);
-            /* do the ip-query  ueapp for received bearers */
-            for(idx = 0; idx < erabInfo->noOfComp; idx++)
-            {
-               nbHandleUeIpInfoReq(ueCb->ueId,erabInfo->erabs[idx].erabId);
-            }
-            NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
-            NB_FREE(erabInfo, sizeof(NbErabLst));
-         }
-         else
-         {
-            retVal = nbSendErabsInfo(ueCb, erabInfo, NULL, ueRadCapRcvd);
-            /* do the ip-query  ueapp for received bearers */
-            for(idx = 0; idx < erabInfo->noOfComp; idx++)
-            {
-               nbHandleUeIpInfoReq(ueCb->ueId,erabInfo->erabs[idx].erabId);
-            }
-            nbStartDelayTimerForICSRsp(ueCb->ueId,erabInfo);
-
-         }
-      }
-   }
-   RETVALUE(retVal);
+    }
+  }
+  RETVALUE(retVal);
 }
 
 PRIVATE S16 nbHandleRabSetupMsg(NbUeCb *ueCb, S1apPdu *pdu) {
@@ -2425,7 +2399,7 @@ PUBLIC S16 nbPrcIncS1apMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType)
       }
    } else if (procedureCodeVal == 7 ) {
       NB_LOG_DEBUG(&nbCb,"nbPrcIncS1apMsg(): Handling RAB Release Command message\n");
-      ret = nbProcErabRelCmd(pdu);
+      ret = nbProcErabRelCmd(pdu, ueCb);
       if(ret != ROK)
       {
         NB_LOG_ERROR(&nbCb, "Failed to Send Erab Release command Indiaction "\
@@ -2456,7 +2430,7 @@ PUBLIC S16 nbPrcS1apRelInd
  SztRelInd   *relInd
 )
 {
-   U8 ueIdx = 0;
+   U32 ueIdx = 0;
    S16 retVal = ROK;
    U8 msgType = NB_S1_REL_IND;
    NbUeCb *ueCb = NULLP;
@@ -2466,7 +2440,7 @@ PUBLIC S16 nbPrcS1apRelInd
    ueCb  = nbCb.ueCbLst[ueIdx];
 #endif
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueIdx),
-      sizeof(U8),0,(PTR *)&ueCb)))
+      sizeof(U32),0,(PTR *)&ueCb)))
    {
       RETVALUE(RFAILED);
    }
@@ -2481,7 +2455,7 @@ PUBLIC S16 nbPrcS1apConCfm
  SztConCfm   *conCfm
 )
 {
-   U8 ueIdx = 0;
+   U32 ueIdx = 0;
    S16 retVal = ROK;
    U8 msgType = NB_S1_CON_CFM;
    NbUeCb *ueCb = NULLP;
@@ -2491,7 +2465,7 @@ PUBLIC S16 nbPrcS1apConCfm
    ueCb  = nbCb.ueCbLst[ueIdx];
 #endif
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueIdx),
-      sizeof(U8),0,(PTR *)&ueCb)))
+      sizeof(U32),0,(PTR *)&ueCb)))
    {
       RETVALUE(RFAILED);
    }
@@ -2506,7 +2480,7 @@ PUBLIC S16 nbPrcS1DatInd
  SztDatEvntInd   *s1DatInd
 )
 {
-   U8 ueIdx = 0;
+   U32 ueIdx = 0;
    S16 retVal = ROK;
    U8 msgType = NB_S1_DAT_IND;
    NbUeCb *ueCb = NULLP;
@@ -2516,7 +2490,7 @@ PUBLIC S16 nbPrcS1DatInd
    ueCb =  nbCb.ueCbLst[ueIdx];
 #endif
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueIdx),
-      sizeof(U8),0,(PTR *)&ueCb)))
+      sizeof(U32),0,(PTR *)&ueCb)))
    {
       RETVALUE(RFAILED);
    }
@@ -3248,139 +3222,185 @@ PUBLIC S16 nbBuildAndSendIntCtxtSetupRsp
    RETVALUE(ret);
 }
 
-PRIVATE S16 nbBuildIntCtxtSetupRsp
-( NbUeCb   *ueCb,
- NbErabLst *erabInfo,
- S1apPdu   **s1apPdu
-)
-{
-   SztProtIE_SingleCont_E_RABSetupItemCtxtSUResIEs  *ie1;
-   SztProtIE_Field_InitCntxtSetupRespIEs            *ie;
-   SztInitCntxtSetupResp                            *initCtxtRsp;
-   S1apPdu                                          *initCtxtRspPdu = NULLP;
+PRIVATE S16 nbBuildIntCtxtSetupRsp(NbUeCb *ueCb, NbErabLst *erabInfo,
+                                   S1apPdu **s1apPdu) {
+  SztProtIE_SingleCont_E_RABSetupItemCtxtSUResIEs *ie1;
+  SztProtIE_SingleCont_E_RABItemIEs *ie2;
+  SztProtIE_Field_InitCntxtSetupRespIEs *ie;
+  SztInitCntxtSetupResp *initCtxtRsp;
+  S1apPdu *initCtxtRspPdu = NULLP;
 
-   U16                                              idx;
-   U16                                              cnt;
-   U8                                               offSet;
-   U16                                              numComp;
-   U32                                              len;
-   U16                                              crntIe = 0;
-   NbS1ConCb                                        *s1ConCb = ueCb->s1ConCb;
-   SztSuccessfulOutcome                             *succOut;
-   U8                                               succIdx = 0;
-   U8 numSuccErabs = 0;
+  U16 idx;
+  U16 idx1;
+  U16 cnt;
+  U8 offSet;
+  U16 numComp;
+  U32 len;
+  U16 crntIe = 0;
+  NbS1ConCb *s1ConCb = ueCb->s1ConCb;
+  SztSuccessfulOutcome *succOut;
+  U8 succIdx = 0;
+  U8 failIdx = 0;
+  U8 numSuccErabs = 0;
 
-   NB_ALLOCEVNT(&initCtxtRspPdu, sizeof(S1apPdu));
-   if (initCtxtRspPdu == NULLP)
-   {
-      NB_LOG_ERROR(&nbCb, "Failed to allocate memory for s1apPdu ");
-      RETVALUE(RFAILED);
-   }
-   nbFillTknU8(&(initCtxtRspPdu->pdu.choice), SZT_TRGR_SUCCESS_OUTCOME);
-   succOut = &(initCtxtRspPdu->pdu.val.successfulOutcome);
-   nbFillTknU8(&(succOut->pres), PRSNT_NODEF);
-   nbFillTknU32(&(succOut->procedureCode), Sztid_InitCntxtSetup);
-   nbFillTknU32(&(succOut->criticality), SztCriticalityrejectEnum);
+  NB_ALLOCEVNT(&initCtxtRspPdu, sizeof(S1apPdu));
+  if (initCtxtRspPdu == NULLP) {
+    NB_LOG_ERROR(&nbCb, "Failed to allocate memory for s1apPdu ");
+    RETVALUE(RFAILED);
+  }
+  nbFillTknU8(&(initCtxtRspPdu->pdu.choice), SZT_TRGR_SUCCESS_OUTCOME);
+  succOut = &(initCtxtRspPdu->pdu.val.successfulOutcome);
+  nbFillTknU8(&(succOut->pres), PRSNT_NODEF);
+  nbFillTknU32(&(succOut->procedureCode), Sztid_InitCntxtSetup);
+  nbFillTknU32(&(succOut->criticality), SztCriticalityrejectEnum);
 
-   numComp = 4;
-   initCtxtRsp = &succOut->value.u.sztInitCntxtSetupResp;
-   nbFillTknU8(&(initCtxtRsp->pres), PRSNT_NODEF);
+  numComp = 5;
+  initCtxtRsp = &succOut->value.u.sztInitCntxtSetupResp;
+  nbFillTknU8(&(initCtxtRsp->pres), PRSNT_NODEF);
 
-   if ((cmGetMem(initCtxtRspPdu,
-               (numComp * sizeof(SztProtIE_Field_InitCntxtSetupRespIEs)),
-               (Ptr *)&initCtxtRsp->protocolIEs.member)) != ROK)
-   {
-      NB_LOG_ERROR(&nbCb, "Failed to allocate memory for components.");
-      cmFreeMem(initCtxtRspPdu);
-      RETVALUE(RFAILED);
-   }
+  if ((cmGetMem(initCtxtRspPdu,
+                (numComp * sizeof(SztProtIE_Field_InitCntxtSetupRespIEs)),
+                (Ptr *)&initCtxtRsp->protocolIEs.member)) != ROK) {
+    NB_LOG_ERROR(&nbCb, "Failed to allocate memory for components.");
+    cmFreeMem(initCtxtRspPdu);
+    RETVALUE(RFAILED);
+  }
 
-   /* Filling MME UE ID */
-   ie = &initCtxtRsp->protocolIEs.member[crntIe++];
-   nbFillTknU8(&(ie->pres), PRSNT_NODEF);
-   nbFillTknU32(&(ie->id), Sztid_MME_UE_S1AP_ID);
-   nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
-   nbFillTknU32(&(ie->value.u.sztMME_UE_S1AP_ID), s1ConCb->mme_ue_s1ap_id);
+  /* Filling MME UE ID */
+  ie = &initCtxtRsp->protocolIEs.member[crntIe++];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_MME_UE_S1AP_ID);
+  nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+  nbFillTknU32(&(ie->value.u.sztMME_UE_S1AP_ID), s1ConCb->mme_ue_s1ap_id);
 
-   /* Filling ENB UE ID */
-   ie = &initCtxtRsp->protocolIEs.member[crntIe++];
-   nbFillTknU8(&(ie->pres), PRSNT_NODEF);
-   nbFillTknU32(&(ie->id), Sztid_eNB_UE_S1AP_ID);
-   nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
-   nbFillTknU32(&(ie->value.u.sztENB_UE_S1AP_ID), s1ConCb->enb_ue_s1ap_id);
+  /* Filling ENB UE ID */
+  ie = &initCtxtRsp->protocolIEs.member[crntIe++];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_eNB_UE_S1AP_ID);
+  nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+  nbFillTknU32(&(ie->value.u.sztENB_UE_S1AP_ID), s1ConCb->enb_ue_s1ap_id);
 
-   /* Filling ERAB Setup List */
-   ie = &initCtxtRsp->protocolIEs.member[crntIe++];
-   nbFillTknU8(&(ie->pres), PRSNT_NODEF);
-   nbFillTknU32(&(ie->id), Sztid_E_RABSetupLstCtxtSURes);
-   nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+  /* Filling ERAB Setup List */
+  ie = &initCtxtRsp->protocolIEs.member[crntIe++];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_E_RABSetupLstCtxtSURes);
+  nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
 
-   numSuccErabs = erabInfo->noOfComp;
-   numComp = numSuccErabs;
+  numComp = erabInfo->noOfComp;
 
-   nbFillTknU16(&(ie->value.u.sztE_RABSetupLstCtxtSURes.noComp), numSuccErabs);
-   if (cmGetMem(initCtxtRspPdu,
-            (numSuccErabs * sizeof(SztProtIE_SingleCont_E_RABSetupItemCtxtSUResIEs)),
-            (Ptr *)&(ie->value.u.sztE_RABSetupLstCtxtSURes.member)) !=ROK)
-   {
-      NB_LOG_ERROR(&nbCb, "Failed to allocate memory for RAB SETUP list.");
-      cmFreeMem(initCtxtRspPdu);
-      RETVALUE(RFAILED);
-   }
-   /* fill the bearer details */
-   for(idx = 0 ; idx < numComp; idx ++)
-   {
-      SztE_RABSetupItemCtxtSURes *erabIe;
+  U8 numFailedErabs =
+      nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].numFailedErabs;
+  numSuccErabs = numComp - numFailedErabs;
+  NB_LOG_DEBUG(&nbCb, "numSuccErabs %d\n", numSuccErabs);
+  NB_LOG_DEBUG(&nbCb, "numFailedErabs %d\n", numFailedErabs);
 
-      ie1 = &(ie->value.u.sztE_RABSetupLstCtxtSURes.member[succIdx++]);
-      erabIe = &(ie1->value.u.sztE_RABSetupItemCtxtSURes);
-      nbFillTknU8(&(ie1->pres), PRSNT_NODEF);
-      nbFillTknU32(&(ie1->id), Sztid_E_RABSetupItemCtxtSURes);
-      nbFillTknU32(&(ie1->criticality), SztCriticalityignoreEnum);
-      nbFillTknU8(&(erabIe->pres), PRSNT_NODEF);
-      nbFillTknU32(&(erabIe->e_RAB_ID), erabInfo->erabs[idx].erabId);
-      if(nbCb.datAppAddr.type == CM_TPTADDR_IPV4)
-      {
-         len = 4;
-         erabIe->transportLyrAddr.pres = PRSNT_NODEF;
-         erabIe->transportLyrAddr.len = (U16)(len * 8);
-         NB_GET_MEM(initCtxtRspPdu, len, &erabIe->transportLyrAddr.val);
-         for (cnt = 0; cnt < len; cnt++)
-         {
-            offSet =(U8)((len - (cnt + 1)) * 8);
-            erabIe->transportLyrAddr.val[cnt] =
-                (U8)(nbCb.datAppAddr.u.ipv4TptAddr.address >> offSet);
-         }
+  if (cmGetMem(initCtxtRspPdu,
+               (numSuccErabs *
+                sizeof(SztProtIE_SingleCont_E_RABSetupItemCtxtSUResIEs)),
+               (Ptr *)&(ie->value.u.sztE_RABSetupLstCtxtSURes.member)) != ROK) {
+    NB_LOG_ERROR(&nbCb, "Failed to allocate memory for RAB SETUP list.");
+    cmFreeMem(initCtxtRspPdu);
+    RETVALUE(RFAILED);
+  }
+  nbFillTknU16(&(ie->value.u.sztE_RABSetupLstCtxtSURes.noComp), numSuccErabs);
+  /* fill the bearer details */
+  U8 itr = 0;
+  Bool found = FALSE;
+  for (idx = 0; idx < numComp; idx++) {
+    if (numFailedErabs > 0) {
+      for (itr = 0; itr < numFailedErabs; itr++) {
+        if (erabInfo->erabs[idx].erabId ==
+            nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].failedErabs[itr]) {
+          found = TRUE;
+          break;
+        }
       }
+      if (found) {
+        found = FALSE;
+        continue;
+      }
+    }
+    SztE_RABSetupItemCtxtSURes *erabIe;
+    NB_LOG_DEBUG(&nbCb, "Adding ebi %u to successfully setup list in ICS Rsp\n",
+                 erabInfo->erabs[idx].erabId);
+    ie1 = &(ie->value.u.sztE_RABSetupLstCtxtSURes.member[succIdx++]);
+    erabIe = &(ie1->value.u.sztE_RABSetupItemCtxtSURes);
+    nbFillTknU8(&(ie1->pres), PRSNT_NODEF);
+    nbFillTknU32(&(ie1->id), Sztid_E_RABSetupItemCtxtSURes);
+    nbFillTknU32(&(ie1->criticality), SztCriticalityignoreEnum);
+    nbFillTknU8(&(erabIe->pres), PRSNT_NODEF);
+    nbFillTknU32(&(erabIe->e_RAB_ID), erabInfo->erabs[idx].erabId);
+    if (nbCb.datAppAddr.type == CM_TPTADDR_IPV4) {
       len = 4;
-      erabIe->gTP_TEID.len = (U16)len;
-      erabIe->gTP_TEID.pres = PRSNT_NODEF;
-      NB_GET_MEM(initCtxtRspPdu, len, &erabIe->gTP_TEID.val);
-      for(cnt = 0; cnt < len; cnt++)
-      {
-         offSet = (U8)(len - (cnt + 1)) * 8;
-         erabIe->gTP_TEID.val[cnt] = (U8)(erabInfo->erabs[idx].lclTeid >> offSet);
+      erabIe->transportLyrAddr.pres = PRSNT_NODEF;
+      erabIe->transportLyrAddr.len = (U16)(len * 8);
+      NB_GET_MEM(initCtxtRspPdu, len, &erabIe->transportLyrAddr.val);
+      for (cnt = 0; cnt < len; cnt++) {
+        offSet = (U8)((len - (cnt + 1)) * 8);
+        erabIe->transportLyrAddr.val[cnt] =
+            (U8)(nbCb.datAppAddr.u.ipv4TptAddr.address >> offSet);
       }
-      erabIe->iE_Extns.noComp.pres = NOTPRSNT;
-   }
-   nbFillTknU16(&(initCtxtRsp->protocolIEs.noComp), crntIe);
-   *s1apPdu = initCtxtRspPdu;
+    }
+    len = 4;
+    erabIe->gTP_TEID.len = (U16)len;
+    erabIe->gTP_TEID.pres = PRSNT_NODEF;
+    NB_GET_MEM(initCtxtRspPdu, len, &erabIe->gTP_TEID.val);
+    for (cnt = 0; cnt < len; cnt++) {
+      offSet = (U8)(len - (cnt + 1)) * 8;
+      erabIe->gTP_TEID.val[cnt] = (U8)(erabInfo->erabs[idx].lclTeid >> offSet);
+    }
+    erabIe->iE_Extns.noComp.pres = NOTPRSNT;
+  }
+  if (numFailedErabs > 0) {
+    /* Filling ERAB Failed List */
+    ie = &initCtxtRsp->protocolIEs.member[crntIe++];
+    nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+    nbFillTknU32(&(ie->id), Sztid_E_RABFailedToSetupLstCtxtSURes);
+    nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+    if ((cmGetMem(
+            initCtxtRspPdu,
+            ((numFailedErabs) * sizeof(SztProtIE_SingleCont_E_RABItemIEs)),
+            (Ptr *)&ie->value.u.sztE_RABLst.member)) != ROK) {
+      NB_LOG_ERROR(&nbCb, "Failed to allocate memory. cmGetMem failed");
+      RETVALUE(RFAILED);
+    }
 
-   RETVALUE(ROK);
+    nbFillTknU16(&(ie->value.u.sztE_RABLst.noComp), numFailedErabs);
+    for (idx1 = 0; idx1 < numFailedErabs; idx1++) {
+      NB_LOG_DEBUG(
+          &nbCb, "Adding ebi %u to failed to setup list in ICS Rsp\n",
+          nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].failedErabs[idx1]);
+      SztE_RABItem *failedErabItem;
+      // E-RAB failed to Setup List
+      ie2 = &(ie->value.u.sztE_RABLst.member[failIdx++]);
+      nbFillTknU8(&(ie2->pres), PRSNT_NODEF);
+      nbFillTknU32(&(ie2->id), Sztid_E_RABItem);
+      nbFillTknU32(&(ie2->criticality), SztCriticalityignoreEnum);
+      failedErabItem = &(ie2->value.u.sztE_RABItem);
+      nbFillTknU8(&(failedErabItem->pres), PRSNT_NODEF);
+      nbFillTknU32(
+          &(failedErabItem->e_RAB_ID),
+          nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].failedErabs[idx1]);
+      nbS1apFillCause(&(failedErabItem->cause),
+                      &nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].cause);
+    }
+  }
+
+  nbFillTknU16(&(initCtxtRsp->protocolIEs.noComp), crntIe);
+  *s1apPdu = initCtxtRspPdu;
+  RETVALUE(ROK);
 }
 
-PUBLIC S16 nbHandleS1UeReleaseCmd(NbUeCb *ueCb)
-{
-   S16 ret;
-   if( nbCb.delayUeCtxtRelCmp[(ueCb->ueId) - 1].delayUeCtxRelComp != TRUE){
-       /* send the release complete to mme */
-       ret = nbCtxtRelSndRlsCmpl(ueCb);
-       ret = nbIfmDamUeDelReq(ueCb->ueId);
-   }
-   else {
-       nbStartDelayTimerForUeCtxRel(ueCb->ueId);
-   }
-   RETVALUE(ret);
+PUBLIC S16 nbHandleS1UeReleaseCmd(NbUeCb *ueCb) {
+  S16 ret;
+  if (nbCb.delayUeCtxtRelCmp[(ueCb->ueId) - 1].delayUeCtxRelComp != TRUE) {
+    /* send the release complete to mme */
+    ret = nbCtxtRelSndRlsCmpl(ueCb);
+    ret = nbIfmDamUeDelReq(ueCb->ueId);
+  } else {
+    nbStartDelayTimerForUeCtxRel(ueCb->ueId);
+  }
+  RETVALUE(ret);
 }
 
 PUBLIC S16 nbCtxtRelSndRlsCmpl(NbUeCb *ueCb)
@@ -3531,9 +3551,9 @@ PUBLIC S16 nbGetTai
 
 
 #ifdef MULTI_ENB_SUPPORT
-PUBLIC U32  nbGetUeLclTeid(U8 ueId, U32 rabId, U32 enbId)
+PUBLIC U32  nbGetUeLclTeid(U32 ueId, U32 rabId, U32 enbId)
 #else
-PUBLIC U32  nbGetUeLclTeid(U8 ueId, U32 rabId)
+PUBLIC U32  nbGetUeLclTeid(U32 ueId, U32 rabId)
 #endif
 {
    U32 lclTeId = 0;
@@ -3725,8 +3745,8 @@ PRIVATE S16 nbFillErrIndMsg(NbErrIndMsg *s1ErrInd,S1apPdu **errIndPdu)
 
    U16 numComp = 0;
    S16 ret = 0;
-   U8 ueId = 0;
-   U8 idx = 0;
+   U32 ueId = 0;
+   U32 idx = 0;
    NbUeCb *ueCb = NULLP;
    NbS1ConCb *s1apConCb = NULLP;
 
@@ -3756,7 +3776,7 @@ PRIVATE S16 nbFillErrIndMsg(NbErrIndMsg *s1ErrInd,S1apPdu **errIndPdu)
    {
       ueId = s1ErrInd->ue_Id;
       if(ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueId),
-              sizeof(U8), 0, (PTR *)&ueCb)))
+              sizeof(U32), 0, (PTR *)&ueCb)))
       {
          NB_LOG_ERROR(&nbCb, "ueCb not found for UeId %d", ueId);
          RETVALUE(RFAILED);
@@ -3884,7 +3904,7 @@ PRIVATE S16 nbFillErrIndMsg(NbErrIndMsg *s1ErrInd,S1apPdu **errIndPdu)
    }
    RETVALUE(ROK);
 }
-PRIVATE S16 nbStartDelayTimerForUeCtxRel(U8 ueId)
+PRIVATE S16 nbStartDelayTimerForUeCtxRel(U32 ueId)
 {
    S16 retVal = RFAILED;
    NbDelayUeCtxtRelCmpCb *ueCtxtRelCmp = NULLP;
@@ -3894,7 +3914,7 @@ PRIVATE S16 nbStartDelayTimerForUeCtxRel(U8 ueId)
    retVal = nbStartTmr((PTR)ueCtxtRelCmp, NB_TMR_DELAY_UE_CTX_REL_COMP, nbCb.delayUeCtxtRelCmp[ueId - 1].tmrVal);
    RETVALUE(retVal);
 }
-PRIVATE S16 nbStartDelayTimerForICSRsp(U8 ueId,NbErabLst *erabInfo)
+PRIVATE S16 nbStartDelayTimerForICSRsp(U32 ueId,NbErabLst *erabInfo)
 {
   S16 retVal = RFAILED;
   NbDelayICSRspCb *icsRspCb = NULLP;
@@ -3915,7 +3935,7 @@ PUBLIC S16 nbHandleDelayTimerForICSExpiry(NbDelayICSRspCb *icsRspCb)
    NbErabLst *erabInfo = NULLP;
 
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(icsRspCb->ueId),
-      sizeof(U8),0,(PTR *)&ueCb)))
+      sizeof(U32),0,(PTR *)&ueCb)))
    {
       NB_LOG_ERROR(&nbCb, "Failed to Find UeCb");
       RETVALUE(RFAILED);
@@ -3975,7 +3995,7 @@ PUBLIC S16 nbHandleDelayTimerForUeCtxRelComplExpiry(NbDelayUeCtxtRelCmpCb *ueCtx
    S16 retVal = RFAILED;
    NbUeCb *ueCb = NULLP;
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueCtxtRelCmp->ueId),
-				   sizeof(U8),0,(PTR *)&ueCb)))
+				   sizeof(U32),0,(PTR *)&ueCb)))
    {
 	   NB_LOG_ERROR(&nbCb, "Failed to Find UeCb");
 	   RETVALUE(RFAILED);

@@ -248,7 +248,7 @@ typedef struct _nbFailedErabLst {
 
 typedef struct _nbErabRelLst
 {
-   U8 ueId;
+   U32 ueId;
    U32 mmeUeS1apId;
    U32 enbUeS1apId;
    U8 numOfErabIds;
@@ -258,14 +258,14 @@ typedef struct _nbErabRelLst
 
 typedef struct _nbDelayICSRspCb
 {
- U8 ueId;
+ U32 ueId;
  NbErabLst *erabInfo;
  CmTimer   timer;
 }NbDelayICSRspCb;
 
 typedef struct _nbDelayUeCtxtRelCmpCb
 {
- U8 ueId;
+ U32 ueId;
  CmTimer   timer;
 }NbDelayUeCtxtRelCmpCb;
 
@@ -311,7 +311,7 @@ struct _nbUeCb
 {
    CmHashListEnt ueHashEnt;
    U32 ueId;
-   U8  ueIdx;
+   U32  ueIdx;
    NbS1ConCb   *s1ConCb;
    U8 tunnIdx;
 #if 0
@@ -368,7 +368,7 @@ typedef struct _nbTai
 
 typedef struct _NbTmrCfg
 {
-   U16                       s1SetupTmr;
+   U32                       s1SetupTmr;
 }NbTmrCfg;
 
 typedef struct _nbMmeName
@@ -437,6 +437,15 @@ typedef struct _dropICSSndCtxtRelCfg
    U32 causeType;
    U32 causeVal;
 }DropICSSndCtxtRelCfg;
+
+typedef struct _InitCtxtSetupFailedErabs {
+#define MAX_FAILED_ERABS 11
+#define CAUSE_TRANSPORT_RESOURCE_UNAVAILABLE 0
+  U8 numFailedErabs;
+  U8 failedErabs[MAX_FAILED_ERABS];
+  NbUeMsgCause cause;
+} InitCtxtSetupRspFailedErabs;
+
 typedef struct _EnbCb
 {
    CmHashListEnt nbHashEnt;
@@ -487,6 +496,7 @@ typedef struct _nbCb
    DelayInitCtxtSetupRspCfg  delayInitCtxtSetupRsp[NB_MAX_UE_SUPPORTED];
    DropICSSndCtxtRelCfg      dropICSSndCtxtRel[NB_MAX_UE_SUPPORTED];
    DelayUeCtxtRelCmpCfg      delayUeCtxtRelCmp[NB_MAX_UE_SUPPORTED];
+   InitCtxtSetupRspFailedErabs  initCtxtSetupFailedErabs[NB_MAX_UE_SUPPORTED];
 #ifdef MULTI_ENB_SUPPORT
    Bool                      x2HoDone;
 #endif
@@ -520,7 +530,7 @@ typedef struct _nbResetMsgInfo
 {
    U8 type;
    NbUeMsgCause cause;
-   U16 s1apIdCnt;
+   U32 s1apIdCnt;
    U32 *enbUeS1apIdLst;
    U32 *mmeUeS1apIdLst;
    U32 enbId;
@@ -529,8 +539,8 @@ typedef struct _nbResetMsgInfo
 typedef struct _nbResetAck
 {
    U8 status;
-   U16 numOfUes;
-   U8 *ueIdLst;
+   U32 numOfUes;
+   U32 *ueIdLst;
 }NbResetAck;
 
 #define NB_GET_S1AP_CON_ID(_suConId,_ptr) {\
@@ -683,7 +693,7 @@ EXTERN Void nbStopTmr(PTR cb, S16 event);
 
 EXTERN Bool nbIsTmrRunning(CmTimer *tmr, S16 event);
 
-EXTERN  Void nbHandleUeIpInfoReq(U8 ueId,U8 bearerId);
+EXTERN  Void nbHandleUeIpInfoReq(U32 ueId,U8 bearerId);
 
 EXTERN Void nbSendLmAlarm(U16 category, U16 event, U16 cause);
 
@@ -698,7 +708,7 @@ EXTERN S16 nbUiBuildAndSendPagingMsg(NbPagingMsgInfo *pagMsgInfo);
 EXTERN S16 nbSendInitCtxtSetupRcvInd(NbUeCb *ueCb, NbErabLst *erabInfo,
       Bool ueRadCapRcvd);
 
-EXTERN S16 nbSendS1RelIndToUeApp(U8 ueId);
+EXTERN S16 nbSendS1RelIndToUeApp(U32 ueId);
 
 EXTERN S16 nbBuildAndSendS1SetupReq(NbMmeId mmeId);
 
@@ -707,9 +717,10 @@ EXTERN S16 nbBuildAndSendResetRequest(NbResetMsgInfo *resetMsgInfo);
 EXTERN S16 nbBuildAndSendErabRelInd(U32 enbUeS1apId, U32 mmeUeS1apId,
       U8 numOfErabIds, U8 *erabIdLst);
 
-EXTERN S16 nbBuildAndSendErabRelRsp(U32 enbUeS1apId, U32 mmeUeS1apId,
-      U8 numOfErabIdsRlsd, U8 *rlsdErabIdLst, U8 numOfErabIdsRlsFld,
-      U8 *rlsFldErabLst);
+EXTERN S16 nbBuildAndSendErabRelRsp(NbUeCb *ueCb, U32 enbUeS1apId,
+                                    U32 mmeUeS1apId, U8 numOfErabIdsRlsd,
+                                    U8 *rlsdErabIdLst, U8 numOfErabIdsRlsFld,
+                                    U8 *rlsFldErabLst);
 
 EXTERN S16 nbBuildAndSendS1AbortReq(NbMmeId mmeId, U8 cause);
 
@@ -778,9 +789,9 @@ EXTERN S16 nbS1apFillEutranCgi(S1apPdu *pdu, SztEUTRAN_CGI *cgiIe);
 EXTERN S16 nbSendErabsInfo(NbUeCb *ueCb, NbErabLst *erabInfo,
                            NbFailedErabLst *failedErabInfo, Bool ueRadCapRcvd);
 
-EXTERN Void nbUiNbuHandleUeInactivity(U8 ueId);
+EXTERN Void nbUiNbuHandleUeInactivity(U32 ueId);
 
-EXTERN Void nbDamSetDatFlag(U8 ueId);
+EXTERN Void nbDamSetDatFlag(U32 ueId);
 
 EXTERN S16 nbFillTknStrOSXL1(TknStrOSXL *ptr, U16 len, U32 val,
       CmMemListCp *mem);
@@ -790,7 +801,7 @@ EXTERN S16 nbS1apFillCtxtRelReq(NbUeCb *ueCb, S1apPdu **pdu,
 
 EXTERN Void nbHandleUeDelReq(NbUeCb *ueCb);
 
-EXTERN S16 nbSndCtxtRelReq(U8 ueId, NbUeMsgCause *relCause);
+EXTERN S16 nbSndCtxtRelReq(U32 ueId, NbUeMsgCause *relCause);
 
 EXTERN S16 NbIfmS1apRelReq(SztRelReq *relReq);
 
@@ -800,14 +811,14 @@ EXTERN Void nbUiSendS1TimeOutInd(Void);
 
 EXTERN Void nbUiSendS1SetupFailInd(U8 causeType,U32 causeVal,U32 wait);
 
-EXTERN Void nbRelCntxtInTrafficHandler(U8 ueId);
+EXTERN Void nbRelCntxtInTrafficHandler(U32 ueId);
 EXTERN S16 nbHandleDelayTimerForICSExpiry(NbDelayICSRspCb *icsRspCb);
 
 EXTERN S16 nbPrcInitPdu(U32 peerId, S1apPdu *pdu);
 
 PUBLIC S16 nbProcPagingMsg(S1apPdu *s1apPagMsg);
 
-PUBLIC S16 nbProcErabRelCmd(S1apPdu *s1apErabRlsCmd);
+PUBLIC S16 nbProcErabRelCmd(S1apPdu *s1apErabRlsCmd, NbUeCb *ueCb);
 
 PUBLIC Bool nbIsTaiPresent(SztTAILst *taiLst);
 
@@ -816,12 +827,11 @@ PUBLIC Bool nbPlmnPlmnsEqual(NbPlmnId *plmnId1, NbPlmnId *plmnId2);
 PUBLIC S16 nbUpdateUePagInfo(S1apPdu *s1apPagMsg, NbPagingMsgInfo *uePagingInfo,
       SztTAILst **pagMsgTAILst, SztCSG_IdLst **pagMsgCSG_IdLst);
 
-PUBLIC S16 nbUiBuildAndSendNasNonDlvryIndToTfw( U8 ueId );
+PUBLIC S16 nbUiBuildAndSendNasNonDlvryIndToTfw( U32 ueId );
 
-EXTERN S16 nbSendErabsRelInfo(NbErabRelLst *erabInfo);
+EXTERN S16 nbSendErabsRelInfo(NbErabRelLst *erabInfo, U8 ueId);
 
-EXTERN  S16 nbNotifyPlmnInfo(U8 ueId, NbPlmnId plmnId);
-
+EXTERN  S16 nbNotifyPlmnInfo(U32 ueId, NbPlmnId plmnId);
 /* Broadcasted PLMN List */
 typedef struct _nbBPlmnList
 {

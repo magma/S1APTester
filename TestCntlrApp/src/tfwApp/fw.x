@@ -43,7 +43,7 @@ typedef enum
 typedef struct _ueIdCb
 {
    CmLList link;
-   U8 ue_id;
+   U32 ue_id;
    attachState state;
    struct fwTmrCb  *tmrCb; /* Defines Timer control block */ 
    U8 epsUpdType;

@@ -122,7 +122,7 @@ typedef struct _ueNwCap
 
 typedef struct _ueConfigInfo
 {
-   U8 ueId;       /*ue identity*/
+   U32 ueId;       /*ue identity*/
    U8 imsi[MAX_IMSI_LEN];       /*Mobile subscriber identity*/
    U8 imei[MAX_IMEI_LEN];       /*Mobile equipment identity*/
    U8 NASCyphCfg;          /*eea0, eea1, eea2*/
@@ -271,7 +271,7 @@ typedef struct _ueCb
    U32         transIdCntr;   /* Transaction counter for sending the 
                                  ESM Procedural transactions. */
    U16         cellId; /* cellId */
-   U16         ueId;   /* ueId */
+   U32         ueId;   /* ueId */
    U8          nasEsmState;  /* NAS State */
    U8          hoState;      /* HO State */
    Bool        drpSecMode;
@@ -312,7 +312,7 @@ typedef struct _ueAppCb
    CmHashListCp     ueLstCp; /*!< Hashlist of UeCb */
 #else
    UeCb             *ueCbLst[UE_APP_MAX_NUM_OF_UES];
-   U8               numOfUesInLst;
+   U32              numOfUesInLst;
 #endif
 }UeAppCb;
 

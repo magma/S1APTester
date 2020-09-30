@@ -40,10 +40,11 @@ EXTERN U8 uesLocalRel;
 PUBLIC S16 NbEnbUeCtxtRelForInitCtxtSetup(NbSendUeCtxtRelForICSRsp *sendUeCtxtRelReq);
 PUBLIC S16 NbEnbDelayInitCtxtSetupRsp(NbDelayICSRsp *delayICSRsp);
 PUBLIC S16 NbEnbDropInitCtxtSetup(NbDropInitCtxtSetup *dropInitCtxtSetup);
-PUBLIC S16 nbDelUeCb(U8 ueId);
+PUBLIC S16 nbDelUeCb(U32 ueId);
 PUBLIC S16 nbUeTnlCreatCfm(U8, U32);
-PUBLIC S16 nbPrcDamUeDelCfm(U8);
-PUBLIC S16 nbCreateUeTunnReq(U8, U8, U32, U8 *, NbuUeIpInfoRsp *);
+PUBLIC S16 nbPrcDamUeDelCfm(U32);
+PUBLIC S16 nbCreateUeTunnReq(U32 ueId, U8 bearerId, U32 ueIp4Addr, U8 *ipv6_addr,
+                             NbuUeIpInfoRsp *rsp);
 PUBLIC S16 NbEnbUeRelReqHdl(NbUeCntxtRelReq*);
 PUBLIC S16 NbEnbResetReqHdl(NbResetRequest *resetReq);
 /*PUBLIC S16 NbEnbErabRelIndHdl(NbErabRelInd *erabRelInd);*/
@@ -53,7 +54,7 @@ PUBLIC S16 NbEnbNasNonDel(NbNasNonDel *nasNonDel);
 PUBLIC S16 NbEnbInitCtxtSetupFail(NbInitCtxtSetupFail *initCtxtSetupFail);
 
 EXTERN S16 nbIfmDamTnlCreatReq(NbDamTnlInfo*);
-EXTERN S16 nbIfmDamUeRelReq(U16, U8);
+EXTERN S16 nbIfmDamUeRelReq(U32, U8);
 EXTERN S16 nbAppRouteInit(U32 selfIp, S8*);
 
 EXTERN NbDamCb nbDamCb;
@@ -275,7 +276,7 @@ PUBLIC S16 nbPrcResetAck
    U32 mmeUeS1apId = 0;
    U32 enbUeS1apId = 0;
    U16 cnt = 0;
-   U8 ueId = 0;
+   U32 ueId = 0;
    NbResetAckldg nbResetAck = {0};
    SztSuccessfulOutcome *succMsg  = &pdu->pdu.val.successfulOutcome;
    SztResetAckg *resetAck = &succMsg->value.u.sztResetAckg;
@@ -294,7 +295,7 @@ PUBLIC S16 nbPrcResetAck
             if(numComp)
             {
                nbResetAck.numOfUes = numComp;
-               NB_ALLOC(&nbResetAck.ueIdLst, numComp);
+               NB_ALLOC(&nbResetAck.ueIdLst, numComp * sizeof(U32));
             }
             for(cnt = 0; cnt < numComp; cnt++)
             {
@@ -320,11 +321,11 @@ PUBLIC S16 nbPrcResetAck
 
    if(nbUiSendResetAckToUser(&nbResetAck) != ROK)
    {
-      NB_FREE(nbResetAck.ueIdLst, nbResetAck.numOfUes);
+      NB_FREE(nbResetAck.ueIdLst, nbResetAck.numOfUes * sizeof(U32));
       NB_LOG_EXITFN(&nbCb, RFAILED);
    }
 
-   NB_FREE(nbResetAck.ueIdLst, nbResetAck.numOfUes);
+   NB_FREE(nbResetAck.ueIdLst, nbResetAck.numOfUes * sizeof(U32));
    uesLocalRel = FALSE;
    UNUSED(peerId);
 
@@ -410,7 +411,7 @@ PUBLIC S16 nbUeTnlCreatCfm(U8 status, U32 lclTeid)
    RETVALUE(ret);
 }
 
-PUBLIC S16 nbPrcDamUeDelCfm(U8 ueId)
+PUBLIC S16 nbPrcDamUeDelCfm(U32 ueId)
 {
    S16 ret = ROK;
 
@@ -421,7 +422,7 @@ PUBLIC S16 nbPrcDamUeDelCfm(U8 ueId)
    RETVALUE(ret);
 }
 
-PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U8 bearerId, U32 ueIp4Addr, U8 *ipv6_addr,
+PUBLIC S16 nbCreateUeTunnReq(U32 ueId, U8 bearerId, U32 ueIp4Addr, U8 *ipv6_addr,
                              NbuUeIpInfoRsp *rsp) {
   U8 idx = 0;
   U8 num_tft = 0;
@@ -432,7 +433,7 @@ PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U8 bearerId, U32 ueIp4Addr, U8 *ipv6_addr,
   NbUeTunInfo *tunInfo = NULLP;
 
   NB_LOG_ENTERFN(&nbCb);
-  if (ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueId), sizeof(U8), 0,
+  if (ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueId), sizeof(U32), 0,
                              (PTR *)&ueCb))) {
     RETVALUE(RFAILED);
   }
@@ -477,7 +478,7 @@ PUBLIC S16 nbCreateUeTunnReq(U8 ueId, U8 bearerId, U32 ueIp4Addr, U8 *ipv6_addr,
   RETVALUE(RFAILED);
 }
 
-PUBLIC S16 nbDelUeCb(U8 ueId)
+PUBLIC S16 nbDelUeCb(U32 ueId)
 {
 
    S16 ret = RFAILED;
@@ -511,7 +512,7 @@ PUBLIC S16 nbDelUeCb(U8 ueId)
    }
 #endif
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueId),
-      sizeof(U8),0,(PTR *)&ueCb)))
+      sizeof(U32),0,(PTR *)&ueCb)))
    {
       ret = RFAILED;
    }
@@ -601,7 +602,7 @@ PUBLIC Void nbHandleUeDelReq(NbUeCb *ueCb)
  */
 PUBLIC S16 nbSndCtxtRelReq
 (
- U8                           ueId,
+ U32                           ueId,
  NbUeMsgCause                 *relCause
 )
 {
@@ -629,7 +630,7 @@ PUBLIC S16 nbSndCtxtRelReq
    }
 #endif
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueId),
-      sizeof(U8),0,(PTR *)&ueCb)))
+      sizeof(U32),0,(PTR *)&ueCb)))
    {
       NB_LOG_ERROR(&nbCb,"ueCb not found");
       RETVALUE(RFAILED);
@@ -833,42 +834,44 @@ PUBLIC S16 NbEnbUeRelReqHdl
    RETVALUE(nbSndCtxtRelReq(relReq->ueId,&cause));
 } /* NbEnbUeRelReqHdl */
 
-PRIVATE S16 getS1apInfoFrmUeId
-(
- U8 *ueIdLst,
- U16 numOfUes,
- NbResetMsgInfo *resetMsg
-)
-{
-   U16 cnt = 0;
-   U8 ueId = 0;
-   NbUeCb *ueCb = NULLP;
+PRIVATE S16 getS1apInfoFrmUeId(NbUeS1apIdPair *ueS1apIdPairList, U32 numOfUes,
+                               NbResetMsgInfo *resetMsg) {
+  U32 cnt = 0;
+  U32 ueId = 0;
+  NbUeCb *ueCb = NULLP;
 
-   NB_LOG_ENTERFN(&nbCb);
+  NB_LOG_ENTERFN(&nbCb);
 
-   if(ueIdLst == NULLP)
-   {
-      NB_LOG_ERROR(&nbCb, "UE Id List is empty");
-      NB_LOG_EXITFN(&nbCb, RFAILED);
-   }
+  if (ueS1apIdPairList == NULLP) {
+    NB_LOG_ERROR(&nbCb, "UE Id List is empty");
+    NB_LOG_EXITFN(&nbCb, RFAILED);
+  }
 
-   resetMsg->s1apIdCnt = numOfUes;
-   NB_ALLOC(&resetMsg->enbUeS1apIdLst, sizeof(U32) * numOfUes);
-   NB_ALLOC(&resetMsg->mmeUeS1apIdLst, sizeof(U32) * numOfUes);
+  resetMsg->s1apIdCnt = numOfUes;
+  NB_ALLOC(&resetMsg->enbUeS1apIdLst, sizeof(U32) * numOfUes);
+  NB_ALLOC(&resetMsg->mmeUeS1apIdLst, sizeof(U32) * numOfUes);
 
-   for(cnt = 0; cnt < numOfUes; cnt++)
-   {
-      ueId = ueIdLst[cnt];
-      if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueId),
-      sizeof(U8),0,(PTR *)&ueCb)))
-      {
-         NB_LOG_ERROR(&nbCb, "UeCb not found for UeId %d", ueIdLst[cnt]);
+  for (cnt = 0; cnt < numOfUes; cnt++) {
+    ueId = ueS1apIdPairList[cnt].ueId;
+    if (ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueId), sizeof(U32), 0,
+                               (PTR *)&ueCb))) {
+      NB_LOG_ERROR(&nbCb, "UeCb not found for UeId %u",
+                   ueS1apIdPairList[cnt].ueId);
+    } else {
+      if (ueS1apIdPairList[cnt].enbUeS1apId) {
+        resetMsg->enbUeS1apIdLst[cnt] = ueS1apIdPairList[cnt].enbUeS1apId;
+      } else {
+        resetMsg->enbUeS1apIdLst[cnt] = ueCb->s1ConCb->enb_ue_s1ap_id;
       }
-      resetMsg->enbUeS1apIdLst[cnt] = ueCb->s1ConCb->enb_ue_s1ap_id;
-      resetMsg->mmeUeS1apIdLst[cnt] = ueCb->s1ConCb->mme_ue_s1ap_id;
-   }
+      if (ueS1apIdPairList[cnt].mmeUeS1apId) {
+        resetMsg->mmeUeS1apIdLst[cnt] = ueS1apIdPairList[cnt].mmeUeS1apId;
+      } else {
+        resetMsg->mmeUeS1apIdLst[cnt] = ueCb->s1ConCb->mme_ue_s1ap_id;
+      }
+    }
+  }
 
-   RETVALUE(ROK);
+  RETVALUE(ROK);
 } /* getS1apInfoFrmUeId */
 
 PUBLIC S16 NbEnbResetReqHdl
@@ -876,7 +879,7 @@ PUBLIC S16 NbEnbResetReqHdl
  NbResetRequest *resetReq
 )
 {
-   U8 idx = 0;
+   U32 idx = 0;
    S16 ret = ROK;
    NbUeCb *ueCb = NULLP, *prev = NULLP;
    NbResetMsgInfo resetMsgInfo = {0};
@@ -894,27 +897,29 @@ PUBLIC S16 NbEnbResetReqHdl
    uesLocalRel = TRUE;
    if(resetMsgInfo.type == NB_PARTIAL_RESET)
    {
-      if(getS1apInfoFrmUeId(resetReq->u.partialRst.ueIdLst,
-            resetReq->u.partialRst.numOfConn, &resetMsgInfo) != ROK)
-      {
-         NB_LOG_ERROR(&nbCb, "Failed to fetch UE Info using UeId");
-         NB_FREE(resetReq->u.partialRst.ueIdLst, resetReq->u.partialRst.numOfConn);
-         RETVALUE(RFAILED);
-      }
+     if (getS1apInfoFrmUeId(resetReq->u.partialRst.ueS1apIdPairList,
+                            resetReq->u.partialRst.numOfConn,
+                            &resetMsgInfo) != ROK) {
+       NB_LOG_ERROR(&nbCb, "Failed to fetch UE Info using UeId");
+       NB_FREE(resetReq->u.partialRst.ueS1apIdPairList,
+               resetReq->u.partialRst.numOfConn);
+       RETVALUE(RFAILED);
+     }
       for(idx = 0 ; idx < resetReq->u.partialRst.numOfConn ; idx ++)
       {
-        if(ret != nbSendS1RelIndToUeApp(resetReq->u.partialRst.ueIdLst[idx]))
-        {
-         NB_LOG_ERROR(&nbCb, "Failed to send Release Indication to UeApp");
-         RETVALUE(RFAILED);
+        if (ret != nbSendS1RelIndToUeApp(
+                       resetReq->u.partialRst.ueS1apIdPairList[idx].ueId)) {
+          NB_LOG_ERROR(&nbCb, "Failed to send Release Indication to UeApp");
+          RETVALUE(RFAILED);
         }
-        if(ret != nbIfmDamUeDelReq(resetReq->u.partialRst.ueIdLst[idx]))
-        {
-         NB_LOG_ERROR(&nbCb, "Failed to send UE Delete Indication to DAM");
-         RETVALUE(RFAILED);
+        if (ret != nbIfmDamUeDelReq(
+                       resetReq->u.partialRst.ueS1apIdPairList[idx].ueId)) {
+          NB_LOG_ERROR(&nbCb, "Failed to send UE Delete Indication to DAM");
+          RETVALUE(RFAILED);
         }
       }
-      NB_FREE(resetReq->u.partialRst.ueIdLst, resetReq->u.partialRst.numOfConn);
+      NB_FREE(resetReq->u.partialRst.ueS1apIdPairList,
+              resetReq->u.partialRst.numOfConn);
    }
    else
    {
@@ -976,7 +981,7 @@ PUBLIC S16 NbEnbErabRelIndHdl
 
    /* Find the ENB and MME UE-S1AP Ids using UeId */
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(erabRelInd->ueId),
-      sizeof(U8),0,(PTR *)&ueCb)))
+      sizeof(U32),0,(PTR *)&ueCb)))
    {
       RETVALUE(RFAILED);
    }
@@ -1017,7 +1022,7 @@ PUBLIC S16 NbEnbErabRelRspHdl
 
    /* Find the ENB and MME UE-S1AP Ids using UeId */
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(erabRelRsp->ueId),
-      sizeof(U8),0,(PTR *)&ueCb)))
+      sizeof(U32),0,(PTR *)&ueCb)))
    {
       NB_LOG_ERROR(&nbCb, "UeCb not found for UeId %d", erabRelRsp->ueId);
       NB_LOG_EXITFN(&nbCb, RFAILED);
@@ -1138,6 +1143,39 @@ PUBLIC S16 NbEnbDelayInitCtxtSetupRsp(NbDelayICSRsp *delayICSRsp)
 
    RETVALUE(ROK);
 }
+
+/*
+ * @details This function marks failed erabs to be sent in ICS Rsp
+ *
+ * Function: NbEnbHandleInitCtxtSetupRspFailedErabs
+ *
+ * @param[in]  pointer to NbInitCtxtSetupFailedErabs
+ * @return  S16
+ *          -# Success : ROK
+ */
+PUBLIC S16 NbEnbHandleInitCtxtSetupRspFailedErabs(
+    NbInitCtxtSetupFailedErabs *icsRspFailedErabs) {
+  NB_LOG_ENTERFN(&nbCb);
+  U8 idx;
+  if (NULLP == icsRspFailedErabs) {
+    NB_LOG_ERROR(&nbCb, "Recieved empty(NULL) request");
+    RETVALUE(RFAILED);
+  }
+
+  nbCb.initCtxtSetupFailedErabs[(icsRspFailedErabs->ueId) - 1].numFailedErabs =
+      icsRspFailedErabs->numFailedErabs;
+  for (idx = 0; idx < icsRspFailedErabs->numFailedErabs; idx++) {
+    nbCb.initCtxtSetupFailedErabs[(icsRspFailedErabs->ueId) - 1]
+        .failedErabs[idx] = icsRspFailedErabs->failedErabs[idx];
+  }
+  nbCb.initCtxtSetupFailedErabs[(icsRspFailedErabs->ueId) - 1].cause.causeTyp =
+      NB_CAUSE_TRANSPORT;
+  nbCb.initCtxtSetupFailedErabs[(icsRspFailedErabs->ueId) - 1].cause.causeVal =
+      CAUSE_TRANSPORT_RESOURCE_UNAVAILABLE;
+  RETVALUE(ROK);
+}
+
+
 /*
  * @details This function marked a ue for delay ue context release complete
  *
@@ -1288,7 +1326,7 @@ PUBLIC S16 NbEnbX2HOTriggerReqHdl
       RETVALUE(RFAILED);
    }
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(x2HOTriggerReq->ueId),
-      sizeof(U8),0,(PTR *)&ueCb)))
+      sizeof(U32),0,(PTR *)&ueCb)))
    {
       NB_LOG_ERROR(&nbCb, "UeCb not found for UeId %d", x2HOTriggerReq->ueId);
       NB_LOG_EXITFN(&nbCb, RFAILED);
@@ -1416,7 +1454,7 @@ PUBLIC S16 NbEnbConfigTransferHdl
    NbUeCb       *ueCb   = NULLP;
 
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(enbConfigTrnsf->ueId),
-      sizeof(U8),0,(PTR *)&ueCb)))
+      sizeof(U32),0,(PTR *)&ueCb)))
    {
       NB_LOG_ERROR(&nbCb, "UeCb not found for UeId %d", enbConfigTrnsf->ueId);
       NB_LOG_EXITFN(&nbCb, RFAILED);

@@ -103,12 +103,16 @@ PRIVATE Void handleMultiEnbConfigReq(multiEnbConfigReq_t* data);
 PUBLIC Void handleX2HoTriggerReq(NbX2HOTriggerReq* data);
 PRIVATE Void handlPdnDisconnectReq(uepdnDisconnectReq_t *data);
 EXTERN Void fwHndlPdnDisconnTmrExp(PTR cb);
+PRIVATE Void
+handleUeInitCtxtSetupRspFailedErabs(UeInitCtxtSetupFailedErabs *data);
+PUBLIC S16
+handleStdAloneActvDfltEpsBearerContextRej(ueActvDfltEpsBearerCtxtRej_t *data);
 PUBLIC FwCb gfwCb;
 
 /* Adding UEID, epsupdate type, active flag into linked list for
  * TAU request
  */
-PRIVATE Void insertUeCb(U8 ueid, U8 epsUpdType, U8 flag, UeIdCb *ueIdCb)
+PRIVATE Void insertUeCb(U32 ueid, U8 epsUpdType, U8 flag, UeIdCb *ueIdCb)
 {
    FwCb *fwCb = NULLP;
    FW_GET_CB(fwCb);
@@ -609,7 +613,7 @@ PUBLIC S16 handlRadCapUpd(ueRadCapUpd_t *data)
 }
 
 /* Adding UEID into linked list for END TO END ATTACH */
-PRIVATE Void insert_ue_entry(U8 ueid, UeIdCb *ueIdCb)
+PRIVATE Void insert_ue_entry(U32 ueid, UeIdCb *ueIdCb)
 {
    FwCb *fwCb = NULLP;
    FW_GET_CB(fwCb);
@@ -1568,12 +1572,14 @@ PUBLIC S16 handleResetRequest(ResetReq *data)
    else if(msgReq->t.resetReq.rstType == NB_PARTIAL_RESET)
    {
       msgReq->t.resetReq.u.partialRst.numOfConn = data->r.partialRst.numOfConn;
-      FW_ALLOC_MEM(fwCb, &msgReq->t.resetReq.u.partialRst.ueIdLst,
-            msgReq->t.resetReq.u.partialRst.numOfConn);
+      FW_ALLOC_MEM(
+          fwCb, &msgReq->t.resetReq.u.partialRst.ueS1apIdPairList,
+          sizeof(NbUeS1apIdPair) * msgReq->t.resetReq.u.partialRst.numOfConn);
 
-      cmMemcpy(msgReq->t.resetReq.u.partialRst.ueIdLst,
-            data->r.partialRst.ueIdLst,
-            msgReq->t.resetReq.u.partialRst.numOfConn);
+      cmMemcpy(
+          msgReq->t.resetReq.u.partialRst.ueS1apIdPairList,
+          data->r.partialRst.ueS1apIdPairList,
+          sizeof(NbUeS1apIdPair) * msgReq->t.resetReq.u.partialRst.numOfConn);
    }
    else
    {
@@ -2232,6 +2238,16 @@ PUBLIC S16 tfwApi
          }
          break;
       }
+      case UE_SET_INIT_CTXT_SETUP_RSP_FAILED_ERABS: {
+        FW_LOG_DEBUG(fwCb, "Received initial context setup for failed erabs");
+        if (fwCb->nbState == ENB_IS_UP) {
+          handleUeInitCtxtSetupRspFailedErabs((UeInitCtxtSetupFailedErabs *)msg);
+        } else {
+          FW_LOG_ERROR(fwCb, "ICS for failed erabs:ENBAPP IS NOT UP");
+          ret = RFAILED;
+        }
+        break;
+      }
       case UE_SET_DELAY_UE_CTXT_REL_CMP:
       {
          FW_LOG_DEBUG(fwCb, "Process Delay CRC Request ");
@@ -2378,7 +2394,13 @@ PUBLIC S16 tfwApi
         }
         break;
       }
-
+      case UE_STANDALONE_ACTV_DEFAULT_EPS_BEARER_CNTXT_REJECT: {
+        FW_LOG_DEBUG(fwCb,
+                     "UE_STANDALONE_ACTV_DEFAULT_EPS_BEARER_CNTXT_REJECT message");
+        handleStdAloneActvDfltEpsBearerContextRej(
+            (ueActvDfltEpsBearerCtxtRej_t *)msg);
+        break;
+      }
      default:
       {
          FW_LOG_ERROR(fwCb, "Invalid Message");
@@ -3002,6 +3024,47 @@ PRIVATE Void handleDropUeInitCtxtSetupReq(UeDropInitCtxtSetup* data)
 }
 /*
  *
+ *   Fun:   handleUeInitCtxtSetupRspFailedErabs
+ *
+ *   Desc:  This function is used to handle failed erabs
+ *
+ *   Ret:   None
+ *
+ *   Notes: None
+ *
+ *   File:  fw_api_int.c
+ *
+ */
+PRIVATE Void
+handleUeInitCtxtSetupRspFailedErabs(UeInitCtxtSetupFailedErabs *data) {
+  FwCb *fwCb = NULLP;
+  NbtRequest *msgReq = NULLP;
+  U8 idx = 0;
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  if (SGetSBuf(fwCb->init.region, fwCb->init.pool, (Data **)&msgReq,
+               (Size)sizeof(NbtRequest)) == ROK) {
+    cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
+  } else {
+    FW_LOG_ERROR(fwCb, "Failed to allocate memory");
+    RETVOID;
+  }
+
+  msgReq->msgType = NB_INIT_CTXT_SETUP_RSP_FAILED_ERABS;
+  msgReq->t.initCtxtSetupRspFailedErabs.ueId = data->ue_Id;
+  msgReq->t.initCtxtSetupRspFailedErabs.numFailedErabs = data->numFailedErabs;
+  for (idx = 0; idx < data->numFailedErabs; idx++) {
+    msgReq->t.initCtxtSetupRspFailedErabs.failedErabs[idx] =
+        data->failedErabs[idx];
+  }
+  fwSendToNbApp(msgReq);
+  RETVOID;
+}
+
+/*
+ *
  *   Fun:   handleDelayUeCtxtRelCmp
  *
  *   Desc:  This function is used to handle  Delay Initial Context Setup Response
@@ -3287,4 +3350,36 @@ PRIVATE Void handlPdnDisconnectReq(uepdnDisconnectReq_t *data) {
     FW_LOG_ERROR(fwCb, "Failed to start T3492 timer");
   }
   RETVOID;
+}
+/*
+ *
+ *   Fun:   handleStdAloneActvDfltEpsBearerContextRej
+ *
+ *   Desc:  This function is used to handle standalone Activate Default Eps
+ *          Bearer context reject message from Test Controller
+ *
+ *   Ret:   None
+ *
+ *   Notes: None
+ *
+ *   File:  fw_api_int.c
+ *
+ */
+PUBLIC S16
+handleStdAloneActvDfltEpsBearerContextRej(ueActvDfltEpsBearerCtxtRej_t *data) {
+  FwCb *fwCb = NULLP;
+  UetMessage *uetMsg = NULLP;
+  UeEsmActDfltBearCtxtRej *ueActDfltBearCtxtRej = NULLP;
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  FW_ALLOC_MEM(fwCb, &uetMsg, sizeof(UetMessage));
+  uetMsg->msgType = UE_STANDALONE_DEFAULT_EPS_BER_REJ;
+  ueActDfltBearCtxtRej = &uetMsg->msg.ueActDfltBerRej;
+
+  ueActDfltBearCtxtRej->ueId = data->ue_Id;
+  ueActDfltBearCtxtRej->bearerId = data->bearerId;
+  ueActDfltBearCtxtRej->esmCause = data->cause;
+  fwSendToUeApp(uetMsg);
+  FW_LOG_EXITFN(fwCb, ROK);
 }

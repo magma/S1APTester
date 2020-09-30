@@ -33,7 +33,7 @@ typedef struct _nbuSTmsi
 
 typedef struct _nbuUeAttachReq
 {
-    U8 ueId;
+    U32 ueId;
     U32 rrcCause;
     NbuSTmsi stmsi;
     TknStrOSXL nasPdu;
@@ -41,18 +41,18 @@ typedef struct _nbuUeAttachReq
 
 typedef struct _nbuUlNasMsg
 {
-   U8 ueId;
+   U32 ueId;
    TknStrOSXL  nasPdu;
 }NbuUlNasMsg;
 typedef struct _nbuUlRrcMsg
 {
-   U8 ueId;
+   U32 ueId;
    TknStrOSXL  rrcPdu;
 }NbuUlRrcMsg;
 
 typedef struct _nbuDlNasMsg
 {
-   U8 ueId;
+   U32 ueId;
    TknStrOSXL nasPdu;
 }NbuDlNasMsg;
 
@@ -133,14 +133,14 @@ typedef struct _nbuErabRelLst
 
 typedef struct _nbuErabRelIndLst
 {
-   U8 ueId;
+   U32 ueId;
    U8 numOfErabIds;
    U8 *erabIdLst;
 }NbuErabRelIndList;
 
 typedef struct _nbuErabsRelInfo
 {
-   U8 ueId;
+   U32 ueId;
    Bool nasPduPres;
    NbuErabRelLst *erabInfo;
    TknStrOSXL nasPdu;
@@ -148,7 +148,7 @@ typedef struct _nbuErabsRelInfo
 
 typedef struct _nbuErabsInfo
 {
-   U8 ueId;
+   U32 ueId;
    Bool nasPduPres;
    Bool ueRadCapRcvd;
    NbuErabLst *erabInfo;
@@ -157,17 +157,17 @@ typedef struct _nbuErabsInfo
 
 typedef struct _nbuS1RelInd
 {
-   U8 ueId;
+   U32 ueId;
 }NbuS1RelInd;
 
 typedef struct _nbuUeInActvInd
 {
-   U8 ueId;
+   U32 ueId;
 }NbuUeInActvInd;
 
 typedef struct _nbuUeIpInfoReq
 {
-   U8 ueId;
+   U32 ueId;
    U8 bearerId;
 }NbuUeIpInfoReq;
 
@@ -219,7 +219,7 @@ typedef struct _tftPfs {
 } TftPfs;
 
 typedef struct _nbuUeIpInfoRsp {
-  U8 ueId;
+  U32 ueId;
   U8 bearerId;
   U8 pdnType;
   U8 Ip4Addr[20];
@@ -230,15 +230,20 @@ typedef struct _nbuUeIpInfoRsp {
   TftPfs pfList[CM_MAX_PKT_FILTERS];
 } NbuUeIpInfoRsp;
 
+typedef struct _nbuUeIpInfoRej {
+  U32 ueId;
+  U8 bearerId;
+} NbuUeIpInfoRej;
+
 typedef struct _nbuTunDelReq
 {
-   U8 ueId;
+   U32 ueId;
    U32 erabId;
 }NbuTunDelReq;
 
 typedef struct _nbuNotifyPlmnInfo
 {
-   U8 ueId;
+   U32 ueId;
    U8 plmnId[3];
 }NbuNotifyPlmnInfo;
 
@@ -256,6 +261,7 @@ typedef S16 (*NbuUeIpInfoRspHdl) (Pst *, NbuUeIpInfoRsp*);
 typedef S16 (*NbuErabRelIndHdl)(Pst *, NbuErabRelIndList*);/*NbErabRelInd*);*/
 typedef S16 (*NbuNotifyPlmnInfoHdl) (Pst *, NbuNotifyPlmnInfo*);
 typedef S16 (*NbuUeIpInfoUpdtHdl)(Pst *, NbuUeIpInfoUpdt *);
+typedef S16 (*NbuUeIpInfoRejHdl)(Pst *, NbuUeIpInfoRej *);
 EXTERN S16 cmPkNbuInitialUeMsg(Pst *pst,NbuInitialUeMsg *req);
 EXTERN S16 cmPkNbuErabRelInd(Pst *pst, NbuErabRelIndList *);
 EXTERN S16 cmPkNbuUlNasMsg(Pst *pst,NbuUlNasMsg *msg);
@@ -268,6 +274,7 @@ EXTERN S16 cmPkNbuUeIpInfoRsp (Pst *pst,NbuUeIpInfoRsp *msg);
 EXTERN S16 cmPkNbuUlRrcMsg ARGS((Pst *pst, NbuUlRrcMsg *msg));
 EXTERN S16 cmPkNbuErabsRelInfo (Pst *pst,NbuErabsRelInfo *msg);
 EXTERN S16 cmPkNbuNotifyPlmnInfo ARGS((Pst *pst,NbuNotifyPlmnInfo *req));
+EXTERN S16 cmPkNbuUeIpInfoRej (Pst *pst,NbuUeIpInfoRej *msg);
 
 EXTERN S16 cmUnPkNbuInitialUeMsg(NbuInitialUeMsgHdl, Pst*, Buffer*);
 EXTERN S16 cmUnPkNbuErabRelInd(NbuErabRelIndHdl, Pst*, Buffer*);
@@ -290,6 +297,7 @@ EXTERN S16 cmUnPkNbuErabsRelInfo(NbuErabsRelInfoMsgHdl func, Pst *pst, Buffer *m
 EXTERN S16 cmUnPkNbuNotifyPlmnInfo (NbuNotifyPlmnInfoHdl func,Pst *pst,Buffer *mBuf);
 EXTERN S16 cmUnPkNbuUeIpInfoUpdt(NbuUeIpInfoUpdtHdl func, Pst *pst,
                                  Buffer *mBuf);
+EXTERN S16 cmUnPkNbuUeIpInfoRej(NbuUeIpInfoRejHdl func, Pst *pst, Buffer *mBuf);
 
 /********************************************************************30**
 

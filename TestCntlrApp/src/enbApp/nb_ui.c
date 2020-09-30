@@ -45,10 +45,12 @@ EXTERN S16 NbEnbNasNonDel(NbNasNonDel *nasNonDel);
 EXTERN S16 NbEnbInitCtxtSetupFail(NbInitCtxtSetupFail*);
 EXTERN S16 NbEnbDropInitCtxtSetup(NbDropInitCtxtSetup*);
 EXTERN S16 NbEnbDelayInitCtxtSetupRsp(NbDelayICSRsp*);
+EXTERN S16 NbEnbHandleInitCtxtSetupRspFailedErabs(NbInitCtxtSetupFailedErabs *);
 EXTERN S16 NbEnbUeCtxtRelForInitCtxtSetup(NbSendUeCtxtRelForICSRsp*);
-EXTERN S16 nbUiSendIntCtxtSetupDrpdIndToUser(U8 ueId);
+EXTERN S16 nbUiSendIntCtxtSetupDrpdIndToUser(U32 ueId);
 EXTERN S16 NbEnbDelayUeCtxtRelCmp(NbDelayUeCtxtRelCmp*);
 EXTERN S16 NbMultiEnbCfgReq(NbMultiEnbConfigReq*);
+EXTERN S16 NbUiNbuHdlUeIpInfoRej(Pst *, NbuUeIpInfoRej *);
 
 int atoi(const char *nptr);
 
@@ -185,7 +187,14 @@ PUBLIC S16 NbUiNbtMsgReq
             break;
             
          }
-
+      case NB_INIT_CTXT_SETUP_RSP_FAILED_ERABS: {
+        if (ROK != NbEnbHandleInitCtxtSetupRspFailedErabs(
+                       &req->t.initCtxtSetupRspFailedErabs)) {
+          NB_LOG_ERROR(&nbCb,
+                       "Failed to process NbEnbHandleInitCtxtSetupRspFailedErabs");
+        }
+        break;
+      }
       case NB_DELAY_UE_CTXT_REL_CMP:
          {
             if(ROK != NbEnbDelayUeCtxtRelCmp(&req->t.delayUeCtxtRelCmp))
@@ -290,7 +299,7 @@ PUBLIC S16 NbUiNbuHdlUlNasMsg
  NbuUlNasMsg *msg
 )
 {
-   U8 ueId = 0;
+   U32 ueId = 0;
    NbUeCb *ueCb = NULLP;
    NbS1ConCb *s1apConCb = NULLP;
    SztDatEvntReq s1UlInfoMsg = {0};
@@ -316,7 +325,7 @@ PUBLIC S16 NbUiNbuHdlUlNasMsg
    }
 #endif
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueId),
-      sizeof(U8),0,(PTR *)&ueCb)))
+      sizeof(U32),0,(PTR *)&ueCb)))
    {
       NB_LOG_ERROR(&nbCb, "ueCb not found for UeId %d", ueId);
       NB_FREE(msg->nasPdu.val, msg->nasPdu.len);
@@ -384,7 +393,7 @@ PUBLIC S16 NbUiNbuHdlUeRadioCapMsg
  NbuUlRrcMsg *msg
 )
 {
-   U8 ueId;
+   U32 ueId;
    NbUeCb    *ueCb = NULLP;
    NbS1ConCb * s1apConCb = NULLP;
    SztDatEvntReq      s1UlInfoMsg;
@@ -412,7 +421,7 @@ PUBLIC S16 NbUiNbuHdlUeRadioCapMsg
    }
 #endif
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueId),
-      sizeof(U8),0,(PTR *)&ueCb)))
+      sizeof(U32),0,(PTR *)&ueCb)))
    {
       NB_LOG_ERROR(&nbCb,"NbUiNbuHdlUeRadioCapMsg: ueCb not found");
       NB_FREE(msg->rrcPdu.val,msg->rrcPdu.len);
@@ -493,7 +502,7 @@ PUBLIC S16 nbUiBuildAndSendDlNasMsg
 #if 0
 PUBLIC S16 nbUiBuildAndSendNasNonDlvryIndToTfw
 (
- U8 ueId
+ U32 ueId
 )
 {
    NbtMsg * msg = NULLP;
@@ -554,7 +563,7 @@ PUBLIC S16 nbUiBuildAndSendPagingMsg
    RETVALUE(ROK);
 } /* nbUiBuildAndSendPagingMsg */
 
-PUBLIC Void nbUiNbuHandleUeInactivity(U8 ueId)
+PUBLIC Void nbUiNbuHandleUeInactivity(U32 ueId)
 {
    NbuUeInActvInd *msg;
    NB_ALLOC(&msg, sizeof(NbuUeInActvInd));
@@ -764,7 +773,7 @@ PUBLIC S16 nbUiSendResetAckToUser(NbResetAckldg *resetAck)
    RETVALUE(ROK);
 } /* nbUiSendResetAckToUser */
 
-PUBLIC S16 nbUiSendUeCtxRelIndToUser(U8 ueId)
+PUBLIC S16 nbUiSendUeCtxRelIndToUser(U32 ueId)
 {
    NbtResponse *rsp = NULLP;
    Pst pst;
@@ -794,7 +803,7 @@ PUBLIC S16 nbUiSendUeCtxRelIndToUser(U8 ueId)
    RETVALUE(ROK);
 } /* nbUiSendUeCtxRelIndToUser */
 
-PUBLIC S16 nbUiSendIntCtxtSetupIndToUser(U8 ueId, U8 status)
+PUBLIC S16 nbUiSendIntCtxtSetupIndToUser(U32 ueId, U8 status)
 {
    NbtResponse *rsp = NULLP;
    Pst pst;
@@ -825,7 +834,7 @@ PUBLIC S16 nbUiSendIntCtxtSetupIndToUser(U8 ueId, U8 status)
    RETVALUE(ROK);
 } /* nbUiSendUeCtxRelIndToUser */
 
-PUBLIC S16 nbUiSendIntCtxtSetupDrpdIndToUser(U8 ueId)
+PUBLIC S16 nbUiSendIntCtxtSetupDrpdIndToUser(U32 ueId)
 {
    NbtResponse *rsp = NULLP;
    Pst pst;
@@ -952,3 +961,10 @@ PUBLIC S16 nbUiSendMmeConfigTrfToUser(NbMmeConfigTrnsf *mmeConfigTrnsf)
 
    RETVALUE(ROK);
 } /* nbUiSendMmeConfigTrfToUser */
+
+PUBLIC S16 NbUiNbuHdlUeIpInfoRej(Pst *pst, NbuUeIpInfoRej *rej) {
+  S16 retVal = ROK;
+
+  retVal = NbHandleUeIpInfoRej(rej);
+  RETVALUE(retVal);
+} /* NbUiNbuHdlUeIpInfoRej */

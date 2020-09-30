@@ -1076,7 +1076,7 @@ U16          keyLen;       /* length of key */
 {
    CmHashListEnt *hashListEnt;    /* pointer to hash list entry header */
    PTR dupEntry;                  /* pointer to entry with duplicate key */
-   U16 idx;                       /* index for insertion into hash list */
+   U32 idx;                       /* index for insertion into hash list */
 
    TRC2(cmHashListInsert);
 

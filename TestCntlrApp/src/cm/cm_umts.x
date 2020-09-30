@@ -40,7 +40,7 @@ EXTERN "C" {
 /* defination for Common UMTS */
 typedef U8 UmtsRbId;          /* Radio Bearer ID */
 typedef U32 UmtsUrnti;        /* Urnti UE Id */
-typedef U16 UmtsCrnti;        /* Crnti UE Id */
+typedef U32 UmtsCrnti;        /* Crnti UE Id */
 typedef U8 UmtsLogChType;     /* Logical Channel Type */
 typedef U8 UmtsRlcSvcType;    /* Rlc Service Type */
 typedef U8 UmtsOperatingMode; /* UMTS Operating Mode */

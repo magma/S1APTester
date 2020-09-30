@@ -188,9 +188,9 @@ typedef struct nbDamDrbCb
  * @details These are the structure members
  * - CmTimer        inactivityTmr  inactivity timer structure
  * - CmTimer        endMrkTmr      end marker timer structure
- * - U16            ueId           unique UE ID
+ * - U32            ueId           unique UE ID
  * - U16            cellId         Cell ID in which UE is present
- * - U16            ueIdx          UE Index
+ * - U32            ueIdx          UE Index
  * - Bool           dataRcvd       flag to indicate if ue has been active
  * - U8             reestabInProgress Flag to indicate if UE is under
  *                                    reestablishment
@@ -317,7 +317,7 @@ typedef struct nbPdnCb {
 typedef struct nbDamUeCb {
   CmHashListEnt ueHashEnt;
   CmTimer inactivityTmr;
-  U16 ueId;
+  U32 ueId;
   U16 expiryCnt;
   U8 ueState;
   U8 dataRcvd;
@@ -340,7 +340,7 @@ typedef struct nbDamUeCb {
 typedef struct nbDamUeIdx
 {
    CmLList                   lnk;
-   U16                       idx;
+   U32                       idx;
    NbDamUeCb                 *ueCb;
 } NbDamUeIdx;
 
@@ -357,7 +357,7 @@ typedef struct nbDamUeIdxCp
 {
    CmLListCp                freeLst;
    CmLListCp                inuseLst;
-   U16                      numIdxs;
+   U32                      numIdxs;
    NbDamUeIdx               *idxs;
 } NbDamUeIdxCp;
 
@@ -377,8 +377,8 @@ typedef struct nbDamCellCb
 {
    U8                        cellInUse;
    U8                        cellId;
-   U16                       startRnti;
-   U16                       numRntis;
+   U32                       startRnti;
+   U32                       numRntis;
    NbDamUeIdxCp              ueIdxCp;
    NbDamUeCb                 **ueCbs;
 } NbDamCellCb;
@@ -514,9 +514,9 @@ EXTERN NbDamCb               nbDamCb;
 
 EXTERN S16 nbDamStartUeInactvTmr(NbDamUeCb*);
 EXTERN Void nbDamTnlMgmtCfm(EgtUEvnt*);
-EXTERN S16 nbDamDelUe(U8);
+EXTERN S16 nbDamDelUe(U32);
 EXTERN S16 nbDamPcapDatInd(Buffer*);
-EXTERN Void nbDamUeDelReq(U8);
+EXTERN Void nbDamUeDelReq(U32);
 EXTERN Void nbDamNbErabDelReq(NbuErabRelIndList*);
 EXTERN S16 nbDamInit(Void);
 EXTERN S16 nbDamActvInit(Ent, Inst, Region, Reason);
@@ -534,7 +534,7 @@ EXTERN S16  nbDamActvTmr(Void);
 EXTERN S16  nbDamStartTmr(PTR cb, S16 tmrEvnt, U32 delay);
 EXTERN Void nbDamStopTmr(PTR cb, S16 event);
 EXTERN S16 nbIfmDamEgtpErrInd(U32 lclTeid, U32 numDrbs, U16 crnti);
-EXTERN Void nbDamSetDataRcvdFlag (U16 cellId, U16 ueId);
+EXTERN Void nbDamSetDataRcvdFlag (U16 cellId, U32 ueId);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

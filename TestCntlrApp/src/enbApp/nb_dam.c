@@ -43,7 +43,7 @@ PRIVATE S16 nbDamLSapCntrl(LnbCntrl *sapCntrl,CmStatus *status,Elmnt elmnt);
 PRIVATE S16 nbDamBndLSap (NbLiSapCb *sapCb,CmStatus  *status,Elmnt elmnt);
 PRIVATE S16 nbDamUbndLSap (NbLiSapCb  *sapCb);
 PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId);
-PUBLIC  NbDamUeCb *nbDamGetUe(U8 ueId);
+PUBLIC  NbDamUeCb *nbDamGetUe(U32 ueId);
 PUBLIC S16 nbDamEgtpDatInd(Pst*, EgtUEvnt*);
 
 /* Some basic default values used for E-GTP Tunnel Management*/
@@ -218,7 +218,7 @@ PUBLIC Void nbDamTnlMgmtCfm
 )
 {
    NbDamTnlCb                *tnlCb = NULLP;
-   U8                        ueId;
+   U32                       ueId;
    U8                        rbId;
    NbDamUeCb                 *ueCb;
    NbDamDrbCb                *drbCb;
@@ -308,7 +308,7 @@ PUBLIC Void nbDamTnlMgmtCfm
  */
 PUBLIC S16 nbDamDelUe
 (
- U8 ueId 
+ U32 ueId
 )
 {
    S16 ret = ROK;
@@ -317,7 +317,7 @@ PUBLIC S16 nbDamDelUe
    NbIpInfo *prevIpInfo = NULLP;
    
    if(ROK != (cmHashListFind(&(nbDamCb.ueCbs), (U8 *)&(ueId),
-      sizeof(U8), 0, (PTR *)&ueCb)))
+      sizeof(U32), 0, (PTR *)&ueCb)))
    {   
       ret = RFAILED;
    }
@@ -367,7 +367,7 @@ PUBLIC S16 nbDamDelUe
  *    -#Success : ROK
  *    -#Failure : RFAILED
  */
-PRIVATE S16 nbDamAddUe(NbDamUeCb **ueCb, U8 ueId)
+PRIVATE S16 nbDamAddUe(NbDamUeCb **ueCb, U32 ueId)
 {
   NbDamDrbCb tmpDamDrbCb;
   NbIpInfo tmpDamIpInfo;
@@ -425,7 +425,7 @@ PRIVATE S16 nbDamAddUe(NbDamUeCb **ueCb, U8 ueId)
 
   cmLListInit(&(pdnCb.tftPfList));
   if (ROK != cmHashListInsert(&(nbDamCb.ueCbs), (PTR) * (ueCb),
-                              (U8 *)&(*ueCb)->ueId, sizeof(U8))) {
+                              (U8 *)&(*ueCb)->ueId, sizeof(U32))) {
     /* deinit the ip list and drblist */
     NB_FREE(*ueCb, sizeof(NbDamUeCb))
     NB_LOG_ERROR(&nbCb, "Failed to Insert UE into UeDamCbLst");
@@ -562,8 +562,7 @@ PRIVATE S16 nbAddPfs(NbPdnCb *pdnCb, NbDamTnlInfo *tnlInfo) {
  *    -#Success : ROK
  *    -#Failure : RFAILED
  */
-PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
-{
+PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo) {
   S16 ret = RFAILED;
   NbPdnCb *pdnCb = NULL;
 
@@ -605,7 +604,7 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
       pdnCb->pdnIp4Addr = tnlInfo->pdnIp4Addr;
       /* Insert pdncb*/
       if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCb,
-                                  (U8 *)&tnlInfo->pdnIp4Addr, sizeof(U32))) {
+                                  (U8 *)&pdnCb->pdnIp4Addr, sizeof(U32))) {
         NB_FREE(pdnCb, sizeof(NbPdnCb))
         NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for pdnCb");
         RETVALUE(RFAILED);
@@ -616,7 +615,7 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo)
       cmMemcpy(pdnCb->pdnIp6Addr, tnlInfo->pdnIp6Addr, (NB_IPV6_ADDRESS_LEN));
       /* Insert pdncb*/
       if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCb,
-                                  (U8 *)&tnlInfo->pdnIp6Addr,
+                                  (U8 *)&pdnCb->pdnIp6Addr,
                                   (NB_IPV6_ADDRESS_LEN))) {
         NB_FREE(pdnCb, sizeof(NbPdnCb))
         NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for pdnCb");
@@ -958,7 +957,7 @@ PRIVATE S16 nbDamAddTunnel
 NbDamTnlInfo                 *tnlInfo
 )
 {
-   U8 ueId;
+   U32 ueId;
    NbDamUeCb       *ueCb = NULLP;
    NbDamTnlCb      *tnlCb  = NULLP;
    U8              rbId    = tnlInfo->tnlId.drbId;
@@ -1714,7 +1713,7 @@ PUBLIC S16 nbDamEgtpDatInd(Pst *pst, EgtUEvnt *eguMsg) {
  */
 PUBLIC Void nbDamUeDelReq
 (
- U8  ueId
+ U32  ueId
 )
 {
    NbDamUeCb *ueCb = NULLP;
@@ -2528,11 +2527,11 @@ PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId)
   RETVALUE(ueCb);
 }
 
-PUBLIC NbDamUeCb* nbDamGetUe(U8 ueId)
+PUBLIC NbDamUeCb* nbDamGetUe(U32 ueId)
 {
    NbDamUeCb *ueCb = NULLP;
    if ( ROK != (cmHashListFind(&(nbDamCb.ueCbs), (U8 *)&(ueId),
-      sizeof(U8),0,(PTR *)&ueCb)))
+      sizeof(U32),0,(PTR *)&ueCb)))
    {    
       RETVALUE(NULLP);
    }
@@ -2540,7 +2539,7 @@ PUBLIC NbDamUeCb* nbDamGetUe(U8 ueId)
    RETVALUE(ueCb);
 }
 
-PUBLIC Void nbDamSetDatFlag(U8 ueId)
+PUBLIC Void nbDamSetDatFlag(U32 ueId)
 {
    NbDamUeCb *ueCb = NULLP;
    ueCb = nbDamGetUe(ueId);
