@@ -44,6 +44,7 @@
 #define EVTNBUERABSRELINFO         12 /* Erab Rel Information Indication */
 #define EVTNBUUPDATEPLMNINFO       13 /* Update Plmn Info */
 #define EVTNBUUEIPINFOREJ          14 /* UE IP info reject */
+#define EVTNBUUEIPINFOUPDT         15 /* Update IPv6 address */
 #define ERRNBU                     0
 
 #define ENBU001         (ERRNBU + 1)

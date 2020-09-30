@@ -51,8 +51,8 @@ EXTERN "C" {
 #define CM_ESM_PDN_IPV6    2
 #define CM_ESM_PDN_IPV4V6  3
 /* cm_esm_h_001.main_1: Adding macros */
-#define CM_ESM_IPV4_SIZE   4    
-#define CM_ESM_IPV6_SIZE   6    
+#define CM_ESM_IPV4_SIZE   4
+#define CM_ESM_IPV6_SIZE 16
 #define CM_ESM_IP_SEC_SIZE  4
 #define  CM_ESM_IPV6_FLOW_LABEL_SIZE 3
 #define CM_ESM_TFT_MAX_PARAM_BUF 10   

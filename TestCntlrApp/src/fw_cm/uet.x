@@ -45,9 +45,9 @@ extern "C" {
 #define UE_ESM_MAX_CONT_ID 10
 
 #define CM_ESM_IPV4_SIZE   4
-#define CM_ESM_IPV6_SIZE   6
+#define CM_ESM_IPV6_SIZE 16
 #define CM_ESM_IP_SEC_SIZE  4
-#define  CM_ESM_IPV6_FLOW_LABEL_SIZE 3
+#define CM_ESM_IPV6_FLOW_LABEL_SIZE 3
 #define CM_ESM_TFT_MAX_PARAM_BUF 10
 #define CM_ESM_MAX_PKT_FILTERS 10
 #define CM_ESM_TFT_MAX_TFT_BUF 50
@@ -209,6 +209,7 @@ typedef enum _ueMsgTypes
    UE_PDN_DISCONNECT_REJ_TYPE,
    UE_ERAB_SETUP_REQ_FAILED_FOR_ERABS,
    UE_AUTH_FAILURE_TYPE,
+   UE_ICMPV6_ROUTER_ADV_TYPE,
    UE_STANDALONE_DEFAULT_EPS_BER_REJ,
 }UeMsgTypes;
 
@@ -893,6 +894,12 @@ typedef struct _ueUetErabSetupFailedTosetup {
   UetFailedErablist failedErablist[MAX_FAILED_ERABS];
 } UeUetErabSetupFailedTosetup;
 
+typedef struct _ueUetRouterAdv {
+  U8 ueId;
+  U8 bearerId;
+  U8 ipv6Addr[CM_ESM_IPV6_SIZE];
+} UeUetRouterAdv;
+
 typedef struct _uetMessage
 {
    UeMsgTypes    msgType;
@@ -947,6 +954,7 @@ typedef struct _uetMessage
      UeUetPdnDisconnectRej  ueUetPdnDisconnectRej;
      UeUetErabSetupFailedTosetup ueErabsFailedToSetup;
      UeUetAuthFailure ueUetAuthFailure;
+     UeUetRouterAdv ueUetRouterAdv;
    }msg;
 }UetMessage;
 /* Ue Interface general Structure declerations */

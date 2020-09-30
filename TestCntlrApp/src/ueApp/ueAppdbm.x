@@ -38,6 +38,7 @@
 #define MAX_NUM_OF_UE_CFD 5
 #define MAX_IMSI_LEN 15
 #define MAX_IMEI_LEN 16
+#define IPV6_ADDR_LEN 16
 
 
 /* Supported UE Authentication Algorithm structure */
@@ -255,6 +256,7 @@ typedef struct _ueRabCb
    U8                epsBearerId;
    U8                lnkEpsBearId;
    CmEsmTft          tft;
+   U8                ipv6Addr[IPV6_ADDR_LEN];
 } UeRabCb;
 
 typedef struct _ueCb

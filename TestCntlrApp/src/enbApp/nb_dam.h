@@ -200,12 +200,12 @@ typedef struct nbDamDrbCb
  * - Bool           isFullCfg      indicate the need for full configuration for the UE
  */
 
-typedef struct nbIpInfo
-{
-   CmHashListEnt             ueHashEnt;
-   U8    drbId;
-   U32   pdnAddr;
-}NbIpInfo;
+typedef struct nbIpInfo {
+  CmHashListEnt ueHashEnt;
+  U8 drbId;
+  U32 pdnIp4Addr;
+  U8 pdnIp6Addr[NB_IPV6_ADDRESS_LEN];
+} NbIpInfo;
 
 /**
  * @brief This structure contains IPv4 address
@@ -220,23 +220,43 @@ typedef struct {
 } NbTftIpv4Addr;
 
 /**
+ * @brief This structure contains IPv6 address
+ *
+ * @details These are the structure members
+ * - U8        ipv6_addr      IPv6 address
+ */
+typedef struct {
+  U8 ipv6_addr[NB_IPV6_ADDRESS_LEN];
+} NbTftIpv6Addr;
+
+/**
  * @brief This structure contains IP packet information
  *
  * @details These are the structure members
  * - U32           locIpv4Addr      Local IPv4 address
  * - U32           remIpv4Addr      Remote IPv4 addr
+ * - U8            localIpv6Addr    Local IPv6 addr
+ *                 Local IPv6 address is used only to
+ *                 verify if we have
+ *                 a valid context for this UE
+ *
+ * - U8            remIpv6Addr      Remote IPv6 addr
  * - U16           locPort          Single local port
  * - U16           remPort          Single remote port
  * - U8            proto_id         Protocol type(TCP/UDP)
  * - U8            srvClass         Type Of service(ToS)
+ * - U8            ipVersion        IPv4 or IPv6 version
  */
 typedef struct nbIpPktFields {
   U32 locIpv4Addr;
   U32 remIpv4Addr;
+  U8 localIpv6Addr[NB_IPV6_ADDRESS_LEN];
+  U8 remIpv6Addr[NB_IPV6_ADDRESS_LEN];
   U16 locPort;
   U16 remPort;
   U8 proto_id;
   U8 srvClass;
+  U8 ipVersion;
 } NbIpPktFields;
 
 /**
@@ -247,6 +267,7 @@ typedef struct nbIpPktFields {
  * - U8            dir              UL/DL
  * - U8            preced           precedence
  * - NbTftIpv4Addr remIpv4Addr      Remote IPv4 addr
+ * - NbTftIpv6Addr remIpv6Addr      Remote IPv6 addr
  * - U16           locPort          Single local port
  * - U16           locPortRangeLow  Local port range
  * - U16           locPortRangeHigh Local port range
@@ -264,6 +285,7 @@ typedef struct nbPktFilterList {
   U8 dir;
   U8 preced;
   NbTftIpv4Addr remIpv4Addr;
+  NbTftIpv6Addr remIpv6Addr;
   U16 locPort;
   U16 locPortRangeLow;
   U16 locPortRangeHigh;
@@ -286,7 +308,8 @@ typedef struct nbPktFilterList {
  */
 typedef struct nbPdnCb {
   CmHashListEnt ueHashEnt;
-  U32 pdnAddr;
+  U32 pdnIp4Addr;
+  U8 pdnIp6Addr[NB_IPV6_ADDRESS_LEN];
   U32 lnkEpsBearId;
   CmLListCp tftPfList;
 } NbPdnCb;

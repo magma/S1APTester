@@ -15,3 +15,4 @@
 #define REM_PORT_RNG_PKT_FLTR_MASK 0x0020   /* Remote port range type  */
 #define SECURITY_PARAM_PKT_FLTR_MASK 0x0040 /* Security parameter index*/
 #define SERV_N_CLASS_PKT_FLTR_MASK 0x0080   /* Type of service/Traffic */
+#define IPV6_REM_ADDR_PKT_FLTR_MASK 0x0100  /* IPv6 remote address type*/

@@ -139,7 +139,9 @@ typedef struct NbDamTunInfo {
   CmTptAddr srcAddr;
   NbEgtpTeid remTeid;
   NbEgtpTeid lclTeid;
-  U32 pdnAddr;
+  U8 pdnType;
+  U32 pdnIp4Addr;
+  U8 pdnIp6Addr[NB_IPV6_ADDRESS_LEN];
   NbTft tft;
 } NbDamTnlInfo;
 

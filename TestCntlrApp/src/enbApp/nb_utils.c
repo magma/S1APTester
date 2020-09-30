@@ -934,3 +934,18 @@ PUBLIC S16 nbGetUeIdFromS1apId
    RETVALUE(ROK);
 }
 
+PUBLIC Void printIpv6Addr(uint8_t *ipv6_addr) {
+
+  uint8_t ip6_str[INET6_ADDRSTRLEN] = {0};
+  sprintf(
+      ip6_str,
+      "%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x",
+      (int)(ipv6_addr[0]), (int)(ipv6_addr[1]), (int)(ipv6_addr[2]),
+      (int)(ipv6_addr[3]), (int)(ipv6_addr[4]), (int)(ipv6_addr[5]),
+      (int)(ipv6_addr[6]), (int)(ipv6_addr[7]), (int)(ipv6_addr[8]),
+      (int)(ipv6_addr[9]), (int)(ipv6_addr[10]), (int)(ipv6_addr[11]),
+      (int)(ipv6_addr[12]), (int)(ipv6_addr[13]), (int)(ipv6_addr[14]),
+      (int)(ipv6_addr[15]));
+  NB_LOG_DEBUG(&nbCb, "IPv6 address %s", ip6_str);
+  RETVOID;
+}

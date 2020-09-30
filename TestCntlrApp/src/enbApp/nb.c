@@ -43,7 +43,8 @@ PUBLIC S16 NbEnbDropInitCtxtSetup(NbDropInitCtxtSetup *dropInitCtxtSetup);
 PUBLIC S16 nbDelUeCb(U32 ueId);
 PUBLIC S16 nbUeTnlCreatCfm(U8, U32);
 PUBLIC S16 nbPrcDamUeDelCfm(U32);
-PUBLIC S16 nbCreateUeTunnReq(U32, U32, U8, NbuUeIpInfoRsp *);
+PUBLIC S16 nbCreateUeTunnReq(U32 ueId, U8 bearerId, U32 ueIp4Addr, U8 *ipv6_addr,
+                             NbuUeIpInfoRsp *rsp);
 PUBLIC S16 NbEnbUeRelReqHdl(NbUeCntxtRelReq*);
 PUBLIC S16 NbEnbResetReqHdl(NbResetRequest *resetReq);
 /*PUBLIC S16 NbEnbErabRelIndHdl(NbErabRelInd *erabRelInd);*/
@@ -421,9 +422,8 @@ PUBLIC S16 nbPrcDamUeDelCfm(U32 ueId)
    RETVALUE(ret);
 }
 
-PUBLIC S16 nbCreateUeTunnReq(U32 ueId, U32 ueIpAddr, U8 bearerId,
-                             NbuUeIpInfoRsp *rsp)
-{
+PUBLIC S16 nbCreateUeTunnReq(U32 ueId, U8 bearerId, U32 ueIp4Addr, U8 *ipv6_addr,
+                             NbuUeIpInfoRsp *rsp) {
   U8 idx = 0;
   U8 num_tft = 0;
   NbUeCb *ueCb = NULLP;
@@ -443,13 +443,26 @@ PUBLIC S16 nbCreateUeTunnReq(U32 ueId, U32 ueIpAddr, U8 bearerId,
     for (idx = 0; idx < ueCb->tunnIdx; idx++) {
       if (ROK != (cmHashListFind(&(ueCb->tunnInfo), (U8 *)&(berId), sizeof(U32),
                                  0, (PTR *)&tunInfo))) {
+        if (ipv6_addr) {
+          NB_FREE(ipv6_addr, sizeof(ipv6_addr));
+        }
         RETVALUE(RFAILED);
       } else {
         tnlInfo->tnlId.drbId = tunInfo->bearerId;
         tnlInfo->tnlType = NB_TNL_NORMAL;
         tnlInfo->remTeid = tunInfo->remTeId;
         tnlInfo->lclTeid = tunInfo->lclTeId;
-        tnlInfo->pdnAddr = ueIpAddr;
+        tnlInfo->pdnType = rsp->pdnType;
+
+        if ((rsp->pdnType == NB_PDN_IPV4) || (rsp->pdnType == NB_PDN_IPV4V6)) {
+          tnlInfo->pdnIp4Addr = ueIp4Addr;
+        }
+        if ((ipv6_addr) && ((rsp->pdnType == NB_PDN_IPV6) ||
+                            (rsp->pdnType == NB_PDN_IPV4V6))) {
+          cmMemcpy(tnlInfo->pdnIp6Addr, ipv6_addr, NB_IPV6_ADDRESS_LEN);
+          NB_FREE(ipv6_addr, sizeof(ipv6_addr));
+        }
+
         nbCpyCmTptAddr(&tnlInfo->dstAddr, &(tunInfo->sgwAddr));
         nbCpyCmTptAddr(&tnlInfo->srcAddr, &(nbCb.datAppAddr));
         tnlInfo->tft.lnkEpsBearId = rsp->lnkEpsBearId;

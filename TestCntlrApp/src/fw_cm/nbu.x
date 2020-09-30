@@ -22,6 +22,8 @@
 *********************************************************************21*/
 #include "tft.h"
 
+#define CM_NB_IPV6_ADDR_LEN 16
+
 typedef struct _nbuSTmsi
 {
    Bool                      pres;
@@ -169,6 +171,12 @@ typedef struct _nbuUeIpInfoReq
    U8 bearerId;
 }NbuUeIpInfoReq;
 
+typedef struct _nbuUeIpInfoUpdt {
+  U8 ueId;
+  U8 bearerId;
+  U8 ipv6Addr[CM_NB_IPV6_ADDR_LEN];
+} NbuUeIpInfoUpdt;
+
 typedef struct _uePagingMsg
 {
    U8      ueIdenType;
@@ -197,6 +205,7 @@ typedef struct _tftPfs {
   U8 preced;           /* Precedence */
   U32 ipv4Mask;        /* Ipv4 Address mask*/
   U32 remoteIpv4;      /* Ipv4 Address */
+  U8 remoteIpv6Addr[CM_NB_IPV6_ADDR_LEN];
   U8 protId;           /* Protocol Identifier */
   U16 localPort;       /* Local  Port Identifier */
   U16 locPortRangeLow; /* Local port range*/
@@ -212,7 +221,9 @@ typedef struct _tftPfs {
 typedef struct _nbuUeIpInfoRsp {
   U32 ueId;
   U8 bearerId;
-  S8 IpAddr[20];
+  U8 pdnType;
+  U8 Ip4Addr[20];
+  U8 Ip6Addr[INET6_ADDRSTRLEN];
   BearerType berType;
   U32 lnkEpsBearId;
   U8 noOfPfs;
@@ -249,6 +260,7 @@ typedef S16 (*NbuUeIpInfoReqHdl) (Pst *, NbuUeIpInfoReq*);
 typedef S16 (*NbuUeIpInfoRspHdl) (Pst *, NbuUeIpInfoRsp*);
 typedef S16 (*NbuErabRelIndHdl)(Pst *, NbuErabRelIndList*);/*NbErabRelInd*);*/
 typedef S16 (*NbuNotifyPlmnInfoHdl) (Pst *, NbuNotifyPlmnInfo*);
+typedef S16 (*NbuUeIpInfoUpdtHdl)(Pst *, NbuUeIpInfoUpdt *);
 typedef S16 (*NbuUeIpInfoRejHdl)(Pst *, NbuUeIpInfoRej *);
 EXTERN S16 cmPkNbuInitialUeMsg(Pst *pst,NbuInitialUeMsg *req);
 EXTERN S16 cmPkNbuErabRelInd(Pst *pst, NbuErabRelIndList *);
@@ -283,6 +295,8 @@ EXTERN S16 cmUnPkNbuUeIpInfoReq (NbuUeIpInfoReqHdl func,Pst *pst,Buffer *mBuf);
 EXTERN S16 cmUnPkNbuUeIpInfoRsp (NbuUeIpInfoRspHdl func,Pst *pst,Buffer *mBuf);
 EXTERN S16 cmUnPkNbuErabsRelInfo(NbuErabsRelInfoMsgHdl func, Pst *pst, Buffer *mBuf);
 EXTERN S16 cmUnPkNbuNotifyPlmnInfo (NbuNotifyPlmnInfoHdl func,Pst *pst,Buffer *mBuf);
+EXTERN S16 cmUnPkNbuUeIpInfoUpdt(NbuUeIpInfoUpdtHdl func, Pst *pst,
+                                 Buffer *mBuf);
 EXTERN S16 cmUnPkNbuUeIpInfoRej(NbuUeIpInfoRejHdl func, Pst *pst, Buffer *mBuf);
 
 /********************************************************************30**

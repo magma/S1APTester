@@ -68,12 +68,12 @@ S8 ueIntf[10];
    (_buf) = NULLP;                                                      \
 }
 
-typedef struct nbAppDataRoutCb
-{
-   U32 ipAddr;
-   U8  ipAddrStr[NB_APP_MAX_IP_ADDR_LEN];
-   U8  macAddr[NB_APP_MAC_ADDR_LEN];
-}NbAppDataRouteCb;
+typedef struct nbAppDataRoutCb {
+  U32 ipAddr;
+  U8 ipAddrStr[NB_APP_MAX_IP_ADDR_LEN];
+  U8 ip6AddrStr[NB_IPV6_ADDRESS_LEN];
+  U8 macAddr[NB_APP_MAC_ADDR_LEN];
+} NbAppDataRouteCb;
 
 typedef struct _ueDataCb
 {
@@ -799,7 +799,7 @@ PUBLIC S16 nbAppCfgrPdnAssignedAddr
       }
    }
    if((ueDatCb == NULLP) && (ueCnt < NB_MAX_UE_SUPPORT_FOR_DATA))
-   { 
+   {
       NBAPP_ALLOC(&ueDatCb, sizeof(UeDataCb));
       if(ueDatCb == NULLP)
       {
@@ -864,6 +864,61 @@ PUBLIC S16 nbAppCfgrPdnAssignedAddr
 
    RETVALUE(ret);
 }/* nbAppCfgrPdnAssignedAddr */
+
+PUBLIC S16 nbAppCfgrPdnAssignedAddrIpv6(U8 ueId, U8 *ipv6Addr) {
+  S16 ret;
+  UeDataCb *ueDatCb = NULLP;
+  U8 idx = 0;
+  U8 idx1 = 0;
+  NbAppDataRouteCb *ipInfo = NULLP;
+
+  for (idx = 0; idx < ueCnt; idx++) {
+    if ((ueDataCbLst[idx] != NULLP) && (ueDataCbLst[idx]->ueId == ueId)) {
+      ueDatCb = ueDataCbLst[idx];
+      for (idx1 = 0; idx1 < ueDatCb->noOfIpsAssigned; idx1++) {
+        if ((ueDatCb->ipInfo[idx1] != NULLP) &&
+            (cmMemcmp(ueDatCb->ipInfo[idx1]->ip6AddrStr, ipv6Addr,
+                      NB_IPV6_ADDRESS_LEN))) {
+          NB_LOG_ERROR(
+              &nbCb,
+              "nbAppCfgrPdnAssignedAddr: IPv6 PDN Address is already assigned "
+              "for UeId %d",
+              ueId);
+          RETVALUE(RFAILED);
+        }
+      }
+      break;
+    }
+  }
+  if ((ueDatCb == NULLP) && (ueCnt < NB_MAX_UE_SUPPORT_FOR_DATA)) {
+    NBAPP_ALLOC(&ueDatCb, sizeof(UeDataCb));
+    if (ueDatCb == NULLP) {
+      NB_LOG_ERROR(&nbCb, "Failed to allocate memory for ueDatCb");
+      RETVALUE(RFAILED);
+    }
+    cmMemset((U8 *)ueDatCb, 0, sizeof(UeDataCb));
+    ueDatCb->ueId = ueId;
+    ueDataCbLst[ueCnt] = ueDatCb;
+    ueCnt++;
+  }
+
+  NBAPP_ALLOC(&ipInfo, sizeof(NbAppDataRouteCb));
+  if (ipInfo == NULLP) {
+    NB_LOG_ERROR(&nbCb, "Failed to allocate memory for ipInfo");
+    RETVALUE(RFAILED);
+  }
+  cmMemset((U8 *)ipInfo, 0, sizeof(NbAppDataRouteCb));
+  cmMemcpy(ipInfo->ip6AddrStr, ipv6Addr, NB_IPV6_ADDRESS_LEN);
+  if (ueDatCb == NULLP) {
+    NB_LOG_ERROR(&nbCb, "ueDatCb is empty");
+    RETVALUE(RFAILED);
+  }
+  ueDatCb->ipInfo[ueDatCb->noOfIpsAssigned] = ipInfo;
+  ueDatCb->noOfIpsAssigned++;
+
+  RETVALUE(ret);
+}
+
 
 PUBLIC Void nbRelCntxtInTrafficHandler
 (
