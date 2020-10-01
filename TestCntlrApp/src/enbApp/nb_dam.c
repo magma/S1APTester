@@ -1127,20 +1127,23 @@ NbDamTnlInfo                 *tnlInfo
  * @param[in]  tnlInfo : new tunnel info
  * @return S16
  */
-PUBLIC Void  nbDamTnlCreatReq
-(
- NbDamTnlInfo                 *tnlInfo
-)
-{
-  
-   if(nbDamAddTunnel(tnlInfo) != ROK)
-   {
-      /* Send failure back to the calling module. The last parameter      */
-      /* as 0 should be ignored by the receiving module as status is      */
-      /* marked as FAILURE                                                */
-      nbIfmDamNbTnlCreatCfm(NB_DAM_CFG_FAIL, 0);
-   }
-   NB_FREE_DATA_APP_SHAREBLE_BUF(tnlInfo, sizeof(NbDamTnlInfo));
+PUBLIC Void nbDamTnlCreatReq(NbDamTnlInfo *tnlInfo) {
+  if (tnlInfo == NULLP) {
+    NB_LOG_DEBUG(&nbCb, "Invalid tunnel info received\n");
+    nbIfmDamNbTnlCreatCfm(NB_DAM_CFG_FAIL, 0);
+    RETVOID;
+  }
+
+  NbDamTnlInfo lclTnlInfo;
+  memcpy(&lclTnlInfo, tnlInfo, sizeof(NbDamTnlInfo));
+
+  if (nbDamAddTunnel(&lclTnlInfo) != ROK) {
+    /* Send failure back to the calling module. The last parameter      */
+    /* as 0 should be ignored by the receiving module as status is      */
+    /* marked as FAILURE                                                */
+    nbIfmDamNbTnlCreatCfm(NB_DAM_CFG_FAIL, 0);
+  }
+  NB_FREE_DATA_APP_SHAREBLE_BUF(tnlInfo, sizeof(NbDamTnlInfo));
 }
 
 /** @brief This function is responsible for deleting the DRB of ueCb
