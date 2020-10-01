@@ -818,7 +818,6 @@ SztConReq *conReq;     /*  connect sdus */
 
 #endif
 
-
    if ((ret = szNdbAllocConCb(&conCb, peer)) != ROK)
    {
       SZ_SEND_LCL_ERR_IND(PRSNT_NODEF, conReq->u.suConnId,
@@ -1415,7 +1414,6 @@ SztDatEvntReq *datEvnt;   /*  cn st sdus */
    TRC3(SzUiSztDatReq);
 
    conCb = NULLP;
-
 #ifdef SS_MULTIPLE_PROCS
    if(((SGetXxCb(pst->dstProcId,pst->dstEnt,pst->dstInst,(Void **)&szCbPtr))
                 !=ROK)||( szCbPtr == NULLP))

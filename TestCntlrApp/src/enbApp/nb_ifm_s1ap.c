@@ -374,16 +374,13 @@ U8                           status
  * @return  S16
  *        -# Success : ROK
  */
-PUBLIC S16 UzLiSztStaInd
-(
-Pst                          *post,
-SuId                         suId,
-SztStaInd                    *sztSta
-)
-{
-   RETVALUE(ROK);
+PUBLIC S16 UzLiSztStaInd(Pst *post, SuId suId, SztStaInd *sztSta) {
+  // Inform TFW App if sctp association is down
+  if (sztSta->status == SZT_STATUS_ASSOC_DOWN) {
+    nbUiSendAssocDownIndToUser();
+  }
+  RETVALUE(ROK);
 } /* End of UzLiSztStaInd */
-
 
 /** @brief This function is call handler for Connection-less data indication.
  *
