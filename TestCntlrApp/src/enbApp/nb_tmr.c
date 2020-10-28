@@ -132,7 +132,8 @@ U32                          delay
    NbUeCb                    *ueCb   = NULLP;
    NbDelayICSRspCb *icsRspCb = NULLP;
    NbDelayUeCtxtRelCmpCb *ueCtxRelCmp = NULLP;
- 
+   NbErabSetupRspCb *erabSetupRspCb = NULLP;
+
    wait = 0;
    wait = NB_CALC_WAIT_TIME(delay);
    switch (tmrEvnt)
@@ -178,6 +179,13 @@ U32                          delay
       {
          ueCtxRelCmp = (NbDelayUeCtxtRelCmpCb *)cb;
          tmr = &ueCtxRelCmp->timer;
+         maxTmrs = 1;
+         break;
+      }
+      case NB_TMR_DELAY_ERAB_SETUP_RSP:
+      {
+         erabSetupRspCb = (NbErabSetupRspCb *)cb;
+         tmr = &erabSetupRspCb->timer;
          maxTmrs = 1;
          break;
       }
@@ -338,6 +346,7 @@ S16                          event
    NbUeCb                    *ueCb;
    NbDelayICSRspCb           *icsRspCb;
    NbDelayUeCtxtRelCmpCb     *ueCtxtRelCb;
+   NbErabSetupRspCb *erabSetupRspCb;
   /*U32 size;*/
    switch(event)
    {
@@ -386,6 +395,14 @@ S16                          event
          /*HandleDelayTimerForICSExpiry(ueCtxtRelCb);*/
          break;
       }
+      case NB_TMR_DELAY_ERAB_SETUP_RSP:
+      {
+         erabSetupRspCb = (NbErabSetupRspCb *)cb;
+         NB_LOG_DEBUG(&nbCb,"ERAB_SETUP_RSP Timer Expired for UE:[%d]",erabSetupRspCb->ueId);
+         nbHandleDelayTimerForErabSetupRspExpiry(erabSetupRspCb);
+         break;
+      }
+ 
       default:
          {
             /* Invalid Timer */

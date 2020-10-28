@@ -1636,3 +1636,30 @@ PUBLIC S16 nbPrcMMEConfigTrf
    RETVALUE(ROK);
 } /* nbPrcS1SetupRsp */
 #endif
+
+/*
+ * @details This function marks a ue for delay erab setup rsp
+ *
+ * Function: NbEnbDelayErabSetupRsp
+ *
+ *
+ * @param[in]  NbDelayErabSetupRsp
+ * @return  S16
+ *          -# Success : ROK
+ */
+PUBLIC S16 NbEnbDelayErabSetupRsp(NbDelayErabSetupRsp *delayErabRsp)
+{
+  NB_LOG_ENTERFN(&nbCb);
+
+  if(NULLP == delayErabRsp) {
+    NB_LOG_ERROR(&nbCb, "Recieved empty(NULL) request");
+    RETVALUE(RFAILED);
+  }
+
+  nbCb.delayErabSetupRsp[(delayErabRsp->ueId) - 1].delayErabSetupRsp  = delayErabRsp->isDelayErabSetupRsp;
+  nbCb.delayErabSetupRsp[(delayErabRsp->ueId) - 1].tmrVal  = delayErabRsp->tmrVal;
+  printf("In NbEnbDelayErabSetupRsp tmrVal %d\n", nbCb.delayErabSetupRsp[(delayErabRsp->ueId) - 1].tmrVal);
+
+  RETVALUE(ROK);
+}
+

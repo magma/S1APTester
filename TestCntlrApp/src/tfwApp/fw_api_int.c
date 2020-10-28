@@ -107,6 +107,7 @@ PRIVATE Void
 handleUeInitCtxtSetupRspFailedErabs(UeInitCtxtSetupFailedErabs *data);
 PUBLIC S16
 handleStdAloneActvDfltEpsBearerContextRej(ueActvDfltEpsBearerCtxtRej_t *data);
+PRIVATE Void handleDelayErabSetupRsp(UeDelayErabSetupRsp* data);
 PUBLIC FwCb gfwCb;
 
 /* Adding UEID, epsupdate type, active flag into linked list for
@@ -2401,6 +2402,21 @@ PUBLIC S16 tfwApi
             (ueActvDfltEpsBearerCtxtRej_t *)msg);
         break;
       }
+      case UE_SET_DELAY_ERAB_SETUP_RSP:
+      {
+         FW_LOG_DEBUG(fwCb, "Process Delay ERAB_SETUP_RSP Request ");
+         if (fwCb->nbState == ENB_IS_UP)
+         {
+            handleDelayErabSetupRsp((UeDelayErabSetupRsp*)msg);
+         }
+         else
+         {
+            FW_LOG_ERROR(fwCb, "Failed To Process ERAB Setup Rsp delay Request:ENBAPP IS NOT UP");
+            ret = RFAILED;
+         }
+         break;
+      }
+
      default:
       {
          FW_LOG_ERROR(fwCb, "Invalid Message");
@@ -3383,3 +3399,45 @@ handleStdAloneActvDfltEpsBearerContextRej(ueActvDfltEpsBearerCtxtRej_t *data) {
   fwSendToUeApp(uetMsg);
   FW_LOG_EXITFN(fwCb, ROK);
 }
+
+/*
+ *
+ *   Fun:   handleDelayErabSetupRsp
+ *
+ *   Desc:  This function is used to handle Delay Erab Setup Response
+ *
+ *   Ret:   None
+ *
+ *   Notes: None
+ *
+ *   File:  fw_api_int.c
+ *
+ */
+PRIVATE Void handleDelayErabSetupRsp(UeDelayErabSetupRsp* data)
+{
+   FwCb *fwCb = NULLP;
+   NbtRequest *msgReq = NULLP;
+
+   FW_GET_CB(fwCb);
+   FW_LOG_ENTERFN(fwCb);
+
+   if(SGetSBuf(fwCb->init.region, fwCb->init.pool,
+       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK)
+   {
+      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
+   }
+   else
+   {
+      FW_LOG_ERROR(fwCb, "Failed to allocate memory");
+      RETVOID;
+   }
+
+   msgReq->msgType = NB_DELAY_ERAB_SETUP_RSP;
+   msgReq->t.delayErabSetupRsp.ueId = data->ue_Id;
+   msgReq->t.delayErabSetupRsp.isDelayErabSetupRsp = data->flag;
+   msgReq->t.delayErabSetupRsp.tmrVal = data->tmrVal;
+
+   fwSendToNbApp(msgReq);
+   RETVOID;
+}
+

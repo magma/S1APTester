@@ -263,6 +263,13 @@ typedef struct _nbDelayICSRspCb
  CmTimer   timer;
 }NbDelayICSRspCb;
 
+typedef struct _nbErabSetupRspCb {
+  U32 ueId;
+  NbErabLst *erabInfo;
+  NbFailedErabLst *failedErabInfo;
+  CmTimer   timer;
+}NbErabSetupRspCb;
+
 typedef struct _nbDelayUeCtxtRelCmpCb
 {
  U32 ueId;
@@ -283,7 +290,8 @@ typedef enum nbTmr
    NB_TMR_UE_CTX_REL_REQ,
    NB_TMR_LCL_UE_CTXT_REL_REQ,
    NB_TMR_DELAY_ICS_RSP,
-   NB_TMR_DELAY_UE_CTX_REL_COMP
+   NB_TMR_DELAY_UE_CTX_REL_COMP,
+   NB_TMR_DELAY_ERAB_SETUP_RSP
 } enNbTimer;
 
 typedef struct _nbS1ConnCb
@@ -446,6 +454,12 @@ typedef struct _InitCtxtSetupFailedErabs {
   NbUeMsgCause cause;
 } InitCtxtSetupRspFailedErabs;
 
+typedef struct _delayErabSetupRsp
+{
+   Bool delayErabSetupRsp;
+   U32   tmrVal;
+}DelayErabSetupRsp;
+
 typedef struct _EnbCb
 {
    CmHashListEnt nbHashEnt;
@@ -497,6 +511,7 @@ typedef struct _nbCb
    DropICSSndCtxtRelCfg      dropICSSndCtxtRel[NB_MAX_UE_SUPPORTED];
    DelayUeCtxtRelCmpCfg      delayUeCtxtRelCmp[NB_MAX_UE_SUPPORTED];
    InitCtxtSetupRspFailedErabs  initCtxtSetupFailedErabs[NB_MAX_UE_SUPPORTED];
+   DelayErabSetupRsp         delayErabSetupRsp[NB_MAX_UE_SUPPORTED];
 #ifdef MULTI_ENB_SUPPORT
    Bool                      x2HoDone;
 #endif
