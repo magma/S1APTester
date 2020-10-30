@@ -211,6 +211,9 @@ typedef U32                  NbMmeId;
 #define NB_IPV6_ADDRESS_LEN 16
 #define NB_IPV4_VERSION 4
 #define NB_IPV6_VERSION 6
+// NB_TMR_ROUTER_SOLICIT_VAL in seconds
+#define NB_RTR_SOLICITATION_INTERVAL 4
+#define NB_MAX_RTR_SOLICITATIONS_RETRY 2
 
 EXTERN U16 szElmSize[][SZT_MAX_PROC_ID];
 typedef struct _nbUeCb _nbUeCb;
@@ -283,7 +286,8 @@ typedef enum nbTmr
    NB_TMR_UE_CTX_REL_REQ,
    NB_TMR_LCL_UE_CTXT_REL_REQ,
    NB_TMR_DELAY_ICS_RSP,
-   NB_TMR_DELAY_UE_CTX_REL_COMP
+   NB_TMR_DELAY_UE_CTX_REL_COMP,
+   NB_TMR_ROUTER_SOLICIT
 } enNbTimer;
 
 typedef struct _nbS1ConnCb
@@ -542,6 +546,14 @@ typedef struct _nbResetAck
    U32 numOfUes;
    U32 *ueIdLst;
 }NbResetAck;
+
+typedef struct _nbRouterSolicitCb {
+  U32 ueId;
+  U8 *ip6Addr;
+  EgtUEvnt *eguEvtMsg;
+  U32 epsBearId;
+  CmTimer   timer;
+} NbRouterSolicitCb;
 
 #define NB_GET_S1AP_CON_ID(_suConId,_ptr) {\
        _suConId = ((nbCb.cellId & 0xFFFF) << 16)\

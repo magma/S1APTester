@@ -172,9 +172,12 @@ typedef struct _nbuUeIpInfoReq
 }NbuUeIpInfoReq;
 
 typedef struct _nbuUeIpInfoUpdt {
+#define SUCCESS 1
+#define FAIL 0
   U8 ueId;
   U8 bearerId;
   U8 ipv6Addr[CM_NB_IPV6_ADDR_LEN];
+  Bool status;
 } NbuUeIpInfoUpdt;
 
 typedef struct _uePagingMsg

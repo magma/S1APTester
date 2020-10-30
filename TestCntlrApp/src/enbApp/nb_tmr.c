@@ -132,7 +132,8 @@ U32                          delay
    NbUeCb                    *ueCb   = NULLP;
    NbDelayICSRspCb *icsRspCb = NULLP;
    NbDelayUeCtxtRelCmpCb *ueCtxRelCmp = NULLP;
- 
+   NbRouterSolicitCb         *rsCb;
+
    wait = 0;
    wait = NB_CALC_WAIT_TIME(delay);
    switch (tmrEvnt)
@@ -180,6 +181,12 @@ U32                          delay
          tmr = &ueCtxRelCmp->timer;
          maxTmrs = 1;
          break;
+      }
+      case NB_RTR_SOLICITATION_INTERVAL: {
+        rsCb = (NbRouterSolicitCb *)cb;
+        tmr = &rsCb->timer;
+        maxTmrs = 1;
+        break;
       }
       default:
       {
@@ -338,6 +345,7 @@ S16                          event
    NbUeCb                    *ueCb;
    NbDelayICSRspCb           *icsRspCb;
    NbDelayUeCtxtRelCmpCb     *ueCtxtRelCb;
+   NbRouterSolicitCb         *rsCb;
   /*U32 size;*/
    switch(event)
    {
@@ -385,6 +393,12 @@ S16                          event
          nbHandleDelayTimerForUeCtxRelComplExpiry(ueCtxtRelCb);
          /*HandleDelayTimerForICSExpiry(ueCtxtRelCb);*/
          break;
+      }
+      case NB_RTR_SOLICITATION_INTERVAL: {
+        rsCb = (NbRouterSolicitCb *)cb;
+        NB_LOG_DEBUG(&nbCb,"Router Solicit Timer Expired for UE:[%d]", rsCb->ueId);
+        nbHandleTimerExpiryForRS(rsCb);
+        break;
       }
       default:
          {
