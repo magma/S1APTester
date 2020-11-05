@@ -52,7 +52,7 @@ EXTERN S16 nbUiSendIntCtxtSetupDrpdIndToUser(U32 ueId);
 EXTERN S16 NbEnbDelayUeCtxtRelCmp(NbDelayUeCtxtRelCmp*);
 EXTERN S16 NbMultiEnbCfgReq(NbMultiEnbConfigReq*);
 EXTERN S16 NbUiNbuHdlUeIpInfoRej(Pst *, NbuUeIpInfoRej *);
-EXTERN S16 NbEnbDelayErabSetupRsp(NbDelayICSRsp*);
+EXTERN S16 NbEnbDelayErabSetupRsp(NbDelayICSRsp *);
 
 int atoi(const char *nptr);
 

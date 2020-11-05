@@ -267,7 +267,7 @@ typedef struct _nbErabSetupRspCb {
   U32 ueId;
   NbErabLst *erabInfo;
   NbFailedErabLst *failedErabInfo;
-  CmTimer   timer;
+  CmTimer timer;
 } NbErabSetupRspCb;
 
 typedef struct _nbDelayUeCtxtRelCmpCb
@@ -456,7 +456,7 @@ typedef struct _InitCtxtSetupFailedErabs {
 
 typedef struct _delayErabSetupRsp {
   Bool delayErabSetupRsp;
-  U32  tmrVal;
+  U32 tmrVal;
 } DelayErabSetupRsp;
 
 typedef struct _EnbCb
