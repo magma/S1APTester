@@ -882,7 +882,7 @@ PRIVATE Void nbPackIpv6HdrRtrSolicit(CmIpv6Hdr *ipv6Hdr,
  * @param[in]  eguEvtMsg : EgtUEvnt
  * @return S16
  */
-PRIVATE S16 nbStartTimerForRS(NbDamUeCb *ueCb, U8 *ip6Addr, EgtUEvnt *eguEvtMsg)
+PRIVATE S16 nbStartTimerForRS(NbDamUeCb *ueCb, NbDamTnlCb *tnlCb, U8 *ip6Addr, U8 *buff, U8 len)
 {
   S16 retVal = RFAILED;
   NbPdnCb *pdnCb = NULLP;
@@ -894,7 +894,7 @@ PRIVATE S16 nbStartTimerForRS(NbDamUeCb *ueCb, U8 *ip6Addr, EgtUEvnt *eguEvtMsg)
     RETVALUE(retVal);
   }
   // Fetch bearer id
-  if (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(ip6Addr),
+  if (cmHashListFind(&(ueCb->pdnCb), (ip6Addr),
                          NB_IPV6_ADDRESS_LEN, 0, (PTR *)&pdnCb) == ROK) {
     rsCb->epsBearId = pdnCb->lnkEpsBearId;
   } else {
@@ -903,10 +903,13 @@ PRIVATE S16 nbStartTimerForRS(NbDamUeCb *ueCb, U8 *ip6Addr, EgtUEvnt *eguEvtMsg)
   }
   rsCb->ueId = ueCb->ueId;
   rsCb->ip6Addr = ip6Addr;
-  rsCb->eguEvtMsg = eguEvtMsg;
+  rsCb->tnlCb = tnlCb;
+  cmMemcpy(rsCb->rs_buff ,buff, len);
+  rsCb->rs_len = len;
   cmInitTimers(&rsCb->timer, 1);
   // Start 4 secs timer
-  retVal = nbStartTmr((PTR)rsCb, NB_RTR_SOLICITATION_INTERVAL, NB_MAX_RTR_SOLICITATIONS_RETRY);
+  printf("Started %d secs timer for RTR_SOLICITATION\n", (NB_RTR_SOLICITATION_INTERVAL/1000));
+  retVal = nbStartTmr((PTR)rsCb, NB_TMR_ROUTER_SOLICIT, NB_RTR_SOLICITATION_INTERVAL);
   RETVALUE(retVal);
 }
 
@@ -919,74 +922,92 @@ PRIVATE S16 nbStartTimerForRS(NbDamUeCb *ueCb, U8 *ip6Addr, EgtUEvnt *eguEvtMsg)
  *         Processing steps:
  *         - Handle timer expiry for Router Solicit message
  *
- * @param[in]  nsCb : NbRouterSolicitCb
+ * @param[in]  rsCb : NbRouterSolicitCb
  * @return S16
  */
 
-PUBLIC S16 nbHandleTimerExpiryForRS(NbRouterSolicitCb *nsCb) {
+PUBLIC S16 nbHandleTimerExpiryForRS(NbRouterSolicitCb *rsCb) {
   S16 retVal = RFAILED;
   NbDamUeCb *ueCb = NULLP;
+  EgUMsg *egMsg;
   EgtUEvnt *eguEvtMsg = NULLP;
   PRIVATE counter;
   NbPdnCb *pdnCb = NULLP;
   NbIpInfo        *ipInfo = NULLP;
+  Buffer *mBuf = NULLP;
 
-  if (!nsCb) {
-    NB_LOG_ERROR(&nbCb, "nsCb is NULL");
+  if (!rsCb) {
+    NB_LOG_ERROR(&nbCb, "rsCb is NULL");
     RETVALUE(retVal);
   }
-  ueCb = nbDamGetUe(nsCb->ueId);
+  ueCb = nbDamGetUe(rsCb->ueId);
   if (!ueCb) {
-    NB_LOG_ERROR(&nbCb, "ueCb is NULL for ue %d", nsCb->ueId);
+    NB_LOG_ERROR(&nbCb, "ueCb is NULL for ue %d", rsCb->ueId);
     RETVALUE(retVal);
   }
-  if (ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(nsCb->ueId),
-     sizeof(U32),0,(PTR *)&ueCb))) {
-    NB_LOG_ERROR(&nbCb, "Failed to find UeCb for ue %d", nsCb->ueId);
-    RETVALUE(retVal);
-  }
+  printf("RS timer expired for ue %d\n", rsCb->ueId);
   if (counter < NB_MAX_RTR_SOLICITATIONS_RETRY) {
-    if (!nsCb->eguEvtMsg) {
-      NB_LOG_ERROR(&nbCb, "eguEvtMsg is NULL for ue %d", nsCb->ueId);
-      RETVALUE(retVal);
+    // Assign memory to mBuf
+    SGetMsg(DFLT_REGION, DFLT_POOL, &mBuf);
+    if (mBuf == NULLP) {
+      RETVALUE(RFAILED);
     }
-    eguEvtMsg = nsCb->eguEvtMsg;
+    // Convert buff to mbuf to be assigned to EGTP Data Req
+    if (SAddPstMsgMult((Data *)rsCb->rs_buff, rsCb->rs_len, mBuf) != ROK) {
+      SPutMsg(mBuf);
+      RETVALUE(RFAILED);
+    }
+
+    if (ROK != nbFillEgtpDatMsg((NbDamTnlCb*)rsCb->tnlCb, &eguEvtMsg, EGT_GTPU_MSG_GPDU)) {
+      NB_LOG_ERROR(&nbCb, "Failed to fill Router Solicit GTP message");
+      NB_FREEMBUF(mBuf);
+      RETVALUE(RFAILED);
+    }
+    egMsg = eguEvtMsg->u.egMsg;
+    egMsg->u.mBuf = mBuf;
+
     // Re-send RS msg
+    printf("Re-sending RS message for ue %d\n", rsCb->ueId);
     NbIfmEgtpEguDatReq(eguEvtMsg);
+    nbStartTimerForRS(ueCb, (NbDamTnlCb*)rsCb->tnlCb, rsCb->ip6Addr, rsCb->rs_buff, rsCb->rs_len);
+    counter ++;
   } else {
+    printf("Max retry cnt exceeded for RS for ue %d\n", rsCb->ueId);
+#if 0
     // Remove ipv6 entry from pdnCb and ipInfo
-    if (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(nsCb->ip6Addr),
+    if (cmHashListFind(&(ueCb->pdnCb), rsCb->ip6Addr,
                        NB_IPV6_ADDRESS_LEN, 0, (PTR *)&pdnCb) == ROK) {
       cmHashListDelete(&(ueCb->pdnCb), (PTR)pdnCb);
       NB_LOG_DEBUG(&nbCb, "Deleted pdnCb for ue %d bearer %u",
-                   nsCb->ueId, nsCb->epsBearId);
+                   rsCb->ueId, rsCb->epsBearId);
     } else {
       NB_LOG_ERROR(&nbCb, "Error in deleting pdnCb for ue %d bearer %u",
-                   nsCb->ueId, nsCb->epsBearId);
+                   rsCb->ueId, rsCb->epsBearId);
       retVal = RFAILED;
     }
-    if (cmHashListFind(&(ueCb->ipInfo), (U8 *)&(nsCb->ip6Addr),
+    if (cmHashListFind(&(ueCb->ipInfo), rsCb->ip6Addr,
                        NB_IPV6_ADDRESS_LEN, 0, (PTR *)&ipInfo) == ROK) {
       cmHashListDelete(&(ueCb->ipInfo), (PTR)ipInfo);
       NB_LOG_DEBUG(&nbCb, "Deleted ipinfo for ue %d, bearer %u",
-                   nsCb->ueId, nsCb->epsBearId);
+                   rsCb->ueId, rsCb->epsBearId);
     } else {
       NB_LOG_ERROR(&nbCb, "Error in deleting ipInfo for ue %d bearer %u",
-                   nsCb->ueId, nsCb->epsBearId);
+                   rsCb->ueId, rsCb->epsBearId);
       retVal = RFAILED;
     }
+#endif
     // Send msg to UE to delete the session
-    if (nbUpdateIpInfo(nsCb->ueId, nsCb->ip6Addr, nsCb->epsBearId, FAIL) == ROK) {
+    if (nbUpdateIpInfo(rsCb->ueId, rsCb->ip6Addr, rsCb->epsBearId, FAILURE) == ROK) {
       NB_LOG_DEBUG(&nbCb, "Sent nbUpdateIpInfo for ue %d, bearer %u",
-                   nsCb->ueId, nsCb->epsBearId);
+                   rsCb->ueId, rsCb->epsBearId);
     } else {
       NB_LOG_ERROR(&nbCb, "Error in sending nbUpdateIpInfo for ue %d bearer %u",
-                   nsCb->ueId, nsCb->epsBearId);
+                   rsCb->ueId, rsCb->epsBearId);
       retVal = RFAILED;
     }
   }
-  NB_FREE(nsCb->eguEvtMsg, sizeof(EgtUEvnt));
-  NB_FREE(nsCb, sizeof(NbRouterSolicitCb));
+  //NB_FREEMBUF(rsCb->mBuf);
+  NB_FREE(rsCb, sizeof(NbRouterSolicitCb));
   RETVALUE(retVal);
 }
 
@@ -1048,7 +1069,7 @@ PRIVATE S16 nbSendIcmpv6RouterSolicit(U8 *ip6Addr, NbDamTnlCb *tnlCb, NbDamUeCb 
   NbIfmEgtpEguDatReq(eguEvtMsg);
 
   // Start timer
-  nbStartTimerForRS(ueCb, ip6Addr, eguEvtMsg);
+  nbStartTimerForRS(ueCb, tnlCb, ip6Addr, buff, idx);
   RETVALUE(ROK);
 }
 
@@ -1660,6 +1681,14 @@ PRIVATE S16 nbProcRouterAdv(NbDamUeCb *ueCb, CmLteRbId drbId, U8 *buf) {
   for (; ((cmHashListGetNext(&(ueCb->ipInfo), (PTR)prevIpInfo,
                              (PTR *)&ipInfo)) == ROK);) {
     if (drbId == ipInfo->drbId) {
+      if (nbCb.dropRA[(ueCb->ueId) - 1].isDropRA) {
+        nbCb.dropRA[(ueCb->ueId) - 1].isDropRA = FALSE;
+        NB_LOG_ERROR(&nbCb, "Dropping RA for ue %d as isDropRA flag is set",
+          ueCb->ueId);
+        RETVALUE(ROK);
+      }
+      // Stop the timer
+      nbDamStopTmr((PTR)ueCb, NB_TMR_ROUTER_SOLICIT);
       // Fetch the pdnCb->pdnIp6Addr(interface id) stored earlier
       if ((cmHashListFind(&(ueCb->pdnCb), (U8 *)&(ipInfo->pdnIp6Addr),
                           sizeof(NbPdnCb), 0, (PTR *)&pdnCb)) == ROK) {

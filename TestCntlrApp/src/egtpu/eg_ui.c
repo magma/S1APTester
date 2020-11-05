@@ -591,7 +591,7 @@ EgtUEvnt *egtUEvnt;       /* eGTP-U event */
     * Call the CPM module for further processing *
     *************************************************/
    cmMemcpy((U8*)&tempPst, (U8*)pst, sizeof(Pst));
-
+  
    if(egtUEvnt->u.egMsg->msgHdr.msgType == EGT_GTPU_MSG_GPDU)
       egFTunProcEguDatReq(egtUEvnt, uSapCb, &tempPst);
    else

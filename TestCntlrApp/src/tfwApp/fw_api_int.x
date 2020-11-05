@@ -124,7 +124,8 @@ typedef enum {
    UE_AUTH_FAILURE,
    UE_SET_INIT_CTXT_SETUP_RSP_FAILED_ERABS,
    UE_STANDALONE_ACTV_DEFAULT_EPS_BEARER_CNTXT_REJECT,
-   UE_ROUTER_ADV_IND
+   UE_ROUTER_ADV_IND,
+   UE_SET_DROP_ROUTER_ADV
 }tfwCmd;
 
 typedef enum
@@ -1585,6 +1586,11 @@ typedef struct ueRouterAdv {
   U8 bearerId;
   U8 ipv6Addr[FW_ESM_MAX_IPV6_LEN];
 } ueRouterAdv_t;
+
+typedef struct ueDropRA {
+  U32 ue_Id;
+  Bool flag;
+} UeDropRA;
 
 typedef FwErabRelCmd_t FwErabRelRsp_t;
 

@@ -2926,6 +2926,7 @@ PRIVATE S16 ueAppUtlBldActDefltBerContextAccept
 
    /* Activate defaule EPS barer context accept*/
    msg->msgType = CM_ESM_MSG_ACTV_DEF_BEAR_ACC;
+   ueCb->numPdns ++;
    UE_LOG_EXITFN(ueAppCb, ret);
 }
 /*
@@ -4741,7 +4742,7 @@ PRIVATE S16 ueAppBuildAndSendActDefltBerContextAccept(UeCb *ueCb, U8 bearerId)
    UE_GET_CB(ueAppCb);
    UE_LOG_ENTERFN(ueAppCb);
 
-
+   printf("In ueAppBuildAndSendActDefltBerContextAccept\n");
    ret = ueAppUtlBldActDefltBerContextAccept(ueCb,&BearerAccEvnt,bearerId);
    if (ret != ROK)
    {
@@ -4807,8 +4808,6 @@ PRIVATE S16 ueAppBuildAndSendActDefltBerContextAccept(UeCb *ueCb, U8 bearerId)
       UE_LOG_ERROR(ueAppCb, "Sending Activate Default Berarer accept to "\
             "Enodeb Failed");
       ret = RFAILED;
-   } else {
-     ueCb->numPdns ++;
    }
    UE_LOG_EXITFN(ueAppCb, ret);
 }
@@ -6888,6 +6887,7 @@ PRIVATE S16 uefillDefEsmInfoToUeCb
    actReq = &evnt->m.esmEvnt->u.actReq;
    ueCb->ueRabCb[drbId].drbId = drbId;
    ueCb->ueRabCb[drbId].epsBearerId = epsBearerId;
+   printf("****************drbId %d\n", drbId);
    params->bearerType = DEFAULT_BEARER;
    if(actReq->epsQos.pres == TRUE)
    {
@@ -8083,9 +8083,10 @@ PRIVATE S16 ueUihandleIpInfoUpdtFail(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt) {
    * 3.If the pdn type is IPv4v6, do nothing
    */
   for (int idx = 0; idx < UE_APP_MAX_DRBS; idx++) {
-    if (ueCb->ueRabCb[idx].lnkEpsBearId == ipInfoUpdt->bearerId) {
+    if (ueCb->ueRabCb[idx].epsBearerId == ipInfoUpdt->bearerId) {
       bearerFound = TRUE;
       if (ueCb->ueRabCb[idx].pAddr.pdnType == CM_ESM_PDN_IPV6) {
+        printf("ueCb->numPdns %d\n", ueCb->numPdns);
         if (ueCb->numPdns == 1) {
           // Initiate detach
           if (ueSendDetachRequest(ueCb, UE_DETACH_SWITCHOFF) == ROK) {

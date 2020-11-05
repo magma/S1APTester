@@ -2019,6 +2019,7 @@ Pst      *pst;
 
    EG_TRC2(egTunProcEguDatReq);
 
+   printf("egTunProcEguDatReq\n");
    ipCb = NULLP;
    srvCb = NULLP;
    egtErrEvnt = NULLP;
@@ -2219,7 +2220,7 @@ Pst      *pst;
 
    if(teIdCb == NULLP)
    {
-    /*  printf("\n Failed to get the TeidCb"); */
+      printf("\n Failed to get the TeidCb"); 
       egUFreeUiEvnt(egtUEvnt);
       EG_DBG_FATAL(0,0,(egp, "[egFTunProcEguDatReq] Failed to get the TeidCb"));
       RETVALUE(RFAILED);
@@ -2240,10 +2241,8 @@ Pst      *pst;
    This will be enoded in the */
    teIdCb->remTeid = egtUEvnt->u.egMsg->msgHdr.teId;
 
-
    egUpdateTxStatistics((EgtMsgType)egtUEvnt->u.egMsg->msgHdr.msgType, &(usap->sts));
    egFUCpmProcUiMsg(teIdCb,egtUEvnt->u.egMsg,pst);
-
    /*******************
     * Free User Event *
     *******************/

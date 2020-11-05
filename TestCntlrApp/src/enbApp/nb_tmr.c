@@ -182,7 +182,7 @@ U32                          delay
          maxTmrs = 1;
          break;
       }
-      case NB_RTR_SOLICITATION_INTERVAL: {
+      case NB_TMR_ROUTER_SOLICIT: {
         rsCb = (NbRouterSolicitCb *)cb;
         tmr = &rsCb->timer;
         maxTmrs = 1;
@@ -394,7 +394,7 @@ S16                          event
          /*HandleDelayTimerForICSExpiry(ueCtxtRelCb);*/
          break;
       }
-      case NB_RTR_SOLICITATION_INTERVAL: {
+      case NB_TMR_ROUTER_SOLICIT: {
         rsCb = (NbRouterSolicitCb *)cb;
         NB_LOG_DEBUG(&nbCb,"Router Solicit Timer Expired for UE:[%d]", rsCb->ueId);
         nbHandleTimerExpiryForRS(rsCb);
