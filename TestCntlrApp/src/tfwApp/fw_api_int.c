@@ -2402,19 +2402,16 @@ PUBLIC S16 tfwApi
             (ueActvDfltEpsBearerCtxtRej_t *)msg);
         break;
       }
-      case UE_SET_DELAY_ERAB_SETUP_RSP:
-      {
-         FW_LOG_DEBUG(fwCb, "Process Delay ERAB_SETUP_RSP Request ");
-         if (fwCb->nbState == ENB_IS_UP)
-         {
-            handleDelayErabSetupRsp((UeDelayErabSetupRsp*)msg);
-         }
-         else
-         {
-            FW_LOG_ERROR(fwCb, "Failed To Process ERAB Setup Rsp delay Request:ENBAPP IS NOT UP");
-            ret = RFAILED;
-         }
-         break;
+      case UE_SET_DELAY_ERAB_SETUP_RSP: {
+        FW_LOG_DEBUG(fwCb, "Process Delay ERAB_SETUP_RSP Request ");
+        if (fwCb->nbState == ENB_IS_UP) {
+          handleDelayErabSetupRsp((UeDelayErabSetupRsp*)msg);
+        }
+        else {
+          FW_LOG_ERROR(fwCb, "Failed to process ERAB Setup Rsp delay request:ENBAPP IS NOT UP");
+          ret = RFAILED;
+        }
+        break;
       }
 
      default:
@@ -3404,7 +3401,8 @@ handleStdAloneActvDfltEpsBearerContextRej(ueActvDfltEpsBearerCtxtRej_t *data) {
  *
  *   Fun:   handleDelayErabSetupRsp
  *
- *   Desc:  This function is used to handle Delay Erab Setup Response
+ *   Desc:  This function is used to process Delay Erab Setup Response
+ *          message received from the test script
  *
  *   Ret:   None
  *
@@ -3413,31 +3411,27 @@ handleStdAloneActvDfltEpsBearerContextRej(ueActvDfltEpsBearerCtxtRej_t *data) {
  *   File:  fw_api_int.c
  *
  */
-PRIVATE Void handleDelayErabSetupRsp(UeDelayErabSetupRsp* data)
-{
-   FwCb *fwCb = NULLP;
-   NbtRequest *msgReq = NULLP;
+PRIVATE Void handleDelayErabSetupRsp(UeDelayErabSetupRsp* data) {
+  FwCb *fwCb = NULLP;
+  NbtRequest *msgReq = NULLP;
 
-   FW_GET_CB(fwCb);
-   FW_LOG_ENTERFN(fwCb);
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
 
-   if(SGetSBuf(fwCb->init.region, fwCb->init.pool,
-       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK)
-   {
-      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
-   }
-   else
-   {
-      FW_LOG_ERROR(fwCb, "Failed to allocate memory");
-      RETVOID;
-   }
+  if(SGetSBuf(fwCb->init.region, fwCb->init.pool,
+      (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK) {
+     cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
+  } else {
+     FW_LOG_ERROR(fwCb, "Failed to allocate memory");
+     RETVOID;
+  }
 
-   msgReq->msgType = NB_DELAY_ERAB_SETUP_RSP;
-   msgReq->t.delayErabSetupRsp.ueId = data->ue_Id;
-   msgReq->t.delayErabSetupRsp.isDelayErabSetupRsp = data->flag;
-   msgReq->t.delayErabSetupRsp.tmrVal = data->tmrVal;
+  msgReq->msgType = NB_DELAY_ERAB_SETUP_RSP;
+  msgReq->t.delayErabSetupRsp.ueId = data->ue_Id;
+  msgReq->t.delayErabSetupRsp.isDelayErabSetupRsp = data->flag;
+  msgReq->t.delayErabSetupRsp.tmrVal = data->tmrVal;
 
-   fwSendToNbApp(msgReq);
-   RETVOID;
+  fwSendToNbApp(msgReq);
+  RETVOID;
 }
 

@@ -1638,7 +1638,7 @@ PUBLIC S16 nbPrcMMEConfigTrf
 #endif
 
 /*
- * @details This function marks a ue for delay erab setup rsp
+ * @details This function sets a flag in nbCb to delay erab setup rsp
  *
  * Function: NbEnbDelayErabSetupRsp
  *
@@ -1658,7 +1658,6 @@ PUBLIC S16 NbEnbDelayErabSetupRsp(NbDelayErabSetupRsp *delayErabRsp)
 
   nbCb.delayErabSetupRsp[(delayErabRsp->ueId) - 1].delayErabSetupRsp  = delayErabRsp->isDelayErabSetupRsp;
   nbCb.delayErabSetupRsp[(delayErabRsp->ueId) - 1].tmrVal  = delayErabRsp->tmrVal;
-  printf("In NbEnbDelayErabSetupRsp tmrVal %d\n", nbCb.delayErabSetupRsp[(delayErabRsp->ueId) - 1].tmrVal);
 
   RETVALUE(ROK);
 }

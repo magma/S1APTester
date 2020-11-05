@@ -2292,7 +2292,7 @@ PRIVATE S16 nbHandleRabSetupMsg(NbUeCb *ueCb, S1apPdu *pdu) {
   if (erabInfo != NULLP || failedErabInfo != NULLP) {
 
     retVal = nbSendErabsInfo(ueCb, erabInfo, failedErabInfo, TRUE);
-    /* do the ip-query  ueapp for received bearers */
+    /* query the ip address from ueapp for the received bearers */
     if (erabInfo->noOfComp > 0) {
       for (idx = 0; idx < erabInfo->noOfComp; idx++) {
         nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId);
@@ -2301,6 +2301,7 @@ PRIVATE S16 nbHandleRabSetupMsg(NbUeCb *ueCb, S1apPdu *pdu) {
     // Start a timer to delay sending of erab setup rsp
     if (nbCb.delayErabSetupRsp[(ueCb->ueId) - 1].delayErabSetupRsp) {
       retVal = nbStartDelayTimerForErabRsp(ueCb->ueId, erabInfo, failedErabInfo, nbCb.delayErabSetupRsp[(ueCb->ueId) - 1].tmrVal);
+      nbCb.delayErabSetupRsp[(ueCb->ueId) - 1].delayErabSetupRsp = FALSE;
       RETVALUE(retVal);
     }
     retVal = nbRabSetupSndS1apRsp(ueCb, erabInfo, failedErabInfo);
@@ -3147,39 +3148,39 @@ PRIVATE S16 nbFillS1apRabSetupRsp(NbUeCb *ueCb, NbErabLst *erabInfo,
       nbFillTknU16(&(ie->value.u.sztE_RABSetupLstBrSURes.noComp), ieIdx);
    }
    if (failedErabInfo) {
-   NB_LOG_ERROR(&nbCb, "failedErabInfo->noOfComp :%d \n",
+     NB_LOG_ERROR(&nbCb, "failedErabInfo->noOfComp :%d \n",
                 failedErabInfo->noOfComp);
-   if (failedErabInfo->noOfComp > 0) {
-     SztProtIE_SingleCont_E_RABItemIEs *failedErabItem;
-     NbFailedErab failedRab = {0};
-     // E-RAB failed to Setup List
-     ie = &rabSetupRsp->protocolIEs.member[crntIe++];
-     nbFillTknU8(&(ie->pres), PRSNT_NODEF);
-     nbFillTknU32(&(ie->id), Sztid_E_RABFailedToSetupLstBrSURes);
-     nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
-     if ((cmGetMem(szERABRspPdu,
+     if (failedErabInfo->noOfComp > 0) {
+       SztProtIE_SingleCont_E_RABItemIEs *failedErabItem;
+       NbFailedErab failedRab = {0};
+       // E-RAB failed to Setup List
+       ie = &rabSetupRsp->protocolIEs.member[crntIe++];
+       nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+       nbFillTknU32(&(ie->id), Sztid_E_RABFailedToSetupLstBrSURes);
+       nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+       if ((cmGetMem(szERABRspPdu,
                    ((failedErabInfo->noOfComp) *
                     sizeof(SztProtIE_SingleCont_E_RABItemIEs)),
                    (Ptr *)&ie->value.u.sztE_RABLst.member)) != ROK) {
-       NB_LOG_ERROR(&nbCb, "Failed to allocate memory. cmGetMem failed");
-       RETVALUE(RFAILED);
-     }
+         NB_LOG_ERROR(&nbCb, "Failed to allocate memory. cmGetMem failed");
+         RETVALUE(RFAILED);
+       }
 
-     ieIdx = 0;
-     for (idx = 0; idx < failedErabInfo->noOfComp; idx++) {
-       SztE_RABItem *rabIE;
-       failedErabItem = &(ie->value.u.sztE_RABLst.member[ieIdx++]);
-       nbFillTknU8(&(failedErabItem->pres), PRSNT_NODEF);
-       nbFillTknU32(&(failedErabItem->id), Sztid_E_RABItem);
-       nbFillTknU32(&(failedErabItem->criticality), SztCriticalityignoreEnum);
-       failedRab = failedErabInfo->failedErabs[idx];
-       rabIE = &(failedErabItem->value.u.sztE_RABItem);
-       nbFillTknU8(&(rabIE->pres), PRSNT_NODEF);
-       nbFillTknU32(&(rabIE->e_RAB_ID), failedRab.erabId);
-       nbS1apFillCause(&(rabIE->cause), &failedRab.cause);
+       ieIdx = 0;
+       for (idx = 0; idx < failedErabInfo->noOfComp; idx++) {
+         SztE_RABItem *rabIE;
+         failedErabItem = &(ie->value.u.sztE_RABLst.member[ieIdx++]);
+         nbFillTknU8(&(failedErabItem->pres), PRSNT_NODEF);
+         nbFillTknU32(&(failedErabItem->id), Sztid_E_RABItem);
+         nbFillTknU32(&(failedErabItem->criticality), SztCriticalityignoreEnum);
+         failedRab = failedErabInfo->failedErabs[idx];
+         rabIE = &(failedErabItem->value.u.sztE_RABItem);
+         nbFillTknU8(&(rabIE->pres), PRSNT_NODEF);
+         nbFillTknU32(&(rabIE->e_RAB_ID), failedRab.erabId);
+         nbS1apFillCause(&(rabIE->cause), &failedRab.cause);
+       }
+       nbFillTknU16(&(ie->value.u.sztE_RABLst.noComp), failedErabInfo->noOfComp);
      }
-     nbFillTknU16(&(ie->value.u.sztE_RABLst.noComp), failedErabInfo->noOfComp);
-   }
    }
    nbFillTknU16(&(rabSetupRsp->protocolIEs.noComp), crntIe);
 
@@ -3986,7 +3987,6 @@ PUBLIC S16 nbHandleDelayTimerForErabSetupRspExpiry(NbErabSetupRspCb *erabSetupRs
    NbFailedErabLst *failedErabInfo = NULLP;
 
    NB_LOG_DEBUG(&nbCb, "Timer expired for ERAB_SETUP_RSP\n");
-   printf("Timer expired for ERAB_SETUP_RSP\n");
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(erabSetupRspCb->ueId),
       sizeof(U32),0,(PTR *)&ueCb))) {
       NB_LOG_ERROR(&nbCb, "Failed to Find UeCb");
@@ -3998,7 +3998,6 @@ PUBLIC S16 nbHandleDelayTimerForErabSetupRspExpiry(NbErabSetupRspCb *erabSetupRs
    }
    erabInfo = erabSetupRspCb->erabInfo;
    failedErabInfo = erabSetupRspCb->failedErabInfo;
-   printf("Sending ERAB_SETUP_RSP\n");
    NB_LOG_DEBUG(&nbCb, "Sending out-of-order ERAB_SETUP_RSP for ue %u\n", erabSetupRspCb->ueId);
    retVal = nbRabSetupSndS1apRsp(ueCb, erabInfo, failedErabInfo);
 
