@@ -973,6 +973,7 @@ PUBLIC S16 nbHandleTimerExpiryForRS(NbRouterSolicitCb *rsCb) {
     counter ++;
   } else {
     printf("Max retry cnt exceeded for RS for ue %d\n", rsCb->ueId);
+    counter = 0;
 #if 0
     // Remove ipv6 entry from pdnCb and ipInfo
     if (cmHashListFind(&(ueCb->pdnCb), rsCb->ip6Addr,
