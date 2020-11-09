@@ -8072,8 +8072,7 @@ PUBLIC S16 ueUiProcErabsInfoMsg(Pst *pst, NbuErabsInfo *pNbuErabsInfo)
 }
 
 // This function handles ipv6 address allocation failure
-PRIVATE S16 ueUihandleIpInfoUpdtFail(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt) {
-  Bool bearerFound = FALSE;
+PRIVATE S16 ueUihandleIpInfoUpdtFail(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt, uint32_t idx) {
   UeAppCb *ueAppCb = NULLP;
   UE_GET_CB(ueAppCb);
   UE_LOG_ENTERFN(ueAppCb);
@@ -8082,9 +8081,6 @@ PRIVATE S16 ueUihandleIpInfoUpdtFail(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt) {
    * 2.If the pdn type is IPv6 and this is the default pdn, initiate detach
    * 3.If the pdn type is IPv4v6, do nothing
    */
-  for (int idx = 0; idx < UE_APP_MAX_DRBS; idx++) {
-    if (ueCb->ueRabCb[idx].epsBearerId == ipInfoUpdt->bearerId) {
-      bearerFound = TRUE;
       if (ueCb->ueRabCb[idx].pAddr.pdnType == CM_ESM_PDN_IPV6) {
         printf("ueCb->numPdns %d\n", ueCb->numPdns);
         if (ueCb->numPdns == 1) {
@@ -8092,9 +8088,9 @@ PRIVATE S16 ueUihandleIpInfoUpdtFail(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt) {
           if (ueSendDetachRequest(ueCb, UE_DETACH_SWITCHOFF) == ROK) {
             UE_LOG_DEBUG(ueAppCb, "Sending Detach Request for ueId: %d", ueCb->ueId);
             UE_LOG_DEBUG(ueAppCb, "Freeing all the DRBs allocated for ueId: %d", ueCb->ueId);
-            for (U8 idx = 0; idx < UE_APP_MAX_DRBS; idx++) {
-              cmMemset((U8 *)&(ueCb->ueRabCb[idx]), 0, sizeof(ueCb->ueRabCb[idx]));
-              ueCb->drbs[idx] = UE_APP_DRB_AVAILABLE;
+            for (U8 itr = 0; itr < UE_APP_MAX_DRBS; itr++) {
+              cmMemset((U8 *)&(ueCb->ueRabCb[itr]), 0, sizeof(ueCb->ueRabCb[itr]));
+              ueCb->drbs[itr] = UE_APP_DRB_AVAILABLE;
               ueCb->numRabs--;
             }
           } else {
@@ -8118,13 +8114,6 @@ PRIVATE S16 ueUihandleIpInfoUpdtFail(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt) {
           }
         }
       }
-    }
-  }
-  if (!bearerFound) {
-    UE_LOG_ERROR(ueAppCb, " ueRabCb not found for bearer %u, ue %u\n",
-                 ipInfoUpdt->bearerId, ueCb->ueId);
-    RETVALUE(RFAILED);
-  }
   RETVALUE(ROK);
 }
 
@@ -8132,25 +8121,30 @@ PUBLIC S16 ueUiProcIpInfoUpdtMsg(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt) {
   UeAppCb *ueAppCb = NULLP;
   UetMessage *tfwMsg = NULLP;
   S16 retVal = RFAILED;
+  uint32_t idx;
+  Bool bearerFound = FALSE;
   UE_GET_CB(ueAppCb);
   UE_LOG_ENTERFN(ueAppCb);
 
+  for (idx = 0; idx < UE_APP_MAX_DRBS; idx++) {
+    if (ueCb->ueRabCb[idx].epsBearerId == ipInfoUpdt->bearerId) {
+      bearerFound = TRUE;
+      break;
+    }
+  }
+  if (!bearerFound) {
+    UE_LOG_ERROR(ueAppCb, "Bearer id %u not found in ueRabCb for ue %u\n",
+                 ipInfoUpdt->bearerId, ueCb->ueId);
+    RETVALUE(RFAILED);
+  }
+
   if (ipInfoUpdt->status == FAIL) {
-    retVal = ueUihandleIpInfoUpdtFail(ueCb, ipInfoUpdt);
+    retVal = ueUihandleIpInfoUpdtFail(ueCb, ipInfoUpdt, idx);
     RETVALUE(retVal);
   }
   // Update the IPv6 address to ueAppCb
-  for (int idx = 0; idx < UE_APP_MAX_DRBS; idx++) {
-    if (ueCb->ueRabCb[idx].lnkEpsBearId == ipInfoUpdt->bearerId) {
-      cmMemcpy(ueCb->ueRabCb[idx].ipv6Addr, ipInfoUpdt->ipv6Addr,
-               sizeof(ipInfoUpdt->ipv6Addr));
-      break;
-    } else {
-      UE_LOG_ERROR(ueAppCb, "Bearer id %u not found in ueRabCb for ue %u\n",
-                   ipInfoUpdt->bearerId, ueCb->ueId);
-      RETVALUE(RFAILED);
-    }
-  }
+  cmMemcpy(ueCb->ueRabCb[idx].ipv6Addr, ipInfoUpdt->ipv6Addr,
+           sizeof(ipInfoUpdt->ipv6Addr));
   // Send message to Test controller
   tfwMsg = (UetMessage *)ueAlloc(sizeof(UetMessage));
   tfwMsg->msg.ueUetRouterAdv.ueId = ueCb->ueId;
@@ -8163,7 +8157,7 @@ PUBLIC S16 ueUiProcIpInfoUpdtMsg(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt) {
                           "TFWAPP failed");
     RETVALUE(RFAILED);
   }
-  UE_LOG_DEBUG(ueAppCb, "Sent ICMPV6 ROUTER ADVERTISEMENT to tfwApp \n");
+  UE_LOG_DEBUG(ueAppCb, "Sent ICMPV6 ROUTER ADVERTISEMENT to tfwApp for ue %d bearer %d\n", ueCb->ueId, ipInfoUpdt->bearerId);
   RETVALUE(ROK);
 }
 

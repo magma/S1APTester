@@ -1584,7 +1584,7 @@ typedef struct _FwErabSetupFailedTosetup {
 typedef struct ueRouterAdv {
   U8 ueId;
   U8 bearerId;
-  U8 ipv6Addr[FW_ESM_MAX_IPV6_LEN];
+  U8 ipv6Addr[46];// Lenght of INET6_ADDRSTRLEN
 } ueRouterAdv_t;
 
 typedef struct ueDropRA {

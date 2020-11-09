@@ -132,7 +132,7 @@ U32                          delay
    NbUeCb                    *ueCb   = NULLP;
    NbDelayICSRspCb *icsRspCb = NULLP;
    NbDelayUeCtxtRelCmpCb *ueCtxRelCmp = NULLP;
-   NbRouterSolicitCb         *rsCb;
+   NbRouterSolicitCb         *rsCb ;
 
    wait = 0;
    wait = NB_CALC_WAIT_TIME(delay);
@@ -184,7 +184,10 @@ U32                          delay
       }
       case NB_TMR_ROUTER_SOLICIT: {
         rsCb = (NbRouterSolicitCb *)cb;
-        tmr = &rsCb->timer;
+        nbCb.rsCb[(rsCb->ueId)-1] = rsCb;
+        tmr = &nbCb.rsCb[(rsCb->ueId)-1]->timer;
+        /*mmeCb = (NbRouterSolicitCb *)cb;
+        tmr = &mmeCb->timer;*/
         maxTmrs = 1;
         break;
       }
@@ -255,6 +258,7 @@ S16                          event
    CmTimer                   *timers = NULLP;
    U8                        max = 0;
    NbLiSapCb                 *sapCb;
+   NbRouterSolicitCb         *rsCb = NULLP;
 
    idx = 0;
 
@@ -296,11 +300,24 @@ S16                          event
          }
          break;
       }
+      case NB_TMR_ROUTER_SOLICIT: {
+        rsCb = (NbRouterSolicitCb *)cb;
+        nbCb.rsCb[(rsCb->ueId)-1] = rsCb;
+        timers = &nbCb.rsCb[(rsCb->ueId)-1]->timer;
+        max    = 1;
+        if (nbCb.rsCb[(rsCb->ueId)-1]->timer.tmrEvnt == event) {
+          printf("Setting tmr running to true\n");
+          tmrRunning = TRUE;
+        }
+        break;
+      }
+
       default:
          break;
    }
    if(tmrRunning == FALSE)
    {
+      printf("tmrRunning is false\n");
       RETVOID;
    }
 
@@ -396,8 +413,10 @@ S16                          event
       }
       case NB_TMR_ROUTER_SOLICIT: {
         rsCb = (NbRouterSolicitCb *)cb;
+        nbCb.rsCb[(rsCb->ueId)-1] = rsCb;
+        nbCb.rsCb[(rsCb->ueId)-1] = (NbRouterSolicitCb *)cb;
         NB_LOG_DEBUG(&nbCb,"Router Solicit Timer Expired for UE:[%d]", rsCb->ueId);
-        nbHandleTimerExpiryForRS(rsCb);
+        nbHandleTimerExpiryForRS(nbCb.rsCb[(rsCb->ueId)-1]);
         break;
       }
       default:

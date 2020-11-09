@@ -622,6 +622,9 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo) {
         NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for pdnCb");
         RETVALUE(RFAILED);
       }
+      NB_LOG_DEBUG(&nbCb,"Created pdn cb for ip\n");
+      for (int i =0;i<16;i++)
+        NB_LOG_DEBUG(&nbCb, "%x", pdnCb->pdnIp6Addr[i]);
     }
   }
   RETVALUE(ROK);
@@ -886,13 +889,13 @@ PRIVATE S16 nbStartTimerForRS(NbDamUeCb *ueCb, NbDamTnlCb *tnlCb, U8 *ip6Addr, U
 {
   S16 retVal = RFAILED;
   NbPdnCb *pdnCb = NULLP;
-  NbRouterSolicitCb *rsCb = NULLP;
 
-  NB_ALLOC(&rsCb,sizeof(NbRouterSolicitCb));
-  if (!rsCb) {
+  NB_ALLOC(&nbCb.rsCb[(ueCb->ueId)-1],sizeof(NbRouterSolicitCb));
+  if (!(nbCb.rsCb[(ueCb->ueId)-1])) {
     NB_LOG_ERROR(&nbCb, "Failed to allocate memory to NbRouterSolicitCb for ue %d", ueCb->ueId);
     RETVALUE(retVal);
   }
+  NbRouterSolicitCb *rsCb = nbCb.rsCb[(ueCb->ueId)-1];
   // Fetch bearer id
   if (cmHashListFind(&(ueCb->pdnCb), (ip6Addr),
                          NB_IPV6_ADDRESS_LEN, 0, (PTR *)&pdnCb) == ROK) {
@@ -1677,7 +1680,9 @@ PRIVATE S16 nbProcRouterAdv(NbDamUeCb *ueCb, CmLteRbId drbId, U8 *buf) {
   NbIpInfo *prevIpInfo = NULLP;
   NbPdnCb *pdnCb = NULLP;
   U8 tempIp6Add[INET6_ADDRSTRLEN] = {0};
+  U8 temp_buf[NB_IPV6_ADDRESS_LEN] = {0};
 
+      printf( "Received RA \n");
   // Fetch the pdnIp6Addr(interface id) from NbIpInfo using drbId
   for (; ((cmHashListGetNext(&(ueCb->ipInfo), (PTR)prevIpInfo,
                              (PTR *)&ipInfo)) == ROK);) {
@@ -1688,17 +1693,31 @@ PRIVATE S16 nbProcRouterAdv(NbDamUeCb *ueCb, CmLteRbId drbId, U8 *buf) {
           ueCb->ueId);
         RETVALUE(ROK);
       }
-      // Stop the timer
-      nbDamStopTmr((PTR)ueCb, NB_TMR_ROUTER_SOLICIT);
-      // Fetch the pdnCb->pdnIp6Addr(interface id) stored earlier
-      if ((cmHashListFind(&(ueCb->pdnCb), (U8 *)&(ipInfo->pdnIp6Addr),
-                          sizeof(NbPdnCb), 0, (PTR *)&pdnCb)) == ROK) {
-        // take a copy of pdnCb->pdnIp6Addr(interface id)
+      NB_LOG_DEBUG(&nbCb, "Received RA with ip len %d", NB_IPV6_ADDRESS_LEN);
+      for (int i =0;i<16;i++)
+        NB_LOG_DEBUG(&nbCb, "%x", ipInfo->pdnIp6Addr[i]);
+     // Fetch the pdnCb->pdnIp6Addr(interface id) stored earlier
+      if (cmHashListFind(&(ueCb->pdnCb), (U8*)&(ipInfo->pdnIp6Addr),
+                          NB_IPV6_ADDRESS_LEN, 0, (PTR *)&pdnCb) == ROK) {
+        // Stop the timer
+        NB_LOG_DEBUG(&nbCb, " Stopping NB_TMR_ROUTER_SOLICIT for UE %d\n", ueCb->ueId);
+        nbStopTmr((PTR)nbCb.rsCb[(ueCb->ueId)-1], NB_TMR_ROUTER_SOLICIT);
+
+       // take a copy of pdnCb->pdnIp6Addr(interface id)
         cmMemcpy(tempIp6Add, pdnCb->pdnIp6Addr, sizeof(pdnCb->pdnIp6Addr));
+        NB_LOG_DEBUG(&nbCb, "Printing tempIp6Add\n");
+      for (int i =0;i<16;i++)
+        NB_LOG_DEBUG(&nbCb, "%x", tempIp6Add[i]);
+        NB_LOG_DEBUG(&nbCb, "Printing buf\n");
+      for (int i =0;i<16;i++)
+        NB_LOG_DEBUG(&nbCb, "%x", buf[i]);
         // Prepend 8 bytes of IPv6 prefix to pdnCb->pdnIp6Addir
-        cmMemcpy(pdnCb->pdnIp6Addr, buf, NB_IPV6_ADDRESS_LEN / 2);
+        cmMemcpy(pdnCb->pdnIp6Addr, buf, (NB_IPV6_ADDRESS_LEN / 2));
         // Copy the interface id from tempIp6Add
-        cmMemcpy(&pdnCb->pdnIp6Addr[8], tempIp6Add, NB_IPV6_ADDRESS_LEN / 2);
+        NB_LOG_DEBUG(&nbCb, "Printing pdnCb->pdnIp6Addr\n");
+      for (int i =0;i<16;i++)
+        NB_LOG_DEBUG(&nbCb, "%x", pdnCb->pdnIp6Addr[i]);
+        //cmMemcpy(&pdnCb->pdnIp6Addr[8], tempIp6Add[8], (NB_IPV6_ADDRESS_LEN / 2));
         // Update ipInfo->pdnIp6Addr
         cmMemcpy(ipInfo->pdnIp6Addr, pdnCb->pdnIp6Addr, NB_IPV6_ADDRESS_LEN);
         // Update UeDataCb
@@ -1826,7 +1845,7 @@ PUBLIC S16 nbDamEgtpDatInd(Pst *pst, EgtUEvnt *eguMsg) {
       (flatBuf[6] == IPPROTO_ICMPV6) &&
       (flatBuf[40] == ICMPV6_TYPE_ROUTER_ADV)) {
     // index-80 = Start of IPv6 prefix
-    if (ROK == nbProcRouterAdv(ueCb, rbId, flatBuf[80])) {
+    if (ROK == nbProcRouterAdv(ueCb, rbId, &flatBuf[80])) {
       NB_LOG_DEBUG(
           &nbCb, "Successfully processed ICMPV6_TYPE_ROUTER_ADV for ueId %u\n",
           ueId);

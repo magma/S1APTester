@@ -120,7 +120,7 @@ PRIVATE S16 sendUePdnDisConRejIndToTstCntlr(UetResponse *uetMsg);
 PRIVATE S16 handlePdnDisConRejInd(Pst *pst, UetMessage *uetPdnDisConRejInd);
 PRIVATE Void handle_erab_setup_req_failed_for_bearers( Pst *pst, UetMessage *erab_setup_req_failed_for_bearers);
 PRIVATE Void sendUeErabSetupReqFailedForBearers( UetMessage *erab_setup_req_failed_for_bearers);
-PRIVATE S16 handleRouterAdvInd(Pst *pst, UeUetRouterAdv *uetRouterAdv);
+PRIVATE S16 handleRouterAdvInd(Pst *pst, UetMessage *uetMsg);
 
 /*
 *        Fun:  sendUeAppConfigRespToTstCntlr
@@ -2236,35 +2236,36 @@ PRIVATE Void sendUeErabSetupReqFailedForBearers(
  *  File: fw_uemsg_handler.c
  *
  */
-PRIVATE S16 handleRouterAdvInd(Pst *pst, UeUetRouterAdv *uetRouterAdv) {
+PRIVATE S16 handleRouterAdvInd(Pst *pst, UetMessage *uetMsg) {
   S16 ret = ROK;
   FwCb *fwCb = NULLP;
   ueRouterAdv_t *tfwUeRouterAdv = NULLP;
-  U8 ipv6AddrStr[FW_ESM_MAX_IPV6_LEN] = {0};
+  U8 ipv6AddrStr[INET6_ADDRSTRLEN] = {0};
 
   FW_GET_CB(fwCb);
   FW_LOG_ENTERFN(fwCb);
 
   FW_LOG_DEBUG(fwCb, "Recieved Router Adv Indication for ueId %u",
-               uetRouterAdv->ueId);
+               uetMsg->msg.ueUetRouterAdv.ueId);
   FW_ALLOC_MEM(fwCb, &tfwUeRouterAdv, sizeof(ueRouterAdv_t));
-
-  tfwUeRouterAdv->ueId = uetRouterAdv->ueId;
-  tfwUeRouterAdv->bearerId = uetRouterAdv->bearerId;
+  printf("Recieved Router Adv Indication for bearer %d\n", uetMsg->msg.ueUetRouterAdv.bearerId);
+  tfwUeRouterAdv->ueId = uetMsg->msg.ueUetRouterAdv.ueId;
+  tfwUeRouterAdv->bearerId = uetMsg->msg.ueUetRouterAdv.bearerId;
   // Convert IPv6 U8 arrary into : separated string for better readability
   sprintf(
       (char *)ipv6AddrStr,
       "%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x",
-      (int)uetRouterAdv->ipv6Addr[0], (int)uetRouterAdv->ipv6Addr[1],
-      (int)uetRouterAdv->ipv6Addr[2], (int)uetRouterAdv->ipv6Addr[3],
-      (int)uetRouterAdv->ipv6Addr[4], (int)uetRouterAdv->ipv6Addr[5],
-      (int)uetRouterAdv->ipv6Addr[6], (int)uetRouterAdv->ipv6Addr[7],
-      (int)uetRouterAdv->ipv6Addr[8], (int)uetRouterAdv->ipv6Addr[9],
-      (int)uetRouterAdv->ipv6Addr[10], (int)uetRouterAdv->ipv6Addr[11],
-      (int)uetRouterAdv->ipv6Addr[12], (int)uetRouterAdv->ipv6Addr[13],
-      (int)uetRouterAdv->ipv6Addr[14], (int)uetRouterAdv->ipv6Addr[15]);
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[0], (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[1],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[2], (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[3],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[4], (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[5],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[6], (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[7],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[8], (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[9],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[10], (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[11],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[12], (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[13],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[14], (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[15]);
 
-  cmMemcpy(tfwUeRouterAdv->ipv6Addr, ipv6AddrStr, FW_ESM_MAX_IPV6_LEN);
+  cmMemcpy(tfwUeRouterAdv->ipv6Addr, ipv6AddrStr, INET6_ADDRSTRLEN);
+  printf("Recieved Router Adv Indication for ip %s\n", tfwUeRouterAdv->ipv6Addr);
   (fwCb->testConrollerCallBack)(UE_ROUTER_ADV_IND, tfwUeRouterAdv,
                                 sizeof(ueRouterAdv_t));
 

@@ -866,7 +866,6 @@ PUBLIC S16 nbAppCfgrPdnAssignedAddr
 }/* nbAppCfgrPdnAssignedAddr */
 
 PUBLIC S16 nbAppCfgrPdnAssignedAddrIpv6(U8 ueId, U8 *ipv6Addr) {
-  S16 ret;
   UeDataCb *ueDatCb = NULLP;
   U8 idx = 0;
   U8 idx1 = 0;
@@ -877,7 +876,7 @@ PUBLIC S16 nbAppCfgrPdnAssignedAddrIpv6(U8 ueId, U8 *ipv6Addr) {
       ueDatCb = ueDataCbLst[idx];
       for (idx1 = 0; idx1 < ueDatCb->noOfIpsAssigned; idx1++) {
         if ((ueDatCb->ipInfo[idx1] != NULLP) &&
-            (cmMemcmp(ueDatCb->ipInfo[idx1]->ip6AddrStr, ipv6Addr,
+            (!cmMemcmp(ueDatCb->ipInfo[idx1]->ip6AddrStr, ipv6Addr,
                       NB_IPV6_ADDRESS_LEN))) {
           NB_LOG_ERROR(
               &nbCb,
@@ -913,10 +912,13 @@ PUBLIC S16 nbAppCfgrPdnAssignedAddrIpv6(U8 ueId, U8 *ipv6Addr) {
     NB_LOG_ERROR(&nbCb, "ueDatCb is empty");
     RETVALUE(RFAILED);
   }
+  NB_LOG_DEBUG(&nbCb, "Added ipv6 address to routeCb %s", ipInfo->ip6AddrStr);
+      for (int i =0;i<16;i++)
+        NB_LOG_DEBUG(&nbCb, "%x", ipInfo->ip6AddrStr[i]);
   ueDatCb->ipInfo[ueDatCb->noOfIpsAssigned] = ipInfo;
   ueDatCb->noOfIpsAssigned++;
 
-  RETVALUE(ret);
+  RETVALUE(ROK);
 }
 
 

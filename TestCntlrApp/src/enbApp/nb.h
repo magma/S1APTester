@@ -471,6 +471,18 @@ typedef struct _dropRA
    Bool isDropRA;
 }DropRA;
 
+typedef struct _nbRouterSolicitCb {
+#define NB_EGTP_MSG_SZ   1024
+  U32 ueId;
+  U8 *ip6Addr;
+  U32 epsBearId;
+  Void *tnlCb;
+  U8 rs_buff[NB_EGTP_MSG_SZ];
+  U8 rs_len;
+  CmTimer   timer;
+} NbRouterSolicitCb;
+
+
 typedef struct _nbCb
 {
    Mem mem; /* memory pool info */
@@ -508,6 +520,7 @@ typedef struct _nbCb
    DelayUeCtxtRelCmpCfg      delayUeCtxtRelCmp[NB_MAX_UE_SUPPORTED];
    InitCtxtSetupRspFailedErabs  initCtxtSetupFailedErabs[NB_MAX_UE_SUPPORTED];
    DropRA                       dropRA[NB_MAX_UE_SUPPORTED];
+   NbRouterSolicitCb         *rsCb[NB_MAX_UE_SUPPORTED];
 #ifdef MULTI_ENB_SUPPORT
    Bool                      x2HoDone;
 #endif
@@ -553,17 +566,6 @@ typedef struct _nbResetAck
    U32 numOfUes;
    U32 *ueIdLst;
 }NbResetAck;
-
-typedef struct _nbRouterSolicitCb {
-#define NB_EGTP_MSG_SZ   1024
-  U32 ueId;
-  U8 *ip6Addr;
-  U32 epsBearId;
-  Void *tnlCb;
-  U8 rs_buff[NB_EGTP_MSG_SZ];
-  U8 rs_len;
-  CmTimer   timer;
-} NbRouterSolicitCb;
 
 #define NB_GET_S1AP_CON_ID(_suConId,_ptr) {\
        _suConId = ((nbCb.cellId & 0xFFFF) << 16)\
