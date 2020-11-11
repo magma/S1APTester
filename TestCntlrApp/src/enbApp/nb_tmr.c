@@ -306,7 +306,6 @@ S16                          event
         timers = &nbCb.rsCb[(rsCb->ueId)-1]->timer;
         max    = 1;
         if (nbCb.rsCb[(rsCb->ueId)-1]->timer.tmrEvnt == event) {
-          printf("Setting tmr running to true\n");
           tmrRunning = TRUE;
         }
         break;

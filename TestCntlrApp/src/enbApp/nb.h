@@ -479,6 +479,7 @@ typedef struct _nbRouterSolicitCb {
   Void *tnlCb;
   U8 rs_buff[NB_EGTP_MSG_SZ];
   U8 rs_len;
+  U8 counter;
   CmTimer   timer;
 } NbRouterSolicitCb;
 
