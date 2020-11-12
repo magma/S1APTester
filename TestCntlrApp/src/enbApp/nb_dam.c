@@ -884,6 +884,8 @@ PRIVATE Void nbPackIpv6HdrRtrSolicit(CmIpv6Hdr *ipv6Hdr,
  * @param[in]  len       : buff len
  * @param[in]  counter   : retry counter
  * @return S16
+ *    -#Success : ROK
+ *    -#Failure : RFAILED
  */
 PRIVATE S16 nbStartTimerForRS(NbDamUeCb *ueCb, NbDamTnlCb *tnlCb, U8 *ip6Addr,
                               U8 *buff, U8 len, U8 counter) {
@@ -932,6 +934,8 @@ PRIVATE S16 nbStartTimerForRS(NbDamUeCb *ueCb, NbDamTnlCb *tnlCb, U8 *ip6Addr,
  *
  * @param[in]  rsCb : NbRouterSolicitCb
  * @return S16
+ *    -#Success : ROK
+ *    -#Failure : RFAILED
  */
 
 PUBLIC S16 nbHandleTimerExpiryForRS(NbRouterSolicitCb *rsCb) {
