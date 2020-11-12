@@ -33,7 +33,8 @@ extern "C" {
 #define FW_ESM_MAX_LEN_PROT_CFG_OPT 247
 #define FW_ESM_MAX_PROTO_ID 4
 #define FW_ESM_MAX_CONT_ID 10
-#define FW_ESM_MAX_IPV6_LEN 16
+// Length of INET6_ADDRSTRLEN
+#define FW_MAX_IPV6_LEN 46
 
 typedef enum {
    UE_APPL_CONFIG = 1,
@@ -1582,8 +1583,6 @@ typedef struct _FwErabSetupFailedTosetup {
 } FwErabSetupFailedTosetup;
 
 typedef struct ueRouterAdv {
-// Length of INET6_ADDRSTRLEN
-#define FW_MAX_IPV6_LEN 46
   U8 ueId;
   U8 bearerId;
   U8 ipv6Addr[FW_MAX_IPV6_LEN];
