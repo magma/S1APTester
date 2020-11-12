@@ -45,6 +45,8 @@ PRIVATE S16 nbDamUbndLSap (NbLiSapCb  *sapCb);
 PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId);
 PUBLIC  NbDamUeCb *nbDamGetUe(U32 ueId);
 PUBLIC S16 nbDamEgtpDatInd(Pst*, EgtUEvnt*);
+PRIVATE S16 nbUpdateIpInfo(U8 ueId, U8 *ipv6Addr, U32 lnkEpsBearId,
+                           Bool status);
 
 /* Some basic default values used for E-GTP Tunnel Management*/
 /* Default Interface type while adding the tunnel at E-GTP*/
@@ -867,6 +869,144 @@ PRIVATE Void nbPackIpv6HdrRtrSolicit(CmIpv6Hdr *ipv6Hdr,
   RETVOID;
 }
 
+/** @brief Router Solicit guard timer.
+ *
+ * @details
+ *
+ *     Function: nbStartTimerForRS
+ *
+ *         Processing steps:
+ *         - Start timer after sending Router Solicit message
+ *
+ * @param[in]  ueCb      : NbDamUeCb
+ * @param[in]  ip6Addr   : IPv6 Address
+ * @param[in]  buff      : encoded RS msg
+ * @param[in]  len       : buff len
+ * @param[in]  counter   : retry counter
+ * @return S16
+ *    -#Success : ROK
+ *    -#Failure : RFAILED
+ */
+PRIVATE S16 nbStartTimerForRS(NbDamUeCb *ueCb, NbDamTnlCb *tnlCb, U8 *ip6Addr,
+                              U8 *buff, U8 len, U8 counter) {
+  S16 retVal = RFAILED;
+  NbPdnCb *pdnCb = NULLP;
+
+  NB_ALLOC(&nbCb.rsCb[(ueCb->ueId) - 1], sizeof(NbRouterSolicitCb));
+  if (!(nbCb.rsCb[(ueCb->ueId) - 1])) {
+    NB_LOG_ERROR(&nbCb,
+                 "Failed to allocate memory to NbRouterSolicitCb for ue %d",
+                 ueCb->ueId);
+    RETVALUE(retVal);
+  }
+  NbRouterSolicitCb *rsCb = nbCb.rsCb[(ueCb->ueId) - 1];
+  // Fetch bearer id
+  if (cmHashListFind(&(ueCb->pdnCb), (ip6Addr), NB_IPV6_ADDRESS_LEN, 0,
+                     (PTR *)&pdnCb) == ROK) {
+    rsCb->epsBearId = pdnCb->lnkEpsBearId;
+  } else {
+    NB_LOG_ERROR(&nbCb, "pdnCb not found for ue %d", ueCb->ueId);
+    RETVALUE(retVal);
+  }
+  rsCb->ueId = ueCb->ueId;
+  rsCb->ip6Addr = ip6Addr;
+  rsCb->tnlCb = tnlCb;
+  cmMemcpy(rsCb->rs_buff, buff, len);
+  rsCb->rs_len = len;
+  rsCb->counter = counter;
+  cmInitTimers(&rsCb->timer, 1);
+  // Start 4 secs timer
+  NB_LOG_DEBUG(&nbCb, "Started %d secs timer for RTR_SOLICITATION\n",
+               (NB_RTR_SOLICITATION_INTERVAL / 1000));
+  retVal = nbStartTmr((PTR)rsCb, NB_TMR_ROUTER_SOLICIT,
+                      NB_RTR_SOLICITATION_INTERVAL);
+  RETVALUE(retVal);
+}
+
+/** @brief Router Solicit timer expiry handler.
+ *
+ * @details
+ *
+ *     Function: nbHandleTimerExpiryForRS
+ *
+ *         Processing steps:
+ *         - Handle timer expiry for Router Solicit message
+ *
+ * @param[in]  rsCb : NbRouterSolicitCb
+ * @return S16
+ *    -#Success : ROK
+ *    -#Failure : RFAILED
+ */
+
+PUBLIC S16 nbHandleTimerExpiryForRS(NbRouterSolicitCb *rsCb) {
+  S16 retVal = RFAILED;
+  NbDamUeCb *ueCb = NULLP;
+  EgUMsg *egMsg;
+  EgtUEvnt *eguEvtMsg = NULLP;
+  NbPdnCb *pdnCb = NULLP;
+  NbIpInfo *ipInfo = NULLP;
+  Buffer *mBuf = NULLP;
+
+  if (!rsCb) {
+    NB_LOG_ERROR(&nbCb, "rsCb is NULL");
+    RETVALUE(retVal);
+  }
+  ueCb = nbDamGetUe(rsCb->ueId);
+  if (!ueCb) {
+    NB_LOG_ERROR(&nbCb, "ueCb is NULL for ue %d", rsCb->ueId);
+    NB_FREE(rsCb, sizeof(NbRouterSolicitCb));
+    RETVALUE(retVal);
+  }
+  NB_LOG_DEBUG(&nbCb, "RS timer expired for ue %d counter %d\n", rsCb->ueId,
+               rsCb->counter);
+  if (rsCb->counter < NB_MAX_RTR_SOLICITATIONS_RETRY) {
+    // Assign memory to mBuf
+    SGetMsg(DFLT_REGION, DFLT_POOL, &mBuf);
+    if (mBuf == NULLP) {
+      NB_FREE(rsCb, sizeof(NbRouterSolicitCb));
+      RETVALUE(RFAILED);
+    }
+    // Convert buff to mbuf to be assigned to EGTP Data Req
+    if (SAddPstMsgMult((Data *)rsCb->rs_buff, rsCb->rs_len, mBuf) != ROK) {
+      SPutMsg(mBuf);
+      NB_FREE(rsCb, sizeof(NbRouterSolicitCb));
+      RETVALUE(RFAILED);
+    }
+
+    if (ROK != nbFillEgtpDatMsg((NbDamTnlCb *)rsCb->tnlCb, &eguEvtMsg,
+                                EGT_GTPU_MSG_GPDU)) {
+      NB_LOG_ERROR(&nbCb, "Failed to fill Router Solicit GTP message");
+      NB_FREEMBUF(mBuf);
+      NB_FREE(rsCb, sizeof(NbRouterSolicitCb));
+      RETVALUE(RFAILED);
+    }
+    egMsg = eguEvtMsg->u.egMsg;
+    egMsg->u.mBuf = mBuf;
+
+    // Re-send RS msg
+    NB_LOG_DEBUG(&nbCb, "Re-sending RS message for ue %d\n", rsCb->ueId);
+    NbIfmEgtpEguDatReq(eguEvtMsg);
+    rsCb->counter++;
+    nbStartTimerForRS(ueCb, (NbDamTnlCb *)rsCb->tnlCb, rsCb->ip6Addr,
+                      rsCb->rs_buff, rsCb->rs_len, rsCb->counter);
+  } else {
+    NB_LOG_ERROR(&nbCb, "Max retry cnt exceeded for RS for ue %d\n",
+                 rsCb->ueId);
+    // Send msg to UE to delete the session
+    if (nbUpdateIpInfo(rsCb->ueId, rsCb->ip6Addr, rsCb->epsBearId, FAILURE) ==
+        ROK) {
+      NB_LOG_DEBUG(&nbCb, "Sent nbUpdateIpInfo for ue %d, bearer %u",
+                   rsCb->ueId, rsCb->epsBearId);
+    } else {
+      NB_LOG_ERROR(&nbCb, "Error in sending nbUpdateIpInfo for ue %d bearer %u",
+                   rsCb->ueId, rsCb->epsBearId);
+      retVal = RFAILED;
+    }
+  }
+  NB_FREE(rsCb, sizeof(NbRouterSolicitCb));
+  RETVALUE(retVal);
+}
+
 /** @brief This function builds and sends the Router Solicit message.
  *
  * @details
@@ -882,7 +1022,8 @@ PRIVATE Void nbPackIpv6HdrRtrSolicit(CmIpv6Hdr *ipv6Hdr,
  * @param[in]  ip6Addr: IPv6 Address
  * @return S16
  */
-PRIVATE S16 nbSendIcmpv6RouterSolicit(U8 *ip6Addr, NbDamTnlCb *tnlCb) {
+PRIVATE S16 nbSendIcmpv6RouterSolicit(U8 *ip6Addr, NbDamTnlCb *tnlCb,
+                                      NbDamUeCb *ueCb) {
   Icmpv6RouterSolicit routerSolicit;
   CmIpv6Hdr ipv6Hdr;
   Buffer *mBuf = NULLP;
@@ -923,6 +1064,8 @@ PRIVATE S16 nbSendIcmpv6RouterSolicit(U8 *ip6Addr, NbDamTnlCb *tnlCb) {
   /* Trigger EGTP Data Req */
   NbIfmEgtpEguDatReq(eguEvtMsg);
 
+  // Start timer
+  nbStartTimerForRS(ueCb, tnlCb, ip6Addr, buff, idx, 0);
   RETVALUE(ROK);
 }
 
@@ -1093,7 +1236,8 @@ NbDamTnlInfo                 *tnlInfo
           cmMemcpy(in6addr.s6_addr, ip6Info->pdnIp6Addr, NB_IPV6_ADDRESS_LEN);
           inet_ntop(AF_INET6, &in6addr, ipv6_str, INET6_ADDRSTRLEN);
 
-          if (nbSendIcmpv6RouterSolicit(ip6Info->pdnIp6Addr, tnlCb) != ROK) {
+          if (nbSendIcmpv6RouterSolicit(ip6Info->pdnIp6Addr, tnlCb, ueCb) !=
+              ROK) {
             NB_LOG_ERROR(
                 &nbCb,
                 "Failed to send Router Solicit message for ip address %s \n",
@@ -1132,7 +1276,6 @@ PUBLIC Void  nbDamTnlCreatReq
  NbDamTnlInfo                 *tnlInfo
 )
 {
-  
    if(nbDamAddTunnel(tnlInfo) != ROK)
    {
       /* Send failure back to the calling module. The last parameter      */
@@ -1481,7 +1624,8 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
  * @param[in]  lnkEpsBearId  : linked/default bearer id
  * @return S16 - ROK/RFAILED
  */
-PRIVATE S16 nbUpdateIpInfo(U8 ueId, U8 *ipv6Addr, U32 lnkEpsBearId) {
+PRIVATE S16 nbUpdateIpInfo(U8 ueId, U8 *ipv6Addr, U32 lnkEpsBearId,
+                           Bool status) {
   S16 ret = ROK;
   NbuUeIpInfoUpdt *msg = NULLP;
 
@@ -1495,6 +1639,7 @@ PRIVATE S16 nbUpdateIpInfo(U8 ueId, U8 *ipv6Addr, U32 lnkEpsBearId) {
   msg->ueId = ueId;
   msg->bearerId = lnkEpsBearId;
   cmMemcpy(msg->ipv6Addr, ipv6Addr, NB_IPV6_ADDRESS_LEN);
+  msg->status = status;
 
   /* Send Ip Info Update message to UEAPP */
   ret = cmPkNbuUeIpInfoUpdt(&nbCb.ueAppPst, msg);
@@ -1528,20 +1673,31 @@ PRIVATE S16 nbProcRouterAdv(NbDamUeCb *ueCb, CmLteRbId drbId, U8 *buf) {
   NbIpInfo *prevIpInfo = NULLP;
   NbPdnCb *pdnCb = NULLP;
   U8 tempIp6Add[INET6_ADDRSTRLEN] = {0};
+  U8 temp_buf[NB_IPV6_ADDRESS_LEN] = {0};
 
   // Fetch the pdnIp6Addr(interface id) from NbIpInfo using drbId
   for (; ((cmHashListGetNext(&(ueCb->ipInfo), (PTR)prevIpInfo,
                              (PTR *)&ipInfo)) == ROK);) {
     if (drbId == ipInfo->drbId) {
+      if (nbCb.dropRA[(ueCb->ueId) - 1].isDropRA) {
+        NB_LOG_ERROR(&nbCb, "Dropping RA for ue %d as isDropRA flag is set",
+                     ueCb->ueId);
+        RETVALUE(ROK);
+      }
+      NB_LOG_DEBUG(&nbCb, "Received Router Advertisement for ue %d",
+                   ueCb->ueId);
       // Fetch the pdnCb->pdnIp6Addr(interface id) stored earlier
-      if ((cmHashListFind(&(ueCb->pdnCb), (U8 *)&(ipInfo->pdnIp6Addr),
-                          sizeof(NbPdnCb), 0, (PTR *)&pdnCb)) == ROK) {
+      if (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(ipInfo->pdnIp6Addr),
+                         NB_IPV6_ADDRESS_LEN, 0, (PTR *)&pdnCb) == ROK) {
+        // Stop the timer
+        NB_LOG_DEBUG(&nbCb, " Stopping NB_TMR_ROUTER_SOLICIT for UE %d\n",
+                     ueCb->ueId);
+        nbStopTmr((PTR)nbCb.rsCb[(ueCb->ueId) - 1], NB_TMR_ROUTER_SOLICIT);
+
         // take a copy of pdnCb->pdnIp6Addr(interface id)
         cmMemcpy(tempIp6Add, pdnCb->pdnIp6Addr, sizeof(pdnCb->pdnIp6Addr));
         // Prepend 8 bytes of IPv6 prefix to pdnCb->pdnIp6Addir
-        cmMemcpy(pdnCb->pdnIp6Addr, buf, NB_IPV6_ADDRESS_LEN / 2);
-        // Copy the interface id from tempIp6Add
-        cmMemcpy(&pdnCb->pdnIp6Addr[8], tempIp6Add, NB_IPV6_ADDRESS_LEN / 2);
+        cmMemcpy(pdnCb->pdnIp6Addr, buf, (NB_IPV6_ADDRESS_LEN / 2));
         // Update ipInfo->pdnIp6Addr
         cmMemcpy(ipInfo->pdnIp6Addr, pdnCb->pdnIp6Addr, NB_IPV6_ADDRESS_LEN);
         // Update UeDataCb
@@ -1553,12 +1709,8 @@ PRIVATE S16 nbProcRouterAdv(NbDamUeCb *ueCb, CmLteRbId drbId, U8 *buf) {
           RETVALUE(ret);
         }
         // Send the updated IPv6 address to UE
-        ret =
-            nbUpdateIpInfo(ueCb->ueId, pdnCb->pdnIp6Addr, pdnCb->lnkEpsBearId);
-        RETVALUE(ret);
-      } else {
-        NB_LOG_ERROR(&nbCb, "pdnCb not found for drbId %u for ue %d", drbId,
-                     ueCb->ueId);
+        ret = nbUpdateIpInfo(ueCb->ueId, pdnCb->pdnIp6Addr, pdnCb->lnkEpsBearId,
+                             SUCCESS);
         RETVALUE(ret);
       }
     }
@@ -1669,7 +1821,7 @@ PUBLIC S16 nbDamEgtpDatInd(Pst *pst, EgtUEvnt *eguMsg) {
       (flatBuf[6] == IPPROTO_ICMPV6) &&
       (flatBuf[40] == ICMPV6_TYPE_ROUTER_ADV)) {
     // index-80 = Start of IPv6 prefix
-    if (ROK == nbProcRouterAdv(ueCb, rbId, flatBuf[80])) {
+    if (ROK == nbProcRouterAdv(ueCb, rbId, &flatBuf[80])) {
       NB_LOG_DEBUG(
           &nbCb, "Successfully processed ICMPV6_TYPE_ROUTER_ADV for ueId %u\n",
           ueId);

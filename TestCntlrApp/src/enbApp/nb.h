@@ -211,6 +211,9 @@ typedef U32                  NbMmeId;
 #define NB_IPV6_ADDRESS_LEN 16
 #define NB_IPV4_VERSION 4
 #define NB_IPV6_VERSION 6
+// NB_RTR_SOLICITATION_INTERVAL in seconds
+#define NB_RTR_SOLICITATION_INTERVAL 4000
+#define NB_MAX_RTR_SOLICITATIONS_RETRY 2
 
 EXTERN U16 szElmSize[][SZT_MAX_PROC_ID];
 typedef struct _nbUeCb _nbUeCb;
@@ -283,7 +286,8 @@ typedef enum nbTmr
    NB_TMR_UE_CTX_REL_REQ,
    NB_TMR_LCL_UE_CTXT_REL_REQ,
    NB_TMR_DELAY_ICS_RSP,
-   NB_TMR_DELAY_UE_CTX_REL_COMP
+   NB_TMR_DELAY_UE_CTX_REL_COMP,
+   NB_TMR_ROUTER_SOLICIT
 } enNbTimer;
 
 typedef struct _nbS1ConnCb
@@ -461,6 +465,24 @@ typedef struct _mutilEnbCfgInfo
    Bool pres;
    U8   numOfEnbs;
 }MutilEnbCfgInfo;
+
+typedef struct _dropRA {
+  Bool isDropRA;
+} DropRA;
+
+typedef struct _nbRouterSolicitCb {
+#define NB_EGTP_MSG_SZ 1024
+  U32 ueId;
+  U8 *ip6Addr;
+  U32 epsBearId;
+  Void *tnlCb;
+  U8 rs_buff[NB_EGTP_MSG_SZ];
+  U8 rs_len;
+  U8 counter;
+  CmTimer timer;
+} NbRouterSolicitCb;
+
+
 typedef struct _nbCb
 {
    Mem mem; /* memory pool info */
@@ -497,6 +519,8 @@ typedef struct _nbCb
    DropICSSndCtxtRelCfg      dropICSSndCtxtRel[NB_MAX_UE_SUPPORTED];
    DelayUeCtxtRelCmpCfg      delayUeCtxtRelCmp[NB_MAX_UE_SUPPORTED];
    InitCtxtSetupRspFailedErabs  initCtxtSetupFailedErabs[NB_MAX_UE_SUPPORTED];
+   DropRA                       dropRA[NB_MAX_UE_SUPPORTED];
+   NbRouterSolicitCb            *rsCb[NB_MAX_UE_SUPPORTED];
 #ifdef MULTI_ENB_SUPPORT
    Bool                      x2HoDone;
 #endif

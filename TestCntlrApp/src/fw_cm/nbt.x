@@ -56,6 +56,7 @@ typedef enum _nbMsgTypes
    NB_MME_CONFIG_TRANSFER,
    // SCTP SHUTDOWN or ABORT
    NB_NW_INITIATED_ASSOC_DOWN,
+   NB_DROP_RA,
    NB_UNKNOWN_MSG_TYPE
 }NbMsgTypes;
 
@@ -440,6 +441,11 @@ typedef struct _nbMmeConfigTrnsf
   }u;
 }NbMmeConfigTrnsf;
 
+typedef struct _nbDropRA {
+  U32 ueId;
+  Bool isDropRA;
+} NbDropRA;
+
 typedef struct _nbtMsg
 {
    NbMsgTypes msgType;
@@ -473,6 +479,7 @@ typedef struct _nbtMsg
       NbTunDelReq         tunDelReq;
       NbEnbConfigTrnsf    enbConfigTrnsf;
       NbMmeConfigTrnsf    mmeConfigTrnsf;
+      NbDropRA dropRA;
    }t;
 }NbtMsg;
 

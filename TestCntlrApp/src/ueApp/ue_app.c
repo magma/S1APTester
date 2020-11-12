@@ -2926,6 +2926,7 @@ PRIVATE S16 ueAppUtlBldActDefltBerContextAccept
 
    /* Activate defaule EPS barer context accept*/
    msg->msgType = CM_ESM_MSG_ACTV_DEF_BEAR_ACC;
+   ueCb->numPdns ++;
    UE_LOG_EXITFN(ueAppCb, ret);
 }
 /*
@@ -4741,7 +4742,6 @@ PRIVATE S16 ueAppBuildAndSendActDefltBerContextAccept(UeCb *ueCb, U8 bearerId)
    UE_GET_CB(ueAppCb);
    UE_LOG_ENTERFN(ueAppCb);
 
-
    ret = ueAppUtlBldActDefltBerContextAccept(ueCb,&BearerAccEvnt,bearerId);
    if (ret != ROK)
    {
@@ -4808,7 +4808,6 @@ PRIVATE S16 ueAppBuildAndSendActDefltBerContextAccept(UeCb *ueCb, U8 bearerId)
             "Enodeb Failed");
       ret = RFAILED;
    }
-
    UE_LOG_EXITFN(ueAppCb, ret);
 }
 
@@ -6232,23 +6231,43 @@ PRIVATE Void ueAppFormIpv4Addr(NbuUeIpInfoRsp *ueIpInfoRsp,
  *       File:  ue_app.c
  *
  */
-PRIVATE Void ueAppFormIpv6Addr(NbuUeIpInfoRsp *ueIpInfoRsp,
-                               CmEsmPdnAdd *pdn_addr) {
+PRIVATE Void ueAppFormIpv6Addr(NbuUeIpInfoRsp *ueIpInfoRsp, UeRabCb *ueRabCb) {
   UeAppCb *ueAppCb = NULLP;
   U8 ip6_str[INET6_ADDRSTRLEN];
 
   UE_GET_CB(ueAppCb);
   UE_LOG_ENTERFN(ueAppCb);
 
-  // Form IPv6 address string by prepending Link local address-fe80::
-  sprintf(ip6_str, "%s::%02x%02x:%02x%02x:%02x%02x:%02x%02x", "fe80",
-          (int)pdn_addr->addrInfo[0], (int)pdn_addr->addrInfo[1],
-          (int)pdn_addr->addrInfo[2], (int)pdn_addr->addrInfo[3],
-          (int)pdn_addr->addrInfo[4], (int)pdn_addr->addrInfo[5],
-          (int)pdn_addr->addrInfo[6], (int)pdn_addr->addrInfo[7]);
+  /* For default bearer form IPv6 address string by prepending
+   * Link local address-fe80:
+   */
+  if (ueRabCb->bearerType == DEFAULT_BEARER) {
+    sprintf(ip6_str, "%s::%02x%02x:%02x%02x:%02x%02x:%02x%02x", "fe80",
+            (int)ueRabCb->pAddr.addrInfo[0], (int)ueRabCb->pAddr.addrInfo[1],
+            (int)ueRabCb->pAddr.addrInfo[2], (int)ueRabCb->pAddr.addrInfo[3],
+            (int)ueRabCb->pAddr.addrInfo[4], (int)ueRabCb->pAddr.addrInfo[5],
+            (int)ueRabCb->pAddr.addrInfo[6], (int)ueRabCb->pAddr.addrInfo[7]);
 
+  } else {
+    /* For dedicated bearer form IPv6 address string using the
+     * ipv6 address in ueRabCb->ipv6Addr as the pAddr.addrInfo contains
+     * only interface id
+     */
+    sprintf(ip6_str,
+            "%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%"
+            "02x%02x",
+            (int)ueRabCb->ipv6Addr[0], (int)ueRabCb->ipv6Addr[1],
+            (int)ueRabCb->ipv6Addr[2], (int)ueRabCb->ipv6Addr[3],
+            (int)ueRabCb->ipv6Addr[4], (int)ueRabCb->ipv6Addr[5],
+            (int)ueRabCb->ipv6Addr[6], (int)ueRabCb->ipv6Addr[7],
+            (int)ueRabCb->ipv6Addr[8], (int)ueRabCb->ipv6Addr[9],
+            (int)ueRabCb->ipv6Addr[10], (int)ueRabCb->ipv6Addr[11],
+            (int)ueRabCb->ipv6Addr[12], (int)ueRabCb->ipv6Addr[13],
+            (int)ueRabCb->ipv6Addr[14], (int)ueRabCb->ipv6Addr[15]);
+  }
   cmMemcpy(ueIpInfoRsp->Ip6Addr, ip6_str, INET6_ADDRSTRLEN);
-  UE_LOG_DEBUG(ueAppCb, "Sending ipv6 address %s to enbApp", ip6_str);
+  UE_LOG_DEBUG(ueAppCb, "Sending ipv6 address %s to enbApp for bearer %d",
+               ip6_str, ueRabCb->epsBearerId);
   RETVOID;
 }
 
@@ -6293,13 +6312,13 @@ PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId,
     } else if (pdn_addr->pdnType == CM_ESM_PDN_IPV6) {
       ueIpInfoRsp->pdnType = CM_ESM_PDN_IPV6;
       // Convert IPv6 address arrary to ":" separated notation(x:x:x:x:x:x:x:x)
-      ueAppFormIpv6Addr(ueIpInfoRsp, pdn_addr);
+      ueAppFormIpv6Addr(ueIpInfoRsp, &ueCb->ueRabCb[idx - 1]);
     } else if (pdn_addr->pdnType == CM_ESM_PDN_IPV4V6) {
       ueIpInfoRsp->pdnType = CM_ESM_PDN_IPV4V6;
       // Convert IPv4 address arrary to dotted notation(x.x.x.x)
       ueAppFormIpv4Addr(ueIpInfoRsp, pdn_addr);
       // Convert IPv6 address arrary to ":" separated notation(x:x:x:x:x:x:x:x)
-      ueAppFormIpv6Addr(ueIpInfoRsp, pdn_addr);
+      ueAppFormIpv6Addr(ueIpInfoRsp, &(ueCb->ueRabCb[idx - 1]));
     }
   }
 }
@@ -8070,23 +8089,84 @@ PUBLIC S16 ueUiProcErabsInfoMsg(Pst *pst, NbuErabsInfo *pNbuErabsInfo)
    UE_LOG_EXITFN(ueAppCb, ret);
 }
 
+// This function handles ipv6 address allocation failure
+PRIVATE S16 ueUihandleIpInfoUpdtFail(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt,
+                                     uint32_t idx) {
+  UeAppCb *ueAppCb = NULLP;
+  UE_GET_CB(ueAppCb);
+  UE_LOG_ENTERFN(ueAppCb);
+
+  /* 1.If the pdn type is IPv6 and this is a secondary pdn, delete the session
+   * 2.If the pdn type is IPv6 and this is the default pdn, initiate detach
+   * 3.If the pdn type is IPv4v6, do nothing
+   */
+  if (ueCb->ueRabCb[idx].pAddr.pdnType == CM_ESM_PDN_IPV6) {
+    if (ueCb->numPdns == 1) {
+      // Initiate detach
+      if (ueSendDetachRequest(ueCb, UE_DETACH_SWITCHOFF) == ROK) {
+        UE_LOG_DEBUG(ueAppCb, "Sending Detach Request for ueId: %d",
+                     ueCb->ueId);
+        UE_LOG_DEBUG(ueAppCb, "Freeing all the DRBs allocated for ueId: %d",
+                     ueCb->ueId);
+        for (U8 itr = 0; itr < UE_APP_MAX_DRBS; itr++) {
+          cmMemset((U8 *)&(ueCb->ueRabCb[itr]), 0, sizeof(ueCb->ueRabCb[itr]));
+          ueCb->drbs[itr] = UE_APP_DRB_AVAILABLE;
+          ueCb->numRabs--;
+        }
+      } else {
+        UE_LOG_ERROR(ueAppCb,
+                     " Error in sending Detach Req for bearer %u, ue %u\n",
+                     ipInfoUpdt->bearerId, ueCb->ueId);
+        RETVALUE(RFAILED);
+      }
+    } else if (ueCb->numPdns > 1) {
+      // Send PDN disconnect
+      UetMessage uetMsg;
+      uetMsg.msg.ueUetPdnDisconnectReq.ueId = ueCb->ueId;
+      uetMsg.msg.ueUetPdnDisconnectReq.bearerId = ipInfoUpdt->bearerId;
+      if (ueProcUePdnDisconnectReq(&uetMsg, NULLP) == ROK) {
+        UE_LOG_DEBUG(ueAppCb, "Pdn Disconnect Req for ueId: %d, bearer %u",
+                     ueCb->ueId, ipInfoUpdt->bearerId);
+      } else {
+        UE_LOG_ERROR(
+            ueAppCb,
+            " Error in sending Pdn Disconnect Req for bearer %u, ue %u\n",
+            ipInfoUpdt->bearerId, ueCb->ueId);
+        RETVALUE(RFAILED);
+      }
+    }
+  }
+  RETVALUE(ROK);
+}
+
 PUBLIC S16 ueUiProcIpInfoUpdtMsg(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt) {
   UeAppCb *ueAppCb = NULLP;
   UetMessage *tfwMsg = NULLP;
+  S16 retVal = RFAILED;
+  uint32_t idx;
+  Bool bearerFound = FALSE;
   UE_GET_CB(ueAppCb);
   UE_LOG_ENTERFN(ueAppCb);
-  // Update the IPv6 address to ueAppCb
-  for (int idx = 0; idx < UE_APP_MAX_DRBS; idx++) {
-    if (ueCb->ueRabCb[idx].lnkEpsBearId == ipInfoUpdt->bearerId) {
-      cmMemcpy(ueCb->ueRabCb[idx].ipv6Addr, ipInfoUpdt->ipv6Addr,
-               sizeof(ipInfoUpdt->ipv6Addr));
+
+  for (idx = 0; idx < UE_APP_MAX_DRBS; idx++) {
+    if (ueCb->ueRabCb[idx].epsBearerId == ipInfoUpdt->bearerId) {
+      bearerFound = TRUE;
       break;
-    } else {
-      UE_LOG_ERROR(ueAppCb, "Bearer id %u not found in ueRabCb for ue %u\n",
-                   ipInfoUpdt->bearerId, ueCb->ueId);
-      RETVALUE(RFAILED);
     }
   }
+  if (!bearerFound) {
+    UE_LOG_ERROR(ueAppCb, "Bearer id %u not found in ueRabCb for ue %u\n",
+                 ipInfoUpdt->bearerId, ueCb->ueId);
+    RETVALUE(RFAILED);
+  }
+
+  if (ipInfoUpdt->status == FAILURE) {
+    retVal = ueUihandleIpInfoUpdtFail(ueCb, ipInfoUpdt, idx);
+    RETVALUE(retVal);
+  }
+  // Update the IPv6 address to ueAppCb
+  cmMemcpy(ueCb->ueRabCb[idx].ipv6Addr, ipInfoUpdt->ipv6Addr,
+           sizeof(ipInfoUpdt->ipv6Addr));
   // Send message to Test controller
   tfwMsg = (UetMessage *)ueAlloc(sizeof(UetMessage));
   tfwMsg->msg.ueUetRouterAdv.ueId = ueCb->ueId;
@@ -8099,7 +8179,10 @@ PUBLIC S16 ueUiProcIpInfoUpdtMsg(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt) {
                           "TFWAPP failed");
     RETVALUE(RFAILED);
   }
-  UE_LOG_DEBUG(ueAppCb, "Sent ICMPV6 ROUTER ADVERTISEMENT to tfwApp \n");
+  UE_LOG_DEBUG(
+      ueAppCb,
+      "Sent ICMPV6 ROUTER ADVERTISEMENT to tfwApp for ue %d bearer %d\n",
+      ueCb->ueId, ipInfoUpdt->bearerId);
   RETVALUE(ROK);
 }
 
@@ -8572,6 +8655,16 @@ PRIVATE S16 uefillDedEsmInfoToUeCb
    ueCb->ueRabCb[drbId].drbId = drbId;
    ueCb->ueRabCb[drbId].epsBearerId = epsBearerId;
    params->lnkEpsBearId = actReq->lnkBearerId;
+   /* If this dedicated bearer is for IPv6 or IPv4v6 pdn type,
+    * copy the ipv6 address from the default bearer to dedicated ueRabCb
+    * Because the pdn address in ueRabCb contains only interface id
+    */
+   if( (ret = ueAppUtlFndRbCb(&rbIdx, ueCb, params->lnkEpsBearId) == ROK)){
+     if ((ueCb->ueRabCb[rbIdx].pAddr.pdnType == CM_ESM_PDN_IPV4V6) ||
+       (ueCb->ueRabCb[rbIdx].pAddr.pdnType == CM_ESM_PDN_IPV6)) {
+       cmMemcpy(params->ipv6Addr, ueCb->ueRabCb[rbIdx].ipv6Addr, sizeof(params->ipv6Addr));
+     }
+   }
    if(actReq->epsQos.pres == TRUE)
    {
       params->epsQos.pres              = TRUE;
@@ -9532,8 +9625,10 @@ PRIVATE S16 ueProcUePdnDisconnectReq(UetMessage *p_ueMsg, Pst *pst) {
   if (ret != ROK) {
     UE_LOG_ERROR(ueAppCb, "Sending PDN Disconnect Req to enbAPP failed");
     ret = RFAILED;
+  } else {
+    // Decrement pdns
+    ueCb->numPdns --;
   }
-
   UE_LOG_EXITFN(ueAppCb, ret);
 } /* End of ueProcUePdnDisconnectReq */
 
