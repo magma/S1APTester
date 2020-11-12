@@ -186,8 +186,6 @@ U32                          delay
         rsCb = (NbRouterSolicitCb *)cb;
         nbCb.rsCb[(rsCb->ueId)-1] = rsCb;
         tmr = &nbCb.rsCb[(rsCb->ueId)-1]->timer;
-        /*mmeCb = (NbRouterSolicitCb *)cb;
-        tmr = &mmeCb->timer;*/
         maxTmrs = 1;
         break;
       }
@@ -304,7 +302,7 @@ S16                          event
         rsCb = (NbRouterSolicitCb *)cb;
         nbCb.rsCb[(rsCb->ueId)-1] = rsCb;
         timers = &nbCb.rsCb[(rsCb->ueId)-1]->timer;
-        max    = 1;
+        max = 1;
         if (nbCb.rsCb[(rsCb->ueId)-1]->timer.tmrEvnt == event) {
           tmrRunning = TRUE;
         }
@@ -316,7 +314,6 @@ S16                          event
    }
    if(tmrRunning == FALSE)
    {
-      printf("tmrRunning is false\n");
       RETVOID;
    }
 

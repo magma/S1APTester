@@ -252,10 +252,10 @@ PUBLIC S16 NbUiNbtMsgReq
 #endif
       case NB_DROP_RA: {
         if(ROK != NbEnbDropRA(&req->t.dropRA)) {
-               NB_LOG_ERROR(&nbCb, "Failed to process Drop RA Indication  "\
-                     "from TFW");
+          NB_LOG_ERROR(&nbCb, "Failed to process Drop RA Indication  "\
+            "from TFW");
         }
-            break;
+        break;
       }
 
       default:

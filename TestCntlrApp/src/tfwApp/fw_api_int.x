@@ -1582,9 +1582,11 @@ typedef struct _FwErabSetupFailedTosetup {
 } FwErabSetupFailedTosetup;
 
 typedef struct ueRouterAdv {
+// Length of INET6_ADDRSTRLEN
+#define FW_MAX_IPV6_LEN 46
   U8 ueId;
   U8 bearerId;
-  U8 ipv6Addr[46];// Lenght of INET6_ADDRSTRLEN
+  U8 ipv6Addr[FW_MAX_IPV6_LEN];
 } ueRouterAdv_t;
 
 typedef struct ueDropRA {

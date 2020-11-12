@@ -2407,7 +2407,7 @@ PUBLIC S16 tfwApi
          if (fwCb->nbState == ENB_IS_UP) {
            handleDropRouterAdv((UeDropRA*)msg);
          } else {
-           FW_LOG_ERROR(fwCb, "Failed To Process RA Drop Request:ENBAPP IS NOT UP");
+           FW_LOG_ERROR(fwCb, "Failed to process RA Drop Request:ENBAPP IS NOT UP");
            ret = RFAILED;
          }
          break;
@@ -3400,7 +3400,7 @@ handleStdAloneActvDfltEpsBearerContextRej(ueActvDfltEpsBearerCtxtRej_t *data) {
  *
  *   Fun:   handleDropRouterAdv
  *
- *   Desc:  This function is used to drop Router Advertisement
+ *   Desc:  This function sends NB_DROP_RA ind to enb app
  *
  *   Ret:   None
  *

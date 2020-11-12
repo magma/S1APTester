@@ -877,7 +877,7 @@ PRIVATE Void fwFillEsmInfo(ue_Esm_Info *fwEsmInfo, UeEsmInfo *esmInfo)
          fwEsmInfo->pAddr.addrInfo[2],
          fwEsmInfo->pAddr.addrInfo[3]);
      }
-       break;
+     break;
      case CM_ESM_PDN_IPV6: {
        printf("IPv6 interface id: %x %x %x %x %x %x %x %x\n",fwEsmInfo->pAddr.addrInfo[0],
          fwEsmInfo->pAddr.addrInfo[1],

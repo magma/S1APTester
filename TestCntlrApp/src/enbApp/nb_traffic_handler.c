@@ -912,9 +912,6 @@ PUBLIC S16 nbAppCfgrPdnAssignedAddrIpv6(U8 ueId, U8 *ipv6Addr) {
     NB_LOG_ERROR(&nbCb, "ueDatCb is empty");
     RETVALUE(RFAILED);
   }
-  NB_LOG_DEBUG(&nbCb, "Added ipv6 address to routeCb %s", ipInfo->ip6AddrStr);
-      for (int i =0;i<16;i++)
-        NB_LOG_DEBUG(&nbCb, "%x", ipInfo->ip6AddrStr[i]);
   ueDatCb->ipInfo[ueDatCb->noOfIpsAssigned] = ipInfo;
   ueDatCb->noOfIpsAssigned++;
 

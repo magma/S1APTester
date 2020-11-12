@@ -7466,7 +7466,6 @@ EgtUEvnt            *egtUEvnt;
 
       RETVALUE(RFAILED);
    } /* end of if allocating memory fails */
-   printf("In cmPkEgtEguDatReq\n");
    egtUEvnt->event = EVTEGTUDATREQ;
 
    /* in case of loose coupling pack the whole event */

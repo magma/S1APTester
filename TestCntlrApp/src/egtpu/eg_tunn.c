@@ -2019,7 +2019,6 @@ Pst      *pst;
 
    EG_TRC2(egTunProcEguDatReq);
 
-   printf("egTunProcEguDatReq\n");
    ipCb = NULLP;
    srvCb = NULLP;
    egtErrEvnt = NULLP;
@@ -2220,7 +2219,6 @@ Pst      *pst;
 
    if(teIdCb == NULLP)
    {
-      printf("\n Failed to get the TeidCb"); 
       egUFreeUiEvnt(egtUEvnt);
       EG_DBG_FATAL(0,0,(egp, "[egFTunProcEguDatReq] Failed to get the TeidCb"));
       RETVALUE(RFAILED);

@@ -879,7 +879,9 @@ PRIVATE Void nbPackIpv6HdrRtrSolicit(CmIpv6Hdr *ipv6Hdr,
  *
  * @param[in]  ueCb      : NbDamUeCb
  * @param[in]  ip6Addr   : IPv6 Address
- * @param[in]  eguEvtMsg : EgtUEvnt
+ * @param[in]  buff      : encoded RS msg
+ * @param[in]  len       : buff len
+ * @param[in]  counter   : retry counter
  * @return S16
  */
 PRIVATE S16 nbStartTimerForRS(NbDamUeCb *ueCb, NbDamTnlCb *tnlCb, U8 *ip6Addr, U8 *buff, U8 len, U8 counter)
@@ -933,7 +935,7 @@ PUBLIC S16 nbHandleTimerExpiryForRS(NbRouterSolicitCb *rsCb) {
   EgUMsg *egMsg;
   EgtUEvnt *eguEvtMsg = NULLP;
   NbPdnCb *pdnCb = NULLP;
-  NbIpInfo        *ipInfo = NULLP;
+  NbIpInfo *ipInfo = NULLP;
   Buffer *mBuf = NULLP;
 
   if (!rsCb) {
@@ -943,6 +945,7 @@ PUBLIC S16 nbHandleTimerExpiryForRS(NbRouterSolicitCb *rsCb) {
   ueCb = nbDamGetUe(rsCb->ueId);
   if (!ueCb) {
     NB_LOG_ERROR(&nbCb, "ueCb is NULL for ue %d", rsCb->ueId);
+    NB_FREE(rsCb, sizeof(NbRouterSolicitCb));
     RETVALUE(retVal);
   }
   NB_LOG_DEBUG(&nbCb, "RS timer expired for ue %d counter %d\n", rsCb->ueId, rsCb->counter);
@@ -950,17 +953,20 @@ PUBLIC S16 nbHandleTimerExpiryForRS(NbRouterSolicitCb *rsCb) {
     // Assign memory to mBuf
     SGetMsg(DFLT_REGION, DFLT_POOL, &mBuf);
     if (mBuf == NULLP) {
+      NB_FREE(rsCb, sizeof(NbRouterSolicitCb));
       RETVALUE(RFAILED);
     }
     // Convert buff to mbuf to be assigned to EGTP Data Req
     if (SAddPstMsgMult((Data *)rsCb->rs_buff, rsCb->rs_len, mBuf) != ROK) {
       SPutMsg(mBuf);
+      NB_FREE(rsCb, sizeof(NbRouterSolicitCb));
       RETVALUE(RFAILED);
     }
 
     if (ROK != nbFillEgtpDatMsg((NbDamTnlCb*)rsCb->tnlCb, &eguEvtMsg, EGT_GTPU_MSG_GPDU)) {
       NB_LOG_ERROR(&nbCb, "Failed to fill Router Solicit GTP message");
       NB_FREEMBUF(mBuf);
+      NB_FREE(rsCb, sizeof(NbRouterSolicitCb));
       RETVALUE(RFAILED);
     }
     egMsg = eguEvtMsg->u.egMsg;
@@ -983,7 +989,6 @@ PUBLIC S16 nbHandleTimerExpiryForRS(NbRouterSolicitCb *rsCb) {
       retVal = RFAILED;
     }
   }
-  //NB_FREEMBUF(rsCb->mBuf);
   NB_FREE(rsCb, sizeof(NbRouterSolicitCb));
   RETVALUE(retVal);
 }
@@ -1664,9 +1669,7 @@ PRIVATE S16 nbProcRouterAdv(NbDamUeCb *ueCb, CmLteRbId drbId, U8 *buf) {
         RETVALUE(ROK);
       }
       NB_LOG_DEBUG(&nbCb, "Received Router Advertisement for ue %d", ueCb->ueId);
-      for (int i =0;i<16;i++)
-        NB_LOG_DEBUG(&nbCb, "%x", ipInfo->pdnIp6Addr[i]);
-     // Fetch the pdnCb->pdnIp6Addr(interface id) stored earlier
+      // Fetch the pdnCb->pdnIp6Addr(interface id) stored earlier
       if (cmHashListFind(&(ueCb->pdnCb), (U8*)&(ipInfo->pdnIp6Addr),
                           NB_IPV6_ADDRESS_LEN, 0, (PTR *)&pdnCb) == ROK) {
         // Stop the timer
@@ -1677,8 +1680,6 @@ PRIVATE S16 nbProcRouterAdv(NbDamUeCb *ueCb, CmLteRbId drbId, U8 *buf) {
         cmMemcpy(tempIp6Add, pdnCb->pdnIp6Addr, sizeof(pdnCb->pdnIp6Addr));
         // Prepend 8 bytes of IPv6 prefix to pdnCb->pdnIp6Addir
         cmMemcpy(pdnCb->pdnIp6Addr, buf, (NB_IPV6_ADDRESS_LEN / 2));
-        // Copy the interface id from tempIp6Add
-        //cmMemcpy(&pdnCb->pdnIp6Addr[8], tempIp6Add[8], (NB_IPV6_ADDRESS_LEN / 2));
         // Update ipInfo->pdnIp6Addr
         cmMemcpy(ipInfo->pdnIp6Addr, pdnCb->pdnIp6Addr, NB_IPV6_ADDRESS_LEN);
         // Update UeDataCb

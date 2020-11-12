@@ -466,10 +466,9 @@ typedef struct _mutilEnbCfgInfo
    U8   numOfEnbs;
 }MutilEnbCfgInfo;
 
-typedef struct _dropRA
-{
+typedef struct _dropRA {
    Bool isDropRA;
-}DropRA;
+} DropRA;
 
 typedef struct _nbRouterSolicitCb {
 #define NB_EGTP_MSG_SZ   1024
@@ -480,7 +479,7 @@ typedef struct _nbRouterSolicitCb {
   U8 rs_buff[NB_EGTP_MSG_SZ];
   U8 rs_len;
   U8 counter;
-  CmTimer   timer;
+  CmTimer timer;
 } NbRouterSolicitCb;
 
 
@@ -521,7 +520,7 @@ typedef struct _nbCb
    DelayUeCtxtRelCmpCfg      delayUeCtxtRelCmp[NB_MAX_UE_SUPPORTED];
    InitCtxtSetupRspFailedErabs  initCtxtSetupFailedErabs[NB_MAX_UE_SUPPORTED];
    DropRA                       dropRA[NB_MAX_UE_SUPPORTED];
-   NbRouterSolicitCb         *rsCb[NB_MAX_UE_SUPPORTED];
+   NbRouterSolicitCb            *rsCb[NB_MAX_UE_SUPPORTED];
 #ifdef MULTI_ENB_SUPPORT
    Bool                      x2HoDone;
 #endif
