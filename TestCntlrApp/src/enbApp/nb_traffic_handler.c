@@ -877,7 +877,7 @@ PUBLIC S16 nbAppCfgrPdnAssignedAddrIpv6(U8 ueId, U8 *ipv6Addr) {
       for (idx1 = 0; idx1 < ueDatCb->noOfIpsAssigned; idx1++) {
         if ((ueDatCb->ipInfo[idx1] != NULLP) &&
             (!cmMemcmp(ueDatCb->ipInfo[idx1]->ip6AddrStr, ipv6Addr,
-                      NB_IPV6_ADDRESS_LEN))) {
+                       NB_IPV6_ADDRESS_LEN))) {
           NB_LOG_ERROR(
               &nbCb,
               "nbAppCfgrPdnAssignedAddr: IPv6 PDN Address is already assigned "

@@ -6231,8 +6231,7 @@ PRIVATE Void ueAppFormIpv4Addr(NbuUeIpInfoRsp *ueIpInfoRsp,
  *       File:  ue_app.c
  *
  */
-PRIVATE Void ueAppFormIpv6Addr(NbuUeIpInfoRsp *ueIpInfoRsp,
-                               UeRabCb *ueRabCb) {
+PRIVATE Void ueAppFormIpv6Addr(NbuUeIpInfoRsp *ueIpInfoRsp, UeRabCb *ueRabCb) {
   UeAppCb *ueAppCb = NULLP;
   U8 ip6_str[INET6_ADDRSTRLEN];
 
@@ -6244,29 +6243,31 @@ PRIVATE Void ueAppFormIpv6Addr(NbuUeIpInfoRsp *ueIpInfoRsp,
    */
   if (ueRabCb->bearerType == DEFAULT_BEARER) {
     sprintf(ip6_str, "%s::%02x%02x:%02x%02x:%02x%02x:%02x%02x", "fe80",
-          (int)ueRabCb->pAddr.addrInfo[0], (int)ueRabCb->pAddr.addrInfo[1],
-          (int)ueRabCb->pAddr.addrInfo[2], (int)ueRabCb->pAddr.addrInfo[3],
-          (int)ueRabCb->pAddr.addrInfo[4], (int)ueRabCb->pAddr.addrInfo[5],
-          (int)ueRabCb->pAddr.addrInfo[6], (int)ueRabCb->pAddr.addrInfo[7]);
+            (int)ueRabCb->pAddr.addrInfo[0], (int)ueRabCb->pAddr.addrInfo[1],
+            (int)ueRabCb->pAddr.addrInfo[2], (int)ueRabCb->pAddr.addrInfo[3],
+            (int)ueRabCb->pAddr.addrInfo[4], (int)ueRabCb->pAddr.addrInfo[5],
+            (int)ueRabCb->pAddr.addrInfo[6], (int)ueRabCb->pAddr.addrInfo[7]);
 
   } else {
     /* For dedicated bearer form IPv6 address string using the
      * ipv6 address in ueRabCb->ipv6Addr as the pAddr.addrInfo contains
      * only interface id
      */
-    sprintf(ip6_str, "%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x",
-          (int)ueRabCb->ipv6Addr[0], (int)ueRabCb->ipv6Addr[1],
-          (int)ueRabCb->ipv6Addr[2], (int)ueRabCb->ipv6Addr[3],
-          (int)ueRabCb->ipv6Addr[4], (int)ueRabCb->ipv6Addr[5],
-          (int)ueRabCb->ipv6Addr[6], (int)ueRabCb->ipv6Addr[7],
-          (int)ueRabCb->ipv6Addr[8], (int)ueRabCb->ipv6Addr[9],
-          (int)ueRabCb->ipv6Addr[10], (int)ueRabCb->ipv6Addr[11],
-          (int)ueRabCb->ipv6Addr[12], (int)ueRabCb->ipv6Addr[13],
-          (int)ueRabCb->ipv6Addr[14], (int)ueRabCb->ipv6Addr[15]);
+    sprintf(ip6_str,
+            "%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%"
+            "02x%02x",
+            (int)ueRabCb->ipv6Addr[0], (int)ueRabCb->ipv6Addr[1],
+            (int)ueRabCb->ipv6Addr[2], (int)ueRabCb->ipv6Addr[3],
+            (int)ueRabCb->ipv6Addr[4], (int)ueRabCb->ipv6Addr[5],
+            (int)ueRabCb->ipv6Addr[6], (int)ueRabCb->ipv6Addr[7],
+            (int)ueRabCb->ipv6Addr[8], (int)ueRabCb->ipv6Addr[9],
+            (int)ueRabCb->ipv6Addr[10], (int)ueRabCb->ipv6Addr[11],
+            (int)ueRabCb->ipv6Addr[12], (int)ueRabCb->ipv6Addr[13],
+            (int)ueRabCb->ipv6Addr[14], (int)ueRabCb->ipv6Addr[15]);
   }
   cmMemcpy(ueIpInfoRsp->Ip6Addr, ip6_str, INET6_ADDRSTRLEN);
   UE_LOG_DEBUG(ueAppCb, "Sending ipv6 address %s to enbApp for bearer %d",
-              ip6_str, ueRabCb->epsBearerId);
+               ip6_str, ueRabCb->epsBearerId);
   RETVOID;
 }
 
@@ -8089,7 +8090,8 @@ PUBLIC S16 ueUiProcErabsInfoMsg(Pst *pst, NbuErabsInfo *pNbuErabsInfo)
 }
 
 // This function handles ipv6 address allocation failure
-PRIVATE S16 ueUihandleIpInfoUpdtFail(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt, uint32_t idx) {
+PRIVATE S16 ueUihandleIpInfoUpdtFail(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt,
+                                     uint32_t idx) {
   UeAppCb *ueAppCb = NULLP;
   UE_GET_CB(ueAppCb);
   UE_LOG_ENTERFN(ueAppCb);
@@ -8098,38 +8100,42 @@ PRIVATE S16 ueUihandleIpInfoUpdtFail(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt, ui
    * 2.If the pdn type is IPv6 and this is the default pdn, initiate detach
    * 3.If the pdn type is IPv4v6, do nothing
    */
-      if (ueCb->ueRabCb[idx].pAddr.pdnType == CM_ESM_PDN_IPV6) {
-        if (ueCb->numPdns == 1) {
-          // Initiate detach
-          if (ueSendDetachRequest(ueCb, UE_DETACH_SWITCHOFF) == ROK) {
-            UE_LOG_DEBUG(ueAppCb, "Sending Detach Request for ueId: %d", ueCb->ueId);
-            UE_LOG_DEBUG(ueAppCb, "Freeing all the DRBs allocated for ueId: %d", ueCb->ueId);
-            for (U8 itr = 0; itr < UE_APP_MAX_DRBS; itr++) {
-              cmMemset((U8 *)&(ueCb->ueRabCb[itr]), 0, sizeof(ueCb->ueRabCb[itr]));
-              ueCb->drbs[itr] = UE_APP_DRB_AVAILABLE;
-              ueCb->numRabs--;
-            }
-          } else {
-            UE_LOG_ERROR(ueAppCb, " Error in sending Detach Req for bearer %u, ue %u\n",
-                         ipInfoUpdt->bearerId, ueCb->ueId);
-            RETVALUE(RFAILED);
-          }
+  if (ueCb->ueRabCb[idx].pAddr.pdnType == CM_ESM_PDN_IPV6) {
+    if (ueCb->numPdns == 1) {
+      // Initiate detach
+      if (ueSendDetachRequest(ueCb, UE_DETACH_SWITCHOFF) == ROK) {
+        UE_LOG_DEBUG(ueAppCb, "Sending Detach Request for ueId: %d",
+                     ueCb->ueId);
+        UE_LOG_DEBUG(ueAppCb, "Freeing all the DRBs allocated for ueId: %d",
+                     ueCb->ueId);
+        for (U8 itr = 0; itr < UE_APP_MAX_DRBS; itr++) {
+          cmMemset((U8 *)&(ueCb->ueRabCb[itr]), 0, sizeof(ueCb->ueRabCb[itr]));
+          ueCb->drbs[itr] = UE_APP_DRB_AVAILABLE;
+          ueCb->numRabs--;
         }
-        else if (ueCb->numPdns > 1) {
-          // Send PDN disconnect
-          UetMessage uetMsg;
-          uetMsg.msg.ueUetPdnDisconnectReq.ueId = ueCb->ueId;
-          uetMsg.msg.ueUetPdnDisconnectReq.bearerId = ipInfoUpdt->bearerId;
-          if (ueProcUePdnDisconnectReq(&uetMsg, NULLP) == ROK) {
-            UE_LOG_DEBUG(ueAppCb, "Pdn Disconnect Req for ueId: %d, bearer %u",
-                         ueCb->ueId, ipInfoUpdt->bearerId);
-          } else {
-            UE_LOG_ERROR(ueAppCb, " Error in sending Pdn Disconnect Req for bearer %u, ue %u\n",
-                         ipInfoUpdt->bearerId, ueCb->ueId);
-            RETVALUE(RFAILED);
-          }
-        }
+      } else {
+        UE_LOG_ERROR(ueAppCb,
+                     " Error in sending Detach Req for bearer %u, ue %u\n",
+                     ipInfoUpdt->bearerId, ueCb->ueId);
+        RETVALUE(RFAILED);
       }
+    } else if (ueCb->numPdns > 1) {
+      // Send PDN disconnect
+      UetMessage uetMsg;
+      uetMsg.msg.ueUetPdnDisconnectReq.ueId = ueCb->ueId;
+      uetMsg.msg.ueUetPdnDisconnectReq.bearerId = ipInfoUpdt->bearerId;
+      if (ueProcUePdnDisconnectReq(&uetMsg, NULLP) == ROK) {
+        UE_LOG_DEBUG(ueAppCb, "Pdn Disconnect Req for ueId: %d, bearer %u",
+                     ueCb->ueId, ipInfoUpdt->bearerId);
+      } else {
+        UE_LOG_ERROR(
+            ueAppCb,
+            " Error in sending Pdn Disconnect Req for bearer %u, ue %u\n",
+            ipInfoUpdt->bearerId, ueCb->ueId);
+        RETVALUE(RFAILED);
+      }
+    }
+  }
   RETVALUE(ROK);
 }
 
@@ -8173,7 +8179,10 @@ PUBLIC S16 ueUiProcIpInfoUpdtMsg(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt) {
                           "TFWAPP failed");
     RETVALUE(RFAILED);
   }
-  UE_LOG_DEBUG(ueAppCb, "Sent ICMPV6 ROUTER ADVERTISEMENT to tfwApp for ue %d bearer %d\n", ueCb->ueId, ipInfoUpdt->bearerId);
+  UE_LOG_DEBUG(
+      ueAppCb,
+      "Sent ICMPV6 ROUTER ADVERTISEMENT to tfwApp for ue %d bearer %d\n",
+      ueCb->ueId, ipInfoUpdt->bearerId);
   RETVALUE(ROK);
 }
 

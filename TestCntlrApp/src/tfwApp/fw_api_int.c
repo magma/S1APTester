@@ -107,7 +107,7 @@ PRIVATE Void
 handleUeInitCtxtSetupRspFailedErabs(UeInitCtxtSetupFailedErabs *data);
 PUBLIC S16
 handleStdAloneActvDfltEpsBearerContextRej(ueActvDfltEpsBearerCtxtRej_t *data);
-PRIVATE Void handleDropRouterAdv(UeDropRA* data);
+PRIVATE Void handleDropRouterAdv(UeDropRA *data);
 PUBLIC FwCb gfwCb;
 
 /* Adding UEID, epsupdate type, active flag into linked list for
@@ -3409,30 +3409,25 @@ handleStdAloneActvDfltEpsBearerContextRej(ueActvDfltEpsBearerCtxtRej_t *data) {
  *   File:  fw_api_int.c
  *
  */
-PRIVATE Void handleDropRouterAdv(UeDropRA* data)
-{
-   FwCb *fwCb = NULLP;
-   NbtRequest *msgReq = NULLP;
+PRIVATE Void handleDropRouterAdv(UeDropRA *data) {
+  FwCb *fwCb = NULLP;
+  NbtRequest *msgReq = NULLP;
 
-   FW_GET_CB(fwCb);
-   FW_LOG_ENTERFN(fwCb);
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
 
-   if(SGetSBuf(fwCb->init.region, fwCb->init.pool,
-       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK)
-   {
-      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
-   }
-   else
-   {
-      FW_LOG_ERROR(fwCb, "Failed to allocate memory");
-      RETVOID;
-   }
+  if (SGetSBuf(fwCb->init.region, fwCb->init.pool, (Data **)&msgReq,
+               (Size)sizeof(NbtRequest)) == ROK) {
+    cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
+  } else {
+    FW_LOG_ERROR(fwCb, "Failed to allocate memory");
+    RETVOID;
+  }
 
-   msgReq->msgType = NB_DROP_RA;
-   msgReq->t.dropRA.ueId = data->ue_Id;
-   msgReq->t.dropRA.isDropRA = data->flag;
+  msgReq->msgType = NB_DROP_RA;
+  msgReq->t.dropRA.ueId = data->ue_Id;
+  msgReq->t.dropRA.isDropRA = data->flag;
 
-   fwSendToNbApp(msgReq);
-   RETVOID;
+  fwSendToNbApp(msgReq);
+  RETVOID;
 }
-

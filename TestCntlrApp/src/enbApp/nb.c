@@ -1649,7 +1649,7 @@ PUBLIC S16 nbPrcMMEConfigTrf
 PUBLIC S16 NbEnbDropRA(NbDropRA *dropRA) {
   NB_LOG_ENTERFN(&nbCb);
 
-  if(NULLP == dropRA) {
+  if (NULLP == dropRA) {
     NB_LOG_ERROR(&nbCb, "Recieved empty(NULL) request");
     RETVALUE(RFAILED);
   }

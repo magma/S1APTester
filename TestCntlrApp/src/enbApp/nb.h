@@ -467,11 +467,11 @@ typedef struct _mutilEnbCfgInfo
 }MutilEnbCfgInfo;
 
 typedef struct _dropRA {
-   Bool isDropRA;
+  Bool isDropRA;
 } DropRA;
 
 typedef struct _nbRouterSolicitCb {
-#define NB_EGTP_MSG_SZ   1024
+#define NB_EGTP_MSG_SZ 1024
   U32 ueId;
   U8 *ip6Addr;
   U32 epsBearId;

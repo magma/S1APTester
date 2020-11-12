@@ -444,7 +444,7 @@ typedef struct _nbMmeConfigTrnsf
 typedef struct _nbDropRA {
   U32 ueId;
   Bool isDropRA;
-}NbDropRA;
+} NbDropRA;
 
 typedef struct _nbtMsg
 {

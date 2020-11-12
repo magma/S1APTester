@@ -2328,17 +2328,25 @@ PRIVATE S16 handleRouterAdvInd(Pst *pst, UetMessage *uetMsg) {
   sprintf(
       (char *)ipv6AddrStr,
       "%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x",
-      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[0], (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[1],
-      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[2], (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[3],
-      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[4], (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[5],
-      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[6], (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[7],
-      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[8], (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[9],
-      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[10], (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[11],
-      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[12], (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[13],
-      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[14], (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[15]);
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[0],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[1],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[2],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[3],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[4],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[5],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[6],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[7],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[8],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[9],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[10],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[11],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[12],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[13],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[14],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[15]);
 
   cmMemcpy(tfwUeRouterAdv->ipv6Addr, ipv6AddrStr, INET6_ADDRSTRLEN);
-  FW_LOG_DEBUG(fwCb," Complete UE ipv6 addr %s\n", tfwUeRouterAdv->ipv6Addr);
+  FW_LOG_DEBUG(fwCb, " Complete UE ipv6 addr %s\n", tfwUeRouterAdv->ipv6Addr);
   (fwCb->testConrollerCallBack)(UE_ROUTER_ADV_IND, tfwUeRouterAdv,
                                 sizeof(ueRouterAdv_t));
 

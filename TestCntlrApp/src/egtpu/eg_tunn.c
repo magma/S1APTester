@@ -2239,8 +2239,10 @@ Pst      *pst;
    This will be enoded in the */
    teIdCb->remTeid = egtUEvnt->u.egMsg->msgHdr.teId;
 
+
    egUpdateTxStatistics((EgtMsgType)egtUEvnt->u.egMsg->msgHdr.msgType, &(usap->sts));
    egFUCpmProcUiMsg(teIdCb,egtUEvnt->u.egMsg,pst);
+
    /*******************
     * Free User Event *
     *******************/
