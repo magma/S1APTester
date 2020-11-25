@@ -2375,6 +2375,10 @@ PUBLIC S16 nbPrcIncS1apMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType)
    else if(procedureCodeVal == 5 ) /* rab setup request */
    {
       NB_LOG_DEBUG(&nbCb,"nbPrcIncS1apMsg(): Handling RAB Setup Request message\n");
+      if (nbCb.dropErabSetupCfg[(ueCb->ueId) - 1].isDropErabSetupReqEnable) {
+        nbUiSendErabSetupDrpdIndToUser(ueCb->ueId);
+        RETVALUE(ROK);
+      }
       ret = nbHandleRabSetupMsg(ueCb,pdu);
    }
    else if(procedureCodeVal == 23) /* context release command message */

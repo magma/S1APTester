@@ -450,6 +450,10 @@ typedef struct _InitCtxtSetupFailedErabs {
   NbUeMsgCause cause;
 } InitCtxtSetupRspFailedErabs;
 
+typedef struct _dropErabSetupCfg {
+  Bool isDropErabSetupReqEnable;
+} NbDropErabSetupCfg;
+
 typedef struct _EnbCb
 {
    CmHashListEnt nbHashEnt;
@@ -521,6 +525,7 @@ typedef struct _nbCb
    InitCtxtSetupRspFailedErabs  initCtxtSetupFailedErabs[NB_MAX_UE_SUPPORTED];
    DropRA                       dropRA[NB_MAX_UE_SUPPORTED];
    NbRouterSolicitCb            *rsCb[NB_MAX_UE_SUPPORTED];
+   NbDropErabSetupCfg dropErabSetupCfg[NB_MAX_UE_SUPPORTED];
 #ifdef MULTI_ENB_SUPPORT
    Bool                      x2HoDone;
 #endif

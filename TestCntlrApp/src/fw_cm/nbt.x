@@ -57,6 +57,8 @@ typedef enum _nbMsgTypes
    // SCTP SHUTDOWN or ABORT
    NB_NW_INITIATED_ASSOC_DOWN,
    NB_DROP_RA,
+   NB_DROP_ERAB_SETUP_REQ,
+   NB_ERAB_SETUP_DROPPD_IND,
    NB_UNKNOWN_MSG_TYPE
 }NbMsgTypes;
 
@@ -338,6 +340,11 @@ typedef struct _nbIntCtxtSetUpDrpdInd
 {
    U32 ueId;
 }NbIntCtxtSetUpDrpdInd;
+typedef struct _nbErabSetUpDrpdInd
+{
+   U32 ueId;
+} NbErabSetUpDrpdInd;
+
 typedef struct _nbNasNonDel
 {
    U32 ueId;
@@ -446,6 +453,12 @@ typedef struct _nbDropRA {
   Bool isDropRA;
 } NbDropRA;
 
+typedef struct _nbDropErabSetupReq
+{
+   U32 ueId;
+   Bool isDropErabSetupReqEnable;
+} NbDropErabSetupReq;
+
 typedef struct _nbtMsg
 {
    NbMsgTypes msgType;
@@ -480,6 +493,8 @@ typedef struct _nbtMsg
       NbEnbConfigTrnsf    enbConfigTrnsf;
       NbMmeConfigTrnsf    mmeConfigTrnsf;
       NbDropRA dropRA;
+      NbDropErabSetupReq dropErabSetupReq;
+      NbErabSetUpDrpdInd  erabSetupDropInd;
    }t;
 }NbtMsg;
 

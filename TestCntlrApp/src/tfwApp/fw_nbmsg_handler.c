@@ -63,17 +63,17 @@
 EXTERN FwCb gfwCb;
 PUBLIC S16 sendNbAppConfigRespToTstCntlr(NbConfigCfm *nbtMsg);
 /*
-*        Fun:   sendNbAppConfigRespToTstCntlr
-*
-*        Desc:  Sends the Nb Config Response message to 
-*               Test controller stub Message Queue
-*
-*        Ret:   S16
-* 
-*        Notes: None
-* 
-*        File:  fw_nbmsg_handler.c
-*/
+ *        Fun:   sendNbAppConfigRespToTstCntlr
+ *
+ *        Desc:  Sends the Nb Config Response message to
+ *               Test controller stub Message Queue
+ *
+ *        Ret:   S16
+ *
+ *        Notes: None
+ *
+ *        File:  fw_nbmsg_handler.c
+ */
 
 PUBLIC S16 sendNbAppS1SetupRespToTstCntlr(NbS1SetupRsp *nbtMsg);
 PUBLIC S16 sendNbAppS1SetupTimeOutIndToTstCntlr(Void);
@@ -86,10 +86,10 @@ PUBLIC S16 sendNbAppNasNonDelIndToTstCntlr(NbNasNonDelRsp *rsp);
 PUBLIC S16 sendNbAppPathSwReqAckToTstCntlr(NbPathSwReqAck *rsp);
 
 /*
- *       Fun: sendNbAppConfigRespToTstCntlr 
+ *       Fun: sendNbAppConfigRespToTstCntlr
  *
- *       Desc: 
- * 
+ *       Desc:
+ *
  *       Ret:  ROK - ok; RFAILED - failed
  *
  *       Notes: none
@@ -120,16 +120,15 @@ PUBLIC S16 sendNbAppConfigRespToTstCntlr(NbConfigCfm *cfm)
    {
       FW_LOG_ERROR(fwCb, "Memory Freeing failed");
    }
-   
+
    FW_LOG_EXITFN(fwCb, ret);
 } /* sendNbAppConfigRespToTstCntlr */
 
-
 /*
- *       Fun: sendNbAppS1SetupRespToTstCntlr 
+ *       Fun: sendNbAppS1SetupRespToTstCntlr
  *
- *       Desc: 
- * 
+ *       Desc:
+ *
  *       Ret:  ROK - ok; RFAILED - failed
  *
  *       Notes: none
@@ -160,7 +159,7 @@ PUBLIC S16 sendNbAppS1SetupRespToTstCntlr(NbS1SetupRsp *rsp)
          msg->waitIe.val  = rsp->waitIe.val;
          msg->waitIe.pres = TRUE;
       }
-      msg->cause.pres = TRUE; 
+      msg->cause.pres = TRUE;
       msg->cause.type = rsp->cause.causeType;
       msg->cause.val  = rsp->cause.causeVal;
       fwCb->nbState   = NB_CONFIG_DONE;
@@ -207,10 +206,10 @@ PUBLIC S16 sendNbAppS1SetupRespToTstCntlr(NbS1SetupRsp *rsp)
 } /* sendNbS1SetupRespToTstCntlr */
 
 /*
- *       Fun: sendNbAppS1ResetAckToTstCntlr 
+ *       Fun: sendNbAppS1ResetAckToTstCntlr
  *
- *       Desc: 
- * 
+ *       Desc:
+ *
  *       Ret:  ROK - ok; RFAILED - failed
  *
  *       Notes: none
@@ -249,10 +248,10 @@ PUBLIC S16 sendNbAppS1ResetAckToTstCntlr(NbResetAckldg *rsp)
 
 /*
  *
- *       Fun: sendNbAppS1SetupTimeOutIndToTstCntlr 
+ *       Fun: sendNbAppS1SetupTimeOutIndToTstCntlr
  *
- *       Desc: 
- * 
+ *       Desc:
+ *
  *       Ret:  ROK - ok; RFAILED - failed
  *
  *       Notes: none
@@ -276,8 +275,8 @@ PUBLIC S16 sendNbAppS1SetupTimeOutIndToTstCntlr(Void)
 /*
  *       Fun: sendNbAppUeCtxRelIndToTstCntlr
  *
- *       Desc: 
- * 
+ *       Desc:
+ *
  *       Ret:  ROK - ok; RFAILED - failed
  *
  *       Notes: none
@@ -306,8 +305,8 @@ PUBLIC S16 sendNbAppUeCtxRelIndToTstCntlr(NbUeCtxRelInd *rsp)
 /*
  *       Fun: sendNbAppIntCtxSetupIndToTstCntlr
  *
- *       Desc: 
- * 
+ *       Desc:
+ *
  *       Ret:  ROK - ok; RFAILED - failed
  *
  *       Notes: none
@@ -336,10 +335,10 @@ PUBLIC S16 sendNbAppIntCtxSetupIndToTstCntlr(NbIntCtxtSetUpInd *rsp)
 
 /*
  *
- *       Fun: sendNbAppIntCtxSetupDrpdIndToTstCntlr 
+ *       Fun: sendNbAppIntCtxSetupDrpdIndToTstCntlr
  *
- *       Desc: 
- * 
+ *       Desc:
+ *
  *       Ret:  ROK - ok; RFAILED - failed
  *
  *       Notes: none
@@ -363,13 +362,13 @@ PUBLIC S16 sendNbAppIntCtxSetupDrpdIndToTstCntlr(NbIntCtxtSetUpDrpdInd *rsp)
          sizeof(FwNbIntCtxSetupDrpdInd_t));
    FW_FREE_MEM(fwCb, msg, sizeof(FwNbIntCtxSetupDrpdInd_t));
    FW_LOG_EXITFN(fwCb, ret);
-} 
+}
 
 /*
  *       Fun: sendNbAppErabRelCmdToTstCntlr
  *
- *       Desc: 
- * 
+ *       Desc:
+ *
  *       Ret:  ROK - ok; RFAILED - failed
  *
  *       Notes: none
@@ -402,13 +401,42 @@ PUBLIC S16 sendNbAppErabRelCmdToTstCntlr(NbErabRelCmd *rsp)
    FW_LOG_EXITFN(fwCb, ret);
 } /* sendNbAppErabRelCmdToTstCntlr */
 
+/*
+ *
+ *       Fun: sendNbAppErabSetupDrpdIndToTstCntlr
+ *
+ *       Desc: Send ErabSetupReq drop indication to test controller
+ *
+ *       Ret:  ROK - ok; RFAILED - failed
+ *
+ *       Notes: none
+ *
+ *       File:  fw_nbmsg_handler.c
+ */
+PUBLIC S16 sendNbAppErabSetupDrpdIndToTstCntlr(NbErabSetUpDrpdInd *rsp) {
+  S16 ret = ROK;
+  FwCb *fwCb = NULLP;
+  FwNbErabSetupDrpdInd_t *msg = NULLP;
+  FW_LOG_ENTERFN(fwCb);
+
+  FW_GET_CB(fwCb);
+  FW_ALLOC_MEM(fwCb, &msg, sizeof(FwNbErabSetupDrpdInd_t));
+
+  msg->ueId = rsp->ueId;
+
+  (*fwCb->testConrollerCallBack)(UE_ERAB_DROP_IND, msg,
+                                 sizeof(FwNbErabSetupDrpdInd_t));
+  FW_FREE_MEM(fwCb, msg, sizeof(FwNbIntCtxSetupDrpdInd_t));
+  FW_LOG_EXITFN(fwCb, ret);
+}
+
 /*eNbApp wouldn't send NAS NON DEL IND to TFW */
 #if 0
 /*
  *       Fun: sendNbAppNasNonDelIndToTstCntlr
  *
- *       Desc: 
- * 
+ *       Desc:
+ *
  *       Ret:  ROK - ok; RFAILED - failed
  *
  *       Notes: none
@@ -438,8 +466,8 @@ PUBLIC S16 sendNbAppNasNonDelIndToTstCntlr(NbNasNonDelRsp *rsp)
 /*
  *       Fun: sendNbAppPathSwReqAckToTstCntlr
  *
- *       Desc: 
- * 
+ *       Desc:
+ *
  *       Ret:  ROK - ok; RFAILED - failed
  *
  *       Notes: none
@@ -465,11 +493,11 @@ PUBLIC S16 sendNbAppPathSwReqAckToTstCntlr(NbPathSwReqAck *rsp)
    FW_LOG_EXITFN(fwCb, ret);
 } /* sendNbAppPathSwReqAckToTstCntlr */
 
- /*
+/*
  *       Fun: sendNbAppMmeConfigTrfToTstCntlr
  *
- *       Desc: 
- * 
+ *       Desc:
+ *
  *       Ret:  ROK - ok; RFAILED - failed
  *
  *       Notes: none
@@ -518,8 +546,8 @@ PUBLIC Void handleNwInitAssocDown() {
  *
  *       Fun: handleNbAppMsg
  *
- *       Desc: 
- * 
+ *       Desc:
+ *
  *       Ret:  ROK - ok; RFAILED - failed
  *
  *       Notes: none
@@ -589,7 +617,7 @@ PUBLIC S16 handleNbAppMsg
       case NB_PATH_SW_REQ_ACK:
          FW_LOG_DEBUG(fwCb, "Recieved Path Sw Req from EnodeB");
          sendNbAppPathSwReqAckToTstCntlr(&nbRspMsg->t.pathSwReqAck);
-         break;         
+         break;
       case NB_MME_CONFIG_TRANSFER:
          FW_LOG_DEBUG(fwCb, "Recieved NB_MME_CONFIG_TRF from EnodeB");
          sendNbAppMmeConfigTrfToTstCntlr(&nbRspMsg->t.mmeConfigTrnsf);
@@ -598,6 +626,10 @@ PUBLIC S16 handleNbAppMsg
          FW_LOG_DEBUG(fwCb, "Recieved NB_NW_INITIATED_ASSOC_DOWN from EnodeB");
          handleNwInitAssocDown();
          break;
+      case NB_ERAB_SETUP_DROPPD_IND:
+        FW_LOG_DEBUG(fwCb, "Recieved NB_ERAB_SETUP_DROPPD_IND from EnodeB");
+        sendNbAppErabSetupDrpdIndToTstCntlr(&nbRspMsg->t.intCtxtSetUpDrpdInd);
+        break;
       default:
          FW_LOG_ERROR(fwCb, "Recieved Invalid event from EnodeB");
          break;

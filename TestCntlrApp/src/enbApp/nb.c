@@ -56,6 +56,7 @@ PUBLIC S16 NbEnbInitCtxtSetupFail(NbInitCtxtSetupFail *initCtxtSetupFail);
 EXTERN S16 nbIfmDamTnlCreatReq(NbDamTnlInfo*);
 EXTERN S16 nbIfmDamUeRelReq(U32, U8);
 EXTERN S16 nbAppRouteInit(U32 selfIp, S8*);
+PUBLIC S16 NbHandleDropErabSetupReq(NbDropErabSetupReq *dropErabSetupReq);
 
 EXTERN NbDamCb nbDamCb;
 
@@ -1660,3 +1661,22 @@ PUBLIC S16 NbEnbDropRA(NbDropRA *dropRA) {
   RETVALUE(ROK);
 }
 
+ /* @details This function marks a ue for dropping Erab Setup Request
+ *
+ * Function: NbHandleDropErabSetupReq
+ *
+ * @param[in]  NbHandleDropErabSetupReq
+ * @return  S16
+ *          -# Success : ROK
+ */
+PUBLIC S16 NbHandleDropErabSetupReq(NbDropErabSetupReq *dropErabSetupReq) {
+   NB_LOG_ENTERFN(&nbCb);
+
+   if (NULLP == dropErabSetupReq) {
+     NB_LOG_ERROR(&nbCb, "Recieved empty(NULL) request");
+     RETVALUE(RFAILED);
+   }
+   nbCb.dropErabSetupCfg[(dropErabSetupReq->ueId) - 1]
+       .isDropErabSetupReqEnable = dropErabSetupReq->isDropErabSetupReqEnable;
+   RETVALUE(ROK);
+ }

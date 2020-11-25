@@ -126,7 +126,9 @@ typedef enum {
    UE_SET_INIT_CTXT_SETUP_RSP_FAILED_ERABS,
    UE_STANDALONE_ACTV_DEFAULT_EPS_BEARER_CNTXT_REJECT,
    UE_ROUTER_ADV_IND,
-   UE_SET_DROP_ROUTER_ADV
+   UE_SET_DROP_ROUTER_ADV,
+   UE_DROP_ERAB_SETUP_REQ,
+   UE_ERAB_DROP_IND
 }tfwCmd;
 
 typedef enum
@@ -141,7 +143,6 @@ typedef enum
    UE_ATTACH_ACCEPT_IND_DONE,
    UE_ATTACH_COMPLETE_DONE
 }attachState;
-
 
 typedef enum ue_state
 {
@@ -1359,6 +1360,12 @@ typedef struct _num_Of_Enbs
    U8   numOfEnb;
 }num_Of_Enbs_t;
 
+typedef struct ueDropErabSetupReq
+{
+   U32 ue_Id;
+   Bool flag;
+} UeDropErabSetupReq_t;
+
 typedef struct _fwNbConfigReq
 {
    cell_Id cellId_pr;
@@ -1501,6 +1508,11 @@ typedef struct _fwNbIntCtxSetupDrpdInd
 {
    U32 ueId;
 }FwNbIntCtxSetupDrpdInd_t;
+
+typedef struct _fwNbErabSetupDrpdInd
+{
+   U32 ueId;
+} FwNbErabSetupDrpdInd_t;
 
 typedef struct UeEmmInformation
 {

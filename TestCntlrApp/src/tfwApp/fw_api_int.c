@@ -110,6 +110,7 @@ handleStdAloneActvDfltEpsBearerContextRej(ueActvDfltEpsBearerCtxtRej_t *data);
 PRIVATE Void handleDropRouterAdv(UeDropRA *data);
 PUBLIC FwCb gfwCb;
 
+PRIVATE Void handleDropErabSetupReq(UeDropErabSetupReq_t *data);
 /* Adding UEID, epsupdate type, active flag into linked list for
  * TAU request
  */
@@ -2412,6 +2413,12 @@ PUBLIC S16 tfwApi
          }
          break;
       }
+      case UE_DROP_ERAB_SETUP_REQ: {
+        FW_LOG_DEBUG(fwCb,
+                     "Process UE_DROP_ERAB_SETUP_REQ message from testcase");
+        handleDropErabSetupReq((UeDropErabSetupReq_t *)msg);
+        break;
+      }
 
      default:
       {
@@ -3427,6 +3434,28 @@ PRIVATE Void handleDropRouterAdv(UeDropRA *data) {
   msgReq->msgType = NB_DROP_RA;
   msgReq->t.dropRA.ueId = data->ue_Id;
   msgReq->t.dropRA.isDropRA = data->flag;
+
+  fwSendToNbApp(msgReq);
+  RETVOID;
+}
+
+PRIVATE Void handleDropErabSetupReq(UeDropErabSetupReq_t * data) {
+  FwCb *fwCb = NULLP;
+  NbtRequest *msgReq = NULLP;
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  if (SGetSBuf(fwCb->init.region, fwCb->init.pool, (Data **)&msgReq,
+               (Size)sizeof(NbtRequest)) == ROK) {
+    cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
+  } else {
+    FW_LOG_ERROR(fwCb, "Failed to allocate memory");
+    RETVOID;
+  }
+  msgReq->msgType = NB_DROP_ERAB_SETUP_REQ;
+  msgReq->t.dropErabSetupReq.ueId = data->ue_Id;
+  msgReq->t.dropErabSetupReq.isDropErabSetupReqEnable = data->flag;
 
   fwSendToNbApp(msgReq);
   RETVOID;

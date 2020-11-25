@@ -8,17 +8,17 @@
 
 /**********************************************************************
 
-    Name:  LTE S1SIM - ENODEB Application Module 
+    Name:  LTE S1SIM - ENODEB Application Module
 
     Type:  C include file
 
     Desc:  C source code for ENODEB Application
-               
+
     File:  nb_ui.c
 
-    Sid:   
+    Sid:
 
-     Prg:      
+     Prg:
 
 **********************************************************************/
 #include "nb.h"
@@ -155,7 +155,6 @@ PUBLIC S16 NbUiNbtMsgReq
                      "from TFW");
             }
             break;
-            
          }
       case NB_INIT_CTXT_SETUP_FAIL:
          {
@@ -165,7 +164,6 @@ PUBLIC S16 NbUiNbtMsgReq
                      "from TFW");
             }
             break;
-            
          }
       case NB_DROP_INIT_CTXT_SETUP:
          {
@@ -176,7 +174,6 @@ PUBLIC S16 NbUiNbtMsgReq
                      "from TFW");
             }
             break;
-            
          }
       case NB_DELAY_INIT_CTXT_SETUP_RSP:
          {
@@ -187,7 +184,6 @@ PUBLIC S16 NbUiNbtMsgReq
                      "from TFW");
             }
             break;
-            
          }
       case NB_INIT_CTXT_SETUP_RSP_FAILED_ERABS: {
         if (ROK != NbEnbHandleInitCtxtSetupRspFailedErabs(
@@ -206,7 +202,6 @@ PUBLIC S16 NbUiNbtMsgReq
                      "from TFW");
             }
             break;
-            
          }
       case NB_SEND_UE_CTXT_REL_FOR_ICS:
          {
@@ -217,7 +212,6 @@ PUBLIC S16 NbUiNbtMsgReq
                      "from TFW");
             }
             break;
-            
          }
       case NB_MULTI_ENB_CONFIG_REQ:
          {
@@ -257,51 +251,43 @@ PUBLIC S16 NbUiNbtMsgReq
     }
     break;
   }
+  case NB_DROP_ERAB_SETUP_REQ: {
+    if (ROK != NbHandleDropErabSetupReq(&req->t.dropErabSetupReq)) {
+      NB_LOG_ERROR(&nbCb,
+                   "Failed to process Drop Erab Setup Request from TFW \n");
+    }
+    break;
+  }
 
-      default:
-         NB_LOG_ERROR(&nbCb,"Invalid msgType");
-         break;
+  default:
+    NB_LOG_ERROR(&nbCb, "Invalid msgType");
+    break;
    }
    /* need to free received buffer */
    RETVALUE(ROK);
 } /* NbUiNbtMsgReq */
 
-PUBLIC S16 NbUiNbuHdlInitialUeMsg 
-(
- Pst *pst,
- NbuInitialUeMsg *req
-)
-{
-   S16 retVal = ROK;
+PUBLIC S16 NbUiNbuHdlInitialUeMsg(Pst *pst, NbuInitialUeMsg *req) {
+  S16 retVal = ROK;
 
-   retVal = NbHandleInitialUeMsg(req);
-   /* free the received message */
-   NB_FREE(req->nasPdu.val, req->nasPdu.len);
-   NB_FREE(req, sizeof(NbuInitialUeMsg));
-   RETVALUE(retVal);
+  retVal = NbHandleInitialUeMsg(req);
+  /* free the received message */
+  NB_FREE(req->nasPdu.val, req->nasPdu.len);
+  NB_FREE(req, sizeof(NbuInitialUeMsg));
+  RETVALUE(retVal);
 } /* NbUiNbuHdlInitialUeMsg */
 
-PUBLIC S16 NbUiNbuHdlUeIpInfoRsp 
-(
- Pst *pst,
- NbuUeIpInfoRsp *rsp
-)
-{
-   S16 retVal = ROK;
+PUBLIC S16 NbUiNbuHdlUeIpInfoRsp(Pst *pst, NbuUeIpInfoRsp *rsp) {
+  S16 retVal = ROK;
 
-   retVal = NbHandleUeIpInfoRsp(rsp);
-   RETVALUE(retVal);
+  retVal = NbHandleUeIpInfoRsp(rsp);
+  RETVALUE(retVal);
 } /* NbUiNbuHdlUeIpInfoRsp */
-PUBLIC S16 NbUiNbuHdlErabRelInd 
-(
- Pst *pst,
- NbuErabRelIndList *msg
-)
-{
-   S16 retVal = ROK;
+PUBLIC S16 NbUiNbuHdlErabRelInd(Pst *pst, NbuErabRelIndList *msg) {
+  S16 retVal = ROK;
 
-   retVal = NbEnbErabRelIndHdl(msg);
-   RETVALUE(retVal);
+  retVal = NbEnbErabRelIndHdl(msg);
+  RETVALUE(retVal);
 } /* NbUiNbuHdlErabRelInd */
 PUBLIC S16 NbUiNbuHdlUlNasMsg
 (
@@ -346,12 +332,12 @@ PUBLIC S16 NbUiNbuHdlUlNasMsg
    /* set the datrcvd flag for ue */
    nbDamSetDatFlag(ueId);
    s1apConCb = ueCb->s1ConCb;
-   if(s1apConCb == NULLP || ((s1apConCb != NULLP) && 
-            (s1apConCb->s1apConnState != NB_S1AP_CONNECTED)))
-   {
-      NB_FREE(msg->nasPdu.val, msg->nasPdu.len);
-      NB_FREE(msg, sizeof(NbuUlNasMsg));
-      RETVALUE(RFAILED);
+   if (s1apConCb == NULLP ||
+       ((s1apConCb != NULLP) &&
+        (s1apConCb->s1apConnState != NB_S1AP_CONNECTED))) {
+     NB_FREE(msg->nasPdu.val, msg->nasPdu.len);
+     NB_FREE(msg, sizeof(NbuUlNasMsg));
+     RETVALUE(RFAILED);
    }
 #ifdef MULTI_ENB_SUPPORT
    EnbCb *enbCb = NULLP;
@@ -395,7 +381,7 @@ PUBLIC S16 NbUiNbuHdlUlNasMsg
    NB_FREE(msg, sizeof(NbuUlNasMsg));
 
    RETVALUE(ROK);
-} /* NbUiNbuHdlUlNasMsg */  
+} /* NbUiNbuHdlUlNasMsg */
 
 PUBLIC S16 NbUiNbuHdlUeRadioCapMsg
 (
@@ -442,12 +428,12 @@ PUBLIC S16 NbUiNbuHdlUeRadioCapMsg
    /* set the datrcvd flag for ue */
    nbDamSetDatFlag(ueId);
    s1apConCb = ueCb->s1ConCb;
-   if(s1apConCb == NULLP || ((s1apConCb != NULLP) && 
-            (s1apConCb->s1apConnState != NB_S1AP_CONNECTED)))
-   {
-      NB_FREE(msg->rrcPdu.val,msg->rrcPdu.len);
-      NB_FREE(msg,sizeof(NbuUlRrcMsg));
-      RETVALUE(RFAILED);
+   if (s1apConCb == NULLP ||
+       ((s1apConCb != NULLP) &&
+        (s1apConCb->s1apConnState != NB_S1AP_CONNECTED))) {
+     NB_FREE(msg->rrcPdu.val, msg->rrcPdu.len);
+     NB_FREE(msg, sizeof(NbuUlRrcMsg));
+     RETVALUE(RFAILED);
    }
 
    if(nbS1apBldUeCapIndPdu(ueCb,&msg->rrcPdu, &s1UlInfoMsg.pdu) != ROK)
@@ -483,29 +469,23 @@ PUBLIC S16 NbUiNbuHdlUeRadioCapMsg
    RETVALUE(ROK);
 } /* NbUiNbuHdlUeRadioCapMsg */
 
-PUBLIC S16 nbUiBuildAndSendDlNasMsg
-(
- NbUeCb       *ueCb,
- SztNAS_PDU   *nasPdu
-) 
-{
-   U8 idx = 0;
-   NbuDlNasMsg *msg = NULLP;
+PUBLIC S16 nbUiBuildAndSendDlNasMsg(NbUeCb *ueCb, SztNAS_PDU *nasPdu) {
+  U8 idx = 0;
+  NbuDlNasMsg *msg = NULLP;
 
-   NB_ALLOC(&msg, sizeof(NbuDlNasMsg));
-   msg->ueId = ueCb->ueId;
-   msg->nasPdu.len = nasPdu->len;
+  NB_ALLOC(&msg, sizeof(NbuDlNasMsg));
+  msg->ueId = ueCb->ueId;
+  msg->nasPdu.len = nasPdu->len;
 
-   NB_ALLOC(&msg->nasPdu.val, msg->nasPdu.len * sizeof(U8));
-   for(idx = 0 ; idx < nasPdu->len; idx++)
-   {
-      msg->nasPdu.val[idx] = nasPdu->val[idx];
-   }
+  NB_ALLOC(&msg->nasPdu.val, msg->nasPdu.len * sizeof(U8));
+  for (idx = 0; idx < nasPdu->len; idx++) {
+    msg->nasPdu.val[idx] = nasPdu->val[idx];
+  }
 
-   /* set the datrcvd flag for ue */
-   nbDamSetDatFlag(ueCb->ueId);
-   cmPkNbuDlNasMsg(&nbCb.ueAppPst, msg);
-   RETVALUE(ROK);
+  /* set the datrcvd flag for ue */
+  nbDamSetDatFlag(ueCb->ueId);
+  cmPkNbuDlNasMsg(&nbCb.ueAppPst, msg);
+  RETVALUE(ROK);
 } /* nbUiBuildAndSendDlNasMsg */
 
 /* eNb is not sending NAS NON DEL IND to TFW */
@@ -568,7 +548,7 @@ PUBLIC S16 nbUiBuildAndSendPagingMsg
       msg->ueIden.sTMSI.mmec = pagMsgInfo->ueIden.sTMSI.mmec;
       msg->ueIden.sTMSI.mTMSI = pagMsgInfo->ueIden.sTMSI.mTMSI;
    }
-   msg->domIndType = pagMsgInfo->domIndType; 
+   msg->domIndType = pagMsgInfo->domIndType;
    cmPkNbuPagingMsg(&nbCb.ueAppPst,msg);
    RETVALUE(ROK);
 } /* nbUiBuildAndSendPagingMsg */
@@ -599,7 +579,7 @@ PUBLIC Void nbUiSendS1TimeOutInd(Void)
    if(msg == NULLP)
       RETVOID;
    smCfgCb.smState = NB_SM_STATE_AWAIT_S1_CON;
-   msg->msgType = NB_S1_SETUP_TIMEOUT_IND; 
+   msg->msgType = NB_S1_SETUP_TIMEOUT_IND;
    if(ROK != cmPkNbtMsgRsp(&pst, msg))
    {
       NB_LOG_ERROR(&nbCb,"Failed to send message to TFWApp");
@@ -633,7 +613,7 @@ PUBLIC Void nbUiSendS1SetupFailInd
    if( wait != 0)
    {
       rsp->t.s1SetupRsp.waitIe.val   = wait;
-      rsp->t.s1SetupRsp.waitIe.pres  =  TRUE; 
+      rsp->t.s1SetupRsp.waitIe.pres = TRUE;
    }
    smCfgCb.smState = NB_SM_STATE_AWAIT_S1_CON;
    if(ROK != cmPkNbtMsgRsp(&pst, rsp))
@@ -662,8 +642,8 @@ PUBLIC Void nbUiSendConfigFailIndToUser(CfgFailCause cause)
    pst.pool = smCfgCb.init.pool;
    pst.srcInst = 0;
 
-   rsp->t.configCfm.status = CFG_DONE_NOK; 
-   rsp->t.configCfm.cause  = cause; 
+   rsp->t.configCfm.status = CFG_DONE_NOK;
+   rsp->t.configCfm.cause = cause;
    NB_LOG_ERROR(&nbCb,"SENDING THE CONFIGURATION CFM NOK  TO USER FW-API");
 
    smCfgCb.smState = NB_SM_STATE_AWAIT_S1_CON;
@@ -701,42 +681,36 @@ PUBLIC Void nbUiSendSuccessResponseToUser(NbMsgTypes msgType)
    pst.region = smCfgCb.init.region;
    pst.pool = smCfgCb.init.pool;
    pst.srcInst = 0;
-   if(msgType == NB_CONFIG_CFM)
-   { 
-      rsp->t.configCfm.status = CFG_DONE_ROK;
-   }
-   else if(msgType == NB_S1_SETUP_RSP)
-   {
-      rsp->t.s1SetupRsp.res = S1_SETUP_SUCC;
+   if (msgType == NB_CONFIG_CFM) {
+     rsp->t.configCfm.status = CFG_DONE_ROK;
+   } else if (msgType == NB_S1_SETUP_RSP) {
+     rsp->t.s1SetupRsp.res = S1_SETUP_SUCC;
 
-      /* Served GUMMEI list */
-      rsp->t.s1SetupRsp.numPlmnIds = mmeCb->numPlmnIds;
-      for (idx = 0; idx < mmeCb->numPlmnIds; idx++)
-      {
-         cmMemcpy((U8 *)&(rsp->t.s1SetupRsp.plmnIds[idx]),
-                  (U8 *)&(mmeCb->plmnIds[idx]), sizeof(NbtPlmnId));
-      }
+     /* Served GUMMEI list */
+     rsp->t.s1SetupRsp.numPlmnIds = mmeCb->numPlmnIds;
+     for (idx = 0; idx < mmeCb->numPlmnIds; idx++) {
+       cmMemcpy((U8 *)&(rsp->t.s1SetupRsp.plmnIds[idx]),
+                (U8 *)&(mmeCb->plmnIds[idx]), sizeof(NbtPlmnId));
+     }
 
-      rsp->t.s1SetupRsp.numGrpIds = mmeCb->numGrpIds;
-      for (idx = 0; idx < mmeCb->numGrpIds; idx++)
-      {
-         rsp->t.s1SetupRsp.groupIds[idx] = mmeCb->groupIds[idx];
-      }
+     rsp->t.s1SetupRsp.numGrpIds = mmeCb->numGrpIds;
+     for (idx = 0; idx < mmeCb->numGrpIds; idx++) {
+       rsp->t.s1SetupRsp.groupIds[idx] = mmeCb->groupIds[idx];
+     }
 
-      rsp->t.s1SetupRsp.numCodes = mmeCb->numCodes;
-      for (idx = 0; idx < mmeCb->numCodes; idx++)
-      {
-         rsp->t.s1SetupRsp.codes[idx] = mmeCb->codes[idx];
-      }
+     rsp->t.s1SetupRsp.numCodes = mmeCb->numCodes;
+     for (idx = 0; idx < mmeCb->numCodes; idx++) {
+       rsp->t.s1SetupRsp.codes[idx] = mmeCb->codes[idx];
+     }
 
-      /* Relative MME Capacity */
-      rsp->t.s1SetupRsp.relCapacity = mmeCb->relCapacity;
-      /* MME Name */
-      rsp->t.s1SetupRsp.mmeName.len = mmeCb->mmeName.len;
-      cmMemcpy(rsp->t.s1SetupRsp.mmeName.val, mmeCb->mmeName.val,
-               mmeCb->mmeName.len);
-      /* MME Relay Support Indication */
-      rsp->t.s1SetupRsp.mmeRelaySuppInd = mmeCb->mmeRelaySuppInd;
+     /* Relative MME Capacity */
+     rsp->t.s1SetupRsp.relCapacity = mmeCb->relCapacity;
+     /* MME Name */
+     rsp->t.s1SetupRsp.mmeName.len = mmeCb->mmeName.len;
+     cmMemcpy(rsp->t.s1SetupRsp.mmeName.val, mmeCb->mmeName.val,
+              mmeCb->mmeName.len);
+     /* MME Relay Support Indication */
+     rsp->t.s1SetupRsp.mmeRelaySuppInd = mmeCb->mmeRelaySuppInd;
    }
 
    if(ROK != cmPkNbtMsgRsp(&pst, rsp))
@@ -873,7 +847,7 @@ PUBLIC S16 nbUiSendIntCtxtSetupDrpdIndToUser(U32 ueId)
 
    RETVALUE(ROK);
 }
- 
+
 PUBLIC S16 nbUiSendErabRelCmdInfoToUser(NbErabRelCmd *erabRelInfo)
 {
    NbtResponse *rsp = NULLP;
@@ -1035,3 +1009,29 @@ PUBLIC S16 NbUiNbuHdlUeIpInfoRej(Pst *pst, NbuUeIpInfoRej *rej) {
   retVal = NbHandleUeIpInfoRej(rej);
   RETVALUE(retVal);
 } /* NbUiNbuHdlUeIpInfoRej */
+
+PUBLIC S16 nbUiSendErabSetupDrpdIndToUser(U32 ueId) {
+  NbtResponse *rsp = NULLP;
+  Pst pst;
+  NB_ALLOC(&rsp, sizeof(NbtResponse));
+
+  rsp->msgType = NB_ERAB_SETUP_DROPPD_IND;
+  SM_SET_ZERO(&pst, sizeof(Pst));
+
+  pst.selector = 0;
+  pst.srcEnt = ENTNB;
+  pst.dstEnt = ENTFW;
+  pst.srcProcId = 0;
+  pst.dstProcId = 0;
+  pst.region = smCfgCb.init.region;
+  pst.pool = smCfgCb.init.pool;
+  pst.srcInst = 0;
+
+  rsp->t.erabSetupDropInd.ueId = ueId;
+
+  if (ROK != cmPkNbtMsgRsp(&pst, rsp)) {
+    NB_LOG_ERROR(&nbCb, "Failed to send message to TFW App");
+    RETVOID(RFAILED);
+  }
+  RETVALUE(ROK);
+}
