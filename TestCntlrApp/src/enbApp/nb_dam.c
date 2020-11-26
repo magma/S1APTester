@@ -614,6 +614,7 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo) {
                           NB_IPV6_ADDRESS_LEN, 0, (PTR *)&pdnCb));
     if (retIpv6 == ROK) {
       /* Sort and add Packet Filter/s */
+
       if (tnlInfo->tft.num_pf) {
         if (ROK != (nbAddPfs(pdnCb, tnlInfo))) {
           NB_LOG_ERROR(&nbCb, "Failed to add Packet Filters\n");
@@ -664,13 +665,6 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo) {
       NB_ALLOC(&(pdnCbIp6), sizeof(NbPdnCb));
       pdnCbIp6->lnkEpsBearId = tnlInfo->tft.lnkEpsBearId;
 
-      if (tnlInfo->tft.num_pf) {
-        cmLListInit(&pdnCbIp6->tftPfList);
-        if (ROK != (nbAddPfs(pdnCbIp6, tnlInfo))) {
-          NB_LOG_ERROR(&nbCb, "Failed to add Packet Filters");
-          RETVALUE(RFAILED);
-        }
-      }
       cmMemcpy(pdnCbIp6->pdnIp6Addr, tnlInfo->pdnIp6Addr, (NB_IPV6_ADDRESS_LEN));
       /* Insert pdncb*/
       if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCbIp6,
@@ -1752,7 +1746,7 @@ PRIVATE S16 nbProcRouterAdv(NbDamUeCb *ueCb, CmLteRbId drbId, U8 *buf) {
 
         // take a copy of pdnCb->pdnIp6Addr(interface id)
         cmMemcpy(tempIp6Add, pdnCb->pdnIp6Addr, sizeof(pdnCb->pdnIp6Addr));
-        // Prepend 8 bytes of IPv6 prefix to pdnCb->pdnIp6Addir
+        // Prepend 8 bytes of IPv6 prefix to pdnCb->pdnIp6Addr
         cmMemcpy(pdnCb->pdnIp6Addr, buf, (NB_IPV6_ADDRESS_LEN / 2));
         if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCb,
                                   (U8 *)&pdnCb->pdnIp6Addr,
