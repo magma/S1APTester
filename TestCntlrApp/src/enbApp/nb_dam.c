@@ -572,7 +572,7 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo) {
 
   if (tnlInfo->pdnType == NB_PDN_IPV4) {
     retIpv4 = (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp4Addr),
-                          sizeof(U32), 0, (PTR *)&pdnCb));
+                              sizeof(U32), 0, (PTR *)&pdnCb));
     if (retIpv4 == ROK) {
       /* Sort and add Packet Filter/s */
       if (tnlInfo->tft.num_pf) {
@@ -585,7 +585,7 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo) {
     }
   } else if (tnlInfo->pdnType == NB_PDN_IPV6) {
     retIpv6 = (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp6Addr),
-                          NB_IPV6_ADDRESS_LEN, 0, (PTR *)&pdnCb));
+                              NB_IPV6_ADDRESS_LEN, 0, (PTR *)&pdnCb));
     if (retIpv6 == ROK) {
       /* Sort and add Packet Filter/s */
       if (tnlInfo->tft.num_pf) {
@@ -599,7 +599,7 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo) {
   } else if (tnlInfo->pdnType == NB_PDN_IPV4V6) {
     // Find ipv4 pdnCb
     retIpv4 = (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp4Addr),
-                          sizeof(U32), 0, (PTR *)&pdnCb));
+                              sizeof(U32), 0, (PTR *)&pdnCb));
     if (retIpv4 == ROK) {
       /* Sort and add Packet Filter/s */
       if (tnlInfo->tft.num_pf) {
@@ -611,7 +611,7 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo) {
     }
     // Find ipv6 pdnCb
     retIpv6 = (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp6Addr),
-                          NB_IPV6_ADDRESS_LEN, 0, (PTR *)&pdnCb));
+                              NB_IPV6_ADDRESS_LEN, 0, (PTR *)&pdnCb));
     if (retIpv6 == ROK) {
       /* Sort and add Packet Filter/s */
 
@@ -627,54 +627,54 @@ PRIVATE S16 nbAddPdnCb(NbDamUeCb *ueCb, NbDamTnlInfo *tnlInfo) {
       RETVALUE(ROK);
     }
   }
-   /* Create a new hash list entry */
-    NB_ALLOC(&(pdnCb), sizeof(NbPdnCb));
-    pdnCb->lnkEpsBearId = tnlInfo->tft.lnkEpsBearId;
+  /* Create a new hash list entry */
+  NB_ALLOC(&(pdnCb), sizeof(NbPdnCb));
+  pdnCb->lnkEpsBearId = tnlInfo->tft.lnkEpsBearId;
 
-    if (tnlInfo->pdnType == NB_PDN_IPV4) {
-      pdnCb->pdnIp4Addr = tnlInfo->pdnIp4Addr;
-      /* Insert pdncb*/
-      if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCb,
-                                  (U8 *)&pdnCb->pdnIp4Addr, sizeof(U32))) {
-        NB_FREE(pdnCb, sizeof(NbPdnCb))
-        NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for pdnCb");
-        RETVALUE(RFAILED);
-      }
-    } else if (tnlInfo->pdnType == NB_PDN_IPV6) {
-
-      cmMemcpy(pdnCb->pdnIp6Addr, tnlInfo->pdnIp6Addr, (NB_IPV6_ADDRESS_LEN));
-      /* Insert pdncb*/
-      if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCb,
-                                  (U8 *)&pdnCb->pdnIp6Addr,
-                                  (NB_IPV6_ADDRESS_LEN))) {
-        NB_FREE(pdnCb, sizeof(NbPdnCb))
-        NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for pdnCb");
-        RETVALUE(RFAILED);
-      }
-    } else if (tnlInfo->pdnType == NB_PDN_IPV4V6) {
-      /* Insert ipv4 pdncb*/
-      pdnCb->pdnIp4Addr = tnlInfo->pdnIp4Addr;
-      if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCb,
-                                  (U8 *)&pdnCb->pdnIp4Addr, sizeof(U32))) {
-        NB_FREE(pdnCb, sizeof(NbPdnCb))
-        NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for ipv4 pdnCb");
-        RETVALUE(RFAILED);
-      }
-
-      /* Insert ipv6 pdncb*/
-      NB_ALLOC(&(pdnCbIp6), sizeof(NbPdnCb));
-      pdnCbIp6->lnkEpsBearId = tnlInfo->tft.lnkEpsBearId;
-
-      cmMemcpy(pdnCbIp6->pdnIp6Addr, tnlInfo->pdnIp6Addr, (NB_IPV6_ADDRESS_LEN));
-      /* Insert pdncb*/
-      if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCbIp6,
-                                  (U8 *)&pdnCbIp6->pdnIp6Addr,
-                                  (NB_IPV6_ADDRESS_LEN))) {
-        NB_FREE(pdnCbIp6, sizeof(NbPdnCb))
-        NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for ipv6 pdnCb");
-        RETVALUE(RFAILED);
-      }
+  if (tnlInfo->pdnType == NB_PDN_IPV4) {
+    pdnCb->pdnIp4Addr = tnlInfo->pdnIp4Addr;
+    /* Insert pdncb*/
+    if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCb,
+                                (U8 *)&pdnCb->pdnIp4Addr, sizeof(U32))) {
+      NB_FREE(pdnCb, sizeof(NbPdnCb))
+      NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for pdnCb");
+      RETVALUE(RFAILED);
     }
+  } else if (tnlInfo->pdnType == NB_PDN_IPV6) {
+
+    cmMemcpy(pdnCb->pdnIp6Addr, tnlInfo->pdnIp6Addr, (NB_IPV6_ADDRESS_LEN));
+    /* Insert pdncb*/
+    if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCb,
+                                (U8 *)&pdnCb->pdnIp6Addr,
+                                (NB_IPV6_ADDRESS_LEN))) {
+      NB_FREE(pdnCb, sizeof(NbPdnCb))
+      NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for pdnCb");
+      RETVALUE(RFAILED);
+    }
+  } else if (tnlInfo->pdnType == NB_PDN_IPV4V6) {
+    /* Insert ipv4 pdncb*/
+    pdnCb->pdnIp4Addr = tnlInfo->pdnIp4Addr;
+    if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCb,
+                                (U8 *)&pdnCb->pdnIp4Addr, sizeof(U32))) {
+      NB_FREE(pdnCb, sizeof(NbPdnCb))
+      NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for ipv4 pdnCb");
+      RETVALUE(RFAILED);
+    }
+
+    /* Insert ipv6 pdncb*/
+    NB_ALLOC(&(pdnCbIp6), sizeof(NbPdnCb));
+    pdnCbIp6->lnkEpsBearId = tnlInfo->tft.lnkEpsBearId;
+
+    cmMemcpy(pdnCbIp6->pdnIp6Addr, tnlInfo->pdnIp6Addr, (NB_IPV6_ADDRESS_LEN));
+    /* Insert pdncb*/
+    if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCbIp6,
+                                (U8 *)&pdnCbIp6->pdnIp6Addr,
+                                (NB_IPV6_ADDRESS_LEN))) {
+      NB_FREE(pdnCbIp6, sizeof(NbPdnCb))
+      NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for ipv6 pdnCb");
+      RETVALUE(RFAILED);
+    }
+  }
   RETVALUE(ROK);
 }
 
@@ -1749,8 +1749,8 @@ PRIVATE S16 nbProcRouterAdv(NbDamUeCb *ueCb, CmLteRbId drbId, U8 *buf) {
         // Prepend 8 bytes of IPv6 prefix to pdnCb->pdnIp6Addr
         cmMemcpy(pdnCb->pdnIp6Addr, buf, (NB_IPV6_ADDRESS_LEN / 2));
         if (ROK != cmHashListInsert(&(ueCb->pdnCb), (PTR)pdnCb,
-                                  (U8 *)&pdnCb->pdnIp6Addr,
-                                  (NB_IPV6_ADDRESS_LEN))) {
+                                    (U8 *)&pdnCb->pdnIp6Addr,
+                                    (NB_IPV6_ADDRESS_LEN))) {
           NB_LOG_ERROR(&nbCb, "Failed to create hash table entry for pdnCb");
           RETVALUE(RFAILED);
         }
