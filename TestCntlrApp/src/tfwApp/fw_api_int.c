@@ -2406,8 +2406,7 @@ PUBLIC S16 tfwApi
         FW_LOG_DEBUG(fwCb, "Process Delay ERAB_SETUP_RSP Request ");
         if (fwCb->nbState == ENB_IS_UP) {
           handleDelayErabSetupRsp((UeDelayErabSetupRsp*)msg);
-        }
-        else {
+        } else {
           FW_LOG_ERROR(fwCb, "Failed to process ERAB Setup Rsp delay request:ENBAPP IS NOT UP");
           ret = RFAILED;
         }
