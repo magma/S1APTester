@@ -1642,20 +1642,20 @@ PUBLIC S16 nbPrcMMEConfigTrf
  *
  * Function: NbEnbDelayErabSetupRsp
  *
- *
  * @param[in]  NbDelayErabSetupRsp
  * @return  S16
  *          -# Success : ROK
+ *          -# Failure : RFAILED
  */
 PUBLIC S16 NbEnbDelayErabSetupRsp(NbDelayErabSetupRsp *delayErabRsp) {
   NB_LOG_ENTERFN(&nbCb);
 
   if (NULLP == delayErabRsp) {
-    NB_LOG_ERROR(&nbCb, "Recieved empty(NULL) request");
+    NB_LOG_ERROR(&nbCb, "Received empty(NULL) NbDelayErabSetupRsp request");
     RETVALUE(RFAILED);
   }
 
-  nbCb.delayErabSetupRsp[(delayErabRsp->ueId) - 1].delayErabSetupRsp =
+  nbCb.delayErabSetupRsp[(delayErabRsp->ueId) - 1].isDelayErabSetupRsp =
       delayErabRsp->isDelayErabSetupRsp;
   nbCb.delayErabSetupRsp[(delayErabRsp->ueId) - 1].tmrVal =
       delayErabRsp->tmrVal;

@@ -455,7 +455,7 @@ typedef struct _InitCtxtSetupFailedErabs {
 } InitCtxtSetupRspFailedErabs;
 
 typedef struct _delayErabSetupRsp {
-  Bool delayErabSetupRsp;
+  Bool isDelayErabSetupRsp;
   U32 tmrVal;
 } DelayErabSetupRsp;
 

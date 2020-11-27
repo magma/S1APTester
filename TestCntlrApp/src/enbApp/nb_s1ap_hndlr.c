@@ -2301,24 +2301,14 @@ PRIVATE S16 nbHandleRabSetupMsg(NbUeCb *ueCb, S1apPdu *pdu) {
       }
     }
     // Start a timer to delay sending of erab setup rsp
-    if (nbCb.delayErabSetupRsp[(ueCb->ueId) - 1].delayErabSetupRsp) {
+    if (nbCb.delayErabSetupRsp[(ueCb->ueId) - 1].isDelayErabSetupRsp) {
       retVal = nbStartDelayTimerForErabRsp(
           ueCb->ueId, erabInfo, failedErabInfo,
           nbCb.delayErabSetupRsp[(ueCb->ueId) - 1].tmrVal);
-      nbCb.delayErabSetupRsp[(ueCb->ueId) - 1].delayErabSetupRsp = FALSE;
+      nbCb.delayErabSetupRsp[(ueCb->ueId) - 1].isDelayErabSetupRsp = FALSE;
       RETVALUE(retVal);
     }
     retVal = nbRabSetupSndS1apRsp(ueCb, erabInfo, failedErabInfo);
-    if (retVal != ROK) {
-      NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
-      NB_FREE(erabInfo, sizeof(NbErabLst));
-      if (failedErabInfo) {
-        NB_FREE(failedErabInfo->failedErabs,
-                (failedErabInfo->noOfComp * sizeof(NbFailedErab)));
-        NB_FREE(failedErabInfo, sizeof(NbFailedErabLst));
-      }
-      RETVALUE(RFAILED);
-    }
     NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
     NB_FREE(erabInfo, sizeof(NbErabLst));
     if (failedErabInfo) {
