@@ -69,6 +69,7 @@
 #include "ss_gen.x"        /* general */
 #include "lfw.x"
 #include "uet.x"
+#include "ue_esm.h"
 #include "nbt.x"
 #include "fw_read_dflcfg.h"
 #include "fw_api_int.x"
@@ -120,7 +121,7 @@ PRIVATE S16 sendUePdnDisConRejIndToTstCntlr(UetResponse *uetMsg);
 PRIVATE S16 handlePdnDisConRejInd(Pst *pst, UetMessage *uetPdnDisConRejInd);
 PRIVATE Void handle_erab_setup_req_failed_for_bearers( Pst *pst, UetMessage *erab_setup_req_failed_for_bearers);
 PRIVATE Void sendUeErabSetupReqFailedForBearers( UetMessage *erab_setup_req_failed_for_bearers);
-PRIVATE S16 handleRouterAdvInd(Pst *pst, UeUetRouterAdv *uetRouterAdv);
+PRIVATE S16 handleRouterAdvInd(Pst *pst, UetMessage *uetMsg);
 
 /*
 *        Fun:  sendUeAppConfigRespToTstCntlr
@@ -851,6 +852,9 @@ PRIVATE Void fwFillEsmInfo(ue_Esm_Info *fwEsmInfo, UeEsmInfo *esmInfo)
 {
    U8 count;
 
+   FwCb *fwCb = NULLP;
+   FW_GET_CB(fwCb);
+   FW_LOG_ENTERFN(fwCb);
    fwEsmInfo->epsBearerId = esmInfo->epsBearerId;
    fwEsmInfo->qos.qci = esmInfo->qos.qci;
    fwEsmInfo->qos.maxBitRateUL = esmInfo->qos.maxBitRateUL;
@@ -866,10 +870,44 @@ PRIVATE Void fwFillEsmInfo(ue_Esm_Info *fwEsmInfo, UeEsmInfo *esmInfo)
          UE_ESM_MAX_LEN_PDN_ADDRESS);
 
    printf("PDN_TYPE: %d\n", fwEsmInfo->pAddr.pdnType);
-   printf("PDN_ADDRESS: %d %d %d %d\n",fwEsmInfo->pAddr.addrInfo[0],
+   switch(fwEsmInfo->pAddr.pdnType) {
+     case CM_ESM_PDN_IPV4: {
+       printf("IPv4 PDN_ADDRESS:%d %d %d %d\n",fwEsmInfo->pAddr.addrInfo[0],
          fwEsmInfo->pAddr.addrInfo[1],
          fwEsmInfo->pAddr.addrInfo[2],
          fwEsmInfo->pAddr.addrInfo[3]);
+     }
+     break;
+     case CM_ESM_PDN_IPV6: {
+       printf("IPv6 interface id: %x %x %x %x %x %x %x %x\n",fwEsmInfo->pAddr.addrInfo[0],
+         fwEsmInfo->pAddr.addrInfo[1],
+         fwEsmInfo->pAddr.addrInfo[2],
+         fwEsmInfo->pAddr.addrInfo[3],
+         fwEsmInfo->pAddr.addrInfo[4],
+         fwEsmInfo->pAddr.addrInfo[5],
+         fwEsmInfo->pAddr.addrInfo[6],
+         fwEsmInfo->pAddr.addrInfo[7]);
+       }
+       break;
+     case CM_ESM_PDN_IPV4V6: {
+       printf("IPv6 interface id: %x %x %x %x %x %x %x %x\n",fwEsmInfo->pAddr.addrInfo[0],
+         fwEsmInfo->pAddr.addrInfo[1],
+         fwEsmInfo->pAddr.addrInfo[2],
+         fwEsmInfo->pAddr.addrInfo[3],
+         fwEsmInfo->pAddr.addrInfo[4],
+         fwEsmInfo->pAddr.addrInfo[5],
+         fwEsmInfo->pAddr.addrInfo[6],
+         fwEsmInfo->pAddr.addrInfo[7]);
+       printf("IPv4 PDN_ADDRESS:%d %d %d %d\n",fwEsmInfo->pAddr.addrInfo[8],
+         fwEsmInfo->pAddr.addrInfo[9],
+         fwEsmInfo->pAddr.addrInfo[10],
+         fwEsmInfo->pAddr.addrInfo[11]);
+       }
+       break;
+       default:
+          FW_LOG_ERROR(fwCb, "Invalid PDN type for bearer %d", esmInfo->epsBearerId);
+          FW_LOG_EXITFNVOID(fwCb);
+     }
 
    fwEsmInfo->apnAmbr.len = esmInfo->apnAmbr.len;
    fwEsmInfo->apnAmbr.dl = esmInfo->apnAmbr.dl;
@@ -1152,10 +1190,46 @@ PRIVATE S16 sendUePdnConRspIndToTstCntlr(UetResponse *uetMsg)
             UE_ESM_MAX_LEN_PDN_ADDRESS);
 
       printf("PDN_TYPE:%d\n", pdnInfo->pAddr.pdnType);
-      printf("PDN_ADDRESS:%d %d %d %d\n",pdnInfo->pAddr.addrInfo[0],
+      switch(pdnInfo->pAddr.pdnType) {
+        case CM_ESM_PDN_IPV4: {
+          printf("IPv4 PDN_ADDRESS:%d %d %d %d\n",pdnInfo->pAddr.addrInfo[0],
             pdnInfo->pAddr.addrInfo[1],
             pdnInfo->pAddr.addrInfo[2],
             pdnInfo->pAddr.addrInfo[3]);
+          }
+          break;
+        case CM_ESM_PDN_IPV6: {
+          printf("IPv6 interface id: %x %x %x %x %x %x %x %x\n",pdnInfo->pAddr.addrInfo[0],
+            pdnInfo->pAddr.addrInfo[1],
+            pdnInfo->pAddr.addrInfo[2],
+            pdnInfo->pAddr.addrInfo[3],
+            pdnInfo->pAddr.addrInfo[4],
+            pdnInfo->pAddr.addrInfo[5],
+            pdnInfo->pAddr.addrInfo[6],
+            pdnInfo->pAddr.addrInfo[7]
+          );
+        }
+        break;
+        case CM_ESM_PDN_IPV4V6: {
+          printf("IPv6 interface id: %x %x %x %x %x %x %x %x\n",pdnInfo->pAddr.addrInfo[0],
+            pdnInfo->pAddr.addrInfo[1],
+            pdnInfo->pAddr.addrInfo[2],
+            pdnInfo->pAddr.addrInfo[3],
+            pdnInfo->pAddr.addrInfo[4],
+            pdnInfo->pAddr.addrInfo[5],
+            pdnInfo->pAddr.addrInfo[6],
+            pdnInfo->pAddr.addrInfo[7]
+          );
+          printf("IPv4 PDN_ADDRESS:%d %d %d %d\n",pdnInfo->pAddr.addrInfo[8],
+            pdnInfo->pAddr.addrInfo[9],
+            pdnInfo->pAddr.addrInfo[10],
+            pdnInfo->pAddr.addrInfo[11]);
+        }
+        break;
+        default:
+          FW_LOG_ERROR(fwCb, "Invalid PDN type for ue %d", uetMsg->msg.ueUetPdnConRsp.ueId);
+          FW_LOG_EXITFN(fwCb, ret);
+     }
    }
    else
    {
@@ -2236,35 +2310,43 @@ PRIVATE Void sendUeErabSetupReqFailedForBearers(
  *  File: fw_uemsg_handler.c
  *
  */
-PRIVATE S16 handleRouterAdvInd(Pst *pst, UeUetRouterAdv *uetRouterAdv) {
+PRIVATE S16 handleRouterAdvInd(Pst *pst, UetMessage *uetMsg) {
   S16 ret = ROK;
   FwCb *fwCb = NULLP;
   ueRouterAdv_t *tfwUeRouterAdv = NULLP;
-  U8 ipv6AddrStr[FW_ESM_MAX_IPV6_LEN] = {0};
+  U8 ipv6AddrStr[INET6_ADDRSTRLEN] = {0};
 
   FW_GET_CB(fwCb);
   FW_LOG_ENTERFN(fwCb);
 
   FW_LOG_DEBUG(fwCb, "Recieved Router Adv Indication for ueId %u",
-               uetRouterAdv->ueId);
+               uetMsg->msg.ueUetRouterAdv.ueId);
   FW_ALLOC_MEM(fwCb, &tfwUeRouterAdv, sizeof(ueRouterAdv_t));
-
-  tfwUeRouterAdv->ueId = uetRouterAdv->ueId;
-  tfwUeRouterAdv->bearerId = uetRouterAdv->bearerId;
+  tfwUeRouterAdv->ueId = uetMsg->msg.ueUetRouterAdv.ueId;
+  tfwUeRouterAdv->bearerId = uetMsg->msg.ueUetRouterAdv.bearerId;
   // Convert IPv6 U8 arrary into : separated string for better readability
   sprintf(
       (char *)ipv6AddrStr,
       "%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x",
-      (int)uetRouterAdv->ipv6Addr[0], (int)uetRouterAdv->ipv6Addr[1],
-      (int)uetRouterAdv->ipv6Addr[2], (int)uetRouterAdv->ipv6Addr[3],
-      (int)uetRouterAdv->ipv6Addr[4], (int)uetRouterAdv->ipv6Addr[5],
-      (int)uetRouterAdv->ipv6Addr[6], (int)uetRouterAdv->ipv6Addr[7],
-      (int)uetRouterAdv->ipv6Addr[8], (int)uetRouterAdv->ipv6Addr[9],
-      (int)uetRouterAdv->ipv6Addr[10], (int)uetRouterAdv->ipv6Addr[11],
-      (int)uetRouterAdv->ipv6Addr[12], (int)uetRouterAdv->ipv6Addr[13],
-      (int)uetRouterAdv->ipv6Addr[14], (int)uetRouterAdv->ipv6Addr[15]);
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[0],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[1],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[2],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[3],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[4],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[5],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[6],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[7],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[8],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[9],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[10],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[11],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[12],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[13],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[14],
+      (int)uetMsg->msg.ueUetRouterAdv.ipv6Addr[15]);
 
-  cmMemcpy(tfwUeRouterAdv->ipv6Addr, ipv6AddrStr, FW_ESM_MAX_IPV6_LEN);
+  cmMemcpy(tfwUeRouterAdv->ipv6Addr, ipv6AddrStr, INET6_ADDRSTRLEN);
+  FW_LOG_DEBUG(fwCb, " Complete UE ipv6 addr %s\n", tfwUeRouterAdv->ipv6Addr);
   (fwCb->testConrollerCallBack)(UE_ROUTER_ADV_IND, tfwUeRouterAdv,
                                 sizeof(ueRouterAdv_t));
 

@@ -57,6 +57,7 @@ typedef enum _nbMsgTypes
    // SCTP SHUTDOWN or ABORT
    NB_NW_INITIATED_ASSOC_DOWN,
    NB_DELAY_ERAB_SETUP_RSP,
+   NB_DROP_RA,
    NB_UNKNOWN_MSG_TYPE
 }NbMsgTypes;
 
@@ -447,6 +448,11 @@ typedef struct _nbDelayErabSetupRsp {
   U32 tmrVal;
 } NbDelayErabSetupRsp;
 
+typedef struct _nbDropRA {
+  U32 ueId;
+  Bool isDropRA;
+} NbDropRA;
+
 typedef struct _nbtMsg
 {
    NbMsgTypes msgType;
@@ -481,6 +487,7 @@ typedef struct _nbtMsg
       NbEnbConfigTrnsf    enbConfigTrnsf;
       NbMmeConfigTrnsf    mmeConfigTrnsf;
       NbDelayErabSetupRsp delayErabSetupRsp;
+      NbDropRA dropRA;
    }t;
 }NbtMsg;
 

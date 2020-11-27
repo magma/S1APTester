@@ -53,6 +53,7 @@ EXTERN S16 NbEnbDelayUeCtxtRelCmp(NbDelayUeCtxtRelCmp*);
 EXTERN S16 NbMultiEnbCfgReq(NbMultiEnbConfigReq*);
 EXTERN S16 NbUiNbuHdlUeIpInfoRej(Pst *, NbuUeIpInfoRej *);
 EXTERN S16 NbEnbDelayErabSetupRsp(NbDelayErabSetupRsp  *);
+EXTERN S16 NbEnbDropRA(NbDropRA *);
 
 int atoi(const char *nptr);
 
@@ -254,6 +255,14 @@ PUBLIC S16 NbUiNbtMsgReq
         if(ROK != NbEnbDelayErabSetupRsp(&req->t.delayErabSetupRsp)) {
           NB_LOG_ERROR(&nbCb, "Failed to process Delay Erab Setup Rsp "\
                      "from TFW");
+        }
+        break;
+      }
+
+      case NB_DROP_RA: {
+        if (ROK != NbEnbDropRA(&req->t.dropRA)) {
+          NB_LOG_ERROR(&nbCb, "Failed to process Drop RA Indication  "
+                          "from TFW");
         }
         break;
       }

@@ -133,6 +133,7 @@ U32                          delay
    NbDelayICSRspCb *icsRspCb = NULLP;
    NbDelayUeCtxtRelCmpCb *ueCtxRelCmp = NULLP;
    NbErabSetupRspCb *erabSetupRspCb = NULLP;
+   NbRouterSolicitCb         *rsCb ;
 
    wait = 0;
    wait = NB_CALC_WAIT_TIME(delay);
@@ -185,6 +186,14 @@ U32                          delay
       case NB_TMR_DELAY_ERAB_SETUP_RSP: {
         erabSetupRspCb = (NbErabSetupRspCb *)cb;
         tmr = &erabSetupRspCb->timer;
+        maxTmrs = 1;
+        break;
+      }
+
+      case NB_TMR_ROUTER_SOLICIT: {
+        rsCb = (NbRouterSolicitCb *)cb;
+        nbCb.rsCb[(rsCb->ueId)-1] = rsCb;
+        tmr = &nbCb.rsCb[(rsCb->ueId)-1]->timer;
         maxTmrs = 1;
         break;
       }
@@ -255,6 +264,7 @@ S16                          event
    CmTimer                   *timers = NULLP;
    U8                        max = 0;
    NbLiSapCb                 *sapCb;
+   NbRouterSolicitCb         *rsCb = NULLP;
 
    idx = 0;
 
@@ -296,6 +306,17 @@ S16                          event
          }
          break;
       }
+      case NB_TMR_ROUTER_SOLICIT: {
+        rsCb = (NbRouterSolicitCb *)cb;
+        nbCb.rsCb[(rsCb->ueId)-1] = rsCb;
+        timers = &nbCb.rsCb[(rsCb->ueId)-1]->timer;
+        max = 1;
+        if (nbCb.rsCb[(rsCb->ueId)-1]->timer.tmrEvnt == event) {
+          tmrRunning = TRUE;
+        }
+        break;
+      }
+
       default:
          break;
    }
@@ -346,6 +367,7 @@ S16                          event
    NbDelayICSRspCb           *icsRspCb;
    NbDelayUeCtxtRelCmpCb     *ueCtxtRelCb;
    NbErabSetupRspCb *erabSetupRspCb;
+   NbRouterSolicitCb         *rsCb;
   /*U32 size;*/
    switch(event)
    {
@@ -401,6 +423,14 @@ S16                          event
         break;
       }
 
+      case NB_TMR_ROUTER_SOLICIT: {
+        rsCb = (NbRouterSolicitCb *)cb;
+        nbCb.rsCb[(rsCb->ueId)-1] = rsCb;
+        nbCb.rsCb[(rsCb->ueId)-1] = (NbRouterSolicitCb *)cb;
+        NB_LOG_DEBUG(&nbCb,"Router Solicit Timer Expired for UE:[%d]", rsCb->ueId);
+        nbHandleTimerExpiryForRS(nbCb.rsCb[(rsCb->ueId)-1]);
+        break;
+      }
       default:
          {
             /* Invalid Timer */

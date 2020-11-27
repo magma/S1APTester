@@ -33,7 +33,8 @@ extern "C" {
 #define FW_ESM_MAX_LEN_PROT_CFG_OPT 247
 #define FW_ESM_MAX_PROTO_ID 4
 #define FW_ESM_MAX_CONT_ID 10
-#define FW_ESM_MAX_IPV6_LEN 16
+// Length of INET6_ADDRSTRLEN
+#define FW_MAX_IPV6_LEN 46
 
 typedef enum {
    UE_APPL_CONFIG = 1,
@@ -125,7 +126,8 @@ typedef enum {
    UE_SET_INIT_CTXT_SETUP_RSP_FAILED_ERABS,
    UE_STANDALONE_ACTV_DEFAULT_EPS_BEARER_CNTXT_REJECT,
    UE_SET_DELAY_ERAB_SETUP_RSP,
-   UE_ROUTER_ADV_IND
+   UE_ROUTER_ADV_IND,
+   UE_SET_DROP_ROUTER_ADV
 }tfwCmd;
 
 typedef enum
@@ -1584,7 +1586,7 @@ typedef struct _FwErabSetupFailedTosetup {
 typedef struct ueRouterAdv {
   U8 ueId;
   U8 bearerId;
-  U8 ipv6Addr[FW_ESM_MAX_IPV6_LEN];
+  U8 ipv6Addr[FW_MAX_IPV6_LEN];
 } ueRouterAdv_t;
 
 typedef struct ueDelayErabSetupRsp {
@@ -1592,6 +1594,11 @@ typedef struct ueDelayErabSetupRsp {
   U32 tmrVal;
   Bool flag;
 } UeDelayErabSetupRsp;
+
+typedef struct ueDropRA {
+  U32 ue_Id;
+  Bool flag;
+} UeDropRA;
 
 typedef FwErabRelCmd_t FwErabRelRsp_t;
 
