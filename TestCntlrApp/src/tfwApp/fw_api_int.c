@@ -245,6 +245,7 @@ PUBLIC Void handlServiceReq(ueserviceReq_t* data)
    ueServiceReq->ueMtmsi.pres = data->ueMtmsi.pres;
    ueServiceReq->ueMtmsi.mTmsi = data->ueMtmsi.mTmsi;
    ueServiceReq->rrcCause = data->rrcCause;
+   ueServiceReq->noMac = data->noMac;
 
    fwSendToUeApp(uetMsg);
    RETVOID;

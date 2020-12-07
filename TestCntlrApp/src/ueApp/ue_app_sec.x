@@ -141,6 +141,7 @@ typedef struct ueAppSecCtxtCb
    /*Local Info*/
    UeAppNasSeqNmb  dlSeqNmb;
    UeAppNasSeqNmb  ulSeqNmb;
+   Bool            noMac;
 }UeAppSecCtxtCb;
 
 /*Key Generation Interface in MME*/

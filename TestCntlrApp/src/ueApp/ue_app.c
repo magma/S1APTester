@@ -193,7 +193,7 @@ PRIVATE S16 ueBldServiceRejectIndToTfw(UetMessage*, UeCb*, U8);
 PRIVATE S16 ueBldDetachAcceptIndToTfw(UetMessage*, UeCb*, U8);
 PRIVATE S16 ueProcUeAttachFail(UetMessage*, Pst*);
 PRIVATE S16 ueAppUtlBldServiceReq(UeCb *ueCb, CmNasEvnt **ueEvt);
-PRIVATE S16 ueSendServiceRequest(UeCb *ueCb, U32 mTmsi, U8 rrcCause);
+PRIVATE S16 ueSendServiceRequest(UeCb *ueCb, U32 mTmsi, U8 rrcCause, Bool noMac);
 PRIVATE S16 ueProcUeServiceRequest(UetMessage *p_ueMsg, Pst *pst);
 PRIVATE S16 ueAppEmmHndlInAttachReject(CmNasEvnt *evnt, UeCb *ueCb);
 PRIVATE S16 ueBldTauRejectIndToTfw(UetMessage *tfwMsg, UeCb *ueCb, U8 cause);
@@ -4530,7 +4530,8 @@ PRIVATE S16 ueSendServiceRequest
 (
  UeCb *ueCb,
  U32 mTmsi,
- U8 rrcCause
+ U8 rrcCause,
+ Bool noMac
 )
 {
    S16 ret = ROK;
@@ -4548,6 +4549,9 @@ PRIVATE S16 ueSendServiceRequest
    UE_LOG_DEBUG(ueAppCb, "Sending UE Service Request message");
 
    ueCb->ecmCb.state = UE_ECM_CONNECTED;
+   if (noMac) {
+     ueCb->secCtxt.noMac = TRUE;
+   }
    ret = ueAppUtlBldServiceReq(ueCb, &serviceReqEvnt);
    if(ROK != ret)
    {
@@ -5099,6 +5103,7 @@ PRIVATE S16 ueProcUeServiceRequest
    UE_LOG_DEBUG(ueAppCb, "Recieved Ue Service Request");
    ueId = p_ueMsg->msg.ueUetServiceReq.ueId;
    rrcCause = p_ueMsg->msg.ueUetServiceReq.rrcCause;
+   Bool noMac = p_ueMsg->msg.ueUetServiceReq.noMac;
    ret = ueDbmFetchUe(ueId, (PTR *)&ueCb);
    if( ret != ROK )
    {
@@ -5112,7 +5117,7 @@ PRIVATE S16 ueProcUeServiceRequest
    {
       mTmsi = ueCb->ueCtxt.ueGuti.mTMSI;
    }
-   ret = ueSendServiceRequest(ueCb, mTmsi, rrcCause);
+   ret = ueSendServiceRequest(ueCb, mTmsi, rrcCause, noMac);
    if (ret != ROK)
    {
       UE_LOG_ERROR(ueAppCb, "Sending Service Request message failed");
