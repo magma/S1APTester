@@ -913,11 +913,11 @@ typedef struct ueMtmsi
    U32 mTmsi;
 }ueMtmsi_t;
 
-typedef struct ueServiceReq
-{
-   U32 ue_Id;
-   ueMtmsi_t ueMtmsi;
-   U8 rrcCause;
+typedef struct ueServiceReq {
+  U32 ue_Id;
+  ueMtmsi_t ueMtmsi;
+  U8 rrcCause;
+  Bool noMac;
 }ueserviceReq_t;
 
 typedef struct _relCause
