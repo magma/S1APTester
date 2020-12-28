@@ -1636,3 +1636,27 @@ PUBLIC S16 nbPrcMMEConfigTrf
    RETVALUE(ROK);
 } /* nbPrcS1SetupRsp */
 #endif
+
+/*
+ * @details This function marks a ue for dropping RA
+ *
+ * Function: NbEnbDropRA
+ *
+ * @param[in]  NbDropRA
+ * @return  S16
+ *          -# Success : ROK
+ */
+PUBLIC S16 NbEnbDropRA(NbDropRA *dropRA) {
+  NB_LOG_ENTERFN(&nbCb);
+
+  if (NULLP == dropRA) {
+    NB_LOG_ERROR(&nbCb, "Recieved empty(NULL) request");
+    RETVALUE(RFAILED);
+  }
+
+  NB_LOG_DEBUG(&nbCb, "Recieved an indication to Drop RA");
+  nbCb.dropRA[(dropRA->ueId) - 1].isDropRA = dropRA->isDropRA;
+
+  RETVALUE(ROK);
+}
+

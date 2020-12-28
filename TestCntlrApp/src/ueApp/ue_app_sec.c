@@ -634,6 +634,11 @@ UeAppMsg       *dstMsg;
       UE_APP_SEC_PRNT_ERR(("Invalid Sequnce Number"));
       RETVALUE(RFAILED);
    }
+
+   if (secCtx->noMac) {
+     mac = 0;
+     secCtx->noMac = FALSE;
+   }
    /*Last 2 bytes of MAC is Short MAC*/
    msg[2] = (U8)((mac>>8) & 0xFF);
    msg[3] = (U8)((mac) & 0xFF);

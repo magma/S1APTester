@@ -557,11 +557,11 @@ typedef struct _ueUetMtmsi
    U32 mTmsi;
 }UeUetMtmsi;
 
-typedef struct _ueUetServiceReq
-{
-   U32 ueId;
-   UeUetMtmsi ueMtmsi;
-   U8 rrcCause;
+typedef struct _ueUetServiceReq {
+  U32 ueId;
+  UeUetMtmsi ueMtmsi;
+  U8 rrcCause;
+  Bool noMac;
 }UeUetServiceReq;
 
 typedef struct _ueUetServiceRej
