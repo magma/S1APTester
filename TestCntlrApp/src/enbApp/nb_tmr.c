@@ -226,109 +226,105 @@ U32                          delay
    RETVALUE(ROK);
 } /* end of nbStartTmr() */
 
-
-/** @brief This function is used to stop a previously running timer. 
+/** @brief This function is used to stop a previously running timer.
  *
  * @details
  *
  *     Function: nbStopTmr
  *
  *         Processing steps:
- *               This function based upon the timer event reterives relevant timerCb and 
- *               tries to determine whether timer is running or not.In case timer 
- *               was running, it is stopped .
+ *               This function based upon the timer event reterives relevant
+ *               timerCb and tries to determine whether timer is running or
+ *               not.In case timer was running, it is stopped .
  *
- * @param[in] Cb : This holds approriate Control block for the timer event passed. 
- * @param[in] tmrEvent : One of the many possible timer types. 
+ * @param[in] Cb : This holds approriate Control block for the timer event
+ *                 passed.
+ * @param[in] tmrEvent : One of the many possible timer types.
  * @return S16
  *        -# Success : ROK
  *        -# Failure : RFAILED
  */
-PUBLIC Void nbStopTmr
-(
-PTR                          cb,
-S16                          event
-)
-{
-   CmTmrArg                  arg;
-   U8                        idx;
-   Bool                      tmrRunning;
-   CmTimer                   *timers = NULLP;
-   U8                        max = 0;
-   NbLiSapCb                 *sapCb;
-   NbRouterSolicitCb         *rsCb = NULLP;
+PUBLIC Void nbStopTmr(PTR cb, S16 event) {
+  CmTmrArg arg;
+  U8 idx;
+  Bool tmrRunning;
+  CmTimer *timers = NULLP;
+  U8 max = 0;
+  NbLiSapCb *sapCb;
+  NbRouterSolicitCb *rsCb = NULLP;
 
-   idx = 0;
+  idx = 0;
 
-   tmrRunning = FALSE;
-   switch(event)
-   {
-      case NB_TMR_SZT_SAP_BND:
-      case NB_TMR_EGT_SAP_BND:
-      {
-         sapCb = (NbLiSapCb*)cb;
-         max     =  1;
-         if(sapCb->timer.tmrEvnt == event)
-         {
-            tmrRunning = TRUE;
-            sapCb->bndRetryCnt = 0;
-         }
-         timers = &sapCb->timer;
-         break;
-      }
-      case NB_TMR_MME_SETUP_RSP:
-      {
-         NbMmeCb             *mmeCb = (NbMmeCb *)cb;
-         timers = &mmeCb->timer;
-         max    = 1;
-         if (mmeCb->timer.tmrEvnt == event)
-         {
-            tmrRunning = TRUE;
-         }
-         break;
-      }
-      case NB_TMR_MME_SETUP_WAIT:
-      {
-         NbMmeCb             *mmeCb = (NbMmeCb *)cb;
-         timers = &mmeCb->timer;
-         max    = 1;
-         if (mmeCb->timer.tmrEvnt == event)
-         {
-            tmrRunning = TRUE;
-         }
-         break;
-      }
-      case NB_TMR_ROUTER_SOLICIT: {
-        rsCb = (NbRouterSolicitCb *)cb;
-        nbCb.rsCb[(rsCb->ueId)-1] = rsCb;
-        timers = &nbCb.rsCb[(rsCb->ueId)-1]->timer;
-        max = 1;
-        if (nbCb.rsCb[(rsCb->ueId)-1]->timer.tmrEvnt == event) {
-          tmrRunning = TRUE;
-        }
-        break;
-      }
+  tmrRunning = FALSE;
+  switch (event) {
+  case NB_TMR_SZT_SAP_BND:
+  case NB_TMR_EGT_SAP_BND: {
+    sapCb = (NbLiSapCb *)cb;
+    max = 1;
+    if (sapCb->timer.tmrEvnt == event) {
+      tmrRunning = TRUE;
+      sapCb->bndRetryCnt = 0;
+    }
+    timers = &sapCb->timer;
+    break;
+  }
+  case NB_TMR_MME_SETUP_RSP: {
+    NbMmeCb *mmeCb = (NbMmeCb *)cb;
+    timers = &mmeCb->timer;
+    max = 1;
+    if (mmeCb->timer.tmrEvnt == event) {
+      tmrRunning = TRUE;
+    }
+    break;
+  }
+  case NB_TMR_MME_SETUP_WAIT: {
+    NbMmeCb *mmeCb = (NbMmeCb *)cb;
+    timers = &mmeCb->timer;
+    max = 1;
+    if (mmeCb->timer.tmrEvnt == event) {
+      tmrRunning = TRUE;
+    }
+    break;
+  }
+  case NB_TMR_LCL_UE_CTXT_REL_REQ: {
+    NbUeCb *ueCb = (NbUeCb *)cb;
+    timers = &nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].timer;
+    max = 1;
+    if (nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].timer.tmrEvnt == event) {
+      tmrRunning = TRUE;
+    }
+    break;
+  }
+  case NB_TMR_ROUTER_SOLICIT: {
+    rsCb = (NbRouterSolicitCb *)cb;
+    nbCb.rsCb[(rsCb->ueId) - 1] = rsCb;
+    timers = &nbCb.rsCb[(rsCb->ueId) - 1]->timer;
+    max = 1;
+    if (nbCb.rsCb[(rsCb->ueId) - 1]->timer.tmrEvnt == event) {
+      tmrRunning = TRUE;
+    }
+    break;
+  }
 
-      default:
-         break;
-   }
-   if(tmrRunning == FALSE)
-   {
-      RETVOID;
-   }
+  default:
+    break;
+  }
+  if (tmrRunning == FALSE) {
+    RETVOID;
+  }
 
-   /* initialize argument for common timer function */
-   arg.tqCp    = &nbCb.tqCp;
-   arg.tq      = nbCb.tq; 
-   arg.timers  = timers;
-   arg.cb      = cb;
-   arg.evnt    = event;
-   arg.wait    = 0;
-   arg.max     = max;
-   arg.tNum    = idx;
-   cmRmvCbTq(&arg);
+  /* initialize argument for common timer function */
+  arg.tqCp = &nbCb.tqCp;
+  arg.tq = nbCb.tq;
+  arg.timers = timers;
+  arg.cb = cb;
+  arg.evnt = event;
+  arg.wait = 0;
+  arg.max = max;
+  arg.tNum = idx;
+  cmRmvCbTq(&arg);
 
-   RETVOID;
+  RETVOID;
 } /* end of nbStopTmr() */
 
 
