@@ -2353,6 +2353,7 @@ PUBLIC S16 nbPrcIncS1apMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType)
       }
       else
       {
+         NB_LOG_DEBUG(&nbCb, "Dropping incoming DL-NAS message as ICS drop is enabled");
          ret = ROK; /* drop the all incoming DL-NAS messages if the drop ICS is enabled */
       }
    }

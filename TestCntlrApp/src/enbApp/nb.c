@@ -1102,20 +1102,28 @@ PUBLIC S16 NbEnbInitCtxtSetupFail(NbInitCtxtSetupFail *initCtxtSetupFail)
  * @return  S16
  *          -# Success : ROK
  */
-PUBLIC S16 NbEnbDropInitCtxtSetup(NbDropInitCtxtSetup *dropInitCtxtSetup)
-{
-   NB_LOG_ENTERFN(&nbCb);
+PUBLIC S16 NbEnbDropInitCtxtSetup(NbDropInitCtxtSetup *dropInitCtxtSetup) {
+  NB_LOG_ENTERFN(&nbCb);
 
-   if(NULLP == dropInitCtxtSetup)
-   {
-      NB_LOG_ERROR(&nbCb, "Recieved empty(NULL) request");
-      RETVALUE(RFAILED);
-   }
+  if (NULLP == dropInitCtxtSetup) {
+    NB_LOG_ERROR(&nbCb, "Recieved empty(NULL) request");
+    RETVALUE(RFAILED);
+  }
 
-   nbCb.dropInitCtxtSetup[(dropInitCtxtSetup->ueId) - 1].isDropICSEnable = dropInitCtxtSetup->isDropICSEnable;
-   nbCb.dropInitCtxtSetup[(dropInitCtxtSetup->ueId) - 1].tmrVal = dropInitCtxtSetup->tmrVal;
+  nbCb.dropInitCtxtSetup[(dropInitCtxtSetup->ueId) - 1].isDropICSEnable =
+      dropInitCtxtSetup->isDropICSEnable;
+  nbCb.dropInitCtxtSetup[(dropInitCtxtSetup->ueId) - 1].tmrVal =
+      dropInitCtxtSetup->tmrVal;
 
-   RETVALUE(ROK);
+  if ((nbCb.dropInitCtxtSetup[(dropInitCtxtSetup->ueId) - 1].isDropICSEnable ==
+       FALSE) &&
+      (nbCb.dropInitCtxtSetup[(dropInitCtxtSetup->ueId) - 1].isICSReqDropped ==
+       TRUE)) {
+    nbCb.dropInitCtxtSetup[(dropInitCtxtSetup->ueId) - 1].isICSReqDropped =
+        FALSE;
+  }
+
+  RETVALUE(ROK);
 }
 
 /*
