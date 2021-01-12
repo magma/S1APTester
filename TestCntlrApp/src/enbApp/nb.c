@@ -1093,7 +1093,7 @@ PUBLIC S16 NbEnbInitCtxtSetupFail(NbInitCtxtSetupFail *initCtxtSetupFail)
 }
 
 /*
- * @details This function marked a ue for dropping intial context setup
+ * @details This function marks a ue for dropping intial context setup
  *
  * Function: NbEnbDropInitCtxtSetup
  *
@@ -1112,25 +1112,27 @@ PUBLIC S16 NbEnbDropInitCtxtSetup(NbDropInitCtxtSetup *dropInitCtxtSetup) {
 
   nbCb.dropInitCtxtSetup[(dropInitCtxtSetup->ueId) - 1].isDropICSEnable =
       dropInitCtxtSetup->isDropICSEnable;
-  nbCb.dropInitCtxtSetup[(dropInitCtxtSetup->ueId) - 1].tmrVal =
-      dropInitCtxtSetup->tmrVal;
 
-  if ((nbCb.dropInitCtxtSetup[(dropInitCtxtSetup->ueId) - 1].isDropICSEnable ==
-       FALSE) &&
-      (nbCb.dropInitCtxtSetup[(dropInitCtxtSetup->ueId) - 1].isICSReqDropped ==
-       TRUE)) {
-    nbCb.dropInitCtxtSetup[(dropInitCtxtSetup->ueId) - 1].isICSReqDropped =
-        FALSE;
+  if (dropInitCtxtSetup->isDropICSEnable == TRUE) {
+    nbCb.dropInitCtxtSetup[(dropInitCtxtSetup->ueId) - 1].tmrVal =
+        dropInitCtxtSetup->tmrVal;
 
-    NbUeCb *ueCb = NULLP;
-    if (ROK !=
-        (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(dropInitCtxtSetup->ueId),
-                        sizeof(U32), 0, (PTR *)&ueCb))) {
-      NB_LOG_ERROR(&nbCb, "Failed to stop the local UE context release timer, "
-                          "could not find ueCb");
-      RETVALUE(RFAILED);
-    } else {
-      nbStopTmr((PTR)ueCb, NB_TMR_LCL_UE_CTXT_REL_REQ);
+  } else {
+    // Stop local UE context release timer if it is running
+    if (nbIsTmrRunning(
+            &nbCb.dropInitCtxtSetup[(dropInitCtxtSetup->ueId) - 1].timer,
+            NB_TMR_LCL_UE_CTXT_REL_REQ)) {
+      NbUeCb *ueCb = NULLP;
+      if (ROK !=
+          (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(dropInitCtxtSetup->ueId),
+                          sizeof(U32), 0, (PTR *)&ueCb))) {
+        NB_LOG_ERROR(&nbCb,
+                     "Failed to stop the local UE context release timer, "
+                     "could not find ueCb");
+        RETVALUE(RFAILED);
+      } else {
+        nbStopTmr((PTR)ueCb, NB_TMR_LCL_UE_CTXT_REL_REQ);
+      }
     }
   }
 
