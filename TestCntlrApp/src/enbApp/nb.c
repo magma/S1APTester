@@ -1106,7 +1106,7 @@ PUBLIC S16 NbEnbDropInitCtxtSetup(NbDropInitCtxtSetup *dropInitCtxtSetup) {
   NB_LOG_ENTERFN(&nbCb);
 
   if (NULLP == dropInitCtxtSetup) {
-    NB_LOG_ERROR(&nbCb, "Recieved empty(NULL) request");
+    NB_LOG_ERROR(&nbCb, "Received empty(NULL) request");
     RETVALUE(RFAILED);
   }
 

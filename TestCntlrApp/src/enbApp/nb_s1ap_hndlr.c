@@ -2254,7 +2254,7 @@ PRIVATE S16 nbHandleInitCtxtPrcSetup(NbUeCb *ueCb, S1apPdu *pdu) {
         NB_FREE(erabInfo, sizeof(NbErabLst));
       } else {
         retVal = nbSendErabsInfo(ueCb, erabInfo, NULL, ueRadCapRcvd);
-        // do the ip-query  ueapp for received bearers
+        // Do the IP-query to ueapp for received bearers
         for (idx = 0; idx < erabInfo->noOfComp; idx++) {
           nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId);
         }
@@ -2403,7 +2403,7 @@ PUBLIC S16 nbPrcIncS1apMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType) {
                  "nbPrcIncS1apMsg(): Handling RAB Release Command message\n");
     ret = nbProcErabRelCmd(pdu, ueCb);
     if (ret != ROK) {
-      NB_LOG_ERROR(&nbCb, "Failed to Send Erab Release command Indiaction "
+      NB_LOG_ERROR(&nbCb, "Failed to send Erab Release Command Indication "
                           "to ueApp");
     }
 

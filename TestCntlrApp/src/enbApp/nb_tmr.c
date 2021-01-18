@@ -233,11 +233,11 @@ U32                          delay
  *     Function: nbStopTmr
  *
  *         Processing steps:
- *               This function based upon the timer event reterives relevant
+ *               This function based upon the timer event retrieves relevant
  *               timerCb and tries to determine whether timer is running or
- *               not.In case timer was running, it is stopped .
+ *               not. In case timer was running, it is stopped.
  *
- * @param[in] Cb : This holds approriate Control block for the timer event
+ * @param[in] Cb : This holds appropriate Control block for the timer event
  *                 passed.
  * @param[in] tmrEvent : One of the many possible timer types.
  * @return S16
