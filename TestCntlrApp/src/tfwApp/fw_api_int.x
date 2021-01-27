@@ -718,6 +718,8 @@ typedef struct ueAttachRequest
    U8 mIdType;
    U8 epsAttachType;
    U8 useOldSecCtxt;
+   U8 imsi_len;
+   U8 imsi[25];
    guti guti_pr;
    last_TAI lastTAI_pr;
    pdn_Type pdnType_pr;
