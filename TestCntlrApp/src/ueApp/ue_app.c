@@ -1134,14 +1134,14 @@ PRIVATE S16 ueAppUtlBldAttachReq(UeCb *ueCb, CmNasEvnt **ueEvt,
   UE_GET_CB(ueAppCb);
   UE_LOG_ENTERFN(ueAppCb);
 
-  UE_LOG_DEBUG(ueAppCb, "Building a Attach Request for ueId(%d)", ueCb->ueId);
-  UE_LOG_DEBUG(ueAppCb, "useOldSecCtxt=%d", useOldSecCtxt);
+  UE_LOG_DEBUG(ueAppCb, "Building Attach Request for ueId(%d)"
+               "useOldSecCtxt=%d", ueCb->ueId, useOldSecCtxt);
 
   if (ueEvt == NULLP) {
     UE_LOG_ERROR(ueAppCb, "ueEvnt NULL Pointer!!!");
     RETVALUE(RFAILED);
   }
-  /* Allocate memory for pdu */
+  // Allocate memory for pdu
   CM_ALLOC_NASEVNT(ueEvt, CM_EMM_PD);
 
   if (*ueEvt == NULLP) {
@@ -1157,96 +1157,95 @@ PRIVATE S16 ueAppUtlBldAttachReq(UeCb *ueCb, CmNasEvnt **ueEvt,
   (*ueEvt)->m.emmEvnt = emmMsg;
   attachReq = &((*ueEvt)->m.emmEvnt->u.atchReq);
 
-  /* Fill header information*/
+  // Fill header information
   if (UE_APP_SEC_CTXT_CRNT == ueCb->secCtxt.status) {
     (*ueEvt)->secHT = CM_NAS_SEC_HDR_TYPE_INT_PRTD;
   }
 
-  /* Security header type is "Plain NAS message, not security protected" */
+  // Security header type is "Plain NAS message, not security protected"
   emmMsg->protDisc = CM_EMM_PD;
   emmMsg->secHdrType = CM_EMM_SEC_HDR_TYPE_PLAIN_NAS_MSG;
   emmMsg->msgId = CM_EMM_MSG_ATTACH_REQ;
 
-  /* Fill mandatory IEs */
-  /*EPS attach type IE*/
+  // Fill mandatory IEs
+  // EPS attach type IE
   attachReq->epsAtchType.pres = TRUE;
   attachReq->epsAtchType.type = epsAttachType;
 
-  /*NAS key set identifier IE*/
+  // NAS key set identifier IE
   attachReq->nasKsi.pres = TRUE;
   attachReq->nasKsi.id = CM_EMM_NONAS_KEY_AVAILABLE;
   attachReq->nasKsi.tsc = CM_EMM_NASKEYSID_NATIVE_SEC;
 
   switch (mIdType) {
-  case CM_EMM_MID_TYPE_IMSI: {
-    /* Fill Mobile Id */
-    attachReq->epsMi.pres = TRUE;
-    attachReq->epsMi.type = CM_EMM_MID_TYPE_IMSI;
-    if (imsi_len == 0) {
-      attachReq->epsMi.len = ueCb->ueCtxt.imsiLen;
+    case CM_EMM_MID_TYPE_IMSI: {
+      // Fill Mobile Id
+      attachReq->epsMi.pres = TRUE;
+      attachReq->epsMi.type = CM_EMM_MID_TYPE_IMSI;
+      if (imsi_len == 0) {
+        attachReq->epsMi.len = ueCb->ueCtxt.imsiLen;
+        attachReq->epsMi.evenOddInd =
+            (((attachReq->epsMi.len) % 2) != 0) ? (UE_ODD) : (UE_EVEN);
+        cmMemcpy((U8 *)&attachReq->epsMi.u.imsi.id, (U8 *)&ueCb->ueCtxt.ueImsi,
+                 attachReq->epsMi.len);
+      } else {
+        attachReq->epsMi.len = imsi_len;
+        attachReq->epsMi.evenOddInd =
+            (((imsi_len) % 2) != 0) ? (UE_ODD) : (UE_EVEN);
+        cmMemcpy((U8 *)&attachReq->epsMi.u.imsi.id, imsi, attachReq->epsMi.len);
+      }
+      break;
+    }
+    case CM_EMM_MID_TYPE_GUTI: {
+      if (useOldSecCtxt) {
+        // Fill old ksi from UeCb
+        attachReq->nasKsi.id = ueCb->secCtxt.ksi;
+        attachReq->nasKsi.tsc = ueCb->secCtxt.tsc;
+      }
+
+      // Fill Mobile Id
+      attachReq->epsMi.pres = TRUE;
+      attachReq->epsMi.type = CM_EMM_MID_TYPE_GUTI;
+      attachReq->epsMi.evenOddInd = UE_EVEN;
+      attachReq->epsMi.len = sizeof(GUTI);
+      cmMemcpy((U8 *)&attachReq->epsMi.u.guti, (U8 *)&ueCb->ueCtxt.ueGuti,
+               attachReq->epsMi.len);
+      break;
+    }
+    case CM_EMM_MID_TYPE_IMEI: {
+      if (useOldSecCtxt) {
+        // Fill old ksi from UeCb
+        attachReq->nasKsi.id = ueCb->secCtxt.ksi;
+        attachReq->nasKsi.tsc = ueCb->secCtxt.tsc;
+      }
+
+      // Fill Mobile Id
+      attachReq->epsMi.pres = TRUE;
+      attachReq->epsMi.type = CM_EMM_MID_TYPE_IMEISV;
+      attachReq->epsMi.evenOddInd = UE_EVEN;
+      attachReq->epsMi.len = 15;
       attachReq->epsMi.evenOddInd =
           (((attachReq->epsMi.len) % 2) != 0) ? (UE_ODD) : (UE_EVEN);
-      cmMemcpy((U8 *)&attachReq->epsMi.u.imsi.id, (U8 *)&ueCb->ueCtxt.ueImsi,
+      cmMemcpy((U8 *)&attachReq->epsMi.u.imei.id, (U8 *)&ueCb->ueCtxt.ueImei,
                attachReq->epsMi.len);
-    } else {
-      attachReq->epsMi.len = imsi_len;
-      attachReq->epsMi.evenOddInd =
-          (((imsi_len) % 2) != 0) ? (UE_ODD) : (UE_EVEN);
-      cmMemcpy((U8 *)&attachReq->epsMi.u.imsi.id, imsi, attachReq->epsMi.len);
+      break;
     }
-    break;
-  }
-  case CM_EMM_MID_TYPE_GUTI: {
-    if (useOldSecCtxt) {
-      /* Fill old ksi from UeCb */
-      attachReq->nasKsi.id = ueCb->secCtxt.ksi;
-      attachReq->nasKsi.tsc = ueCb->secCtxt.tsc;
+    default: {
+      UE_LOG_ERROR(ueAppCb, "Invalid miType");
+      UE_LOG_EXITFN(ueAppCb, RFAILED);
     }
-
-    /* Fill Mobile Id */
-    attachReq->epsMi.pres = TRUE;
-    attachReq->epsMi.type = CM_EMM_MID_TYPE_GUTI;
-    attachReq->epsMi.evenOddInd = UE_EVEN;
-    attachReq->epsMi.len = sizeof(GUTI);
-    cmMemcpy((U8 *)&attachReq->epsMi.u.guti, (U8 *)&ueCb->ueCtxt.ueGuti,
-             attachReq->epsMi.len);
-    break;
-  }
-  case CM_EMM_MID_TYPE_IMEI: {
-    if (useOldSecCtxt) {
-      /* Fill old ksi from UeCb */
-      attachReq->nasKsi.id = ueCb->secCtxt.ksi;
-      attachReq->nasKsi.tsc = ueCb->secCtxt.tsc;
-    }
-
-    /* Fill Mobile Id */
-    attachReq->epsMi.pres = TRUE;
-    attachReq->epsMi.type = CM_EMM_MID_TYPE_IMEISV;
-    attachReq->epsMi.evenOddInd = UE_EVEN;
-    attachReq->epsMi.len = 15;
-    attachReq->epsMi.evenOddInd =
-        (((attachReq->epsMi.len) % 2) != 0) ? (UE_ODD) : (UE_EVEN);
-    cmMemcpy((U8 *)&attachReq->epsMi.u.imei.id, (U8 *)&ueCb->ueCtxt.ueImei,
-             attachReq->epsMi.len);
-    break;
-  }
-  default: {
-    UE_LOG_ERROR(ueAppCb, "Invalid miType");
-    ret = RFAILED;
-    break;
-  }
   }
 
-  /*Copy UE capabilities from UE Cb*/
+  // Copy UE capabilities from UE Cb
   cmMemcpy((U8 *)&attachReq->ueNwCap, (U8 *)&ueCb->ueCtxt.ueNwCap,
            sizeof(CmEmmUeNwCap));
 
-  /*Include Additional Update Type */
+  // Include Additional Update Type
   if (addUpdType->pres == TRUE) {
     attachReq->addUpdType.pres = TRUE;             /* Additional Update Type*/
     attachReq->addUpdType.type = addUpdType->type; /* Additional Update Type*/
   }
-  /*Include DRX Parameter Ie */
+  // Include DRX Parameter Ie
   if (drxParm->pres == TRUE) {
     attachReq->drxPrm.pres = TRUE;
     attachReq->drxPrm.spltPGCycle = drxParm->spltPGCycle;
@@ -1263,7 +1262,7 @@ PRIVATE S16 ueAppUtlBldAttachReq(UeCb *ueCb, CmNasEvnt **ueEvt,
   attachReq->suppCodecLst.codec[1].sysId = 0x00;
   attachReq->suppCodecLst.codec[1].bmpLen = 2;
   attachReq->suppCodecLst.codec[1].bmp = (0x1c << 8);
-  /*ESM message container IE*/
+  // ESM message container IE
   if ((ret = ueAppUtlBldPdnConReq(ueCb, &(attachReq->esmEvnt), protCfgOpt,
                                   pdnType, eti)) != ROK) {
     UE_LOG_ERROR(ueAppCb, "Building PDN Connection Request Failed\n");
