@@ -44,6 +44,7 @@
 #include "rl_common.h"
 #include "lfw.h"
 #include "uet.h"
+#include "ue_emm.h"
 #include "nbt.h"
 #include "fw_api_int.h"
 #include "fw.h"
@@ -807,6 +808,11 @@ PUBLIC S16 handleAttachReq(ueAttachRequest_t *data)
    ueAttachReq->mIdType = data->mIdType;
    ueAttachReq->epsAtchType.type = data->epsAttachType;
    ueAttachReq->useOldSecCtxt = data->useOldSecCtxt;
+
+   if ((data->mIdType == CM_EMM_MID_TYPE_IMSI) && (data->imsi_len > 0)) {
+     cmMemcpy(ueAttachReq->imsi, data->imsi, data->imsi_len);
+     ueAttachReq->imsi_len = data->imsi_len;
+   }
 
    /* optional feilds */
    if (data->guti_pr.pres == TRUE)
