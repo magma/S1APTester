@@ -2096,7 +2096,7 @@ PRIVATE S16 nbHandleInitCtxtPrcSetup(NbUeCb *ueCb, S1apPdu *pdu) {
   SztE_RABToBeSetupLstCtxtSUReq *s1ErabLst = NULLP;
   Bool ueRadCapRcvd = FALSE;
 
-  /* Parse and process the received IEs */
+  // Parse and process the received IEs
   initMsg = &(pdu->pdu.val.initiatingMsg);
   protIes = &initMsg->value.u.sztInitCntxtSetupRqst.protocolIEs;
 
@@ -2186,28 +2186,28 @@ PRIVATE S16 nbHandleInitCtxtPrcSetup(NbUeCb *ueCb, S1apPdu *pdu) {
       if (ROK != sendInitCtxtSetupFailRsp(ueCb, &cause)) {
         NB_LOG_DEBUG(
             &nbCb,
-            "Failed to Sending Initial Context Setup Failure message to MME");
+            "Failed to send Initial Context Setup Failure message to MME");
       }
       NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
       NB_FREE(erabInfo, sizeof(NbErabLst));
     } else if (nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isDropICSEnable ==
                TRUE) {
-      if (nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isICSReqDropped == FALSE) {
-        nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isICSReqDropped = TRUE;
-        /* start timr to release the UE context locally */
+      if (!nbIsTmrRunning(&nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].timer,
+                          NB_TMR_LCL_UE_CTXT_REL_REQ)) {
+        // Start timer to release the UE context locally
         cmInitTimers(&nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].timer, 1);
         if (retVal !=
             nbStartTmr((PTR)ueCb, NB_TMR_LCL_UE_CTXT_REL_REQ,
                        nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].tmrVal)) {
           RETVALUE(retVal);
         }
-        /* send indication to tfwApp for dropping the Initial Context Setup Req
-         */
-        retVal = nbUiSendIntCtxtSetupDrpdIndToUser(ueCb->ueId);
-        if (retVal != ROK) {
-          NB_LOG_ERROR(&nbCb, "Failed to Send Initial Context Setup"
-                              "Dropped Indiaction to User");
-        }
+      }
+
+      // Send indication to tfwApp for dropping the Initial Context Setup Req
+      retVal = nbUiSendIntCtxtSetupDrpdIndToUser(ueCb->ueId);
+      if (retVal != ROK) {
+        NB_LOG_ERROR(&nbCb, "Failed to send Initial Context Setup Dropped "
+                            "Indiaction to User");
       }
       NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
       NB_FREE(erabInfo, sizeof(NbErabLst));
@@ -2218,7 +2218,7 @@ PRIVATE S16 nbHandleInitCtxtPrcSetup(NbUeCb *ueCb, S1apPdu *pdu) {
       NB_FREE(erabInfo, sizeof(NbErabLst));
     } else {
       if (nbCb.delayInitCtxtSetupRsp[(ueCb->ueId) - 1].delayICSRsp != TRUE) {
-        /* send the s1-context resp to mme and nas pdu to ue */
+        // Send the s1-context resp to mme and nas pdu to UE
         retVal = nbBuildAndSendIntCtxtSetupRsp(ueCb, erabInfo);
         if (retVal != ROK) {
           NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
@@ -2257,7 +2257,7 @@ PRIVATE S16 nbHandleInitCtxtPrcSetup(NbUeCb *ueCb, S1apPdu *pdu) {
         NB_FREE(erabInfo, sizeof(NbErabLst));
       } else {
         retVal = nbSendErabsInfo(ueCb, erabInfo, NULL, ueRadCapRcvd);
-        /* do the ip-query  ueapp for received bearers */
+        // Do the IP-query to ueapp for received bearers
         for (idx = 0; idx < erabInfo->noOfComp; idx++) {
           nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId);
         }
@@ -2340,91 +2340,91 @@ PRIVATE S16 nbHandleRabSetupMsg(NbUeCb *ueCb, S1apPdu *pdu) {
   -# Failure : RFAILED
 */
 
+PUBLIC S16 nbPrcIncS1apMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType) {
+  U32 procedureCodeVal;
+  U8 ret = RFAILED;
+  // Get the procedure code
+  procedureCodeVal = pdu->pdu.val.initiatingMsg.procedureCode.val;
+  if (procedureCodeVal == 11) // downlink NAS Transport MSG
+  {
+    ret = nbProcessDlNasMsg(ueCb, pdu, msgType);
+  } else if (procedureCodeVal == 9) // initial context setup request
+  {
+    ret = nbHandleInitCtxtPrcSetup(ueCb, pdu);
+    // Inform the Tfw about Initial Context Setup
+    if ((nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isDropICSEnable != TRUE) &&
+        (nbCb.dropICSSndCtxtRel[(ueCb->ueId) - 1].sndICSRspUeCtxtRel != TRUE)) {
+      ret = nbUiSendIntCtxtSetupIndToUser(
+          ueCb->ueId,
+          nbCb.initCtxtSetupFail[(ueCb->ueId) - 1].initCtxtSetupFailInd);
+      if (ret != ROK) {
+        NB_LOG_ERROR(&nbCb, "Failed to Send Initial Context Setup"
+                            "Indiaction to ueApp");
+      }
+    }
+  } else if (procedureCodeVal == 5) // rab setup request
+  {
+    NB_LOG_DEBUG(&nbCb,
+                 "nbPrcIncS1apMsg(): Handling RAB Setup Request message\n");
+    ret = nbHandleRabSetupMsg(ueCb, pdu);
+  } else if (procedureCodeVal == 23) // context release command message
+  {
+    ret = nbHandleS1UeReleaseCmd(ueCb);
+    if (ret == ROK) {
+      // Inform the ueApp about UE context release
+      ret = nbSendS1RelIndToUeApp(ueCb->ueId);
+      if (ret != ROK) {
+        NB_LOG_ERROR(&nbCb, "Failed to Send S1 Release Indiaction "
+                            "to ueApp");
+      }
 
-PUBLIC S16 nbPrcIncS1apMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType)
-{
-   U32 procedureCodeVal;
-   U8 ret = RFAILED;
-   /* get the procedure code */
-   procedureCodeVal = pdu->pdu.val.initiatingMsg.procedureCode.val;
-   if(procedureCodeVal == 11) /* downlink NAS Transport MSG */
-   {
-      if(nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isICSReqDropped  != TRUE )
-      {
-         ret = nbProcessDlNasMsg(ueCb, pdu, msgType);
+      if (nbIsTmrRunning(&nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].timer,
+                         NB_TMR_LCL_UE_CTXT_REL_REQ)) {
+        nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isDropICSEnable = FALSE;
+
+        if (ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueCb->ueId),
+                                   sizeof(U32), 0, (PTR *)&ueCb))) {
+          NB_LOG_ERROR(&nbCb,
+                       "Failed to stop the local UE context release timer, "
+                       "could not find ueCb");
+          RETVALUE(RFAILED);
+        } else {
+          nbStopTmr((PTR)ueCb, NB_TMR_LCL_UE_CTXT_REL_REQ);
+        }
       }
-      else
-      {
-         ret = ROK; /* drop the all incoming DL-NAS messages if the drop ICS is enabled */
-      }
-   }
-   else if(procedureCodeVal == 9) /* initial context setup request*/
-   {
-      ret = nbHandleInitCtxtPrcSetup(ueCb,pdu);
-      /* Inform the Tfw about Initial Context Setup */
-      if((nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isDropICSEnable != TRUE) &&\
-             (nbCb.dropICSSndCtxtRel[(ueCb->ueId) - 1].sndICSRspUeCtxtRel != TRUE))
-      {
-         ret = nbUiSendIntCtxtSetupIndToUser(ueCb->ueId,\
-               nbCb.initCtxtSetupFail[(ueCb->ueId) - 1].initCtxtSetupFailInd);
-         if(ret != ROK)
-         {
-            NB_LOG_ERROR(&nbCb, "Failed to Send Initial Context Setup"\
-                                 "Indiaction to ueApp");
-          }
-      }
-   }
-   else if(procedureCodeVal == 5 ) /* rab setup request */
-   {
-      NB_LOG_DEBUG(&nbCb,"nbPrcIncS1apMsg(): Handling RAB Setup Request message\n");
-      ret = nbHandleRabSetupMsg(ueCb,pdu);
-   }
-   else if(procedureCodeVal == 23) /* context release command message */
-   {
-      ret = nbHandleS1UeReleaseCmd(ueCb);
-      if(ret == ROK)
-      {
-         /* Inform the ueApp about UE context release */
-         ret = nbSendS1RelIndToUeApp(ueCb->ueId);
-         if(ret != ROK)
-         {
-            NB_LOG_ERROR(&nbCb, "Failed to Send S1 Release Indiaction "\
-                  "to ueApp");
-         }
- #if 0
+#if 0
 
          /* Inform the Tfw about UE context release */
          ret = nbUiSendUeCtxRelIndToUser(ueCb->ueId);
          /* trigger ueCb deletion in enbApp */
          ret = nbIfmDamUeDelReq(ueCb->ueId);
 #endif
-      }
-   } else if (procedureCodeVal == 7 ) {
-      NB_LOG_DEBUG(&nbCb,"nbPrcIncS1apMsg(): Handling RAB Release Command message\n");
-      ret = nbProcErabRelCmd(pdu, ueCb);
-      if(ret != ROK)
-      {
-        NB_LOG_ERROR(&nbCb, "Failed to Send Erab Release command Indiaction "\
-             "to ueApp");
-      }
+    }
+  } else if (procedureCodeVal == 7) {
+    NB_LOG_DEBUG(&nbCb,
+                 "nbPrcIncS1apMsg(): Handling RAB Release Command message\n");
+    ret = nbProcErabRelCmd(pdu, ueCb);
+    if (ret != ROK) {
+      NB_LOG_ERROR(&nbCb, "Failed to send Erab Release Command Indication "
+                          "to ueApp");
+    }
 
-   }
+  }
 #ifdef MULTI_ENB_SUPPORT
-   else if (procedureCodeVal == 3)/* Path SW Req Ack*/
-   {
-     NB_LOG_DEBUG(&nbCb, "RECEIVED PATH SW REQ ACK");
-     ret = nbPrcPathSwReqAck(ueCb, pdu);
-   }
+  else if (procedureCodeVal == 3) // Path SW Req Ack
+  {
+    NB_LOG_DEBUG(&nbCb, "RECEIVED PATH SW REQ ACK");
+    ret = nbPrcPathSwReqAck(ueCb, pdu);
+  }
 #endif
-   else
-   {
-      NB_LOG_ERROR(&nbCb, "Procedure not handled");
-      ret = RFAILED;
-   }
+  else {
+    NB_LOG_ERROR(&nbCb, "Procedure not handled");
+    ret = RFAILED;
+  }
 
-   cmFreeMem((Ptr *)(pdu));
+  cmFreeMem((Ptr *)(pdu));
 
-   RETVALUE(ret);
+  RETVALUE(ret);
 }
 
 PUBLIC S16 nbPrcS1apRelInd
