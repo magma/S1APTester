@@ -132,6 +132,7 @@ U32                          delay
    NbUeCb                    *ueCb   = NULLP;
    NbDelayICSRspCb *icsRspCb = NULLP;
    NbDelayUeCtxtRelCmpCb *ueCtxRelCmp = NULLP;
+   NbErabSetupRspCb *erabSetupRspCb = NULLP;
    NbRouterSolicitCb         *rsCb ;
 
    wait = 0;
@@ -182,6 +183,13 @@ U32                          delay
          maxTmrs = 1;
          break;
       }
+      case NB_TMR_DELAY_ERAB_SETUP_RSP: {
+        erabSetupRspCb = (NbErabSetupRspCb *)cb;
+        tmr = &erabSetupRspCb->timer;
+        maxTmrs = 1;
+        break;
+      }
+
       case NB_TMR_ROUTER_SOLICIT: {
         rsCb = (NbRouterSolicitCb *)cb;
         nbCb.rsCb[(rsCb->ueId)-1] = rsCb;
@@ -358,6 +366,7 @@ S16                          event
    NbUeCb                    *ueCb;
    NbDelayICSRspCb           *icsRspCb;
    NbDelayUeCtxtRelCmpCb     *ueCtxtRelCb;
+   NbErabSetupRspCb *erabSetupRspCb;
    NbRouterSolicitCb         *rsCb;
   /*U32 size;*/
    switch(event)
@@ -407,6 +416,13 @@ S16                          event
          /*HandleDelayTimerForICSExpiry(ueCtxtRelCb);*/
          break;
       }
+      case NB_TMR_DELAY_ERAB_SETUP_RSP: {
+        erabSetupRspCb = (NbErabSetupRspCb *)cb;
+        NB_LOG_DEBUG(&nbCb,"ERAB_SETUP_RSP Timer Expired for UE:[%d]",erabSetupRspCb->ueId);
+        nbHandleDelayTimerForErabSetupRspExpiry(erabSetupRspCb);
+        break;
+      }
+
       case NB_TMR_ROUTER_SOLICIT: {
         rsCb = (NbRouterSolicitCb *)cb;
         nbCb.rsCb[(rsCb->ueId)-1] = rsCb;

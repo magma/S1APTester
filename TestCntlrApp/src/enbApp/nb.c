@@ -1638,6 +1638,32 @@ PUBLIC S16 nbPrcMMEConfigTrf
 #endif
 
 /*
+ * @details This function sets a flag in nbCb to delay erab setup rsp
+ *
+ * Function: NbEnbDelayErabSetupRsp
+ *
+ * @param[in]  NbDelayErabSetupRsp
+ * @return  S16
+ *          -# Success : ROK
+ *          -# Failure : RFAILED
+ */
+PUBLIC S16 NbEnbDelayErabSetupRsp(NbDelayErabSetupRsp *delayErabRsp) {
+  NB_LOG_ENTERFN(&nbCb);
+
+  if (NULLP == delayErabRsp) {
+    NB_LOG_ERROR(&nbCb, "Received empty(NULL) NbDelayErabSetupRsp request");
+    RETVALUE(RFAILED);
+  }
+
+  nbCb.delayErabSetupRsp[(delayErabRsp->ueId) - 1].isDelayErabSetupRsp =
+      delayErabRsp->isDelayErabSetupRsp;
+  nbCb.delayErabSetupRsp[(delayErabRsp->ueId) - 1].tmrVal =
+      delayErabRsp->tmrVal;
+
+  RETVALUE(ROK);
+}
+
+/*
  * @details This function marks a ue for dropping RA
  *
  * Function: NbEnbDropRA
@@ -1659,4 +1685,3 @@ PUBLIC S16 NbEnbDropRA(NbDropRA *dropRA) {
 
   RETVALUE(ROK);
 }
-
