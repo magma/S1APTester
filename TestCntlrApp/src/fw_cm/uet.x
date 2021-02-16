@@ -211,6 +211,7 @@ typedef enum _ueMsgTypes
    UE_AUTH_FAILURE_TYPE,
    UE_ICMPV6_ROUTER_ADV_TYPE,
    UE_STANDALONE_DEFAULT_EPS_BER_REJ,
+   UE_DROP_ACT_DEFAULT_EPS_BER_CTXT_REQ,
 }UeMsgTypes;
 
 typedef struct _ueEmmEpsAtchType
@@ -833,6 +834,11 @@ typedef struct ueEsmActDfltBearCtxtRej
 #endif
 }UeEsmActDfltBearCtxtRej;
 
+typedef struct ueDropActDfltEpsBearCtxtReq {
+  U32 ueId;
+  Bool dropActDfltEpsBearCtxtReq;
+} UeDropActDfltEpsBearCtxtReq;
+
 typedef struct _ueUetEmmInformation
 {
    U32 ueId;
@@ -955,6 +961,7 @@ typedef struct _uetMessage
      UeUetErabSetupFailedTosetup ueErabsFailedToSetup;
      UeUetAuthFailure ueUetAuthFailure;
      UeUetRouterAdv ueUetRouterAdv;
+     UeDropActDfltEpsBearCtxtReq ueDropActDfltBerReq;
    }msg;
 }UetMessage;
 /* Ue Interface general Structure declerations */
