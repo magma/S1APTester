@@ -2632,6 +2632,7 @@ PRIVATE S16 ueAppUtlBldSecModReject(UeCb *ueCb, CmNasEvnt **ueEvt, U8 cause)
 
    UE_LOG_EXITFN(ueAppCb, ret);
 }
+
 /*
  *
  *       Fun: ueAppUtlBldSecModComplete
@@ -2650,6 +2651,7 @@ PRIVATE S16 ueAppUtlBldSecModComplete(UeCb *ueCb, CmNasEvnt **ueEvt)
    S16 ret = ROK;
    UeAppCb *ueAppCb = NULLP;
    CmEmmMsg* emmMsg;
+   CmEmmSecModeCmp *secModeCmp = NULLP;
 
    UE_GET_CB(ueAppCb);
    UE_LOG_ENTERFN(ueAppCb);
@@ -2674,6 +2676,17 @@ PRIVATE S16 ueAppUtlBldSecModComplete(UeCb *ueCb, CmNasEvnt **ueEvt)
    }
 
    (*ueEvt)->m.emmEvnt = emmMsg;
+   secModeCmp = &((*ueEvt)->m.emmEvnt->u.secModCmp);
+   if (ueCb->ueCtxt.imeisvReq) {
+     UE_LOG_DEBUG(ueAppCb, "Filling IMEISV in security mode complete");
+     secModeCmp->imeisv.pres = TRUE;
+     secModeCmp->imeisv.type = CM_EMM_MID_TYPE_IMEISV;
+     secModeCmp->imeisv.len = CM_EMM_MAX_IMEI_DIGS;
+     secModeCmp->imeisv.evenOddInd = (((secModeCmp->imeisv.len) % 2) != 0) ? \
+                                   (UE_ODD):(UE_EVEN);
+     cmMemcpy((U8 *)&secModeCmp->imeisv.u.imei.id,
+              (U8 *)&ueCb->ueCtxt.ueImei, secModeCmp->imeisv.len);
+   }
 
    /*Fill header information*/
    /*(*ueEvt)->secHT = UE_APP_SEC_HT_INT_PRTD_ENC_NEW_SEC_CTXT;*/
@@ -6431,6 +6444,9 @@ PRIVATE S16 ueAppRcvEmmMsg
          ueCb->secCtxt.encAlg =
             evnt->m.emmEvnt->u.secModCmd.selNasSecAlgo.ciphAlgo;
 
+         if (evnt->m.emmEvnt->u.secModCmd.imeisvReq.pres) {
+           ueCb->ueCtxt.imeisvReq = TRUE;
+         }
          ret = ueAppGenerateNasKey(&ueCb->secCtxt);
          if (ROK != ret)
          {
