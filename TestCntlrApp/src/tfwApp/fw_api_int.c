@@ -448,9 +448,13 @@ PUBLIC S16 handlSecModComp(ueSecModeComplete_t *data)
    FW_ALLOC_MEM(fwCb, &uetMsg, sizeof(UetMessage));
    uetMsg->msgType = UE_SEC_MOD_CMP_TYPE;
    ueSecModComp = &uetMsg->msg.ueUetSecModeComplete;
+   cmMemset((U8 *)ueSecModComp, 0, sizeof(UeUetSecModeComplete));
 
    ueSecModComp->ueId = data->ue_Id;
-
+   ueSecModComp->imeisvPres = data->imeisv_pres;
+   if (ueSecModComp->imeisvPres) {
+     cmMemcpy(ueSecModComp->imeisv, data->imeisv, FW_MAX_IMEISV_LEN);
+   }
    fwSendToUeApp(uetMsg);
    FW_LOG_EXITFN(fwCb, ROK);
 }

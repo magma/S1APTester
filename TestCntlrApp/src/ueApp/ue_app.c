@@ -140,7 +140,8 @@ PRIVATE S16 ueAppUtlFndEsmCb(UeEsmCb**, U8, UeAppEsmKeyType, UeCb*);
 PRIVATE S16 ueAppEsmHndlInvEvnt(UeEsmCb *esmCb, CmNasEvnt *evnt, UeCb *ueCb);
 PRIVATE S16 ueAppEsmHdlOutUeEvnt(CmNasEvnt *evnt, UeCb *ueCb);
 PRIVATE S16 ueProcUeAttachReq(UetMessage *p_ueMsg, Pst *pst);
-PRIVATE S16 ueAppUtlBldSecModComplete(UeCb *ueCb, CmNasEvnt **ueEvt);
+PRIVATE S16 ueAppUtlBldSecModComplete(UeCb *ueCb, UeUetSecModeComplete uetSmc,
+            CmNasEvnt **ueEvt);
 PRIVATE S16 ueAppUtlBldSecModReject(UeCb *ueCb, CmNasEvnt **ueEvt, U8 cause);
 PRIVATE S16 ueAppUtlBldActDefltBerContextAccept(UeCb*, CmNasEvnt**, U8);
 PRIVATE S16 ueAppUtlBldActDedBerContextAccept(UeCb*, CmNasEvnt**, U8);
@@ -2646,7 +2647,7 @@ PRIVATE S16 ueAppUtlBldSecModReject(UeCb *ueCb, CmNasEvnt **ueEvt, U8 cause)
  *       File:  ue_app.c
  *
  */
-PRIVATE S16 ueAppUtlBldSecModComplete(UeCb *ueCb, CmNasEvnt **ueEvt)
+PRIVATE S16 ueAppUtlBldSecModComplete(UeCb *ueCb, UeUetSecModeComplete uetSmc, CmNasEvnt **ueEvt)
 {
    S16 ret = ROK;
    UeAppCb *ueAppCb = NULLP;
@@ -2684,8 +2685,18 @@ PRIVATE S16 ueAppUtlBldSecModComplete(UeCb *ueCb, CmNasEvnt **ueEvt)
      secModeCmp->imeisv.len = CM_EMM_MAX_IMEI_DIGS;
      secModeCmp->imeisv.evenOddInd = (((secModeCmp->imeisv.len) % 2) != 0) ? \
                                    (UE_ODD):(UE_EVEN);
-     cmMemcpy((U8 *)&secModeCmp->imeisv.u.imei.id,
-              (U8 *)&ueCb->ueCtxt.ueImei, secModeCmp->imeisv.len);
+
+     if (!uetSmc.imeisvPres) {
+       UE_LOG_DEBUG(ueAppCb, "Filling IMEISV from ueCb");
+       cmMemcpy((U8 *)&secModeCmp->imeisv.u.imei.id,
+                (U8 *)&ueCb->ueCtxt.ueImei, secModeCmp->imeisv.len);
+     } else {
+       UE_LOG_DEBUG(ueAppCb, "Filling IMEISV from the data"
+                             "received from testscript");
+       cmMemcpy((U8 *)&secModeCmp->imeisv.u.imei.id,
+                uetSmc.imeisv, secModeCmp->imeisv.len);
+
+     }
    }
 
    /*Fill header information*/
@@ -3656,7 +3667,8 @@ PRIVATE S16 ueProcUeSecModeCmdComplete(UetMessage *p_ueMsg, Pst *pst)
       RETVALUE(ret);
    }
 
-   ret = ueAppUtlBldSecModComplete(ueCb, &secModeCompEvnt);
+   ret = ueAppUtlBldSecModComplete(ueCb, p_ueMsg->msg.ueUetSecModeComplete,
+         &secModeCompEvnt);
    if(ROK != ret)
    {
       UE_LOG_ERROR(ueAppCb, "Could not build  and send the "\

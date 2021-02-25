@@ -771,9 +771,10 @@ typedef struct ueSecModeCmdInd
    U8 knas_Vrfy_Sts;
 }ueSecModeCmdInd_t;
 
-typedef struct ueSecModeComplete
-{
-   U32 ue_Id;
+typedef struct ueSecModeComplete {
+  U32 ue_Id;
+  Bool imeisv_pres;
+  U8 imeisv[FW_MAX_IMEISV_LEN];
 }ueSecModeComplete_t;
 
 typedef struct ueSecModeReject
