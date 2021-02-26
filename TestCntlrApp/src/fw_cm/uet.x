@@ -315,6 +315,8 @@ PDN APN */
    U32 pdnType;
    UeEmmEpsAtchType epsAtchType;
    Guti oldGuti;
+   U8 imsi_len;
+   U8 imsi[15];
    UeEmmLastTai ueLastTai;
    UeEmmNasPdnApn nasPdnApn;
    UeEmmNasAddUpdType addUpdType;

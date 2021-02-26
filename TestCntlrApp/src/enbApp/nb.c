@@ -1093,7 +1093,7 @@ PUBLIC S16 NbEnbInitCtxtSetupFail(NbInitCtxtSetupFail *initCtxtSetupFail)
 }
 
 /*
- * @details This function marked a ue for dropping intial context setup
+ * @details This function marks a ue for dropping intial context setup
  *
  * Function: NbEnbDropInitCtxtSetup
  *
@@ -1102,20 +1102,41 @@ PUBLIC S16 NbEnbInitCtxtSetupFail(NbInitCtxtSetupFail *initCtxtSetupFail)
  * @return  S16
  *          -# Success : ROK
  */
-PUBLIC S16 NbEnbDropInitCtxtSetup(NbDropInitCtxtSetup *dropInitCtxtSetup)
-{
-   NB_LOG_ENTERFN(&nbCb);
+PUBLIC S16 NbEnbDropInitCtxtSetup(NbDropInitCtxtSetup *dropInitCtxtSetup) {
+  NB_LOG_ENTERFN(&nbCb);
 
-   if(NULLP == dropInitCtxtSetup)
-   {
-      NB_LOG_ERROR(&nbCb, "Recieved empty(NULL) request");
-      RETVALUE(RFAILED);
-   }
+  if (NULLP == dropInitCtxtSetup) {
+    NB_LOG_ERROR(&nbCb, "Received empty(NULL) request");
+    RETVALUE(RFAILED);
+  }
 
-   nbCb.dropInitCtxtSetup[(dropInitCtxtSetup->ueId) - 1].isDropICSEnable = dropInitCtxtSetup->isDropICSEnable;
-   nbCb.dropInitCtxtSetup[(dropInitCtxtSetup->ueId) - 1].tmrVal = dropInitCtxtSetup->tmrVal;
+  nbCb.dropInitCtxtSetup[(dropInitCtxtSetup->ueId) - 1].isDropICSEnable =
+      dropInitCtxtSetup->isDropICSEnable;
 
-   RETVALUE(ROK);
+  if (dropInitCtxtSetup->isDropICSEnable == TRUE) {
+    nbCb.dropInitCtxtSetup[(dropInitCtxtSetup->ueId) - 1].tmrVal =
+        dropInitCtxtSetup->tmrVal;
+
+  } else {
+    // Stop local UE context release timer if it is running
+    if (nbIsTmrRunning(
+            &nbCb.dropInitCtxtSetup[(dropInitCtxtSetup->ueId) - 1].timer,
+            NB_TMR_LCL_UE_CTXT_REL_REQ)) {
+      NbUeCb *ueCb = NULLP;
+      if (ROK !=
+          (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(dropInitCtxtSetup->ueId),
+                          sizeof(U32), 0, (PTR *)&ueCb))) {
+        NB_LOG_ERROR(&nbCb,
+                     "Failed to stop the local UE context release timer, "
+                     "could not find ueCb");
+        RETVALUE(RFAILED);
+      } else {
+        nbStopTmr((PTR)ueCb, NB_TMR_LCL_UE_CTXT_REL_REQ);
+      }
+    }
+  }
+
+  RETVALUE(ROK);
 }
 
 /*
@@ -1638,6 +1659,32 @@ PUBLIC S16 nbPrcMMEConfigTrf
 #endif
 
 /*
+ * @details This function sets a flag in nbCb to delay erab setup rsp
+ *
+ * Function: NbEnbDelayErabSetupRsp
+ *
+ * @param[in]  NbDelayErabSetupRsp
+ * @return  S16
+ *          -# Success : ROK
+ *          -# Failure : RFAILED
+ */
+PUBLIC S16 NbEnbDelayErabSetupRsp(NbDelayErabSetupRsp *delayErabRsp) {
+  NB_LOG_ENTERFN(&nbCb);
+
+  if (NULLP == delayErabRsp) {
+    NB_LOG_ERROR(&nbCb, "Received empty(NULL) NbDelayErabSetupRsp request");
+    RETVALUE(RFAILED);
+  }
+
+  nbCb.delayErabSetupRsp[(delayErabRsp->ueId) - 1].isDelayErabSetupRsp =
+      delayErabRsp->isDelayErabSetupRsp;
+  nbCb.delayErabSetupRsp[(delayErabRsp->ueId) - 1].tmrVal =
+      delayErabRsp->tmrVal;
+
+  RETVALUE(ROK);
+}
+
+/*
  * @details This function marks a ue for dropping RA
  *
  * Function: NbEnbDropRA
@@ -1659,4 +1706,3 @@ PUBLIC S16 NbEnbDropRA(NbDropRA *dropRA) {
 
   RETVALUE(ROK);
 }
-

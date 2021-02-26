@@ -44,6 +44,7 @@
 #include "rl_common.h"
 #include "lfw.h"
 #include "uet.h"
+#include "ue_emm.h"
 #include "nbt.h"
 #include "fw_api_int.h"
 #include "fw.h"
@@ -107,6 +108,7 @@ PRIVATE Void
 handleUeInitCtxtSetupRspFailedErabs(UeInitCtxtSetupFailedErabs *data);
 PUBLIC S16
 handleStdAloneActvDfltEpsBearerContextRej(ueActvDfltEpsBearerCtxtRej_t *data);
+PRIVATE Void handleDelayErabSetupRsp(UeDelayErabSetupRsp *data);
 PRIVATE Void handleDropRouterAdv(UeDropRA *data);
 PUBLIC FwCb gfwCb;
 
@@ -810,6 +812,11 @@ PUBLIC S16 handleAttachReq(ueAttachRequest_t *data)
    ueAttachReq->mIdType = data->mIdType;
    ueAttachReq->epsAtchType.type = data->epsAttachType;
    ueAttachReq->useOldSecCtxt = data->useOldSecCtxt;
+
+   if ((data->mIdType == CM_EMM_MID_TYPE_IMSI) && (data->imsi_len > 0)) {
+     cmMemcpy(ueAttachReq->imsi, data->imsi, data->imsi_len);
+     ueAttachReq->imsi_len = data->imsi_len;
+   }
 
    /* optional feilds */
    if (data->guti_pr.pres == TRUE)
@@ -2407,6 +2414,16 @@ PUBLIC S16 tfwApi
             (ueActvDfltEpsBearerCtxtRej_t *)msg);
         break;
       }
+      case UE_SET_DELAY_ERAB_SETUP_RSP: {
+        FW_LOG_DEBUG(fwCb, "Process Delay ERAB_SETUP_RSP Request ");
+        if (fwCb->nbState == ENB_IS_UP) {
+          handleDelayErabSetupRsp((UeDelayErabSetupRsp*)msg);
+        } else {
+          FW_LOG_ERROR(fwCb, "Failed to process ERAB Setup Rsp delay request:ENBAPP IS NOT UP");
+          ret = RFAILED;
+        }
+        break;
+      }
       case UE_SET_DROP_ROUTER_ADV: {
          FW_LOG_DEBUG(fwCb, "Process Drop ROUTER_ADV Request ");
          if (fwCb->nbState == ENB_IS_UP) {
@@ -3432,6 +3449,44 @@ PRIVATE Void handleDropRouterAdv(UeDropRA *data) {
   msgReq->msgType = NB_DROP_RA;
   msgReq->t.dropRA.ueId = data->ue_Id;
   msgReq->t.dropRA.isDropRA = data->flag;
+
+  fwSendToNbApp(msgReq);
+  RETVOID;
+}
+
+/*
+ *
+ *   Fun:   handleDelayErabSetupRsp
+ *
+ *   Desc:  This function is used to process Delay Erab Setup Response
+ *          message received from the test script
+ *
+ *   Ret:   None
+ *
+ *   Notes: None
+ *
+ *   File:  fw_api_int.c
+ *
+ */
+PRIVATE Void handleDelayErabSetupRsp(UeDelayErabSetupRsp *data) {
+  FwCb *fwCb = NULLP;
+  NbtRequest *msgReq = NULLP;
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  if (SGetSBuf(fwCb->init.region, fwCb->init.pool, (Data **)&msgReq,
+               (Size)sizeof(NbtRequest)) == ROK) {
+    cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
+  } else {
+    FW_LOG_ERROR(fwCb, "Failed to allocate memory");
+    RETVOID;
+  }
+
+  msgReq->msgType = NB_DELAY_ERAB_SETUP_RSP;
+  msgReq->t.delayErabSetupRsp.ueId = data->ue_Id;
+  msgReq->t.delayErabSetupRsp.isDelayErabSetupRsp = data->flag;
+  msgReq->t.delayErabSetupRsp.tmrVal = data->tmrVal;
 
   fwSendToNbApp(msgReq);
   RETVOID;

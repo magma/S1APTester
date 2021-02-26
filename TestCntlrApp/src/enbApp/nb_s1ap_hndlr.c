@@ -73,6 +73,9 @@ PUBLIC S16 sendNonDelFlag(NbUeCb *ueCb, SztNAS_PDU *pdu, NbUeMsgCause *cause);
 PUBLIC S16 sendInitCtxtSetupFailRsp(NbUeCb *ueCb, NbUeMsgCause *cause);
 PRIVATE S16 nbSendUeCtxtRelReqAsICSRsp(NbUeCb *ueCb);
 PRIVATE S16 nbStartDelayTimerForICSRsp(U32 ueId,NbErabLst *erabInfo);
+PRIVATE S16 nbStartDelayTimerForErabRsp(U32 ueId, NbErabLst *erabInfo,
+                                        NbFailedErabLst *failedErabInfo,
+                                        U32 tmrVal);
 PRIVATE S16 nbStartDelayTimerForUeCtxRel(U32 ueId);
 PUBLIC S16 nbHandleDelayTimerForUeCtxRelComplExpiry(NbDelayUeCtxtRelCmpCb *ueCtxtRelCmpCb);
 PUBLIC S16 nbPrcPathSwReqAck(NbUeCb *ueCb,S1apPdu *pdu);
@@ -2093,7 +2096,7 @@ PRIVATE S16 nbHandleInitCtxtPrcSetup(NbUeCb *ueCb, S1apPdu *pdu) {
   SztE_RABToBeSetupLstCtxtSUReq *s1ErabLst = NULLP;
   Bool ueRadCapRcvd = FALSE;
 
-  /* Parse and process the received IEs */
+  // Parse and process the received IEs
   initMsg = &(pdu->pdu.val.initiatingMsg);
   protIes = &initMsg->value.u.sztInitCntxtSetupRqst.protocolIEs;
 
@@ -2183,28 +2186,28 @@ PRIVATE S16 nbHandleInitCtxtPrcSetup(NbUeCb *ueCb, S1apPdu *pdu) {
       if (ROK != sendInitCtxtSetupFailRsp(ueCb, &cause)) {
         NB_LOG_DEBUG(
             &nbCb,
-            "Failed to Sending Initial Context Setup Failure message to MME");
+            "Failed to send Initial Context Setup Failure message to MME");
       }
       NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
       NB_FREE(erabInfo, sizeof(NbErabLst));
     } else if (nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isDropICSEnable ==
                TRUE) {
-      if (nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isICSReqDropped == FALSE) {
-        nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isICSReqDropped = TRUE;
-        /* start timr to release the UE context locally */
+      if (!nbIsTmrRunning(&nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].timer,
+                          NB_TMR_LCL_UE_CTXT_REL_REQ)) {
+        // Start timer to release the UE context locally
         cmInitTimers(&nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].timer, 1);
         if (retVal !=
             nbStartTmr((PTR)ueCb, NB_TMR_LCL_UE_CTXT_REL_REQ,
                        nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].tmrVal)) {
           RETVALUE(retVal);
         }
-        /* send indication to tfwApp for dropping the Initial Context Setup Req
-         */
-        retVal = nbUiSendIntCtxtSetupDrpdIndToUser(ueCb->ueId);
-        if (retVal != ROK) {
-          NB_LOG_ERROR(&nbCb, "Failed to Send Initial Context Setup"
-                              "Dropped Indiaction to User");
-        }
+      }
+
+      // Send indication to tfwApp for dropping the Initial Context Setup Req
+      retVal = nbUiSendIntCtxtSetupDrpdIndToUser(ueCb->ueId);
+      if (retVal != ROK) {
+        NB_LOG_ERROR(&nbCb, "Failed to send Initial Context Setup Dropped "
+                            "Indiaction to User");
       }
       NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
       NB_FREE(erabInfo, sizeof(NbErabLst));
@@ -2215,7 +2218,7 @@ PRIVATE S16 nbHandleInitCtxtPrcSetup(NbUeCb *ueCb, S1apPdu *pdu) {
       NB_FREE(erabInfo, sizeof(NbErabLst));
     } else {
       if (nbCb.delayInitCtxtSetupRsp[(ueCb->ueId) - 1].delayICSRsp != TRUE) {
-        /* send the s1-context resp to mme and nas pdu to ue */
+        // Send the s1-context resp to mme and nas pdu to UE
         retVal = nbBuildAndSendIntCtxtSetupRsp(ueCb, erabInfo);
         if (retVal != ROK) {
           NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
@@ -2254,7 +2257,7 @@ PRIVATE S16 nbHandleInitCtxtPrcSetup(NbUeCb *ueCb, S1apPdu *pdu) {
         NB_FREE(erabInfo, sizeof(NbErabLst));
       } else {
         retVal = nbSendErabsInfo(ueCb, erabInfo, NULL, ueRadCapRcvd);
-        /* do the ip-query  ueapp for received bearers */
+        // Do the IP-query to ueapp for received bearers
         for (idx = 0; idx < erabInfo->noOfComp; idx++) {
           nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId);
         }
@@ -2289,24 +2292,23 @@ PRIVATE S16 nbHandleRabSetupMsg(NbUeCb *ueCb, S1apPdu *pdu) {
     }
   }
   if (erabInfo != NULLP || failedErabInfo != NULLP) {
-    retVal = nbRabSetupSndS1apRsp(ueCb, erabInfo, failedErabInfo);
-    if (retVal != ROK) {
-      NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
-      NB_FREE(erabInfo, sizeof(NbErabLst));
-      if (failedErabInfo) {
-        NB_FREE(failedErabInfo->failedErabs,
-                (failedErabInfo->noOfComp * sizeof(NbFailedErab)));
-        NB_FREE(failedErabInfo, sizeof(NbFailedErabLst));
-      }
-      RETVALUE(RFAILED);
-    }
+
     retVal = nbSendErabsInfo(ueCb, erabInfo, failedErabInfo, TRUE);
-    /* do the ip-query  ueapp for received bearers */
+    /* query the ip address from ueapp for the received bearers */
     if (erabInfo->noOfComp > 0) {
       for (idx = 0; idx < erabInfo->noOfComp; idx++) {
         nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId);
       }
     }
+    // Start a timer to delay sending of erab setup rsp
+    if (nbCb.delayErabSetupRsp[(ueCb->ueId) - 1].isDelayErabSetupRsp) {
+      retVal = nbStartDelayTimerForErabRsp(
+          ueCb->ueId, erabInfo, failedErabInfo,
+          nbCb.delayErabSetupRsp[(ueCb->ueId) - 1].tmrVal);
+      nbCb.delayErabSetupRsp[(ueCb->ueId) - 1].isDelayErabSetupRsp = FALSE;
+      RETVALUE(retVal);
+    }
+    retVal = nbRabSetupSndS1apRsp(ueCb, erabInfo, failedErabInfo);
     NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
     NB_FREE(erabInfo, sizeof(NbErabLst));
     if (failedErabInfo) {
@@ -2338,91 +2340,91 @@ PRIVATE S16 nbHandleRabSetupMsg(NbUeCb *ueCb, S1apPdu *pdu) {
   -# Failure : RFAILED
 */
 
+PUBLIC S16 nbPrcIncS1apMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType) {
+  U32 procedureCodeVal;
+  U8 ret = RFAILED;
+  // Get the procedure code
+  procedureCodeVal = pdu->pdu.val.initiatingMsg.procedureCode.val;
+  if (procedureCodeVal == 11) // downlink NAS Transport MSG
+  {
+    ret = nbProcessDlNasMsg(ueCb, pdu, msgType);
+  } else if (procedureCodeVal == 9) // initial context setup request
+  {
+    ret = nbHandleInitCtxtPrcSetup(ueCb, pdu);
+    // Inform the Tfw about Initial Context Setup
+    if ((nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isDropICSEnable != TRUE) &&
+        (nbCb.dropICSSndCtxtRel[(ueCb->ueId) - 1].sndICSRspUeCtxtRel != TRUE)) {
+      ret = nbUiSendIntCtxtSetupIndToUser(
+          ueCb->ueId,
+          nbCb.initCtxtSetupFail[(ueCb->ueId) - 1].initCtxtSetupFailInd);
+      if (ret != ROK) {
+        NB_LOG_ERROR(&nbCb, "Failed to Send Initial Context Setup"
+                            "Indiaction to ueApp");
+      }
+    }
+  } else if (procedureCodeVal == 5) // rab setup request
+  {
+    NB_LOG_DEBUG(&nbCb,
+                 "nbPrcIncS1apMsg(): Handling RAB Setup Request message\n");
+    ret = nbHandleRabSetupMsg(ueCb, pdu);
+  } else if (procedureCodeVal == 23) // context release command message
+  {
+    ret = nbHandleS1UeReleaseCmd(ueCb);
+    if (ret == ROK) {
+      // Inform the ueApp about UE context release
+      ret = nbSendS1RelIndToUeApp(ueCb->ueId);
+      if (ret != ROK) {
+        NB_LOG_ERROR(&nbCb, "Failed to Send S1 Release Indiaction "
+                            "to ueApp");
+      }
 
-PUBLIC S16 nbPrcIncS1apMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType)
-{
-   U32 procedureCodeVal;
-   U8 ret = RFAILED;
-   /* get the procedure code */
-   procedureCodeVal = pdu->pdu.val.initiatingMsg.procedureCode.val;
-   if(procedureCodeVal == 11) /* downlink NAS Transport MSG */
-   {
-      if(nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isICSReqDropped  != TRUE )
-      {
-         ret = nbProcessDlNasMsg(ueCb, pdu, msgType);
+      if (nbIsTmrRunning(&nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].timer,
+                         NB_TMR_LCL_UE_CTXT_REL_REQ)) {
+        nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isDropICSEnable = FALSE;
+
+        if (ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueCb->ueId),
+                                   sizeof(U32), 0, (PTR *)&ueCb))) {
+          NB_LOG_ERROR(&nbCb,
+                       "Failed to stop the local UE context release timer, "
+                       "could not find ueCb");
+          RETVALUE(RFAILED);
+        } else {
+          nbStopTmr((PTR)ueCb, NB_TMR_LCL_UE_CTXT_REL_REQ);
+        }
       }
-      else
-      {
-         ret = ROK; /* drop the all incoming DL-NAS messages if the drop ICS is enabled */
-      }
-   }
-   else if(procedureCodeVal == 9) /* initial context setup request*/
-   {
-      ret = nbHandleInitCtxtPrcSetup(ueCb,pdu);
-      /* Inform the Tfw about Initial Context Setup */
-      if((nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].isDropICSEnable != TRUE) &&\
-             (nbCb.dropICSSndCtxtRel[(ueCb->ueId) - 1].sndICSRspUeCtxtRel != TRUE))
-      {
-         ret = nbUiSendIntCtxtSetupIndToUser(ueCb->ueId,\
-               nbCb.initCtxtSetupFail[(ueCb->ueId) - 1].initCtxtSetupFailInd);
-         if(ret != ROK)
-         {
-            NB_LOG_ERROR(&nbCb, "Failed to Send Initial Context Setup"\
-                                 "Indiaction to ueApp");
-          }
-      }
-   }
-   else if(procedureCodeVal == 5 ) /* rab setup request */
-   {
-      NB_LOG_DEBUG(&nbCb,"nbPrcIncS1apMsg(): Handling RAB Setup Request message\n");
-      ret = nbHandleRabSetupMsg(ueCb,pdu);
-   }
-   else if(procedureCodeVal == 23) /* context release command message */
-   {
-      ret = nbHandleS1UeReleaseCmd(ueCb);
-      if(ret == ROK)
-      {
-         /* Inform the ueApp about UE context release */
-         ret = nbSendS1RelIndToUeApp(ueCb->ueId);
-         if(ret != ROK)
-         {
-            NB_LOG_ERROR(&nbCb, "Failed to Send S1 Release Indiaction "\
-                  "to ueApp");
-         }
- #if 0
+#if 0
 
          /* Inform the Tfw about UE context release */
          ret = nbUiSendUeCtxRelIndToUser(ueCb->ueId);
          /* trigger ueCb deletion in enbApp */
          ret = nbIfmDamUeDelReq(ueCb->ueId);
 #endif
-      }
-   } else if (procedureCodeVal == 7 ) {
-      NB_LOG_DEBUG(&nbCb,"nbPrcIncS1apMsg(): Handling RAB Release Command message\n");
-      ret = nbProcErabRelCmd(pdu, ueCb);
-      if(ret != ROK)
-      {
-        NB_LOG_ERROR(&nbCb, "Failed to Send Erab Release command Indiaction "\
-             "to ueApp");
-      }
+    }
+  } else if (procedureCodeVal == 7) {
+    NB_LOG_DEBUG(&nbCb,
+                 "nbPrcIncS1apMsg(): Handling RAB Release Command message\n");
+    ret = nbProcErabRelCmd(pdu, ueCb);
+    if (ret != ROK) {
+      NB_LOG_ERROR(&nbCb, "Failed to send Erab Release Command Indication "
+                          "to ueApp");
+    }
 
-   }
+  }
 #ifdef MULTI_ENB_SUPPORT
-   else if (procedureCodeVal == 3)/* Path SW Req Ack*/
-   {
-     NB_LOG_DEBUG(&nbCb, "RECEIVED PATH SW REQ ACK");
-     ret = nbPrcPathSwReqAck(ueCb, pdu);
-   }
+  else if (procedureCodeVal == 3) // Path SW Req Ack
+  {
+    NB_LOG_DEBUG(&nbCb, "RECEIVED PATH SW REQ ACK");
+    ret = nbPrcPathSwReqAck(ueCb, pdu);
+  }
 #endif
-   else
-   {
-      NB_LOG_ERROR(&nbCb, "Procedure not handled");
-      ret = RFAILED;
-   }
+  else {
+    NB_LOG_ERROR(&nbCb, "Procedure not handled");
+    ret = RFAILED;
+  }
 
-   cmFreeMem((Ptr *)(pdu));
+  cmFreeMem((Ptr *)(pdu));
 
-   RETVALUE(ret);
+  RETVALUE(ret);
 }
 
 PUBLIC S16 nbPrcS1apRelInd
@@ -3040,7 +3042,7 @@ PRIVATE S16 nbFillS1apRabSetupRsp(NbUeCb *ueCb, NbErabLst *erabInfo,
   if (erabInfo->noOfComp > 0) {
     ++noComp;
   }
-  if (failedErabInfo->noOfComp > 0) {
+  if ((failedErabInfo) && (failedErabInfo->noOfComp > 0)) {
     ++noComp;
   }
   s1apCon = ueCb->s1ConCb;
@@ -3139,38 +3141,40 @@ PRIVATE S16 nbFillS1apRabSetupRsp(NbUeCb *ueCb, NbErabLst *erabInfo,
       }
       nbFillTknU16(&(ie->value.u.sztE_RABSetupLstBrSURes.noComp), ieIdx);
    }
-   NB_LOG_ERROR(&nbCb, "failedErabInfo->noOfComp :%d \n",
+   if (failedErabInfo) {
+     NB_LOG_ERROR(&nbCb, "failedErabInfo->noOfComp :%d \n",
                 failedErabInfo->noOfComp);
-   if (failedErabInfo->noOfComp > 0) {
-     SztProtIE_SingleCont_E_RABItemIEs *failedErabItem;
-     NbFailedErab failedRab = {0};
-     // E-RAB failed to Setup List
-     ie = &rabSetupRsp->protocolIEs.member[crntIe++];
-     nbFillTknU8(&(ie->pres), PRSNT_NODEF);
-     nbFillTknU32(&(ie->id), Sztid_E_RABFailedToSetupLstBrSURes);
-     nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
-     if ((cmGetMem(szERABRspPdu,
+     if (failedErabInfo->noOfComp > 0) {
+       SztProtIE_SingleCont_E_RABItemIEs *failedErabItem;
+       NbFailedErab failedRab = {0};
+       // E-RAB failed to Setup List
+       ie = &rabSetupRsp->protocolIEs.member[crntIe++];
+       nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+       nbFillTknU32(&(ie->id), Sztid_E_RABFailedToSetupLstBrSURes);
+       nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+       if ((cmGetMem(szERABRspPdu,
                    ((failedErabInfo->noOfComp) *
                     sizeof(SztProtIE_SingleCont_E_RABItemIEs)),
                    (Ptr *)&ie->value.u.sztE_RABLst.member)) != ROK) {
-       NB_LOG_ERROR(&nbCb, "Failed to allocate memory. cmGetMem failed");
-       RETVALUE(RFAILED);
-     }
+         NB_LOG_ERROR(&nbCb, "Failed to allocate memory. cmGetMem failed");
+         RETVALUE(RFAILED);
+       }
 
-     ieIdx = 0;
-     for (idx = 0; idx < failedErabInfo->noOfComp; idx++) {
-       SztE_RABItem *rabIE;
-       failedErabItem = &(ie->value.u.sztE_RABLst.member[ieIdx++]);
-       nbFillTknU8(&(failedErabItem->pres), PRSNT_NODEF);
-       nbFillTknU32(&(failedErabItem->id), Sztid_E_RABItem);
-       nbFillTknU32(&(failedErabItem->criticality), SztCriticalityignoreEnum);
-       failedRab = failedErabInfo->failedErabs[idx];
-       rabIE = &(failedErabItem->value.u.sztE_RABItem);
-       nbFillTknU8(&(rabIE->pres), PRSNT_NODEF);
-       nbFillTknU32(&(rabIE->e_RAB_ID), failedRab.erabId);
-       nbS1apFillCause(&(rabIE->cause), &failedRab.cause);
+       ieIdx = 0;
+       for (idx = 0; idx < failedErabInfo->noOfComp; idx++) {
+         SztE_RABItem *rabIE;
+         failedErabItem = &(ie->value.u.sztE_RABLst.member[ieIdx++]);
+         nbFillTknU8(&(failedErabItem->pres), PRSNT_NODEF);
+         nbFillTknU32(&(failedErabItem->id), Sztid_E_RABItem);
+         nbFillTknU32(&(failedErabItem->criticality), SztCriticalityignoreEnum);
+         failedRab = failedErabInfo->failedErabs[idx];
+         rabIE = &(failedErabItem->value.u.sztE_RABItem);
+         nbFillTknU8(&(rabIE->pres), PRSNT_NODEF);
+         nbFillTknU32(&(rabIE->e_RAB_ID), failedRab.erabId);
+         nbS1apFillCause(&(rabIE->cause), &failedRab.cause);
+       }
+       nbFillTknU16(&(ie->value.u.sztE_RABLst.noComp), failedErabInfo->noOfComp);
      }
-     nbFillTknU16(&(ie->value.u.sztE_RABLst.noComp), failedErabInfo->noOfComp);
    }
    nbFillTknU16(&(rabSetupRsp->protocolIEs.noComp), crntIe);
 
@@ -3951,12 +3955,71 @@ PUBLIC S16 nbHandleDelayTimerForICSExpiry(NbDelayICSRspCb *icsRspCb)
    RETVALUE(retVal);
 }
 
-PRIVATE S16 nbSendUeCtxtRelReqAsICSRsp(NbUeCb *ueCb)
-{
-   S16 retVal = ROK;
-   S1apPdu   *ctxtRelReqPdu = NULLP;
-   NbUeMsgCause   cause;
+PRIVATE S16 nbStartDelayTimerForErabRsp(U32 ueId, NbErabLst *erabInfo,
+                                        NbFailedErabLst *failedErabInfo,
+                                        U32 tmrVal) {
+  S16 retVal = RFAILED;
+  NbErabSetupRspCb *erabSetupRspCb = NULLP;
+  NB_ALLOC(&erabSetupRspCb, sizeof(NbErabSetupRspCb));
+  erabSetupRspCb->ueId = ueId;
+  erabSetupRspCb->erabInfo = erabInfo;
+  erabSetupRspCb->failedErabInfo = failedErabInfo;
+  cmInitTimers(&erabSetupRspCb->timer, 1);
+  if (nbStartTmr((PTR)erabSetupRspCb, NB_TMR_DELAY_ERAB_SETUP_RSP, tmrVal) !=
+      ROK) {
+    NB_LOG_ERROR(&nbCb,
+                 "Failed to start timer for delaying erab setup rsp for ue %u",
+                 ueId);
+    RETVALUE(RFAILED);
+  }
+  NB_LOG_DEBUG(&nbCb, "Started timer of (%u) secs for ERAB_SETUP_RSP\n",
+               tmrVal);
+  RETVALUE(ROK);
+}
 
+PUBLIC S16
+nbHandleDelayTimerForErabSetupRspExpiry(NbErabSetupRspCb *erabSetupRspCb) {
+
+  S16 retVal = RFAILED;
+  NbUeCb *ueCb = NULLP;
+  NbErabLst *erabInfo = NULLP;
+  NbFailedErabLst *failedErabInfo = NULLP;
+
+  NB_LOG_DEBUG(&nbCb, "Timer expired for ERAB_SETUP_RSP\n");
+  if (ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(erabSetupRspCb->ueId),
+                             sizeof(U32), 0, (PTR *)&ueCb))) {
+    NB_LOG_ERROR(&nbCb, "Failed to Find UeCb");
+    RETVALUE(RFAILED);
+  }
+  if (erabSetupRspCb == NULLP) {
+    NB_LOG_ERROR(&nbCb, "erabSetupRspCb is NULL for ue %u ",
+                 erabSetupRspCb->ueId);
+    RETVALUE(RFAILED);
+  }
+  erabInfo = erabSetupRspCb->erabInfo;
+  failedErabInfo = erabSetupRspCb->failedErabInfo;
+  NB_LOG_DEBUG(&nbCb, "Sending out-of-order ERAB_SETUP_RSP for ue %u\n",
+               erabSetupRspCb->ueId);
+  retVal = nbRabSetupSndS1apRsp(ueCb, erabInfo, failedErabInfo);
+
+  if (erabInfo) {
+    NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
+    NB_FREE(erabInfo, sizeof(NbErabLst));
+  }
+  if (failedErabInfo) {
+    NB_FREE(failedErabInfo->failedErabs,
+            (failedErabInfo->noOfComp * sizeof(NbFailedErab)));
+    NB_FREE(failedErabInfo, sizeof(NbFailedErabLst));
+  }
+  NB_FREE(erabSetupRspCb, sizeof(NbErabSetupRspCb));
+
+  RETVALUE(retVal);
+}
+
+PRIVATE S16 nbSendUeCtxtRelReqAsICSRsp(NbUeCb *ueCb) {
+  S16 retVal = ROK;
+  S1apPdu *ctxtRelReqPdu = NULLP;
+  NbUeMsgCause cause;
 
    cause.causeTyp = \
          nbCb.dropICSSndCtxtRel[(ueCb->ueId) - 1].causeType;
