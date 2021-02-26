@@ -26,7 +26,7 @@ extern "C" {
 #endif   /* __cplusplus  */
 
 #define UE_IMSI_LENGTH 15
-#define UE_IMEI_LENGTH 16
+#define UE_IMEISV_LENGTH 16
 #define CM_EMM_MAX_MOBILE_ID_DIGS 15
 #define MAX_APN_LEN 50
 #define OP_KEY_LEN 16
@@ -410,7 +410,7 @@ typedef struct _ueUetSecModeComplete
 {
    U32 ueId;
    Bool imeisvPres;
-   U8 imeisv[UE_IMEI_LENGTH];
+   U8 imeisv[UE_IMEISV_LENGTH];
 }UeUetSecModeComplete;
 
 typedef struct _ueUetSecModeReject

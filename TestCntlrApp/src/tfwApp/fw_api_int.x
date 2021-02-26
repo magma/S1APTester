@@ -775,7 +775,7 @@ typedef struct ueSecModeComplete {
   U32 ue_Id;
   Bool imeisv_pres;
   U8 imeisv[FW_MAX_IMEISV_LEN];
-}ueSecModeComplete_t;
+} ueSecModeComplete_t;
 
 typedef struct ueSecModeReject
 {
