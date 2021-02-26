@@ -2679,6 +2679,8 @@ PRIVATE S16 ueAppUtlBldSecModComplete(UeCb *ueCb, UeUetSecModeComplete uetSmc, C
    (*ueEvt)->m.emmEvnt = emmMsg;
    secModeCmp = &((*ueEvt)->m.emmEvnt->u.secModCmp);
    if (ueCb->ueCtxt.imeisvReq) {
+     // Reset flag
+     ueCb->ueCtxt.imeisvReq = FALSE;
      UE_LOG_DEBUG(ueAppCb, "Filling IMEISV in security mode complete");
      secModeCmp->imeisv.pres = TRUE;
      secModeCmp->imeisv.type = CM_EMM_MID_TYPE_IMEISV;
@@ -2691,7 +2693,7 @@ PRIVATE S16 ueAppUtlBldSecModComplete(UeCb *ueCb, UeUetSecModeComplete uetSmc, C
        cmMemcpy((U8 *)&secModeCmp->imeisv.u.imei.id,
                 (U8 *)&ueCb->ueCtxt.ueImei, secModeCmp->imeisv.len);
      } else {
-       UE_LOG_DEBUG(ueAppCb, "Filling IMEISV from the data"
+       UE_LOG_DEBUG(ueAppCb, "Filling IMEISV"
                              "received from testscript");
        cmMemcpy((U8 *)&secModeCmp->imeisv.u.imei.id,
                 uetSmc.imeisv, secModeCmp->imeisv.len);
