@@ -776,7 +776,14 @@ typedef struct ueSecModeCmdInd
 
 typedef struct ueSecModeComplete {
   U32 ue_Id;
+  /* Flag to indiciate if imeisv value is
+   * provided from the test
+   */
   Bool imeisv_pres;
+  /* Flag to indiciate if imeisv should
+   * be included in security mode complete msg
+   */
+  Bool noImeisv;
   U8 imeisv[FW_MAX_IMEISV_LEN];
 } ueSecModeComplete_t;
 
@@ -1039,16 +1046,20 @@ typedef struct ueAttachRejInd
    U8 cause;
 }ueAttachRejInd_t;
 
-typedef struct ueIdentityReqInd
-{
-   U32 ue_Id;
-   U8 idType;
+typedef struct ueIdentityReqInd {
+  U32 ue_Id;
+  U8 idType;
 }ueIdentityReqInd_t;
 
-typedef struct ueIdentityResp
-{
-   U32 ue_Id;
-   U8 idType;
+typedef struct ueIdentityResp {
+  U32 ue_Id;
+  U8 idType;
+  Bool idValPres;
+  /* As of now we consider only IMSI/IMEI/IMEISV
+   * so FW_MAX_IMEISV_LEN=16 should be sufficient
+   */
+  U8 idVal[FW_MAX_IMEISV_LEN];
+
 }ueIdentityResp_t;
 
 typedef struct ueTauReq

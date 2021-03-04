@@ -357,10 +357,14 @@ typedef struct _ueUetIdentReqInd
    U8 idType;
 }UeUetIdentReqInd;
 
-typedef struct _ueUetIdentRsp
-{
-   U32 ueId;
-   U8 idType;
+typedef struct _ueUetIdentRsp {
+  U32 ueId;
+  U8 idType;
+  Bool idValPres;
+  /* As of now we consider only IMSI/IMEI/IMEISV
+   * so UE_IMEISV_LENGTH=16 should be sufficient
+   */
+  U8 idVal[UE_IMEISV_LENGTH];
 }UeUetIdentRsp;
 
 typedef struct _ueUetAuthReqInd
@@ -412,6 +416,7 @@ typedef struct _ueUetSecModeComplete
 {
    U32 ueId;
    Bool imeisvPres;
+   Bool noImeisv;
    U8 imeisv[UE_IMEISV_LENGTH];
 }UeUetSecModeComplete;
 

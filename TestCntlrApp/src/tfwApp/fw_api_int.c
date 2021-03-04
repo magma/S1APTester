@@ -406,21 +406,25 @@ PUBLIC S16 handleActvDfltEpsBearerContextRej(ueActvDfltEpsBearerCtxtRej_t *data)
  *   File:  fw_api_int.c
  *
  */
-PUBLIC S16 handlIdentResp(ueIdentityResp_t *data)
-{
-   FwCb *fwCb = NULLP;
-   UetMessage *uetMsg = NULLP;
+PUBLIC S16 handlIdentResp(ueIdentityResp_t *data) {
+  FwCb *fwCb = NULLP;
+  UetMessage *uetMsg = NULLP;
 
-   FW_GET_CB(fwCb);
-   FW_LOG_ENTERFN(fwCb);
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
 
-   FW_ALLOC_MEM(fwCb, &uetMsg, sizeof(UetMessage));
-   uetMsg->msgType = UE_IDENTITY_RES_TYPE;
+  FW_ALLOC_MEM(fwCb, &uetMsg, sizeof(UetMessage));
+  uetMsg->msgType = UE_IDENTITY_RES_TYPE;
 
-   uetMsg->msg.ueUetIdentRsp.ueId = data->ue_Id;
-   uetMsg->msg.ueUetIdentRsp.idType = data->idType;
+  uetMsg->msg.ueUetIdentRsp.ueId = data->ue_Id;
+  uetMsg->msg.ueUetIdentRsp.idType = data->idType;
+  uetMsg->msg.ueUetIdentRsp.idValPres = data->idValPres;
+  if (data->idValPres) {
+    cmMemcpy(uetMsg->msg.ueUetIdentRsp.idVal, data->idVal,
+       sizeof(data->idVal));
+  }
 
-   fwSendToUeApp(uetMsg);
+  fwSendToUeApp(uetMsg);
 
    RETVALUE(ROK);
 }
@@ -454,6 +458,7 @@ PUBLIC S16 handlSecModComp(ueSecModeComplete_t *data)
 
    ueSecModComp->ueId = data->ue_Id;
    ueSecModComp->imeisvPres = data->imeisv_pres;
+   ueSecModComp->noImeisv = data->noImeisv;
    if (ueSecModComp->imeisvPres) {
      cmMemcpy(ueSecModComp->imeisv, data->imeisv, FW_MAX_IMEISV_LEN);
    }

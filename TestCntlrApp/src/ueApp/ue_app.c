@@ -120,9 +120,9 @@ PRIVATE S16 ueProcUeConfigReq(UetMessage *pCfgReq, Pst *pst);
 PRIVATE S16 sendUeAppCfgCompInd(Void);
 PRIVATE S16 sendUeConfigCompInd(Void);
 PRIVATE S16 ueAppGetDrb(UeCb *ueCb, U8 *drb);
-PRIVATE S16 ueAppUtlBldIdentResp(UeCb*, CmNasEvnt**, U8);
+PRIVATE S16 ueAppUtlBldIdentResp(UeCb*, CmNasEvnt**, UeUetIdentRsp identityRsp);
 PRIVATE S16 ueAppUtlBldAuthResp(UeCb*, CmNasEvnt**, CmEmmAuthPrmRES*);
-PRIVATE S16 ueAppSndIdentResponse(UeCb *ueCb, U8 idType);
+PRIVATE S16 ueAppSndIdentResponse(UeCb *ueCb, UeUetIdentRsp identityRsp);
 PRIVATE S16 ueAppSndAuthResponse(UeCb *ueCb, UeSQN sqnRcvd,UeSQN maxSqnRcvd,UeRand randRcvd);
 PRIVATE S16 ueProcUeIdentResp(UetMessage *tfwMsg, Pst *pst);
 PRIVATE S16 ueProcUeAuthResp(UetMessage *tfwMsg, Pst *pst);
@@ -260,7 +260,7 @@ PRIVATE S16 ueAppUtlBldIdentResp
 (
    UeCb *ueCb,
    CmNasEvnt **ueEvt,
-   U8 idType
+   UeUetIdentRsp identityRsp
 )
 {
    CmEmmIdRsp *identRsp;
@@ -306,7 +306,7 @@ PRIVATE S16 ueAppUtlBldIdentResp
    emmMsg->msgId = CM_EMM_MSG_ID_RSP;
 
    /* Fill mandatory IEs */
-   switch (idType)
+   switch (identityRsp.idType)
    {
       case CM_EMM_MID_TYPE_IMSI:
       {
@@ -332,6 +332,24 @@ PRIVATE S16 ueAppUtlBldIdentResp
                   (U8 *)&ueCb->ueCtxt.ueImei, identRsp->msId.len);
          break;
       }
+      case CM_EMM_MID_TYPE_IMEISV:
+      {
+         UE_LOG_DEBUG(ueAppCb, "Filling IMEISV in Identity Response");
+         identRsp->msId.pres = TRUE;
+         identRsp->msId.type = CM_EMM_MID_TYPE_IMEISV;
+         identRsp->msId.len = CM_EMM_MAX_IMEI_DIGS;
+         identRsp->msId.evenOddInd = (((identRsp->msId.len) % 2) != 0) ? \
+                                       (UE_ODD):(UE_EVEN);
+         if (!identityRsp.idValPres) {
+           cmMemcpy((U8 *)&identRsp->msId.u.imei.id,
+                    (U8 *)&ueCb->ueCtxt.ueImei, identRsp->msId.len);
+         } else {
+           cmMemcpy((U8 *)&identRsp->msId.u.imei.id,
+                    identityRsp.idVal, identRsp->msId.len);
+         }
+         break;
+      }
+
       default:
       {
          UE_LOG_ERROR(ueAppCb, "Invalid idType");
@@ -418,7 +436,7 @@ PRIVATE S16 ueAppUtlBldAuthResp
  *       File:  ue_app.c
  *
  */
-PRIVATE S16 ueAppSndIdentResponse(UeCb *ueCb, U8 idType)
+PRIVATE S16 ueAppSndIdentResponse(UeCb *ueCb, UeUetIdentRsp identityRsp)
 {
    U8                   isPlainMsg   = TRUE;
    S16                  ret          = ROK;
@@ -433,9 +451,9 @@ PRIVATE S16 ueAppSndIdentResponse(UeCb *ueCb, U8 idType)
    UE_LOG_ENTERFN(ueAppCb);
 
    UE_LOG_DEBUG(ueAppCb, "Preparing Identity Response for ueId(%d), idType(%d)",
-                ueCb->ueId, idType);
+                ueCb->ueId, identityRsp.idType);
 
-   ret = ueAppUtlBldIdentResp(ueCb, &identRspEvnt, idType);
+   ret = ueAppUtlBldIdentResp(ueCb, &identRspEvnt, identityRsp);
    if (ROK != ret)
    {
       UE_LOG_DEBUG(ueAppCb, "Could not build Identity Response message");
@@ -678,7 +696,7 @@ PRIVATE S16 ueProcUeIdentResp(UetMessage *tfwMsg, Pst *pst)
       RETVALUE(ret);
    }
 
-   ret = ueAppSndIdentResponse(ueCb, tfwMsg->msg.ueUetIdentRsp.idType);
+   ret = ueAppSndIdentResponse(ueCb, tfwMsg->msg.ueUetIdentRsp);
    if (ret != ROK)
    {
       UE_LOG_ERROR(ueAppCb,
@@ -2647,29 +2665,32 @@ PRIVATE S16 ueAppUtlBldSecModComplete(UeCb *ueCb, UeUetSecModeComplete uetSmc, C
       CM_FREE_NASEVNT(ueEvt);
       RETVALUE(RFAILED);
    }
-
    (*ueEvt)->m.emmEvnt = emmMsg;
-   secModeCmp = &((*ueEvt)->m.emmEvnt->u.secModCmp);
-   if (ueCb->ueCtxt.imeisvReq) {
-     // Reset flag
-     ueCb->ueCtxt.imeisvReq = FALSE;
-     UE_LOG_DEBUG(ueAppCb, "Filling IMEISV in security mode complete");
-     secModeCmp->imeisv.pres = TRUE;
-     secModeCmp->imeisv.type = CM_EMM_MID_TYPE_IMEISV;
-     secModeCmp->imeisv.len = CM_EMM_MAX_IMEI_DIGS;
-     secModeCmp->imeisv.evenOddInd = (((secModeCmp->imeisv.len) % 2) != 0) ? \
-                                   (UE_ODD):(UE_EVEN);
+   if (!uetSmc.noImeisv) {
+     secModeCmp = &((*ueEvt)->m.emmEvnt->u.secModCmp);
+     // Check if MME requested for imeisv in smc
+     if (ueCb->ueCtxt.imeisvReq) {
+       // Reset flag
+       ueCb->ueCtxt.imeisvReq = FALSE;
+       UE_LOG_DEBUG(ueAppCb, "Filling IMEISV in security mode complete");
+       secModeCmp->imeisv.pres = TRUE;
+       secModeCmp->imeisv.type = CM_EMM_MID_TYPE_IMEISV;
+       secModeCmp->imeisv.len = CM_EMM_MAX_IMEI_DIGS;
+       secModeCmp->imeisv.evenOddInd = (((secModeCmp->imeisv.len) % 2) != 0) ? \
+                                     (UE_ODD):(UE_EVEN);
 
-     if (!uetSmc.imeisvPres) {
-       UE_LOG_DEBUG(ueAppCb, "Filling IMEISV from ueCb");
-       cmMemcpy((U8 *)&secModeCmp->imeisv.u.imei.id,
-                (U8 *)&ueCb->ueCtxt.ueImei, secModeCmp->imeisv.len);
-     } else {
-       UE_LOG_DEBUG(ueAppCb, "Filling IMEISV"
-                             "received from testscript");
-       cmMemcpy((U8 *)&secModeCmp->imeisv.u.imei.id,
-                uetSmc.imeisv, secModeCmp->imeisv.len);
-
+       if (!uetSmc.imeisvPres) {
+         UE_LOG_DEBUG(ueAppCb, "Filling IMEISV from ueCb");
+         cmMemcpy((U8 *)&secModeCmp->imeisv.u.imei.id,
+                  (U8 *)&ueCb->ueCtxt.ueImei, secModeCmp->imeisv.len);
+       } else {
+         UE_LOG_DEBUG(ueAppCb, "Filling IMEISV"
+                               "received from the test");
+         cmMemcpy((U8 *)&secModeCmp->imeisv.u.imei.id,
+                  uetSmc.imeisv, secModeCmp->imeisv.len);
+         // Reset flag
+         uetSmc.imeisvPres = FALSE;
+       }
      }
    }
 
