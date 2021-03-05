@@ -412,12 +412,19 @@ typedef struct _ueUetSecModeCmdInd
    U8 KNasVrfySts;
 }UeUetSecModeCmdInd;
 
-typedef struct _ueUetSecModeComplete
-{
-   U32 ueId;
-   Bool imeisvPres;
-   Bool noImeisv;
-   U8 imeisv[UE_IMEISV_LENGTH];
+typedef struct _ueUetSecModeComplete {
+  U32 ueId;
+  /* Flag to indicate if the imeisv
+   * value provided in the test to be
+   * used or it should be taken from
+   * ueCb
+   */
+  Bool imeisvPres;
+  /* Flag to indicate if imeisv should
+   * be included in the msg or not
+   */
+  Bool noImeisv;
+  U8 imeisv[UE_IMEISV_LENGTH];
 }UeUetSecModeComplete;
 
 typedef struct _ueUetSecModeReject
