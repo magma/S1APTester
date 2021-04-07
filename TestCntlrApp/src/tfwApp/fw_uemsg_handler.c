@@ -677,6 +677,7 @@ PUBLIC S16 ueSecModCmdInd
       {
          ueSecModeComplete_t *secModComp = NULLP;
          FW_ALLOC_MEM(fwCb, &secModComp, sizeof(ueSecModeComplete_t));
+         cmMemset((U8*)secModComp, 0, sizeof(ueSecModeComplete_t));
          secModComp->ue_Id = uetSecModCmdInd->msg.ueUetSecModeCmdInd.ueId;
          handlSecModComp(secModComp);
          ueIdCb->state = UE_SEC_MOD_COMPLETE_DONE;

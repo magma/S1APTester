@@ -26,6 +26,7 @@ extern "C" {
 #endif   /* __cplusplus  */
 
 #define UE_IMSI_LENGTH 15
+#define UE_IMEISV_LENGTH 16
 #define CM_EMM_MAX_MOBILE_ID_DIGS 15
 #define MAX_APN_LEN 50
 #define OP_KEY_LEN 16
@@ -356,10 +357,14 @@ typedef struct _ueUetIdentReqInd
    U8 idType;
 }UeUetIdentReqInd;
 
-typedef struct _ueUetIdentRsp
-{
-   U32 ueId;
-   U8 idType;
+typedef struct _ueUetIdentRsp {
+  U32 ueId;
+  U8 idType;
+  Bool idValPres;
+  /* As of now we consider only IMSI/IMEI/IMEISV
+   * so UE_IMEISV_LENGTH=16 should be sufficient
+   */
+  U8 idVal[UE_IMEISV_LENGTH];
 }UeUetIdentRsp;
 
 typedef struct _ueUetAuthReqInd
@@ -407,9 +412,19 @@ typedef struct _ueUetSecModeCmdInd
    U8 KNasVrfySts;
 }UeUetSecModeCmdInd;
 
-typedef struct _ueUetSecModeComplete
-{
-   U32 ueId;
+typedef struct _ueUetSecModeComplete {
+  U32 ueId;
+  /* Flag to indicate if the imeisv
+   * value provided in the test to be
+   * used or it should be taken from
+   * ueCb
+   */
+  Bool imeisvPres;
+  /* Flag to indicate if imeisv should
+   * be included in the msg or not
+   */
+  Bool noImeisv;
+  U8 imeisv[UE_IMEISV_LENGTH];
 }UeUetSecModeComplete;
 
 typedef struct _ueUetSecModeReject

@@ -31,6 +31,7 @@ extern "C" {
 /* EMM Cause Values */
 #define TFW_EMM_CAUSE_IMSI_UNKNOWN                    0x02
 #define TFW_EMM_CAUSE_ILLEGAL_UE                      0x03
+#define TFW_EMM_CAUSE_IMEI_NOT_ACCEPTED               0x05
 #define TFW_EMM_CAUSE_ILLEGAL_ME                      0x06
 #define TFW_EMM_CAUSE_EPS_SVC_NA                      0x07
 #define TFW_EMM_CAUSE_NON_EPS_SVC_NA                  0x08
@@ -103,6 +104,7 @@ extern "C" {
 // Authentication failure param AUTS length
 #define TFW_AUTS_LEN 14
 #define MAX_FAILED_ERABS 11
+#define FW_MAX_IMEISV_LEN 16
 #ifdef TFW_STUB /* definitions only required by test controller */
 
 /* Mobile Identity types */
