@@ -58,6 +58,7 @@ typedef enum _nbMsgTypes
    NB_NW_INITIATED_ASSOC_DOWN,
    NB_DELAY_ERAB_SETUP_RSP,
    NB_DROP_RA,
+   NB_SEND_ERR_IND,
    NB_UNKNOWN_MSG_TYPE
 }NbMsgTypes;
 
@@ -453,6 +454,11 @@ typedef struct _nbDropRA {
   Bool isDropRA;
 } NbDropRA;
 
+typedef struct _nbSendErrorInd{
+  U32 ueId;
+  Bool isSendErrorInd;
+} NbSendErrorInd;
+
 typedef struct _nbtMsg
 {
    NbMsgTypes msgType;
@@ -488,6 +494,7 @@ typedef struct _nbtMsg
       NbMmeConfigTrnsf    mmeConfigTrnsf;
       NbDelayErabSetupRsp delayErabSetupRsp;
       NbDropRA dropRA;
+      NbSendErrorInd sendErrorInd;
    }t;
 }NbtMsg;
 

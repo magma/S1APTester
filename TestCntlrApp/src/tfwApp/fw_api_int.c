@@ -110,6 +110,7 @@ PUBLIC S16
 handleStdAloneActvDfltEpsBearerContextRej(ueActvDfltEpsBearerCtxtRej_t *data);
 PRIVATE Void handleDelayErabSetupRsp(UeDelayErabSetupRsp *data);
 PRIVATE Void handleDropRouterAdv(UeDropRA *data);
+PRIVATE Void handleSendErrorInd(NbSendErrInd* data);
 PUBLIC FwCb gfwCb;
 
 /* Adding UEID, epsupdate type, active flag into linked list for
@@ -2439,6 +2440,20 @@ PUBLIC S16 tfwApi
          }
          break;
       }
+      case NB_SEND_ERROR_IND:
+      {
+         FW_LOG_DEBUG(fwCb, "Process NB_SEND_ERROR_IND ");
+         if (fwCb->nbState == ENB_IS_UP)
+         {
+            handleSendErrorInd((NbSendErrInd*)msg);
+         }
+         else
+         {
+            FW_LOG_ERROR(fwCb, "Failed To Prcess NB_SEND_ERROR_IND:ENBAPP IS NOT UP");
+            ret = RFAILED;
+         }
+         break;
+      }
 
      default:
       {
@@ -3496,3 +3511,44 @@ PRIVATE Void handleDelayErabSetupRsp(UeDelayErabSetupRsp *data) {
   fwSendToNbApp(msgReq);
   RETVOID;
 }
+
+/*
+ *
+ *   Fun:   handleSendErrorInd
+ *
+ *   Desc:  This function is used to send Error Indication to MME
+ *
+ *   Ret:   None
+ *
+ *   Notes: None
+ *
+ *   File:  fw_api_int.c
+ *
+ */
+PRIVATE Void handleSendErrorInd(NbSendErrInd* data)
+{
+   FwCb *fwCb = NULLP;
+   NbtRequest *msgReq = NULLP;
+
+   FW_GET_CB(fwCb);
+   FW_LOG_ENTERFN(fwCb);
+
+   if(SGetSBuf(fwCb->init.region, fwCb->init.pool,
+       (Data **)&msgReq, (Size)sizeof(NbtRequest)) == ROK)
+   {
+      cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
+   }
+   else
+   {
+      FW_LOG_ERROR(fwCb, "Failed to allocate memory");
+      RETVOID;
+   }
+
+   msgReq->msgType = NB_SEND_ERROR_IND;
+   msgReq->t.sendErrorInd.ueId = data->ue_Id;
+   msgReq->t.sendErrorInd.isSendErrorInd = data->flag;
+
+   fwSendToNbApp(msgReq);
+   RETVOID;
+}
+

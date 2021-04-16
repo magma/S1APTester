@@ -483,6 +483,10 @@ typedef struct _dropRA {
   Bool isDropRA;
 } DropRA;
 
+typedef struct _sendErrorInd {
+  Bool isSendErrorInd;
+} SendErrorInd;
+
 typedef struct _nbRouterSolicitCb {
 #define NB_EGTP_MSG_SZ 1024
   U32 ueId;
@@ -535,6 +539,7 @@ typedef struct _nbCb
    DelayErabSetupRsp         delayErabSetupRsp[NB_MAX_UE_SUPPORTED];
    DropRA                       dropRA[NB_MAX_UE_SUPPORTED];
    NbRouterSolicitCb            *rsCb[NB_MAX_UE_SUPPORTED];
+   SendErrorInd              sendErrorInd[NB_MAX_UE_SUPPORTED];
 #ifdef MULTI_ENB_SUPPORT
    Bool                      x2HoDone;
 #endif

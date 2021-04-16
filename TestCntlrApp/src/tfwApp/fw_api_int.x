@@ -127,7 +127,8 @@ typedef enum {
    UE_STANDALONE_ACTV_DEFAULT_EPS_BEARER_CNTXT_REJECT,
    UE_SET_DELAY_ERAB_SETUP_RSP,
    UE_ROUTER_ADV_IND,
-   UE_SET_DROP_ROUTER_ADV
+   UE_SET_DROP_ROUTER_ADV,
+   NB_SEND_ERROR_IND,
 }tfwCmd;
 
 typedef enum
@@ -1339,6 +1340,12 @@ typedef struct ueDropInitCtxtSetup
    Bool flag;
    U32 tmrVal;
 }UeDropInitCtxtSetup;
+
+typedef struct nbSendErrInd {
+  U32 ue_Id;
+  Bool flag;
+} NbSendErrInd;
+
 typedef struct ueDelayInitCtxtSetupRsp
 {
    U32 ue_Id;

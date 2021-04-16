@@ -56,6 +56,7 @@ PUBLIC S16 NbEnbInitCtxtSetupFail(NbInitCtxtSetupFail *initCtxtSetupFail);
 EXTERN S16 nbIfmDamTnlCreatReq(NbDamTnlInfo*);
 EXTERN S16 nbIfmDamUeRelReq(U32, U8);
 EXTERN S16 nbAppRouteInit(U32 selfIp, S8*);
+PUBLIC S16 NbEnbSendErrorInd(NbSendErrorInd*);
 
 EXTERN NbDamCb nbDamCb;
 
@@ -1704,5 +1705,27 @@ PUBLIC S16 NbEnbDropRA(NbDropRA *dropRA) {
   NB_LOG_DEBUG(&nbCb, "Recieved an indication to Drop RA");
   nbCb.dropRA[(dropRA->ueId) - 1].isDropRA = dropRA->isDropRA;
 
+  RETVALUE(ROK);
+}
+
+/*
+ * @details This function marks a ue to send error indication
+ *
+ * Function: NbEnbSendErrorInd
+ *
+ *
+ * @param[in]  NbSendErrorInd
+ * @return  S16
+ *          -# Success : ROK
+ */
+PUBLIC S16 NbEnbSendErrorInd(NbSendErrorInd* sendErrInd) {
+  NB_LOG_ENTERFN(&nbCb);
+
+  if (NULLP == sendErrInd) {
+    NB_LOG_ERROR(&nbCb, "Received empty(NULL) request");
+    RETVALUE(RFAILED);
+  }
+  nbCb.sendErrorInd[(sendErrInd->ueId) - 1].isSendErrorInd =
+      sendErrInd->isSendErrorInd;
   RETVALUE(ROK);
 }
