@@ -50,8 +50,8 @@ extern "C" {
 #include "gen.x"           /* General */
 #include "ssi.x"           /* System services */
 
-#include "cm_tkns.x"       /* Common tokens */
 #include "cm5.x"           /* Common timer library */
+#include "cm_tkns.x"       /* Common tokens */
 #include "cm_mblk.x"       /* Common memory allocation */
 #include "cm_llist.x"      /* Common link list */
 #include "cm_hash.x"       /* Common hashlist */
@@ -62,13 +62,11 @@ extern "C" {
 #include "hit.h"
 #include "sct.h"
 /* header include files related to lower layer interfaces */
-
 #include "szt.h"           /* S1AP RRM control Interface */
 #include "szt_asn.h"
 #include "nb_lnb.h"
 #include "egt.h"           /* DATA app, GTP interface   */
 #include "nbu.h"
-
 #ifdef SZTV3
 #include "szt_3gasn.h"
 #endif

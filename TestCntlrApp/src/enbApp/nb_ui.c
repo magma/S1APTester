@@ -270,7 +270,7 @@ PUBLIC S16 NbUiNbtMsgReq
 
       case NB_DROP_ERAB_SETUP_REQ: {
         if(ROK != NbHandleDropErabSetupReq(&req->t.dropErabSetupReq)) {
-          NB_LOG_ERROR(&nbCb, "Failed to process Drop Erab Setup Rsp "\
+          NB_LOG_ERROR(&nbCb, "Failed to process Drop Erab Setup Req "\
                      "from TFW");
         }
         break;

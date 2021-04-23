@@ -2445,7 +2445,7 @@ PUBLIC S16 tfwApi
         if (fwCb->nbState == ENB_IS_UP) {
           handleDropErabSetupReq((DropErabSetupReq_t *)msg);
         } else {
-          FW_LOG_ERROR(fwCb, "Failed to process ERAB Setup Rsp delay request:ENBAPP IS NOT UP");
+          FW_LOG_ERROR(fwCb, "Failed to process UE_DROP_ERAB_SETUP_REQ:ENBAPP IS NOT UP");
           ret = RFAILED;
         }
         break;
@@ -2589,12 +2589,10 @@ PRIVATE S16 handlErrIndMsg(fwNbErrIndMsg_t *data)
    /* copying all optional feilds */
    msgReq->msgType = NB_ERR_IND_MSG;
    msgReq->t.s1ErrIndMsg.isUeAssoc = data->isUeAssoc;
-
    if(data->isUeAssoc == TRUE)
    {
       msgReq->t.s1ErrIndMsg.ue_Id = data->ue_Id;
    }
-
 #ifdef MULTI_ENB_SUPPORT
    msgReq->t.s1ErrIndMsg.enbId = data->enbId;
 #endif

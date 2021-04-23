@@ -3731,13 +3731,11 @@ PUBLIC S16  NbBuildAndSndErrIndMsg(NbErrIndMsg *s1ErrInd)
       RETVALUE(RFAILED);
    }
 
-   NB_LOG_ERROR(&nbCb, "In NbBuildAndSndErrIndMsg");
    if (nbFillErrIndMsg(s1ErrInd,&(uDatEvnt.pdu)) != ROK)
    {
       RETVALUE(RFAILED);
    }
 
-   NB_LOG_ERROR(&nbCb, "Filled ErrIndMsg");
    uDatEvnt.transId.pres = PRSNT_NODEF;
    uDatEvnt.transId.val = 1;
    uDatEvnt.peerId.pres = PRSNT_NODEF;
