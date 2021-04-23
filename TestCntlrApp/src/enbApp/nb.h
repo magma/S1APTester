@@ -50,8 +50,8 @@ extern "C" {
 #include "gen.x"           /* General */
 #include "ssi.x"           /* System services */
 
-#include "cm5.x"           /* Common timer library */
 #include "cm_tkns.x"       /* Common tokens */
+#include "cm5.x"           /* Common timer library */
 #include "cm_mblk.x"       /* Common memory allocation */
 #include "cm_llist.x"      /* Common link list */
 #include "cm_hash.x"       /* Common hashlist */
@@ -62,11 +62,13 @@ extern "C" {
 #include "hit.h"
 #include "sct.h"
 /* header include files related to lower layer interfaces */
+
 #include "szt.h"           /* S1AP RRM control Interface */
 #include "szt_asn.h"
 #include "nb_lnb.h"
 #include "egt.h"           /* DATA app, GTP interface   */
 #include "nbu.h"
+
 #ifdef SZTV3
 #include "szt_3gasn.h"
 #endif
@@ -86,7 +88,6 @@ extern "C" {
 #include "egt.x"           /* DATA app, GTP interface   */
 #include "nbu.x"
 #include "ss_diag.h"
-
 
 #define NB_MAX_HASH_SIZE        1024
 #if (defined(NB_DBG_CIRLOG) || defined(SS_SEGV_SIG_HDLR))
@@ -483,9 +484,9 @@ typedef struct _dropRA {
   Bool isDropRA;
 } DropRA;
 
-typedef struct _sendErrorInd {
-  Bool isSendErrorInd;
-} SendErrorInd;
+typedef struct _dropErabSetupReq {
+  Bool isDropErabSetupReq;
+} DropErabSetupReq;
 
 typedef struct _nbRouterSolicitCb {
 #define NB_EGTP_MSG_SZ 1024
@@ -539,7 +540,7 @@ typedef struct _nbCb
    DelayErabSetupRsp         delayErabSetupRsp[NB_MAX_UE_SUPPORTED];
    DropRA                       dropRA[NB_MAX_UE_SUPPORTED];
    NbRouterSolicitCb            *rsCb[NB_MAX_UE_SUPPORTED];
-   SendErrorInd              sendErrorInd[NB_MAX_UE_SUPPORTED];
+   DropErabSetupReq          dropErabSetupReq[NB_MAX_UE_SUPPORTED];
 #ifdef MULTI_ENB_SUPPORT
    Bool                      x2HoDone;
 #endif

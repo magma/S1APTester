@@ -128,7 +128,7 @@ typedef enum {
    UE_SET_DELAY_ERAB_SETUP_RSP,
    UE_ROUTER_ADV_IND,
    UE_SET_DROP_ROUTER_ADV,
-   NB_SEND_ERROR_IND,
+   DROP_ERAB_SETUP_REQ
 }tfwCmd;
 
 typedef enum
@@ -992,6 +992,7 @@ typedef struct fwNbErrIndMsg
 {
    U8   isUeAssoc;
    U32  ue_Id;
+   U32 enbId;
    ErrCause cause;
    FwCriticalityDiag criticalityDiag;
 }fwNbErrIndMsg_t;
@@ -1341,10 +1342,10 @@ typedef struct ueDropInitCtxtSetup
    U32 tmrVal;
 }UeDropInitCtxtSetup;
 
-typedef struct nbSendErrInd {
+typedef struct dropErabSetupReq {
   U32 ue_Id;
   Bool flag;
-} NbSendErrInd;
+} DropErabSetupReq_t;
 
 typedef struct ueDelayInitCtxtSetupRsp
 {

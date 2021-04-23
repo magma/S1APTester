@@ -52,11 +52,11 @@ PUBLIC S16 NbEnbErabRelIndHdl(NbuErabRelIndList *erabRelInd);
 PUBLIC S16 NbEnbErabRelRspHdl(NbErabRelRsp *erabRelInd);
 PUBLIC S16 NbEnbNasNonDel(NbNasNonDel *nasNonDel);
 PUBLIC S16 NbEnbInitCtxtSetupFail(NbInitCtxtSetupFail *initCtxtSetupFail);
+PUBLIC S16 NbHandleDropErabSetupReq(NbDropErabSetupReq *dropErabSetupReq);
 
 EXTERN S16 nbIfmDamTnlCreatReq(NbDamTnlInfo*);
 EXTERN S16 nbIfmDamUeRelReq(U32, U8);
 EXTERN S16 nbAppRouteInit(U32 selfIp, S8*);
-PUBLIC S16 NbEnbSendErrorInd(NbSendErrorInd*);
 
 EXTERN NbDamCb nbDamCb;
 
@@ -1708,24 +1708,22 @@ PUBLIC S16 NbEnbDropRA(NbDropRA *dropRA) {
   RETVALUE(ROK);
 }
 
-/*
- * @details This function marks a ue to send error indication
+/* @details This function marks a ue for dropping Erab Setup Request
  *
- * Function: NbEnbSendErrorInd
+ * Function: NbHandleDropErabSetupReq
  *
- *
- * @param[in]  NbSendErrorInd
+ * @param[in]  NbHandleDropErabSetupReq
  * @return  S16
  *          -# Success : ROK
  */
-PUBLIC S16 NbEnbSendErrorInd(NbSendErrorInd* sendErrInd) {
-  NB_LOG_ENTERFN(&nbCb);
+PUBLIC S16 NbHandleDropErabSetupReq(NbDropErabSetupReq *dropErabSetupReq) {
+   NB_LOG_ENTERFN(&nbCb);
 
-  if (NULLP == sendErrInd) {
-    NB_LOG_ERROR(&nbCb, "Received empty(NULL) request");
-    RETVALUE(RFAILED);
-  }
-  nbCb.sendErrorInd[(sendErrInd->ueId) - 1].isSendErrorInd =
-      sendErrInd->isSendErrorInd;
-  RETVALUE(ROK);
-}
+   if (NULLP == dropErabSetupReq) {
+     NB_LOG_ERROR(&nbCb, "Recieved empty(NULL) request");
+     RETVALUE(RFAILED);
+   }
+   nbCb.dropErabSetupReq[(dropErabSetupReq->ueId) - 1]
+       .isDropErabSetupReq = dropErabSetupReq->isDropErabSetupReqEnable;
+   RETVALUE(ROK);
+ }

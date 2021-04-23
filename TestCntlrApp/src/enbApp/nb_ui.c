@@ -54,7 +54,7 @@ EXTERN S16 NbMultiEnbCfgReq(NbMultiEnbConfigReq*);
 EXTERN S16 NbUiNbuHdlUeIpInfoRej(Pst *, NbuUeIpInfoRej *);
 EXTERN S16 NbEnbDelayErabSetupRsp(NbDelayErabSetupRsp  *);
 EXTERN S16 NbEnbDropRA(NbDropRA *);
-EXTERN S16 NbEnbSendErrorInd(NbSendErrorInd*);
+EXTERN S16 NbHandleDropErabSetupReq(NbDropErabSetupReq  *);
 
 int atoi(const char *nptr);
 
@@ -268,10 +268,10 @@ PUBLIC S16 NbUiNbtMsgReq
         break;
       }
 
-      case NB_SEND_ERROR_IND: {
-        if(ROK != NbEnbSendErrorInd(&req->t.dropInitCtxtSetup)) {
-          NB_LOG_ERROR(&nbCb, "Failed to process SEND_ERROR_IND"\
-                       "from TFW");
+      case NB_DROP_ERAB_SETUP_REQ: {
+        if(ROK != NbHandleDropErabSetupReq(&req->t.dropErabSetupReq)) {
+          NB_LOG_ERROR(&nbCb, "Failed to process Drop Erab Setup Rsp "\
+                     "from TFW");
         }
         break;
       }
