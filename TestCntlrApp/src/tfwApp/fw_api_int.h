@@ -65,6 +65,11 @@ extern "C" {
 #define TFW_EMM_CAUSE_INV_MSG_IN_PROT_STATE           0x65
 #define TFW_EMM_CAUSE_PROT_ERR_UNSP                   0x6f
 
+/* ESM Cause Values */
+#define TFW_ESM_CAUSE_MULTIPLE_PDN_CON_FOR_A_GIVEN_APN_NA   0x37
+#define TFW_ESM_CAUSE_MISSING_OR_UNKNOWN_APN   0x1B
+#define TFW_ESM_CAUSE_UNKNOWN_PDN_TYPE   0x1C
+
 /* SCTP ABORT Cause/Reason : RFC4960, Section 3.3.10/3.3.10.12 */
 /* The upper layer can specify this cause. SCTP transports it transparently.
  * The receiving SCTP entity may deliver it to upper layer protocol. */
