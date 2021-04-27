@@ -110,6 +110,7 @@ PUBLIC S16
 handleStdAloneActvDfltEpsBearerContextRej(ueActvDfltEpsBearerCtxtRej_t *data);
 PRIVATE Void handleDelayErabSetupRsp(UeDelayErabSetupRsp *data);
 PRIVATE Void handleDropRouterAdv(UeDropRA *data);
+PRIVATE Void handleDropErabSetupReq(DropErabSetupReq_t *data);
 PUBLIC FwCb gfwCb;
 
 /* Adding UEID, epsupdate type, active flag into linked list for
@@ -2439,6 +2440,16 @@ PUBLIC S16 tfwApi
          }
          break;
       }
+      case DROP_ERAB_SETUP_REQ: {
+        FW_LOG_DEBUG(fwCb, "Process UE_DROP_ERAB_SETUP_REQ ");
+        if (fwCb->nbState == ENB_IS_UP) {
+          handleDropErabSetupReq((DropErabSetupReq_t *)msg);
+        } else {
+          FW_LOG_ERROR(fwCb, "Failed to process UE_DROP_ERAB_SETUP_REQ:ENBAPP IS NOT UP");
+          ret = RFAILED;
+        }
+        break;
+      }
 
      default:
       {
@@ -2582,6 +2593,9 @@ PRIVATE S16 handlErrIndMsg(fwNbErrIndMsg_t *data)
    {
       msgReq->t.s1ErrIndMsg.ue_Id = data->ue_Id;
    }
+#ifdef MULTI_ENB_SUPPORT
+   msgReq->t.s1ErrIndMsg.enbId = data->enbId;
+#endif
    if(data->cause.pres == TRUE)
    {
       msgReq->t.s1ErrIndMsg.causePres = data->cause.pres;
@@ -3492,6 +3506,42 @@ PRIVATE Void handleDelayErabSetupRsp(UeDelayErabSetupRsp *data) {
   msgReq->t.delayErabSetupRsp.ueId = data->ue_Id;
   msgReq->t.delayErabSetupRsp.isDelayErabSetupRsp = data->flag;
   msgReq->t.delayErabSetupRsp.tmrVal = data->tmrVal;
+
+  fwSendToNbApp(msgReq);
+  RETVOID;
+}
+
+/*
+ *
+ *   Fun:   handleDropErabSetupReq
+ *
+ *   Desc:  This function is used to drop ErabSetupReq
+ *
+ *   Ret:   None
+ *
+ *   Notes: None
+ *
+ *   File:  fw_api_int.c
+ *
+ */
+
+PRIVATE Void handleDropErabSetupReq(DropErabSetupReq_t * data) {
+  FwCb *fwCb = NULLP;
+  NbtRequest *msgReq = NULLP;
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  if (SGetSBuf(fwCb->init.region, fwCb->init.pool, (Data **)&msgReq,
+               (Size)sizeof(NbtRequest)) == ROK) {
+    cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
+  } else {
+    FW_LOG_ERROR(fwCb, "Failed to allocate memory");
+    RETVOID;
+  }
+  msgReq->msgType = NB_DROP_ERAB_SETUP_REQ;
+  msgReq->t.dropErabSetupReq.ueId = data->ue_Id;
+  msgReq->t.dropErabSetupReq.isDropErabSetupReqEnable = data->flag;
 
   fwSendToNbApp(msgReq);
   RETVOID;

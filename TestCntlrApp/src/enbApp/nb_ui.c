@@ -54,6 +54,7 @@ EXTERN S16 NbMultiEnbCfgReq(NbMultiEnbConfigReq*);
 EXTERN S16 NbUiNbuHdlUeIpInfoRej(Pst *, NbuUeIpInfoRej *);
 EXTERN S16 NbEnbDelayErabSetupRsp(NbDelayErabSetupRsp  *);
 EXTERN S16 NbEnbDropRA(NbDropRA *);
+EXTERN S16 NbHandleDropErabSetupReq(NbDropErabSetupReq  *);
 
 int atoi(const char *nptr);
 
@@ -263,6 +264,14 @@ PUBLIC S16 NbUiNbtMsgReq
         if (ROK != NbEnbDropRA(&req->t.dropRA)) {
           NB_LOG_ERROR(&nbCb, "Failed to process Drop RA Indication  "
                           "from TFW");
+        }
+        break;
+      }
+
+      case NB_DROP_ERAB_SETUP_REQ: {
+        if(ROK != NbHandleDropErabSetupReq(&req->t.dropErabSetupReq)) {
+          NB_LOG_ERROR(&nbCb, "Failed to process Drop Erab Setup Req "\
+                     "from TFW");
         }
         break;
       }

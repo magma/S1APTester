@@ -87,7 +87,6 @@ extern "C" {
 #include "nbu.x"
 #include "ss_diag.h"
 
-
 #define NB_MAX_HASH_SIZE        1024
 #if (defined(NB_DBG_CIRLOG) || defined(SS_SEGV_SIG_HDLR))
 #include "wr_dbg_log.h"
@@ -483,6 +482,10 @@ typedef struct _dropRA {
   Bool isDropRA;
 } DropRA;
 
+typedef struct _dropErabSetupReq {
+  Bool isDropErabSetupReq;
+} DropErabSetupReq;
+
 typedef struct _nbRouterSolicitCb {
 #define NB_EGTP_MSG_SZ 1024
   U32 ueId;
@@ -535,6 +538,7 @@ typedef struct _nbCb
    DelayErabSetupRsp         delayErabSetupRsp[NB_MAX_UE_SUPPORTED];
    DropRA                       dropRA[NB_MAX_UE_SUPPORTED];
    NbRouterSolicitCb            *rsCb[NB_MAX_UE_SUPPORTED];
+   DropErabSetupReq          dropErabSetupReq[NB_MAX_UE_SUPPORTED];
 #ifdef MULTI_ENB_SUPPORT
    Bool                      x2HoDone;
 #endif

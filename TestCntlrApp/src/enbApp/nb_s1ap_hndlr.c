@@ -2300,6 +2300,14 @@ PRIVATE S16 nbHandleRabSetupMsg(NbUeCb *ueCb, S1apPdu *pdu) {
         nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId);
       }
     }
+    // Check if erab setup req needs to be dropped
+    if (nbCb.dropErabSetupReq[(ueCb->ueId) - 1].isDropErabSetupReq) {
+      // Reset isDropErabSetupReq flag
+      nbCb.dropErabSetupReq[(ueCb->ueId) - 1].isDropErabSetupReq = FALSE;
+      NB_LOG_DEBUG(&nbCb,
+                 "Dropping E-RAB Setup Request message\n");
+      RETVALUE(retVal);
+    }
     // Start a timer to delay sending of erab setup rsp
     if (nbCb.delayErabSetupRsp[(ueCb->ueId) - 1].isDelayErabSetupRsp) {
       retVal = nbStartDelayTimerForErabRsp(
@@ -3732,7 +3740,9 @@ PUBLIC S16  NbBuildAndSndErrIndMsg(NbErrIndMsg *s1ErrInd)
    uDatEvnt.transId.val = 1;
    uDatEvnt.peerId.pres = PRSNT_NODEF;
    uDatEvnt.peerId.val = mmeCb->mmeId;
-
+   #ifdef MULTI_ENB_SUPPORT
+   uDatEvnt.enbId = s1ErrInd->enbId;
+   #endif
    /* Send the pdu to the MME */
    if((NbIfmS1apSndMgmtMsg(&uDatEvnt)) != ROK)
    {

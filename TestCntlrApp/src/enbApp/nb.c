@@ -52,6 +52,7 @@ PUBLIC S16 NbEnbErabRelIndHdl(NbuErabRelIndList *erabRelInd);
 PUBLIC S16 NbEnbErabRelRspHdl(NbErabRelRsp *erabRelInd);
 PUBLIC S16 NbEnbNasNonDel(NbNasNonDel *nasNonDel);
 PUBLIC S16 NbEnbInitCtxtSetupFail(NbInitCtxtSetupFail *initCtxtSetupFail);
+PUBLIC S16 NbHandleDropErabSetupReq(NbDropErabSetupReq *dropErabSetupReq);
 
 EXTERN S16 nbIfmDamTnlCreatReq(NbDamTnlInfo*);
 EXTERN S16 nbIfmDamUeRelReq(U32, U8);
@@ -1706,3 +1707,23 @@ PUBLIC S16 NbEnbDropRA(NbDropRA *dropRA) {
 
   RETVALUE(ROK);
 }
+
+/* @details This function marks a ue for dropping Erab Setup Request
+ *
+ * Function: NbHandleDropErabSetupReq
+ *
+ * @param[in]  NbHandleDropErabSetupReq
+ * @return  S16
+ *          -# Success : ROK
+ */
+PUBLIC S16 NbHandleDropErabSetupReq(NbDropErabSetupReq *dropErabSetupReq) {
+   NB_LOG_ENTERFN(&nbCb);
+
+   if (NULLP == dropErabSetupReq) {
+     NB_LOG_ERROR(&nbCb, "Recieved empty(NULL) request");
+     RETVALUE(RFAILED);
+   }
+   nbCb.dropErabSetupReq[(dropErabSetupReq->ueId) - 1]
+       .isDropErabSetupReq = dropErabSetupReq->isDropErabSetupReqEnable;
+   RETVALUE(ROK);
+ }
