@@ -44,6 +44,7 @@
 #include "rl_common.h"
 #include "lfw.h"
 #include "uet.h"
+#include "ue_emm.h"
 #include "nbt.h"
 #include "fw_api_int.h"
 #include "fw.h"
@@ -107,9 +108,11 @@ PRIVATE Void
 handleUeInitCtxtSetupRspFailedErabs(UeInitCtxtSetupFailedErabs *data);
 PUBLIC S16
 handleStdAloneActvDfltEpsBearerContextRej(ueActvDfltEpsBearerCtxtRej_t *data);
+PRIVATE Void handleDelayErabSetupRsp(UeDelayErabSetupRsp *data);
 PRIVATE Void handleDropRouterAdv(UeDropRA *data);
 PRIVATE S16
 handleEnableOrDisableActvDfltBerReq(UeDropActvDefaultEpsBearCtxtReq_t *data);
+PRIVATE Void handleDropErabSetupReq(DropErabSetupReq_t *data);
 PUBLIC FwCb gfwCb;
 
 /* Adding UEID, epsupdate type, active flag into linked list for
@@ -406,21 +409,25 @@ PUBLIC S16 handleActvDfltEpsBearerContextRej(ueActvDfltEpsBearerCtxtRej_t *data)
  *   File:  fw_api_int.c
  *
  */
-PUBLIC S16 handlIdentResp(ueIdentityResp_t *data)
-{
-   FwCb *fwCb = NULLP;
-   UetMessage *uetMsg = NULLP;
+PUBLIC S16 handlIdentResp(ueIdentityResp_t *data) {
+  FwCb *fwCb = NULLP;
+  UetMessage *uetMsg = NULLP;
 
-   FW_GET_CB(fwCb);
-   FW_LOG_ENTERFN(fwCb);
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
 
-   FW_ALLOC_MEM(fwCb, &uetMsg, sizeof(UetMessage));
-   uetMsg->msgType = UE_IDENTITY_RES_TYPE;
+  FW_ALLOC_MEM(fwCb, &uetMsg, sizeof(UetMessage));
+  uetMsg->msgType = UE_IDENTITY_RES_TYPE;
 
-   uetMsg->msg.ueUetIdentRsp.ueId = data->ue_Id;
-   uetMsg->msg.ueUetIdentRsp.idType = data->idType;
+  uetMsg->msg.ueUetIdentRsp.ueId = data->ue_Id;
+  uetMsg->msg.ueUetIdentRsp.idType = data->idType;
+  uetMsg->msg.ueUetIdentRsp.idValPres = data->idValPres;
+  if (data->idValPres) {
+    cmMemcpy(uetMsg->msg.ueUetIdentRsp.idVal, data->idVal,
+       sizeof(data->idVal));
+  }
 
-   fwSendToUeApp(uetMsg);
+  fwSendToUeApp(uetMsg);
 
    RETVALUE(ROK);
 }
@@ -450,9 +457,14 @@ PUBLIC S16 handlSecModComp(ueSecModeComplete_t *data)
    FW_ALLOC_MEM(fwCb, &uetMsg, sizeof(UetMessage));
    uetMsg->msgType = UE_SEC_MOD_CMP_TYPE;
    ueSecModComp = &uetMsg->msg.ueUetSecModeComplete;
+   cmMemset((U8 *)ueSecModComp, 0, sizeof(UeUetSecModeComplete));
 
    ueSecModComp->ueId = data->ue_Id;
-
+   ueSecModComp->imeisvPres = data->imeisv_pres;
+   ueSecModComp->noImeisv = data->noImeisv;
+   if (ueSecModComp->imeisvPres) {
+     cmMemcpy(ueSecModComp->imeisv, data->imeisv, FW_MAX_IMEISV_LEN);
+   }
    fwSendToUeApp(uetMsg);
    FW_LOG_EXITFN(fwCb, ROK);
 }
@@ -808,6 +820,11 @@ PUBLIC S16 handleAttachReq(ueAttachRequest_t *data)
    ueAttachReq->mIdType = data->mIdType;
    ueAttachReq->epsAtchType.type = data->epsAttachType;
    ueAttachReq->useOldSecCtxt = data->useOldSecCtxt;
+
+   if ((data->mIdType == CM_EMM_MID_TYPE_IMSI) && (data->imsi_len > 0)) {
+     cmMemcpy(ueAttachReq->imsi, data->imsi, data->imsi_len);
+     ueAttachReq->imsi_len = data->imsi_len;
+   }
 
    /* optional feilds */
    if (data->guti_pr.pres == TRUE)
@@ -2405,6 +2422,16 @@ PUBLIC S16 tfwApi
             (ueActvDfltEpsBearerCtxtRej_t *)msg);
         break;
       }
+      case UE_SET_DELAY_ERAB_SETUP_RSP: {
+        FW_LOG_DEBUG(fwCb, "Process Delay ERAB_SETUP_RSP Request ");
+        if (fwCb->nbState == ENB_IS_UP) {
+          handleDelayErabSetupRsp((UeDelayErabSetupRsp*)msg);
+        } else {
+          FW_LOG_ERROR(fwCb, "Failed to process ERAB Setup Rsp delay request:ENBAPP IS NOT UP");
+          ret = RFAILED;
+        }
+        break;
+      }
       case UE_SET_DROP_ROUTER_ADV: {
          FW_LOG_DEBUG(fwCb, "Process Drop ROUTER_ADV Request ");
          if (fwCb->nbState == ENB_IS_UP) {
@@ -2415,11 +2442,22 @@ PUBLIC S16 tfwApi
          }
          break;
       }
+<<<<<<< HEAD
       case UE_DROP_ACTV_DEFAULT_EPS_BEARER_CTXT_REQ: {
         FW_LOG_DEBUG(fwCb, "Process Enable or Disable the Drop of "
                            "ACTV_DEFAULT_EPS_BEARER_CTXT_REQ \n");
         handleEnableOrDisableActvDfltBerReq(
             (UeDropActvDefaultEpsBearCtxtReq_t *)msg);
+=======
+      case DROP_ERAB_SETUP_REQ: {
+        FW_LOG_DEBUG(fwCb, "Process UE_DROP_ERAB_SETUP_REQ ");
+        if (fwCb->nbState == ENB_IS_UP) {
+          handleDropErabSetupReq((DropErabSetupReq_t *)msg);
+        } else {
+          FW_LOG_ERROR(fwCb, "Failed to process UE_DROP_ERAB_SETUP_REQ:ENBAPP IS NOT UP");
+          ret = RFAILED;
+        }
+>>>>>>> upstream/master
         break;
       }
 
@@ -2565,6 +2603,9 @@ PRIVATE S16 handlErrIndMsg(fwNbErrIndMsg_t *data)
    {
       msgReq->t.s1ErrIndMsg.ue_Id = data->ue_Id;
    }
+#ifdef MULTI_ENB_SUPPORT
+   msgReq->t.s1ErrIndMsg.enbId = data->enbId;
+#endif
    if(data->cause.pres == TRUE)
    {
       msgReq->t.s1ErrIndMsg.causePres = data->cause.pres;
@@ -3441,12 +3482,22 @@ PRIVATE Void handleDropRouterAdv(UeDropRA *data) {
   fwSendToNbApp(msgReq);
   RETVOID;
 }
+<<<<<<< HEAD
 /*
  *
  *   Fun:   handleEnableOrDisableActvDfltBerReq
  *
  *   Desc:  This function is used to enable or disable the drop of Activate
  *          Default Eps Bearer context request message from Test Controller
+=======
+
+/*
+ *
+ *   Fun:   handleDelayErabSetupRsp
+ *
+ *   Desc:  This function is used to process Delay Erab Setup Response
+ *          message received from the test script
+>>>>>>> upstream/master
  *
  *   Ret:   None
  *
@@ -3455,6 +3506,7 @@ PRIVATE Void handleDropRouterAdv(UeDropRA *data) {
  *   File:  fw_api_int.c
  *
  */
+<<<<<<< HEAD
 PUBLIC S16
 handleEnableOrDisableActvDfltBerReq(UeDropActvDefaultEpsBearCtxtReq_t *data) {
   FwCb *fwCb = NULLP;
@@ -3474,3 +3526,64 @@ handleEnableOrDisableActvDfltBerReq(UeDropActvDefaultEpsBearCtxtReq_t *data) {
   FW_LOG_EXITFN(fwCb, ROK);
 }
 
+=======
+PRIVATE Void handleDelayErabSetupRsp(UeDelayErabSetupRsp *data) {
+  FwCb *fwCb = NULLP;
+  NbtRequest *msgReq = NULLP;
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  if (SGetSBuf(fwCb->init.region, fwCb->init.pool, (Data **)&msgReq,
+               (Size)sizeof(NbtRequest)) == ROK) {
+    cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
+  } else {
+    FW_LOG_ERROR(fwCb, "Failed to allocate memory");
+    RETVOID;
+  }
+
+  msgReq->msgType = NB_DELAY_ERAB_SETUP_RSP;
+  msgReq->t.delayErabSetupRsp.ueId = data->ue_Id;
+  msgReq->t.delayErabSetupRsp.isDelayErabSetupRsp = data->flag;
+  msgReq->t.delayErabSetupRsp.tmrVal = data->tmrVal;
+
+  fwSendToNbApp(msgReq);
+  RETVOID;
+}
+
+/*
+ *
+ *   Fun:   handleDropErabSetupReq
+ *
+ *   Desc:  This function is used to drop ErabSetupReq
+ *
+ *   Ret:   None
+ *
+ *   Notes: None
+ *
+ *   File:  fw_api_int.c
+ *
+ */
+
+PRIVATE Void handleDropErabSetupReq(DropErabSetupReq_t * data) {
+  FwCb *fwCb = NULLP;
+  NbtRequest *msgReq = NULLP;
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  if (SGetSBuf(fwCb->init.region, fwCb->init.pool, (Data **)&msgReq,
+               (Size)sizeof(NbtRequest)) == ROK) {
+    cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
+  } else {
+    FW_LOG_ERROR(fwCb, "Failed to allocate memory");
+    RETVOID;
+  }
+  msgReq->msgType = NB_DROP_ERAB_SETUP_REQ;
+  msgReq->t.dropErabSetupReq.ueId = data->ue_Id;
+  msgReq->t.dropErabSetupReq.isDropErabSetupReqEnable = data->flag;
+
+  fwSendToNbApp(msgReq);
+  RETVOID;
+}
+>>>>>>> upstream/master

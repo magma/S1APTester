@@ -87,7 +87,6 @@ extern "C" {
 #include "nbu.x"
 #include "ss_diag.h"
 
-
 #define NB_MAX_HASH_SIZE        1024
 #if (defined(NB_DBG_CIRLOG) || defined(SS_SEGV_SIG_HDLR))
 #include "wr_dbg_log.h"
@@ -266,6 +265,13 @@ typedef struct _nbDelayICSRspCb
  CmTimer   timer;
 }NbDelayICSRspCb;
 
+typedef struct _nbErabSetupRspCb {
+  U32 ueId;
+  NbErabLst *erabInfo;
+  NbFailedErabLst *failedErabInfo;
+  CmTimer timer;
+} NbErabSetupRspCb;
+
 typedef struct _nbDelayUeCtxtRelCmpCb
 {
  U32 ueId;
@@ -287,6 +293,7 @@ typedef enum nbTmr
    NB_TMR_LCL_UE_CTXT_REL_REQ,
    NB_TMR_DELAY_ICS_RSP,
    NB_TMR_DELAY_UE_CTX_REL_COMP,
+   NB_TMR_DELAY_ERAB_SETUP_RSP,
    NB_TMR_ROUTER_SOLICIT
 } enNbTimer;
 
@@ -450,6 +457,11 @@ typedef struct _InitCtxtSetupFailedErabs {
   NbUeMsgCause cause;
 } InitCtxtSetupRspFailedErabs;
 
+typedef struct _delayErabSetupRsp {
+  Bool isDelayErabSetupRsp;
+  U32 tmrVal;
+} DelayErabSetupRsp;
+
 typedef struct _EnbCb
 {
    CmHashListEnt nbHashEnt;
@@ -469,6 +481,10 @@ typedef struct _mutilEnbCfgInfo
 typedef struct _dropRA {
   Bool isDropRA;
 } DropRA;
+
+typedef struct _dropErabSetupReq {
+  Bool isDropErabSetupReq;
+} DropErabSetupReq;
 
 typedef struct _nbRouterSolicitCb {
 #define NB_EGTP_MSG_SZ 1024
@@ -519,8 +535,10 @@ typedef struct _nbCb
    DropICSSndCtxtRelCfg      dropICSSndCtxtRel[NB_MAX_UE_SUPPORTED];
    DelayUeCtxtRelCmpCfg      delayUeCtxtRelCmp[NB_MAX_UE_SUPPORTED];
    InitCtxtSetupRspFailedErabs  initCtxtSetupFailedErabs[NB_MAX_UE_SUPPORTED];
+   DelayErabSetupRsp         delayErabSetupRsp[NB_MAX_UE_SUPPORTED];
    DropRA                       dropRA[NB_MAX_UE_SUPPORTED];
    NbRouterSolicitCb            *rsCb[NB_MAX_UE_SUPPORTED];
+   DropErabSetupReq          dropErabSetupReq[NB_MAX_UE_SUPPORTED];
 #ifdef MULTI_ENB_SUPPORT
    Bool                      x2HoDone;
 #endif

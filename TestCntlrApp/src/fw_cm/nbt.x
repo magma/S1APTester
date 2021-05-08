@@ -56,7 +56,9 @@ typedef enum _nbMsgTypes
    NB_MME_CONFIG_TRANSFER,
    // SCTP SHUTDOWN or ABORT
    NB_NW_INITIATED_ASSOC_DOWN,
+   NB_DELAY_ERAB_SETUP_RSP,
    NB_DROP_RA,
+   NB_DROP_ERAB_SETUP_REQ,
    NB_UNKNOWN_MSG_TYPE
 }NbMsgTypes;
 
@@ -286,6 +288,7 @@ typedef struct _nbErrIndMsg
 {
    U8          isUeAssoc;
    U32         ue_Id;
+   U32         enbId;
    U8          causePres;
    FailCause   cause;
    NbCriticalityDiag criticalityDiag;
@@ -441,10 +444,21 @@ typedef struct _nbMmeConfigTrnsf
   }u;
 }NbMmeConfigTrnsf;
 
+typedef struct _nbDelayErabSetupRsp {
+  U32 ueId;
+  Bool isDelayErabSetupRsp;
+  U32 tmrVal;
+} NbDelayErabSetupRsp;
+
 typedef struct _nbDropRA {
   U32 ueId;
   Bool isDropRA;
 } NbDropRA;
+
+typedef struct _nbDropErabSetupReq {
+  U32 ueId;
+  Bool isDropErabSetupReqEnable;
+} NbDropErabSetupReq;
 
 typedef struct _nbtMsg
 {
@@ -479,7 +493,9 @@ typedef struct _nbtMsg
       NbTunDelReq         tunDelReq;
       NbEnbConfigTrnsf    enbConfigTrnsf;
       NbMmeConfigTrnsf    mmeConfigTrnsf;
+      NbDelayErabSetupRsp delayErabSetupRsp;
       NbDropRA dropRA;
+      NbDropErabSetupReq dropErabSetupReq;
    }t;
 }NbtMsg;
 

@@ -185,6 +185,7 @@ typedef struct ueAppInfo
    U8            imsiLen;    /* len of IMSI=MCC+MNC+MSIN */
    U8            ueImsi[CM_EMM_MAX_IMSI_DIGS]; /* IMSI of UE */
    U8            ueImei[CM_EMM_MAX_IMEI_DIGS]; /* Mobile equipment identity */
+   Bool          imeisvReq; // Flag set based on the req recvd in sec mode cmd
    GUTI          ueGuti;      /* Guti allocated to this UE from MME  */
    CmEmmTaiLst   *taList;     /* Tracking Area List for this UE from MME */
    CmEmmUeNwCap  ueNwCap;     /* Network capability of UE */

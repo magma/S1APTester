@@ -31,6 +31,7 @@ extern "C" {
 /* EMM Cause Values */
 #define TFW_EMM_CAUSE_IMSI_UNKNOWN                    0x02
 #define TFW_EMM_CAUSE_ILLEGAL_UE                      0x03
+#define TFW_EMM_CAUSE_IMEI_NOT_ACCEPTED               0x05
 #define TFW_EMM_CAUSE_ILLEGAL_ME                      0x06
 #define TFW_EMM_CAUSE_EPS_SVC_NA                      0x07
 #define TFW_EMM_CAUSE_NON_EPS_SVC_NA                  0x08
@@ -63,6 +64,11 @@ extern "C" {
 #define TFW_EMM_CAUSE_COND_IE_ERR                     0x64
 #define TFW_EMM_CAUSE_INV_MSG_IN_PROT_STATE           0x65
 #define TFW_EMM_CAUSE_PROT_ERR_UNSP                   0x6f
+
+/* ESM Cause Values */
+#define TFW_ESM_CAUSE_MULTIPLE_PDN_CON_FOR_A_GIVEN_APN_NA   0x37
+#define TFW_ESM_CAUSE_MISSING_OR_UNKNOWN_APN   0x1B
+#define TFW_ESM_CAUSE_UNKNOWN_PDN_TYPE   0x1C
 
 /* SCTP ABORT Cause/Reason : RFC4960, Section 3.3.10/3.3.10.12 */
 /* The upper layer can specify this cause. SCTP transports it transparently.
@@ -103,6 +109,7 @@ extern "C" {
 // Authentication failure param AUTS length
 #define TFW_AUTS_LEN 14
 #define MAX_FAILED_ERABS 11
+#define FW_MAX_IMEISV_LEN 16
 #ifdef TFW_STUB /* definitions only required by test controller */
 
 /* Mobile Identity types */

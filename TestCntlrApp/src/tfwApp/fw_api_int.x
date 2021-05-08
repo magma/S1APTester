@@ -125,8 +125,10 @@ typedef enum {
    UE_AUTH_FAILURE,
    UE_SET_INIT_CTXT_SETUP_RSP_FAILED_ERABS,
    UE_STANDALONE_ACTV_DEFAULT_EPS_BEARER_CNTXT_REJECT,
+   UE_SET_DELAY_ERAB_SETUP_RSP,
    UE_ROUTER_ADV_IND,
    UE_SET_DROP_ROUTER_ADV,
+   DROP_ERAB_SETUP_REQ,
    UE_DROP_ACTV_DEFAULT_EPS_BEARER_CTXT_REQ
 }tfwCmd;
 
@@ -719,6 +721,8 @@ typedef struct ueAttachRequest
    U8 mIdType;
    U8 epsAttachType;
    U8 useOldSecCtxt;
+   U8 imsi_len;
+   U8 imsi[25];
    guti guti_pr;
    last_TAI lastTAI_pr;
    pdn_Type pdnType_pr;
@@ -772,10 +776,18 @@ typedef struct ueSecModeCmdInd
    U8 knas_Vrfy_Sts;
 }ueSecModeCmdInd_t;
 
-typedef struct ueSecModeComplete
-{
-   U32 ue_Id;
-}ueSecModeComplete_t;
+typedef struct ueSecModeComplete {
+  U32 ue_Id;
+  /* Flag to indiciate if imeisv value is
+   * provided from the test
+   */
+  Bool imeisv_pres;
+  /* Flag to indiciate if imeisv should
+   * be included in security mode complete msg
+   */
+  Bool noImeisv;
+  U8 imeisv[FW_MAX_IMEISV_LEN];
+} ueSecModeComplete_t;
 
 typedef struct ueSecModeReject
 {
@@ -981,6 +993,7 @@ typedef struct fwNbErrIndMsg
 {
    U8   isUeAssoc;
    U32  ue_Id;
+   U32 enbId;
    ErrCause cause;
    FwCriticalityDiag criticalityDiag;
 }fwNbErrIndMsg_t;
@@ -1036,16 +1049,20 @@ typedef struct ueAttachRejInd
    U8 cause;
 }ueAttachRejInd_t;
 
-typedef struct ueIdentityReqInd
-{
-   U32 ue_Id;
-   U8 idType;
+typedef struct ueIdentityReqInd {
+  U32 ue_Id;
+  U8 idType;
 }ueIdentityReqInd_t;
 
-typedef struct ueIdentityResp
-{
-   U32 ue_Id;
-   U8 idType;
+typedef struct ueIdentityResp {
+  U32 ue_Id;
+  U8 idType;
+  Bool idValPres;
+  /* As of now we consider only IMSI/IMEI/IMEISV
+   * so FW_MAX_IMEISV_LEN=16 should be sufficient
+   */
+  U8 idVal[FW_MAX_IMEISV_LEN];
+
 }ueIdentityResp_t;
 
 typedef struct ueTauReq
@@ -1330,6 +1347,12 @@ typedef struct ueDropInitCtxtSetup
    Bool flag;
    U32 tmrVal;
 }UeDropInitCtxtSetup;
+
+typedef struct dropErabSetupReq {
+  U32 ue_Id;
+  Bool flag;
+} DropErabSetupReq_t;
+
 typedef struct ueDelayInitCtxtSetupRsp
 {
    U32 ue_Id;
@@ -1593,6 +1616,12 @@ typedef struct ueRouterAdv {
   U8 bearerId;
   U8 ipv6Addr[FW_MAX_IPV6_LEN];
 } ueRouterAdv_t;
+
+typedef struct ueDelayErabSetupRsp {
+  U32 ue_Id;
+  U32 tmrVal;
+  Bool flag;
+} UeDelayErabSetupRsp;
 
 typedef struct ueDropRA {
   U32 ue_Id;

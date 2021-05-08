@@ -521,7 +521,7 @@ CmEmmEdmMsgFormat emmMsgTab[CM_EMM_MAX_MSG][CM_EMM_MAX_IE] =
    /* Security Mode Complete */
    {
       { CM_EMM_IE_MSID, EDM_PRES_OPTIONAL, EDM_FMTTLV, TRUE, 0,
-         NULLP, NULLP, cmEmmDecMi}
+         NULLP, cmEmmEncMi, cmEmmDecMi}
    },
 
    /* Security Mode Reject */
@@ -2302,9 +2302,10 @@ U16 *len;
          break;
       }
       case CM_EMM_MID_TYPE_IMEI:
+      case CM_EMM_MID_TYPE_IMEISV:
       {
          /* encode type of ID */
-         buf[*indx] = CM_EMM_MID_TYPE_IMEI;
+         buf[*indx] = mi->type;
 
          /* encode even or odd indicator */
          buf[*indx] |= mi->evenOddInd << 3;
