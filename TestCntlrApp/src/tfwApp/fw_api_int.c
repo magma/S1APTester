@@ -110,9 +110,9 @@ PUBLIC S16
 handleStdAloneActvDfltEpsBearerContextRej(ueActvDfltEpsBearerCtxtRej_t *data);
 PRIVATE Void handleDelayErabSetupRsp(UeDelayErabSetupRsp *data);
 PRIVATE Void handleDropRouterAdv(UeDropRA *data);
+PRIVATE Void handleDropErabSetupReq(DropErabSetupReq_t *data);
 PRIVATE S16
 handleEnableOrDisableActvDfltBerReq(UeDropActvDefaultEpsBearCtxtReq_t *data);
-PRIVATE Void handleDropErabSetupReq(DropErabSetupReq_t *data);
 PUBLIC FwCb gfwCb;
 
 /* Adding UEID, epsupdate type, active flag into linked list for
@@ -2442,13 +2442,6 @@ PUBLIC S16 tfwApi
          }
          break;
       }
-<<<<<<< HEAD
-      case UE_DROP_ACTV_DEFAULT_EPS_BEARER_CTXT_REQ: {
-        FW_LOG_DEBUG(fwCb, "Process Enable or Disable the Drop of "
-                           "ACTV_DEFAULT_EPS_BEARER_CTXT_REQ \n");
-        handleEnableOrDisableActvDfltBerReq(
-            (UeDropActvDefaultEpsBearCtxtReq_t *)msg);
-=======
       case DROP_ERAB_SETUP_REQ: {
         FW_LOG_DEBUG(fwCb, "Process UE_DROP_ERAB_SETUP_REQ ");
         if (fwCb->nbState == ENB_IS_UP) {
@@ -2457,7 +2450,13 @@ PUBLIC S16 tfwApi
           FW_LOG_ERROR(fwCb, "Failed to process UE_DROP_ERAB_SETUP_REQ:ENBAPP IS NOT UP");
           ret = RFAILED;
         }
->>>>>>> upstream/master
+        break;
+      }
+      case UE_DROP_ACTV_DEFAULT_EPS_BEARER_CTXT_REQ: {
+        FW_LOG_DEBUG(fwCb, "Process Enable or Disable the Drop of "
+                           "ACTV_DEFAULT_EPS_BEARER_CTXT_REQ \n");
+        handleEnableOrDisableActvDfltBerReq(
+            (UeDropActvDefaultEpsBearCtxtReq_t *)msg);
         break;
       }
 
@@ -3482,14 +3481,6 @@ PRIVATE Void handleDropRouterAdv(UeDropRA *data) {
   fwSendToNbApp(msgReq);
   RETVOID;
 }
-<<<<<<< HEAD
-/*
- *
- *   Fun:   handleEnableOrDisableActvDfltBerReq
- *
- *   Desc:  This function is used to enable or disable the drop of Activate
- *          Default Eps Bearer context request message from Test Controller
-=======
 
 /*
  *
@@ -3497,7 +3488,6 @@ PRIVATE Void handleDropRouterAdv(UeDropRA *data) {
  *
  *   Desc:  This function is used to process Delay Erab Setup Response
  *          message received from the test script
->>>>>>> upstream/master
  *
  *   Ret:   None
  *
@@ -3506,27 +3496,6 @@ PRIVATE Void handleDropRouterAdv(UeDropRA *data) {
  *   File:  fw_api_int.c
  *
  */
-<<<<<<< HEAD
-PUBLIC S16
-handleEnableOrDisableActvDfltBerReq(UeDropActvDefaultEpsBearCtxtReq_t *data) {
-  FwCb *fwCb = NULLP;
-  UetMessage *uetMsg = NULLP;
-  UeDropActDfltEpsBearCtxtReq *ueDropActDfltEpsBearCtxtReq = NULLP;
-  FW_GET_CB(fwCb);
-  FW_LOG_ENTERFN(fwCb);
-
-  FW_ALLOC_MEM(fwCb, &uetMsg, sizeof(UetMessage));
-  uetMsg->msgType = UE_DROP_ACT_DEFAULT_EPS_BER_CTXT_REQ;
-  ueDropActDfltEpsBearCtxtReq = &uetMsg->msg.ueDropActDfltBerReq;
-
-  ueDropActDfltEpsBearCtxtReq->ueId = data->ue_id;
-  ueDropActDfltEpsBearCtxtReq->dropActDfltEpsBearCtxtReq =
-      data->dropActDfltEpsBearCtxtReq;
-  fwSendToUeApp(uetMsg);
-  FW_LOG_EXITFN(fwCb, ROK);
-}
-
-=======
 PRIVATE Void handleDelayErabSetupRsp(UeDelayErabSetupRsp *data) {
   FwCb *fwCb = NULLP;
   NbtRequest *msgReq = NULLP;
@@ -3564,7 +3533,6 @@ PRIVATE Void handleDelayErabSetupRsp(UeDelayErabSetupRsp *data) {
  *   File:  fw_api_int.c
  *
  */
-
 PRIVATE Void handleDropErabSetupReq(DropErabSetupReq_t * data) {
   FwCb *fwCb = NULLP;
   NbtRequest *msgReq = NULLP;
@@ -3586,4 +3554,37 @@ PRIVATE Void handleDropErabSetupReq(DropErabSetupReq_t * data) {
   fwSendToNbApp(msgReq);
   RETVOID;
 }
->>>>>>> upstream/master
+
+/*
+ *
+ *   Fun:   handleEnableOrDisableActvDfltBerReq
+ *
+ *   Desc:  This function is used to enable or disable the drop of Activate
+ *          Default Eps Bearer context request message from Test Controller
+ *
+ *   Ret:   None
+ *
+ *   Notes: None
+ *
+ *   File:  fw_api_int.c
+ *
+ */
+PUBLIC S16
+handleEnableOrDisableActvDfltBerReq(UeDropActvDefaultEpsBearCtxtReq_t *data) {
+  FwCb *fwCb = NULLP;
+  UetMessage *uetMsg = NULLP;
+  UeDropActDfltEpsBearCtxtReq *ueDropActDfltEpsBearCtxtReq = NULLP;
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  FW_ALLOC_MEM(fwCb, &uetMsg, sizeof(UetMessage));
+  uetMsg->msgType = UE_DROP_ACT_DEFAULT_EPS_BER_CTXT_REQ;
+  ueDropActDfltEpsBearCtxtReq = &uetMsg->msg.ueDropActDfltBerReq;
+
+  ueDropActDfltEpsBearCtxtReq->ueId = data->ue_id;
+  ueDropActDfltEpsBearCtxtReq->dropActDfltEpsBearCtxtReq =
+      data->dropActDfltEpsBearCtxtReq;
+  fwSendToUeApp(uetMsg);
+  FW_LOG_EXITFN(fwCb, ROK);
+}
+

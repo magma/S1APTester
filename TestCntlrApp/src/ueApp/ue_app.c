@@ -7349,7 +7349,9 @@ PRIVATE S16 ueAppEsmHdlIncUeEvnt
                         (U8 *)&actReq->pAddr.addrInfo,
                         CM_ESM_MAX_LEN_PDN_ADDRESS);
                }
-                ret = ueSendToTfwApp(tfwMsg, &ueAppCb->fwPst);
+               if (!ueCb->is_drop_actv_dflt_eps_ber_ctxt_req) {
+                 ret = ueSendToTfwApp(tfwMsg, &ueAppCb->fwPst);
+               }
                 if (ret != ROK)
                 {
                    UE_LOG_ERROR(ueAppCb, "Sending PDN Connection Response "\
