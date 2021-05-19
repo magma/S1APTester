@@ -128,7 +128,8 @@ typedef enum {
    UE_SET_DELAY_ERAB_SETUP_RSP,
    UE_ROUTER_ADV_IND,
    UE_SET_DROP_ROUTER_ADV,
-   DROP_ERAB_SETUP_REQ
+   DROP_ERAB_SETUP_REQ,
+   UE_DROP_ACTV_DEFAULT_EPS_BEARER_CTXT_REQ
 }tfwCmd;
 
 typedef enum
@@ -1282,6 +1283,11 @@ typedef struct ueDeActvBearCtxtAcc
    U32 ue_Id;
    U8 bearerId;
 }UeDeActvBearCtxtAcc_t;
+
+typedef struct ueDropActvDefaultEpsBearCtxtReq {
+  U32 ue_id;
+  Bool dropActDfltEpsBearCtxtReq;
+} UeDropActvDefaultEpsBearCtxtReq_t;
 
 typedef enum
 {

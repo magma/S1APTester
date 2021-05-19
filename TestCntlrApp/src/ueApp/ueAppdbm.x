@@ -8,18 +8,18 @@
 
 /**********************************************************************
 
-    Name:  LTE UESIM - Sample Application Module 
- 
+    Name:  LTE UESIM - Sample Application Module
+
     Type:  C include file
- 
+
     Desc:  C source code for UE Sample Application
- 
-    File:  ueAppdbm.x 
- 
-    Sid:      
- 
-    Prg:    
- 
+
+    File:  ueAppdbm.x
+
+    Sid:
+
+    Prg:
+
 **********************************************************************/
 #include "cm_llist.h"      /* cm link list */
 #include "cm_llist.x"      /* cm link list */
@@ -157,7 +157,7 @@ typedef enum ueEcmState
    UE_ECM_IDLE = 0,          /* UE ECM IDLE */
    UE_ECM_CONNECTED          /* UE ECM_CONNECTED */
 }UeEcmState;
-	
+
 typedef enum ueTransState
 {
    UE_DETACHED = 0,              /* UE Detached */
@@ -174,9 +174,9 @@ typedef struct ueAppNwId
 
 typedef struct ueAppGUMMEI
 {
-   UeAppNwId  nwId;           /* Serving Network with PLMN ID */ 
+   UeAppNwId  nwId;           /* Serving Network with PLMN ID */
    U8         mmeCode;        /* MME Code */
-   U16        mmeGrpId;       /* MME Group ID */ 
+   U16        mmeGrpId;       /* MME Group ID */
 }UeAppGUMMEI;
 
 typedef struct ueAppInfo
@@ -269,7 +269,7 @@ typedef struct _ueCb
    UeEsmCb     *esmTList[CM_ESM_MAX_BEARER_ID];
    /* BID List of ESM Cbs. BID range is 5-15 */
    UeEsmCb     *esmBList[CM_ESM_MAX_BEARER_ID];
-   U32         transIdCntr;   /* Transaction counter for sending the 
+   U32         transIdCntr;   /* Transaction counter for sending the
                                  ESM Procedural transactions. */
    U16         cellId; /* cellId */
    U32         ueId;   /* ueId */
@@ -298,15 +298,16 @@ typedef struct _ueCb
    Bool    is_actv_dflt_eps_ber_ctxt_rej;
    U8      actv_dflt_eps_bear_ctxt_reject_cause;
    U8      numPdns;
+   Bool is_drop_actv_dflt_eps_ber_ctxt_req;
 }UeCb;
 
 
 typedef struct _ueAppCb
 {
-   TskInit          init;       
+   TskInit          init;
    Pst              nbPst;
    Pst              fwPst;
-   U32              trfGenIfAddr; /* IP address of eth port connected to 
+   U32              trfGenIfAddr; /* IP address of eth port connected to
                                      traffic generator*/
    U8               NASProcGuardtimer; /* timer value */
    U32              numOfUeCfgd;

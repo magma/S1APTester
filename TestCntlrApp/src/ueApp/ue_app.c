@@ -226,6 +226,7 @@ void ueSendErabSetupRspForFailedBearers(NbuErabsInfo *pNbuErabsInfo);
 PRIVATE S16 ueProcUeStandAloneActvDfltBerCtxtRej(UetMessage *p_ueMsg, Pst *pst);
 PRIVATE S16 ueAppBuildAndSendActDefltBerContextReject(UeCb *ueCb, U8 bearerId);
 
+PRIVATE S16 ueProcDropActDefaultEpsBerCtxtReq(UetMessage *p_ueMsg, Pst *pst);
 PRIVATE S16 ueAppGetDrb(UeCb *ueCb, U8 *drb)
 {
    U8  idx;
@@ -5564,12 +5565,18 @@ PUBLIC S16 ueUiProcessTfwMsg(UetMessage *p_ueMsg, Pst *pst)
 
         break;
       }
-      default:
-      {
-         UE_LOG_ERROR(ueAppCb, "Recieved Invalid message of type: %d",
-               p_ueMsg->msgType);
-         ret = RFAILED;
-         break;
+      case UE_DROP_ACT_DEFAULT_EPS_BER_CTXT_REQ: {
+        UE_LOG_DEBUG(ueAppCb,
+                     "Received UE_DROP_ACT_DEFAULT_EPS_BER_CTXT_REQ from TFW");
+        ret = ueProcDropActDefaultEpsBerCtxtReq(p_ueMsg, pst);
+        break;
+      }
+
+      default: {
+        UE_LOG_ERROR(ueAppCb, "Recieved Invalid message of type: %d",
+                     p_ueMsg->msgType);
+        ret = RFAILED;
+        break;
       }
    }
    RETVALUE(ret);
@@ -7342,7 +7349,9 @@ PRIVATE S16 ueAppEsmHdlIncUeEvnt
                         (U8 *)&actReq->pAddr.addrInfo,
                         CM_ESM_MAX_LEN_PDN_ADDRESS);
                }
-                ret = ueSendToTfwApp(tfwMsg, &ueAppCb->fwPst);
+               if (!ueCb->is_drop_actv_dflt_eps_ber_ctxt_req) {
+                 ret = ueSendToTfwApp(tfwMsg, &ueAppCb->fwPst);
+               }
                 if (ret != ROK)
                 {
                    UE_LOG_ERROR(ueAppCb, "Sending PDN Connection Response "\
@@ -7358,6 +7367,15 @@ PRIVATE S16 ueAppEsmHdlIncUeEvnt
                   }
                   break;
                 }
+                if (ueCb->is_drop_actv_dflt_eps_ber_ctxt_req) {
+                  /* Don't respond to MME with either default bearer reject or
+                   * accept to mme */
+                  UE_LOG_DEBUG(ueAppCb,
+                               "Don't respond to Activate Default Bearer "
+                               "Context Request ");
+                  break;
+                }
+
                /* send stand-alone activate default bearer accept to mme */
                 ret = ueAppBuildAndSendActDefltBerContextAccept(ueCb,
                       ueCb->ueRabCb[drbId-1].epsBearerId);
@@ -9895,3 +9913,42 @@ PRIVATE S16 ueAppBuildAndSendActDefltBerContextReject(UeCb *ueCb, U8 bearerId) {
 
   UE_LOG_EXITFN(ueAppCb, ret);
 }
+
+/*
+ *
+ *       Fun: ueProcDropActDefaultEpsBerCtxtReq
+ *
+ *       Desc:
+ *
+ *       Ret:  ROK - ok; RFAILED - failed
+ *
+ *       Notes: none
+ *
+ *       File:  ue_app.c
+ *
+ */
+PRIVATE S16 ueProcDropActDefaultEpsBerCtxtReq(UetMessage *p_ueMsg, Pst *pst) {
+  S16 ret = ROK;
+  U32 ueId;
+  UeAppCb *ueAppCb = NULLP;
+  UeCb *ueCb = NULLP;
+
+  UE_GET_CB(ueAppCb);
+  UE_LOG_ENTERFN(ueAppCb);
+  UE_LOG_DEBUG(
+      ueAppCb,
+      "Received an indication from TFWAPP to drop activate default EPS bearer "
+      "context request message \n");
+
+  ueId = p_ueMsg->msg.ueDropActDfltBerReq.ueId;
+  ret = ueDbmFetchUe(ueId, (PTR *)&ueCb);
+  if (ret != ROK) {
+    UE_LOG_ERROR(ueAppCb, "UeCb List NULL ueId = %d", ueId);
+    RETVALUE(ret);
+  }
+  ueCb->is_drop_actv_dflt_eps_ber_ctxt_req =
+      p_ueMsg->msg.ueDropActDfltBerReq.dropActDfltEpsBearCtxtReq;
+
+  UE_LOG_EXITFN(ueAppCb, ret);
+}
+
