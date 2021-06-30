@@ -1020,7 +1020,7 @@ PUBLIC S16 handleTauAcceptInd
       FW_LOG_DEBUG(fwCb, "Stoping T3430 timer for ueId %d", ueIdCb->ue_id);
       ret = sendUeTauAcceptIndToTstCntlr(uetTauAccept);
       fwStopTmr(fwCb, ueIdCb);
-      delete_ue_entries(ueIdCb->ue_id);
+      cmLListDelFrm(&fwCb->ueIdList, ueIdCb);
       FW_FREE_MEM(fwCb, ueIdCb, sizeof(UeIdCb));
    }
    else
@@ -1117,7 +1117,7 @@ PUBLIC S16 handleAttachAcceptInd
          /* Stop Attach Timer */
          FW_LOG_DEBUG(fwCb, "Stopping Attach Timer for ue %d", ueIdCb->ue_id);
          fwStopTmr(fwCb, ueIdCb);
-         delete_ue_entries(ueIdCb->ue_id);
+         cmLListDelFrm(&fwCb->ueIdList, ueIdCb);
          FW_FREE_MEM(fwCb, ueIdCb, sizeof(UeIdCb));
       }
       /*else, send to test controller*/
@@ -1429,6 +1429,7 @@ PUBLIC S16 handleTauRejectInd
          printf("ue id %d found\n", uetTauRejInd->msg.ueUetTauReject.ueId);
          flag = 1;
          ueIdCb->link.node = (PTR)ueIdCb;
+         break;
       }
       tmpNode = tmpNode->next;
    }
@@ -1438,7 +1439,7 @@ PUBLIC S16 handleTauRejectInd
    if (flag == 1)
    {
       fwStopTmr(fwCb, ueIdCb);
-      delete_ue_entries(ueIdCb->ue_id);
+      cmLListDelFrm(&fwCb->ueIdList, ueIdCb);
       FW_FREE_MEM(fwCb, ueIdCb, sizeof(UeIdCb));
       ret = sendUeTauRejectIndToTstCntrl(uetTauRejInd);
    }
@@ -1607,6 +1608,7 @@ PRIVATE S16 handlePdnConRspInd
          printf("ue id %d found\n", uetPdnConRspInd->msg.ueUetPdnConRsp.ueId);
          flag = 1;
          ueIdCb->link.node = (PTR)ueIdCb;
+         break;
       }
       tmpNode = tmpNode->next;
    }
@@ -1614,7 +1616,7 @@ PRIVATE S16 handlePdnConRspInd
    if (flag == 1) {
      FW_LOG_DEBUG(fwCb, "\nStoping timer T3482\n");
      fwStopTmr(fwCb, ueIdCb);
-     delete_ue_entries(ueIdCb->ue_id);
+     cmLListDelFrm(&fwCb->ueIdList, ueIdCb);
      FW_FREE_MEM(fwCb, ueIdCb, sizeof(UeIdCb));
      ret = sendUePdnConRspIndToTstCntlr(uetPdnConRspInd);
    }
@@ -1727,6 +1729,7 @@ PRIVATE S16 handleAndSendDeActvBerReqInd
            printf("ue id %d found\n", params->ueId);
            flag = 1;
            ueIdCb->link.node = (PTR)ueIdCb;
+           break;
        }
        tmpNode = tmpNode->next;
    }
@@ -1734,7 +1737,7 @@ PRIVATE S16 handleAndSendDeActvBerReqInd
    if (flag == 1) {
      FW_LOG_DEBUG(fwCb, "\nStoping timer T3492\n");
      fwStopTmr(fwCb, ueIdCb);
-     delete_ue_entries(ueIdCb->ue_id);
+     cmLListDelFrm(&fwCb->ueIdList, ueIdCb);
      FW_FREE_MEM(fwCb, ueIdCb, sizeof(UeIdCb));
    }
 
@@ -2074,7 +2077,7 @@ PRIVATE S16 handleAuthRejectInd
       /* Stop Attach Timer */
       FW_LOG_DEBUG(fwCb, "Stopping Attach Timer for ue %d", ueIdCb->ue_id);
       fwStopTmr(fwCb, ueIdCb);
-      delete_ue_entries(ueIdCb->ue_id);
+      cmLListDelFrm(&fwCb->ueIdList, ueIdCb);
       FW_FREE_MEM(fwCb, ueIdCb, sizeof(UeIdCb));
    }
    FW_ALLOC_MEM(fwCb, &authRejInd , sizeof(ueAuthRejInd_t));
@@ -2207,7 +2210,7 @@ PRIVATE S16 handlePdnDisConRejInd
    if (flag == 1) {
      FW_LOG_DEBUG(fwCb, "\nStoping timer T3492\n");
      fwStopTmr(fwCb, ueIdCb);
-     delete_ue_entries(ueIdCb->ue_id);
+     cmLListDelFrm(&fwCb->ueIdList, ueIdCb);
      FW_FREE_MEM(fwCb, ueIdCb, sizeof(UeIdCb));
      ret = sendUePdnDisConRejIndToTstCntlr(uetPdnDisConRejInd);
    }
