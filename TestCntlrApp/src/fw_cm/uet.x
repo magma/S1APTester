@@ -315,6 +315,8 @@ PDN APN */
    U8 useOldSecCtxt;
    U32 pdnType;
    UeEmmEpsAtchType epsAtchType;
+   Bool gutiMI_pres;
+   Guti gutiMI;
    Guti oldGuti;
    U8 imsi_len;
    U8 imsi[15];
