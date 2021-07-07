@@ -1229,7 +1229,7 @@ PRIVATE S16 ueAppUtlBldAttachReq(UeCb *ueCb, CmNasEvnt **ueEvt,
       attachReq->epsMi.evenOddInd = UE_EVEN;
       attachReq->epsMi.len = sizeof(GUTI);
       if (ueUetAttachReq.gutiMI_pres) {
-        UE_LOG_DEBUG(ueAppCb, "Filling user provided MI GUTI from testscript");
+        UE_LOG_DEBUG(ueAppCb, "Filling MI GUTI received from testscript");
         cmMemcpy((U8 *)&attachReq->epsMi.u.guti, (U8 *)&ueUetAttachReq.gutiMI,
                attachReq->epsMi.len);
       } else {
