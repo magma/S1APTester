@@ -824,6 +824,13 @@ PUBLIC S16 handleAttachReq(ueAttachRequest_t *data)
    if ((data->mIdType == CM_EMM_MID_TYPE_IMSI) && (data->imsi_len > 0)) {
      cmMemcpy(ueAttachReq->imsi, data->imsi, data->imsi_len);
      ueAttachReq->imsi_len = data->imsi_len;
+   } else if ((data->mIdType == CM_EMM_MID_TYPE_GUTI) && (data->guti_mi.pres == TRUE)) {
+      ueAttachReq->gutiMI_pres = TRUE;
+      cmMemcpy(ueAttachReq->gutiMI.mcc, data->guti_mi.guti.mcc, 3);
+      cmMemcpy(ueAttachReq->gutiMI.mnc, data->guti_mi.guti.mnc, 3);
+      ueAttachReq->gutiMI.mmeGrpId = data->guti_mi.guti.mmeGrdId;
+      ueAttachReq->gutiMI.mmeCode = data->guti_mi.guti.mmeCode;
+      ueAttachReq->gutiMI.mTMSI = data->guti_mi.guti.mTmsi;
    }
 
    /* optional feilds */

@@ -724,6 +724,7 @@ typedef struct ueAttachRequest
    U8 imsi_len;
    U8 imsi[25];
    guti guti_pr;
+   guti guti_mi;
    last_TAI lastTAI_pr;
    pdn_Type pdnType_pr;
    pdn_APN pdnAPN_pr;
