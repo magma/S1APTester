@@ -2147,6 +2147,7 @@ PRIVATE S16 ueProcUeTauRequest(UetMessage *p_ueMsg, Pst *pst)
    NhuDedicatedInfoNAS nasEncPdu;
    CmNasEvnt           *tauReqEvnt = NULLP;
    NbuInitialUeMsg      *nbUeTauReq = NULLP;
+   NbuUlNasMsg *nbUeTauReqUlNas = NULLP;
 
    UE_GET_CB(ueAppCb);
    UE_LOG_ENTERFN(ueAppCb);
@@ -2228,7 +2229,21 @@ PRIVATE S16 ueProcUeTauRequest(UetMessage *p_ueMsg, Pst *pst)
       EDM_FREE(nasEncPdu.val, CM_MAX_EMM_ESM_PDU);
    }
 
-   ret = ueSendInitialUeMsg(nbUeTauReq, &ueAppCb->nbPst);
+   if(ueCb->ecmCb.state == UE_ECM_IDLE) {
+     UE_LOG_DEBUG(ueAppCb, "Sending TAU in initial ue message");
+     ret = ueSendInitialUeMsg(nbUeTauReq, &ueAppCb->nbPst);
+   } else if (ueCb->ecmCb.state == UE_ECM_CONNECTED) {
+     nbUeTauReqUlNas = (NbuUlNasMsg *)ueAlloc(sizeof(NbuUlNasMsg));
+     nbUeTauReqUlNas->ueId = ueCb->ueId;
+     nbUeTauReqUlNas->nasPdu.pres = TRUE;
+     nbUeTauReqUlNas->nasPdu.len = nasEncPdu.len;
+     nbUeTauReqUlNas->nasPdu.val = (U8 *)ueAlloc(nbUeTauReqUlNas->nasPdu.len);
+     cmMemcpy((U8 *)nbUeTauReqUlNas->nasPdu.val, (U8 *)nasEncPdu.val,
+             nbUeTauReqUlNas->nasPdu.len);
+
+     UE_LOG_DEBUG(ueAppCb, "Sending TAU in UL NAS message");
+     ret = ueSendUlNasMsgToNb(nbUeTauReqUlNas, &ueAppCb->nbPst);
+   }
    if (ret != ROK)
    {
       UE_LOG_ERROR(ueAppCb, "Sending TAU Request to eNodeB failed\n");

@@ -1727,3 +1727,24 @@ PUBLIC S16 NbHandleDropErabSetupReq(NbDropErabSetupReq *dropErabSetupReq) {
        .isDropErabSetupReq = dropErabSetupReq->isDropErabSetupReqEnable;
    RETVALUE(ROK);
  }
+
+/* @details This function stores tai received from the user
+ *
+ * Function: NbHandleConfigTai
+ *
+ * @param[in]  NbConfigNewTai
+ * @return  S16
+ *          -# Success : ROK
+ */
+PUBLIC S16 NbHandleConfigTai(NbConfigNewTai *configNewTai) {
+   NB_LOG_ENTERFN(&nbCb);
+
+   if (NULLP == configNewTai) {
+     NB_LOG_ERROR(&nbCb, "Recieved empty(NULL) request");
+     RETVALUE(RFAILED);
+   }
+   nbCb.tau[(configNewTai->ueId) - 1]
+       .isTaiPres = TRUE;
+   nbCb.tau[(configNewTai->ueId) - 1].tac = configNewTai->tac;
+   RETVALUE(ROK);
+ }

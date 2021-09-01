@@ -55,6 +55,7 @@ EXTERN S16 NbUiNbuHdlUeIpInfoRej(Pst *, NbuUeIpInfoRej *);
 EXTERN S16 NbEnbDelayErabSetupRsp(NbDelayErabSetupRsp  *);
 EXTERN S16 NbEnbDropRA(NbDropRA *);
 EXTERN S16 NbHandleDropErabSetupReq(NbDropErabSetupReq  *);
+EXTERN S16 NbHandleConfigTai(NbConfigNewTai  *);
 
 int atoi(const char *nptr);
 
@@ -271,6 +272,14 @@ PUBLIC S16 NbUiNbtMsgReq
       case NB_DROP_ERAB_SETUP_REQ: {
         if(ROK != NbHandleDropErabSetupReq(&req->t.dropErabSetupReq)) {
           NB_LOG_ERROR(&nbCb, "Failed to process Drop Erab Setup Req "\
+                     "from TFW");
+        }
+        break;
+      }
+
+      case NB_CONFIG_TAI: {
+        if(ROK != NbHandleConfigTai(&req->t.configNewTai)) {
+          NB_LOG_ERROR(&nbCb, "Failed to process onfig TAI"
                      "from TFW");
         }
         break;
