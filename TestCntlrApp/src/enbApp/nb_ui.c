@@ -279,7 +279,7 @@ PUBLIC S16 NbUiNbtMsgReq
 
       case NB_CONFIG_TAI: {
         if(ROK != NbHandleConfigTai(&req->t.configNewTai)) {
-          NB_LOG_ERROR(&nbCb, "Failed to process onfig TAI"
+          NB_LOG_ERROR(&nbCb, "Failed to process config New TAI"
                      "from TFW");
         }
         break;
