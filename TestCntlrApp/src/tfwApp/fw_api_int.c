@@ -3605,8 +3605,8 @@ handleEnableOrDisableActvDfltBerReq(UeDropActvDefaultEpsBearCtxtReq_t *data) {
  *
  *     Fun:  configTaiReq
  *
- *     Desc:  This function is used to cofigure TAI(tac,plmn)
- *            from Test Controller.
+ *     Desc:  This function is used to configure TAI(tac,plmn)
+ *            from Test Controller.For now only tac is supported
  *
  *     Ret:   None
  *
