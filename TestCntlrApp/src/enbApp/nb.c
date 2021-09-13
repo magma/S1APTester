@@ -1740,7 +1740,7 @@ PUBLIC S16 NbHandleConfigTai(NbConfigNewTai *configNewTai) {
    NB_LOG_ENTERFN(&nbCb);
 
    if (NULLP == configNewTai) {
-     NB_LOG_ERROR(&nbCb, "Recieved empty(NULL) request");
+     NB_LOG_ERROR(&nbCb, "Received empty(NULL) request");
      RETVALUE(RFAILED);
    }
    nbCb.tau[(configNewTai->ueId) - 1]
