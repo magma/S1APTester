@@ -144,6 +144,10 @@ PUBLIC S16 NbHandleInitialUeMsg
    tai.plmnId = nbCb.plmnId;
 #endif
 
+   if (nbCb.tau[(ueCb->ueId) - 1].isTaiPres) {
+     tai.tac = nbCb.tau[(ueCb->ueId) - 1].tac;
+     nbCb.tau[(ueCb->ueId) - 1].isTaiPres = FALSE;
+   }
    establishCause = initialUeMsg->rrcCause;
 
    stmsi.pres  = initialUeMsg->stmsi.pres;

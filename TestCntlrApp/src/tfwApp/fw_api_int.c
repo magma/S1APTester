@@ -113,6 +113,7 @@ PRIVATE Void handleDropRouterAdv(UeDropRA *data);
 PRIVATE Void handleDropErabSetupReq(DropErabSetupReq_t *data);
 PRIVATE S16
 handleEnableOrDisableActvDfltBerReq(UeDropActvDefaultEpsBearCtxtReq_t *data);
+PRIVATE S16 configTaiReq(nbConfigTai_t *data);
 PUBLIC FwCb gfwCb;
 
 /* Adding UEID, epsupdate type, active flag into linked list for
@@ -2466,7 +2467,12 @@ PUBLIC S16 tfwApi
             (UeDropActvDefaultEpsBearCtxtReq_t *)msg);
         break;
       }
-
+      case ENB_CONFIG_TAI: {
+        FW_LOG_DEBUG(fwCb, "Process ENB_CONFIG_TAI \n");
+        configTaiReq(
+            (nbConfigTai_t *)msg);
+        break;
+      }
      default:
       {
          FW_LOG_ERROR(fwCb, "Invalid Message");
@@ -3593,5 +3599,37 @@ handleEnableOrDisableActvDfltBerReq(UeDropActvDefaultEpsBearCtxtReq_t *data) {
       data->dropActDfltEpsBearCtxtReq;
   fwSendToUeApp(uetMsg);
   FW_LOG_EXITFN(fwCb, ROK);
+}
+
+/*
+ *
+ *     Fun:  configTaiReq
+ *
+ *     Desc:  This function is used to configure TAI(tac,plmn)
+ *            from Test Controller.For now only tac is supported
+ *
+ *     Ret:   None
+ *
+ *     Notes: None
+ *
+ *     File:  fw_api_int.c
+ *
+ */
+PRIVATE S16 configTaiReq(nbConfigTai_t *data)
+{
+   FwCb  *fwCb = NULLP;
+   NbtRequest *msgReq = NULLP;
+
+   FW_GET_CB(fwCb);
+   FW_LOG_ENTERFN(fwCb);
+
+   FW_ALLOC_MEM(fwCb, &msgReq, sizeof(NbtMsg));
+   msgReq->msgType = NB_CONFIG_TAI;
+
+   msgReq->t.configNewTai.ueId = data->ue_Id;
+   msgReq->t.configNewTai.tac = data->tac;
+   fwSendToNbApp(msgReq);
+
+   FW_LOG_EXITFN(fwCb, ROK);
 }
 

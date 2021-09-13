@@ -498,6 +498,10 @@ typedef struct _nbRouterSolicitCb {
   CmTimer timer;
 } NbRouterSolicitCb;
 
+typedef struct _TauParams {
+  Bool isTaiPres;
+  U16 tac;
+} TauParams;
 
 typedef struct _nbCb
 {
@@ -542,6 +546,7 @@ typedef struct _nbCb
 #ifdef MULTI_ENB_SUPPORT
    Bool                      x2HoDone;
 #endif
+   TauParams                 tau[NB_MAX_UE_SUPPORTED];
 }NbCb;
 /** @brief This structure is temparerly store on stack which contains
  * UE specific Paging Message information.
