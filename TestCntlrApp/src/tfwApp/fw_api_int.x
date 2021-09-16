@@ -129,7 +129,8 @@ typedef enum {
    UE_ROUTER_ADV_IND,
    UE_SET_DROP_ROUTER_ADV,
    DROP_ERAB_SETUP_REQ,
-   UE_DROP_ACTV_DEFAULT_EPS_BEARER_CTXT_REQ
+   UE_DROP_ACTV_DEFAULT_EPS_BEARER_CTXT_REQ,
+   ENB_CONFIG_TAI
 }tfwCmd;
 
 typedef enum
@@ -1388,6 +1389,11 @@ typedef struct _num_Of_Enbs
    Bool pres;
    U8   numOfEnb;
 }num_Of_Enbs_t;
+
+typedef struct nbConfigTai {
+  U32 ue_Id;
+  U16 tac;
+}nbConfigTai_t;
 
 typedef struct _fwNbConfigReq
 {

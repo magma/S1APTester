@@ -59,6 +59,7 @@ typedef enum _nbMsgTypes
    NB_DELAY_ERAB_SETUP_RSP,
    NB_DROP_RA,
    NB_DROP_ERAB_SETUP_REQ,
+   NB_CONFIG_TAI,
    NB_UNKNOWN_MSG_TYPE
 }NbMsgTypes;
 
@@ -460,6 +461,12 @@ typedef struct _nbDropErabSetupReq {
   Bool isDropErabSetupReqEnable;
 } NbDropErabSetupReq;
 
+typedef struct _nbConfigNewTai {
+  // Add PLMN later if needed
+  U32 ueId;
+  U16 tac;
+} NbConfigNewTai;
+
 typedef struct _nbtMsg
 {
    NbMsgTypes msgType;
@@ -496,6 +503,7 @@ typedef struct _nbtMsg
       NbDelayErabSetupRsp delayErabSetupRsp;
       NbDropRA dropRA;
       NbDropErabSetupReq dropErabSetupReq;
+      NbConfigNewTai configNewTai;
    }t;
 }NbtMsg;
 
