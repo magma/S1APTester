@@ -114,6 +114,9 @@ PRIVATE Void handleDropErabSetupReq(DropErabSetupReq_t *data);
 PRIVATE S16
 handleEnableOrDisableActvDfltBerReq(UeDropActvDefaultEpsBearCtxtReq_t *data);
 PRIVATE S16 configTaiReq(nbConfigTai_t *data);
+#ifdef MULTI_ENB_SUPPORT
+PUBLIC Void handleS1HandoverRequired(FwNbS1HoRequired_t *data);
+#endif
 PUBLIC FwCb gfwCb;
 
 /* Adding UEID, epsupdate type, active flag into linked list for
@@ -1814,6 +1817,43 @@ PUBLIC Void handleEnbConfigTransfer(NbEnbConfigTrnsf* data)
    RETVOID;
 }
 
+#ifdef MULTI_ENB_SUPPORT
+/*
+ *   Fun:   handleS1HandoverRequired
+ *
+ *   Desc:  This function is used to handle S1 Handover Required
+ *          from Test Controller
+ *
+ *   Ret:   None
+ *
+ *   Notes: None
+ *
+ *   File:  fw_api_int.c
+ */
+PUBLIC Void handleS1HandoverRequired(FwNbS1HoRequired_t *data) {
+  FwCb *fwCb = NULLP;
+  NbtRequest *msgReq = NULLP;
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  if (SGetSBuf(fwCb->init.region, fwCb->init.pool, (Data **)&msgReq,
+               (Size)sizeof(NbtRequest)) == ROK) {
+    cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
+  } else {
+    FW_LOG_ERROR(fwCb, "Failed to allocate memory in handleS1HandoverRequired");
+    RETVOID;
+  }
+
+  msgReq->msgType = NB_S1_HANDOVER_REQUIRED;
+  cmMemcpy(&msgReq->t.s1HoRequired, data, sizeof(FwNbS1HoRequired_t));
+
+  // Send S1_HANDOVER_REQUIRED to NB APP
+  fwSendToNbApp(msgReq);
+  RETVOID;
+}
+#endif
+
 /*
  *   Fun:   tfwApi
  *
@@ -2405,6 +2445,13 @@ PUBLIC S16 tfwApi
     	 handleEnbConfigTransfer((NbEnbConfigTrnsf*)msg);
          break;
       }
+#ifdef MULTI_ENB_SUPPORT
+      case S1_HANDOVER_REQUIRED: {
+         FW_LOG_DEBUG(fwCb, "S1_HANDOVER_REQUIRED");
+         handleS1HandoverRequired((FwNbS1HoRequired_t *)msg);
+         break;
+      }
+#endif
       case UE_PDN_DISCONNECT_REQ:
       {
          FW_LOG_DEBUG(fwCb, "UE_PDN_DISCONNECT_REQ");

@@ -167,7 +167,7 @@ PFSZLIMSGHANDLER szLiRcvEnb[SZ_MAX_MSG_ID] =
    szLiCOMsgHandler,     /* Handover Required */
    szLiCOMsgHandler,     /* Handover Command */
    szLiCOMsgHandler,     /* Handover Preperation Failure */
-   szLiCOMsgHandler,     /* Handover Request */
+   szMgmtLiMsgHandler,   /* Handover Request */
    szLiCOMsgHandler,     /* Handover Request Acknowledge */
    szLiCOMsgHandler,     /* Handover Request Failure */
    szLiCOMsgHandler,     /* Handover Notify */
