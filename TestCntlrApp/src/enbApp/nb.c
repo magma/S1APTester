@@ -1748,3 +1748,32 @@ PUBLIC S16 NbHandleConfigTai(NbConfigNewTai *configNewTai) {
    nbCb.tau[(configNewTai->ueId) - 1].tac = configNewTai->tac;
    RETVALUE(ROK);
  }
+
+PUBLIC S16 NbEnbRelBearerReqHdl
+(
+ NbuRelBearerReq *relBearerReq
+)
+{
+   NbUeCb *ueCb = NULLP;
+
+   NB_LOG_ENTERFN(&nbCb);
+
+   if(NULLP == relBearerReq)
+   {
+      NB_LOG_ERROR(&nbCb, "Recieved empty(NULL) request");
+      RETVALUE(RFAILED);
+   }
+
+   /* Find the ENB and MME UE-S1AP Ids using UeId */
+   if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(relBearerReq->ueId),
+      sizeof(U32),0,(PTR *)&ueCb)))
+   {
+      RETVALUE(RFAILED);
+   }
+
+   /* Release all bearers which are their in the erabIdLst */
+   nbIfmDamErabDelReq((Void *)relBearerReq);
+
+   RETVALUE(ROK);
+} /* NbEnbErabRelIndHdl */
+

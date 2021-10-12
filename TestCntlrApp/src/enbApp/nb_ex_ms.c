@@ -50,6 +50,8 @@ EXTERN S16 NbUiNbtMsgReq(Pst *pst,NbtMsg *req);
 
 EXTERN S16 NbUiNbuHdlUeIpInfoRej(Pst *, NbuUeIpInfoRej *);
 
+EXTERN S16 NbUiNbuHdlRelBearerReq(Pst *, NbuRelBearerReq *);
+
 /*
  *
  *       Fun:    nbActvTsk
@@ -149,6 +151,11 @@ Buffer   *mBuf;
             }
             case EVTNBUUEIPINFOREJ: {
               cmUnPkNbuUeIpInfoRej(NbUiNbuHdlUeIpInfoRej, pst, mBuf);
+              break;
+            }
+            case EVTNBURELBEARERREQ:
+            {
+              cmUnPkNbuRelBearerReq(NbUiNbuHdlRelBearerReq, pst, mBuf);
               break;
             }
 

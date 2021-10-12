@@ -1062,3 +1062,17 @@ PUBLIC S16 NbUiNbuHdlUeIpInfoRej(Pst *pst, NbuUeIpInfoRej *rej) {
   retVal = NbHandleUeIpInfoRej(rej);
   RETVALUE(retVal);
 } /* NbUiNbuHdlUeIpInfoRej */
+
+
+PUBLIC S16 NbUiNbuHdlRelBearerReq
+(
+ Pst *pst,
+ NbuRelBearerReq *msg
+)
+{
+   S16 retVal = ROK;
+
+   retVal = NbEnbRelBearerReqHdl(msg);
+   RETVALUE(retVal);
+} /* NbUiNbuHdlRelBearerReq */
+

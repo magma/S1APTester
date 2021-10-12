@@ -1321,7 +1321,7 @@ PUBLIC S16 ueAppUtlBldTauReq
    S16 ret = ROK;
    U32 mTmsi = 0;
    UeAppCb *ueAppCb = NULLP;
-   CmEmmTAURequest  *tauReq;
+   CmEmmTAURequest  *tauReq = NULLP;
    CmEmmMsg* emmMsg;
 
    UE_GET_CB(ueAppCb);
@@ -1387,6 +1387,18 @@ PUBLIC S16 ueAppUtlBldTauReq
          sizeof(Guti));
    tauReq->epsMi.u.guti.mTMSI = mTmsi;
 
+   printf("\n ueApp epsBearCtxtSts %x\n", p_ueMsg->msg.ueUetTauRequest.epsBearerCtxSts);
+   if (p_ueMsg->msg.ueUetTauRequest.epsBearerCtxSts > 0) {
+     printf("\n Copying epsBearCtxtSts=%x\n", p_ueMsg->msg.ueUetTauRequest.epsBearerCtxSts);
+     tauReq->epsBearCtxtSts.pres = TRUE;
+     tauReq->epsBearCtxtSts.len = 2;
+     printf("\n Copying2 epsBearCtxtSts len\n");
+     cmMemcpy((U8 *)&tauReq->epsBearCtxtSts.val, &p_ueMsg->msg.ueUetTauRequest.epsBearerCtxSts,
+           sizeof(p_ueMsg->msg.ueUetTauRequest.epsBearerCtxSts));
+     //tauReq->epsBearCtxtSts.val = p_ueMsg->msg.ueUetTauRequest.epsBearerCtxSts;
+     printf("\n Copied epsBearCtxtSts %x\n", tauReq->epsBearCtxtSts.val[0]);
+     printf("\n Copied epsBearCtxtSts %x\n", tauReq->epsBearCtxtSts.val[1]);
+   }
    UE_LOG_EXITFN(ueAppCb, ret);
 }
 
@@ -2143,17 +2155,22 @@ PRIVATE S16 ueProcUeTauRequest(UetMessage *p_ueMsg, Pst *pst)
    UeCb    *ueCb = NULLP;
    UeAppMsg srcMsg;
    UeAppMsg dstMsg;
+   U8 rbIdx = 0;
+   U8 bearerToBeRel = 0;
+   U8 tmpBearerList[CM_ESM_MAX_BEARER_ID] = {0};
 
    NhuDedicatedInfoNAS nasEncPdu;
    CmNasEvnt           *tauReqEvnt = NULLP;
    NbuInitialUeMsg      *nbUeTauReq = NULLP;
    NbuUlNasMsg *nbUeTauReqUlNas = NULLP;
+   NbuRelBearerReq *nbuRelBerReq = NULLP;
 
    UE_GET_CB(ueAppCb);
    UE_LOG_ENTERFN(ueAppCb);
 
    UE_LOG_DEBUG(ueAppCb, "Processing UE Tracking area update message");
    ueId = p_ueMsg->msg.ueUetTauRequest.ueId;
+   U16 epsBearerCtxSts = p_ueMsg->msg.ueUetTauRequest.epsBearerCtxSts;
 
    /* Fetching the UeCb */
    ret = ueDbmFetchUe(ueId,(PTR*)&ueCb);
@@ -2162,7 +2179,52 @@ PRIVATE S16 ueProcUeTauRequest(UetMessage *p_ueMsg, Pst *pst)
       UE_LOG_ERROR(ueAppCb, "ueProcUeTauReq: UeCb List NULL ueId = %d", ueId);
       RETVALUE(ret);
    }
-
+   /* Deactivate bearer only if epsBearerCtxSts received from test script is
+    * non zero and there is more than 1 PDN
+    */
+   if (epsBearerCtxSts > 0 && (ueCb->numPdns > 1)) {
+     for(U8 ebi=5;ebi<CM_ESM_MAX_BEARER_ID;ebi++) {
+       if (!(epsBearerCtxSts & (1<<ebi))) {
+        /*Find the bearer index*/
+        if((ueAppUtlFndRbCb(&rbIdx, ueCb,
+                  ebi) == ROK)) {
+          if (ueCb->\
+                  ueRabCb[rbIdx].bearerType == DEFAULT_BEARER) {
+              if (ueCb->numPdns == 1) {
+                continue;
+              }
+          for(U8 ctxtCount = 0; ctxtCount < UE_APP_MAX_DRBS; ctxtCount++) {
+            if(ebi == ueCb->ueRabCb[ctxtCount].\
+                  lnkEpsBearId) {
+               cmMemset((U8 *)&(ueCb->ueRabCb[ctxtCount]), 0,
+                     sizeof(ueCb->ueRabCb[ctxtCount]));
+               ueCb->drbs[ctxtCount] = UE_APP_DRB_AVAILABLE;
+               tmpBearerList[bearerToBeRel] = ebi;
+               bearerToBeRel ++;
+            }
+          }
+        } else if (ueCb->ueRabCb[rbIdx].bearerType == DEDICATED_BEARER) {
+          cmMemset((U8 *)&(ueCb->ueRabCb[rbIdx]), 0,
+               sizeof(ueCb->ueRabCb[rbIdx]));
+          ueCb->drbs[rbIdx + 1] = UE_APP_DRB_AVAILABLE;
+          tmpBearerList[bearerToBeRel] = ebi;
+          bearerToBeRel ++;
+        }
+   }
+   }
+   }
+   if (bearerToBeRel > 0) {
+     nbuRelBerReq = (NbuRelBearerReq *)ueAlloc(sizeof(NbuRelBearerReq));
+     nbuRelBerReq->ueId = ueId;
+     nbuRelBerReq->numOfErabIds = bearerToBeRel;
+     nbuRelBerReq->erabIdLst = (U8 *)ueAlloc((sizeof(U8)) * \
+         nbuRelBerReq->numOfErabIds);
+     cmMemset((U8 *)(nbuRelBerReq->erabIdLst), 0, ((sizeof(U8)) * \
+            nbuRelBerReq->numOfErabIds));
+     cmMemCpy(nbuRelBerReq->erabIdLst, tmpBearerList, bearerToBeRel);
+     ret = ueSendRelBearerReqMsgToNb(nbuRelBerReq, &ueAppCb->nbPst);
+    }
+  }
    ret = ueAppUtlBldTauReq(ueCb, &tauReqEvnt, p_ueMsg);
    if (ret != ROK)
    {
@@ -2170,6 +2232,7 @@ PRIVATE S16 ueProcUeTauRequest(UetMessage *p_ueMsg, Pst *pst)
       RETVALUE(ret);
    }
 
+   printf("TAU Request Building success");
    cmMemset((U8 *)&nasEncPdu, 0, sizeof(NhuDedicatedInfoNAS));
    /* Encode the PDU */
    ret = ueAppEdmEncode(tauReqEvnt, &nasEncPdu);
@@ -9972,4 +10035,3 @@ PRIVATE S16 ueProcDropActDefaultEpsBerCtxtReq(UetMessage *p_ueMsg, Pst *pst) {
 
   UE_LOG_EXITFN(ueAppCb, ret);
 }
-

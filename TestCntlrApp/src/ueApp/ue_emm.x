@@ -786,6 +786,7 @@ typedef struct cmEmmEpsBearCtxtSts
    U8 pres;
    U8 len;
    U8 val[CM_EMM_EPS_BEAR_CTXT_STS_LEN];
+   //U16 val;
 }CmEmmEpsBearCtxtSts;
 
 typedef struct cmEmmEpsNwFeatSupp
@@ -1229,7 +1230,9 @@ typedef struct cmEmmTAURequest
  */
    CmEmmEpsUpdType epsUpdType;
    CmEmmNasKsi nasKsi;
-   CmEmmEpsMI epsMi; /* Old GUTI or IMSI */
+   CmEmmEpsBearCtxtSts epsBearCtxtSts;
+   CmEmmEpsMI epsMi; // Old GUTI or IMSI
+   // Optional IE
 }CmEmmTAURequest;
 
 typedef struct cmEmmGprsTimer2

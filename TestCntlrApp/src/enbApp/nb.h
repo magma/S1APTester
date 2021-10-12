@@ -213,6 +213,7 @@ typedef U32                  NbMmeId;
 // NB_RTR_SOLICITATION_INTERVAL in seconds
 #define NB_RTR_SOLICITATION_INTERVAL 4000
 #define NB_MAX_RTR_SOLICITATIONS_RETRY 2
+#define MAX_ERAB_ID 15
 
 EXTERN U16 szElmSize[][SZT_MAX_PROC_ID];
 typedef struct _nbUeCb _nbUeCb;

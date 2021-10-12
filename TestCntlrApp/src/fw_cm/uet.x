@@ -620,6 +620,7 @@ typedef struct _ueUetTauRequest
    UeUetMtmsi ueMtmsi;
    U8 epsUpdtType;
    U8 ActvFlag;
+   U16 epsBearerCtxSts;
 }UeUetTauRequest;
 
 typedef struct _ueUetTauAccept

@@ -467,6 +467,13 @@ typedef struct _nbConfigNewTai {
   U16 tac;
 } NbConfigNewTai;
 
+typedef struct _nbRelBearerReq
+{
+   U32 ueId;
+   U8 numOfErabIds;
+   U8 *erabIdLst;
+}NbRelBearerReq;
+
 typedef struct _nbtMsg
 {
    NbMsgTypes msgType;

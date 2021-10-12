@@ -179,6 +179,7 @@ PRIVATE S16 cmEmmEncMsClsMrk3 ARGS((U8* buf, U32* indx, CmEmmMsg *msg, U16 *len)
 PRIVATE S16 cmEmmEncSuppCodecLst ARGS((U8* buf, U32* indx, CmEmmMsg *msg, U16 *len));
 PRIVATE S16 cmEmmEncAuthFalrPrm ARGS((U8* buf, U32* indx, CmEmmMsg *msg, U16 *len));
 PRIVATE S16 cmEmmEncRES ARGS((U8* buf, U32* indx, CmEmmMsg *msg, U16 *len));
+PRIVATE S16 cmEmmEncEpsBearCtxtSts (U8 *buf, U32* indx, CmEmmMsg *msg, U16 *len);
 PRIVATE S16 cmEmmDecEpsBearCtxtSts ARGS((U8* buf, U32* indx, CmEmmMsg *msg,
                                          U32 len));
 PRIVATE S16 cmEmmDecEpsNwFeatSupp ARGS((U8* buf, U32* indx, CmEmmMsg *msg,
@@ -557,7 +558,9 @@ CmEmmEdmMsgFormat emmMsgTab[CM_EMM_MAX_MSG][CM_EMM_MAX_IE] =
       { 0, EDM_PRES_MANDATORY, EDM_FMTV, FALSE, 8,
          NULLP, NULLP, NULLP},
       { 0, EDM_PRES_MANDATORY, EDM_FMTLV, FALSE, 776,
-         NULLP, NULLP, NULLP}
+         NULLP, NULLP, NULLP},
+      {CM_EMM_IE_EPS_BRR_CTX_STS, EDM_PRES_OPTIONAL, EDM_FMTTLV, TRUE, 0,
+         NULLP, NULLP, cmEmmDecEpsBearCtxSts}
    },
 
    /* Tracking Area Update Complete */
@@ -577,8 +580,10 @@ CmEmmEdmMsgFormat emmMsgTab[CM_EMM_MAX_MSG][CM_EMM_MAX_IE] =
          NULLP, NULLP, cmEmmDecEpsUpdType},
       {0, EDM_PRES_MANDATORY, EDM_FMTV, FALSE, 4,
          NULLP, NULLP, cmEmmDecNasKsi},
-      {0, EDM_PRES_MANDATORY, EDM_FMTLV, TRUE, 96,
-         NULLP, NULLP, cmEmmDecEpsMi}
+      {0, EDM_PRES_MANDATORY, EDM_FMTLV, FALSE, 96,
+         NULLP, NULLP, cmEmmDecEpsMi},
+      {CM_EMM_IE_EPS_BRR_CTX_STS, EDM_PRES_OPTIONAL, EDM_FMTTLV, TRUE, 0,
+         NULLP, cmEmmEncEpsBearCtxtSts, NULLP}
    },
 
    /* Uplink NAS Transport */
@@ -896,8 +901,10 @@ CmEmmEdmMsgFormat emmMsgTab[CM_EMM_MAX_MSG][CM_EMM_MAX_IE] =
          NULLP, cmEmmEncEpsUpdType, cmEmmDecEpsUpdType},
       {0, EDM_PRES_MANDATORY, EDM_FMTV, FALSE, 4,
          NULLP, cmEmmEncNasKsi, cmEmmDecNasKsi},
-      {0, EDM_PRES_MANDATORY, EDM_FMTLV, TRUE, 96,
-         NULLP, cmEmmEncOldEpsMi, cmEmmDecOldEpsMi}
+      {0, EDM_PRES_MANDATORY, EDM_FMTLV, FALSE, 96,
+         NULLP, cmEmmEncOldEpsMi, cmEmmDecOldEpsMi},
+      {CM_EMM_IE_EPS_BRR_CTX_STS, EDM_PRES_OPTIONAL, EDM_FMTTLV, TRUE, 0,
+         NULLP, cmEmmEncEpsBearCtxtSts, NULLP}
    },
 
    /* Uplink NAS Transport */
@@ -9508,6 +9515,72 @@ U32 len;
    RETVALUE(ROK);
 }
 
+/*
+ *
+ *       Fun:  cmEmmEncEpsBearCtxtSts
+ *
+ *       Desc:  This function encodes Eps bearer contect status IE
+ *
+ *       Ret:  ROK - ok; RFAILED - failed
+ *
+ *       Notes: none
+ *
+         File:  ue_emm_edm.c
+ *
+ */
+#ifdef ANSI
+PRIVATE S16 cmEmmEncEpsBearCtxtSts
+(
+U8 *buf,
+U32 *indx,
+CmEmmMsg *msg,
+U16 *len
+)
+#else
+PRIVATE S16 cmEmmEncEpsBearCtxtSts (buf, indx, msg, len)
+U8 *buf;
+U32 *indx;
+CmEmmMsg *msg;
+U16 *len;
+#endif
+{
+/*   CmEmmEpsBearCtxtSts *epsBearCtxtSts;;
+   EDM_TRC2(cmEmmEncEpsBearCtxtSts)
+
+   epsBearCtxtSts = &msg->u.tauReq.epsBearCtxtSts;
+   printf("In cmEmmEncEpsBearCtxtSts\n");
+   if (!epsBearCtxtSts->pres) {
+     RETVALUE(ROK);
+   }
+
+   // Encode the IEI
+   buf[(*indx)++] = CM_EMM_IE_EPS_BRR_CTX_STS;
+   // Len
+   buf[(*indx)++] = 2;
+
+   // Encode the value
+  //cmMemcpy(&buf[(*indx)], epsBearCtxtSts->val, epsBearCtxtSts->len);
+   buf[(*indx)] = epsBearCtxtSts->val >> 8;
+   printf("Encoded epsBearCtxtSts buf[indx]=%x\n", buf[(*indx)++]);
+   buf[(*indx)] = epsBearCtxtSts->val;
+   printf("Encoded epsBearCtxtSts buf[indx]=%x\n", buf[(*indx)++]);
+   *len = 2;*/
+   EDM_TRC2(cmEmmEncEpsBearCtxtSts)
+   CmEmmEpsBearCtxtSts *epsBearCtxtSts;
+   if (!epsBearCtxtSts->pres) {
+     RETVALUE(ROK);
+   }
+   epsBearCtxtSts = &msg->u.tauReq.epsBearCtxtSts;
+   // Encode the IEI
+   buf[(*indx)++] = CM_EMM_IE_EPS_BRR_CTX_STS;
+   // Len
+   buf[(*indx)++] = 2;
+   // Value
+   buf[(*indx)++] = msg->u.tauReq.epsBearCtxtSts.val[0];
+   buf[(*indx)++] = msg->u.tauReq.epsBearCtxtSts.val[1];
+   *len = 32;
+   RETVALUE(ROK);
+}
 
 #ifdef __cplusplus
 }

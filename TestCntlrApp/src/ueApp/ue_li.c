@@ -523,3 +523,22 @@ PUBLIC S16 ueAppBldAndSndIpInfoRejToNb(UeCb *ueCb, U8 bearerId, Pst *pst) {
   ret = UeLiNbuSendUeIpInfoRej(pst, ueIpInfoRej);
   RETVALUE(ret);
 }
+
+PUBLIC S16 ueSendRelBearerReqMsgToNb(NbuRelBearerReq *nbuRelBerReq, Pst *pst)
+{
+   S16 ret = ROK;
+   UeAppCb *ueAppCb;
+
+   UE_GET_CB(ueAppCb);
+   UE_LOG_ENTERFN(ueAppCb);
+
+   UE_LOG_DEBUG(ueAppCb, "Sending Release bearer request to EnodeB APP");
+
+   ret = UeLiNbuRelBearerReq(pst, nbuRelBerReq);
+   if (ret != ROK)
+   {
+      UE_LOG_ERROR(ueAppCb, "Sending Release bearer request to NB failed");
+   }
+   UE_LOG_EXITFN(ueAppCb, ret);
+}
+

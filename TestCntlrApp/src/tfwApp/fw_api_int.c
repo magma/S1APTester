@@ -169,6 +169,11 @@ PUBLIC S16 handlTauReq(ueTauReq_t* data)
    ueTauReq->ueMtmsi.mTmsi = data->ueMtmsi.mTmsi;
    ueTauReq->epsUpdtType = data->type;
    ueTauReq->ActvFlag = data->Actv_flag;
+   printf("epsBearerCtxSts=%x\n", data->epsBearerCtxSts);
+   if (data->epsBearerCtxSts > 0) {
+     ueTauReq->epsBearerCtxSts = data->epsBearerCtxSts;
+     printf("Adding epsBearerCtxSts=%x\n", ueTauReq->epsBearerCtxSts);
+   }
    fwSendToUeApp(uetMsg);
 
    FW_LOG_DEBUG(fwCb, "\n-------------------------------\n\
