@@ -446,7 +446,7 @@ S16                          event
  *         Processing steps:
  *               Check Whetether Timer is running or not based on Event type
  *
- * @param[in] tmr : pointre to the Timer.
+ * @param[in] tmr : pointer to the Timer.
  * @param[in] event : One of the many possible timer types.
  * @return S16
  *        -# Success : ROK
