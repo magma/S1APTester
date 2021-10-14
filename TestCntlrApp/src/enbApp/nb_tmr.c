@@ -446,28 +446,23 @@ S16                          event
  *         Processing steps:
  *               Check Whetether Timer is running or not based on Event type
  *
- * @param[in] tmr : pointre to the Timer. 
- * @param[in] event : One of the many possible timer types. 
+ * @param[in] tmr : pointer to the Timer.
+ * @param[in] event : One of the many possible timer types.
  * @return S16
  *        -# Success : ROK
  *        -# Failure : RFAILED
  */
-PUBLIC Bool nbIsTmrRunning
-(
-CmTimer                      *tmr,
-S16                          event
-)
-{
-   if(tmr != NULLP)
-   {	
-      if(tmr->tmrEvnt == event)
-      {
-         RETVALUE(TRUE);
-      }
-      else if (tmr->tmrEvnt != TMR_NONE)
-      {
-         NB_LOG_ERROR(&nbCb,"Invalid Timer event [%d] received", event);
-      }
-   }
-   RETVALUE(FALSE);
+PUBLIC Bool nbIsTmrRunning(CmTimer *tmr, S16 event) {
+  if (tmr != NULLP) {
+    if (tmr->tmrEvnt == event) {
+      RETVALUE(TRUE);
+    } else if (tmr->tmrEvnt != TMR_NONE && tmr->tmrEvnt != TMR0) {
+      /* The tmrEvnt is set to TMR_NONE when a timer is stopped, whereas it is
+       * set to TMR0 by default if initialized as CmTimer structures as part of
+       * NbCb, e.g., nbCb.dropInitCtxtSetup.timer.tmrEvnt
+       */
+      NB_LOG_ERROR(&nbCb, "Invalid Timer event [%d] received", event);
+    }
+  }
+  RETVALUE(FALSE);
 }
