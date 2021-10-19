@@ -772,7 +772,6 @@ PUBLIC Void cmUnPkErabDelReq
    Void *erabRelReq = NULLP;
    CMCHKUNPKLOG(cmUnpkPtr,(PTR *)&erabRelReq, mBuf, 0, pst);
    NB_DAM_FREE_BUFFER(pst->region, mBuf);
-   printf("cmUnPkErabDelReq\n");
    nbDamNbErabDelReq(erabRelReq);
 }
 

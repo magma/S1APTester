@@ -3408,7 +3408,6 @@ PUBLIC S16 nbHandleS1UeReleaseCmd(NbUeCb *ueCb) {
   if (nbCb.delayUeCtxtRelCmp[(ueCb->ueId) - 1].delayUeCtxRelComp != TRUE) {
     /* send the release complete to mme */
     ret = nbCtxtRelSndRlsCmpl(ueCb);
-    printf("Deleting UE in nbHandleS1UeReleaseCmd\n");
     ret = nbIfmDamUeDelReq(ueCb->ueId);
   } else {
     nbStartDelayTimerForUeCtxRel(ueCb->ueId);

@@ -676,7 +676,6 @@ PRIVATE S16 nbAppReadConfigParams(Void)
    FW_GET_CB(fwCb);
    FW_LOG_ENTERFN(fwCb);
 
-   printf("Reading config\n");
    if((fp = fopen("nbAppCfg.txt", "r")) == NULLP)
    {
       /* configuration file checking */

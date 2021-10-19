@@ -1064,15 +1064,8 @@ PUBLIC S16 NbUiNbuHdlUeIpInfoRej(Pst *pst, NbuUeIpInfoRej *rej) {
 } /* NbUiNbuHdlUeIpInfoRej */
 
 
-PUBLIC S16 NbUiNbuHdlRelBearerReq
-(
- Pst *pst,
- NbuRelBearerReq *msg
-)
-{
-   S16 retVal = ROK;
-   printf("In NbUiNbuHdlRelBearerReq\n");
-   retVal = NbEnbRelBearerReqHdl(msg);
-   RETVALUE(retVal);
+PUBLIC S16 NbUiNbuHdlRelBearerReq (Pst *pst, NbuRelBearerReq *msg) {
+  S16 retVal = ROK;
+  retVal = NbEnbRelBearerReqHdl(msg);
+  RETVALUE(retVal);
 } /* NbUiNbuHdlRelBearerReq */
-

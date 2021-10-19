@@ -250,17 +250,15 @@ typedef struct _nbuNotifyPlmnInfo
    U8 plmnId[3];
 }NbuNotifyPlmnInfo;
 
-typedef struct _nbuRelBearerReq
-{
-   U32 ueId;
-   U8 numOfErabIds;
-   U8 *erabIdLst;
-}NbuRelBearerReq;
-
-typedef struct _nbuRelBearerRsp
-{
+typedef struct _nbuRelBearerReq {
   U32 ueId;
-}NbuRelBearerRsp;
+  U8 numOfErabIds;
+  U8 *erabIdLst;
+} NbuRelBearerReq;
+
+typedef struct _nbuRelBearerRsp {
+  U32 ueId;
+} NbuRelBearerRsp;
 
 typedef S16 (*NbuInitialUeMsgHdl)(Pst*, NbuInitialUeMsg*);
 typedef S16 (*NbuUlNasMsgHdl)(Pst*, NbuUlNasMsg*);

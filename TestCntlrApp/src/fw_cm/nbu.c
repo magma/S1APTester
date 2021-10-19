@@ -2977,23 +2977,19 @@ Buffer *mBuf;
 
 /*
  *
- *    Fun:    cmPkNbuErabRelInd
+ *    Fun:    cmPkNbuRelBearerReq
  *
- *    Desc:    pack the Erab Rel Ind
+ *    Desc:   pack NbuRelBearerReq
  *
  *    Ret:    ROK  -ok
  *
- *    Notes:    None
+ *    Notes:  None
  *
  *    File:
  *
  */
 #ifdef ANSI
-PUBLIC S16 cmPkNbuRelBearerReq
-(
- Pst *pst,
- NbuRelBearerReq *req
-)
+PUBLIC S16 cmPkNbuRelBearerReq(Pst *pst, NbuRelBearerReq *req)
 #else
 PUBLIC S16 cmPkNbuRelBearerReq(pst,req)
 Pst *pst;
@@ -3049,26 +3045,21 @@ NbuRelBearerReq *req;
 #ifdef LCNBU
 /*
  *
- *     Fun:     cmPkRelBearerReq
+ *     Fun:    cmPkRelBearerReq
  *
- *     Desc:    pack the structure NbuErabRelIndList
+ *     Desc:   pack the structure NbuRelBearerReq
  *
  *     Ret:    ROK  -ok
  *
- *     Notes:    None
+ *     Notes:  None
  *
  *     File:
  *
  */
 
-PRIVATE S16 cmPkRelBearerReq
-(
- NbuRelBearerReq  *param,
- Buffer *mBuf
-)
-{
-   TRC3(NbuRelBearerReq)
-   RETVALUE(ROK);
+PRIVATE S16 cmPkRelBearerReq(NbuRelBearerReq  *param, Buffer *mBuf) {
+  TRC3(NbuRelBearerReq)
+  RETVALUE(ROK);
 } /*end of function NbuRelBearerReq */
 
 #endif
@@ -3077,11 +3068,11 @@ PRIVATE S16 cmPkRelBearerReq
  *
  *    Fun:    cmUnPkNbuRelBearerReq
  *
- *    Desc:    unpack the primitive RelBearerReq
+ *    Desc:   unpack the primitive RelBearerReq
  *
  *    Ret:    ROK  -ok
  *
- *    Notes:    None
+ *    Notes:  None
  *
  *    File:
  *
@@ -3113,7 +3104,6 @@ Buffer *mBuf;
       {
 #ifdef LCNBU
          case NBU_SEL_LC:
-            printf("cmUnPkRelBearerReq\n");
             ret1 = cmUnPkRelBearerReq((NbuRelBearerReq *)&req,mBuf);
 #if(ERRCLASS & ERRCLS_DEBUG)
             if(ret1 != ROK)
@@ -3129,7 +3119,6 @@ Buffer *mBuf;
 #endif
 #ifdef LWLCNBU
          case  NBU_SEL_LWLC:
-            printf("CMCHKUNPKLOG cmUnPkRelBearerReq\n");
             CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &req, mBuf, (ErrVal)ENBU025, pst);
             break;
 #endif
@@ -3151,13 +3140,13 @@ Buffer *mBuf;
  *
  *    Fun:   cmUnPkRelBearerReq
  *
- *    Desc:    unpack the primitive NbuRelBearerReq
+ *    Desc:  unpack the primitive NbuRelBearerReq
  *
- *    Ret:    ROK  -ok
+ *    Ret:   ROK  -ok
  *
- *    Notes:    None
+ *    Notes: None
  *
- *    File:   NbuRelBearerReq
+ *    File:  NbuRelBearerReq
  *
  */
 
@@ -3182,13 +3171,13 @@ Buffer *mBuf;
  *
  *    Fun:   cmPkRelBearerRsp
  *
- *    Desc:    pack the primitive NbuRelBearerRsp
+ *    Desc:  pack the primitive NbuRelBearerRsp
  *
- *    Ret:    ROK  -ok
+ *    Ret:   ROK  -ok
  *
- *    Notes:    None
+ *    Notes: None
  *
- *    File:   NbuRelBearerRsp
+ *    File:  NbuRelBearerRsp
  *
  */
 
@@ -3230,15 +3219,15 @@ PUBLIC S16 cmPkNbuRelBearerRsp
 
 /*
  *
- *    Fun:   cmUnPkNbuRelBearerRsp 
+ *    Fun:   cmUnPkNbuRelBearerRsp
  *
- *    Desc:    unpack the primitive NbuRelBearerRsp
+ *    Desc:  unpack the primitive NbuRelBearerRsp
  *
- *    Ret:    ROK  -ok
+ *    Ret:   ROK  -ok
  *
- *    Notes:    None
+ *    Notes: None
  *
- *    File:   NbuRelBearerRsp
+ *    File:  NbuRelBearerRsp
  *
  */
 

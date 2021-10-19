@@ -1374,7 +1374,6 @@ PUBLIC S16 ueAppUtlBldTauReq
    /* Fill mandatory IEs */
    tauReq->epsUpdType.pres = TRUE;
    tauReq->epsUpdType.actv = ueUetTauRequest->ActvFlag;
-   printf("ActvFlag=%d\n", tauReq->epsUpdType.actv);
    tauReq->epsUpdType.type = ueUetTauRequest->epsUpdtType;
 
    /*NAS key set identifier IE*/
@@ -1390,17 +1389,11 @@ PUBLIC S16 ueAppUtlBldTauReq
          sizeof(Guti));
    tauReq->epsMi.u.guti.mTMSI = mTmsi;
 
-   printf("\n ueApp epsBearCtxtSts %x\n", ueUetTauRequest->epsBearerCtxSts);
-   printf("\n epsBearCtxtSts in tauReq in ueAppUtlBldTauReq %x\n", tauReq->epsBearCtxtSts.pres);
    if (ueUetTauRequest->epsBearerCtxSts > 0) {
-     printf("\n Copying epsBearCtxtSts=%x\n", ueUetTauRequest->epsBearerCtxSts);
      tauReq->epsBearCtxtSts.pres = TRUE;
      tauReq->epsBearCtxtSts.len = 2;
-     printf("\n Copying2 epsBearCtxtSts len\n");
      cmMemcpy((U8 *)&tauReq->epsBearCtxtSts.val, &ueUetTauRequest->epsBearerCtxSts,
            sizeof(ueUetTauRequest->epsBearerCtxSts));
-     printf("\n Copied epsBearCtxtSts %x\n", tauReq->epsBearCtxtSts.val[0]);
-     printf("\n Copied epsBearCtxtSts %x\n", tauReq->epsBearCtxtSts.val[1]);
    }
    UE_LOG_EXITFN(ueAppCb, ret);
 }
@@ -2185,31 +2178,27 @@ PRIVATE S16 ueProcUeTauRequest(UetMessage *p_ueMsg, Pst *pst)
    /* Deactivate bearer only if epsBearerCtxSts received from test script is
     * non zero and there is more than 1 PDN
     */
-   printf("epsBearerCtxSts in ueProcUeTauReq=%x\n", epsBearerCtxSts);
    if (epsBearerCtxSts > 0) {
-     printf("epsBearerCtxSts is > 0\n");
-     for(U8 ebi=5;ebi<CM_ESM_MAX_BEARER_ID;ebi++) {
+     for(U8 ebi=CM_ESM_BEARER_ID_INDX;ebi<CM_ESM_MAX_BEARER_ID;ebi++) {
        rbIdx = 0;
        if (!(epsBearerCtxSts & (1<<ebi))) {
-        UE_LOG_DEBUG(ueAppCb, "Checking if ebi is active or not for ebi=%d, rbIdx=%d\n", ebi, rbIdx);
         // Find the bearer index
         if((ueAppUtlFndRbCb(&rbIdx, ueCb,
                   ebi) == ROK)) {
-          UE_LOG_DEBUG(ueAppCb, "ueAppUtlFndRbCb is successful for ebi=%d, rbIdx=%d\n", ebi, rbIdx);
           if (ueCb->\
                   ueRabCb[rbIdx].bearerType == DEFAULT_BEARER) {
               if (ueCb->numPdns == 1) {
                 continue;
               }
-               printf("Clearing memory for ebi=%d at rbIdx=%d\n", ebi, rbIdx);
+              // Clear the bearer context
                cmMemset((U8 *)&(ueCb->ueRabCb[rbIdx]), 0,
                      sizeof(ueCb->ueRabCb[rbIdx]));
                ueCb->drbs[rbIdx] = UE_APP_DRB_AVAILABLE;
                tmpBearerList[bearerToBeRel] = ebi;
                UE_LOG_DEBUG(ueAppCb, "Adding default ebi=%d to tmpBearerList\n", ebi);
                bearerToBeRel ++;
-         
         } else if (ueCb->ueRabCb[rbIdx].bearerType == DEDICATED_BEARER) {
+          // Clear the bearer context
           cmMemset((U8 *)&(ueCb->ueRabCb[rbIdx]), 0,
                sizeof(ueCb->ueRabCb[rbIdx]));
           ueCb->drbs[rbIdx + 1] = UE_APP_DRB_AVAILABLE;
@@ -2245,8 +2234,6 @@ PRIVATE S16 ueProcUeTauRequest(UetMessage *p_ueMsg, Pst *pst)
           RETVALUE(RFAILED);
        }
        cmMemcpy(ueCb->ueUetTauRequest, &p_ueMsg->msg.ueUetTauRequest, sizeof(UeUetTauRequest));
-       printf("Actv flag=%d, eps bearer sts=%x\n", p_ueMsg->msg.ueUetTauRequest.ActvFlag, p_ueMsg->msg.ueUetTauRequest.epsBearerCtxSts);
-       printf("Actv flag=%d, eps bearer sts=%x\n", ueCb->ueUetTauRequest->ActvFlag, ueCb->ueUetTauRequest->epsBearerCtxSts);
        RETVALUE(ROK);
      } else {
        UE_LOG_ERROR(ueAppCb, "Failed to send RelBearerReq to enb for ueId=%d",ueId);
@@ -2261,7 +2248,6 @@ PRIVATE S16 ueProcUeTauRequest(UetMessage *p_ueMsg, Pst *pst)
       RETVALUE(ret);
    }
 
-   printf("TAU Request Building success");
    cmMemset((U8 *)&nasEncPdu, 0, sizeof(NhuDedicatedInfoNAS));
    /* Encode the PDU */
    ret = ueAppEdmEncode(tauReqEvnt, &nasEncPdu);
@@ -7054,7 +7040,6 @@ PRIVATE S16 uefillDefEsmInfoToUeCb
    actReq = &evnt->m.esmEvnt->u.actReq;
    ueCb->ueRabCb[drbId].drbId = drbId;
    ueCb->ueRabCb[drbId].epsBearerId = epsBearerId;
-   printf("Adding def ebi=%d to indx=%d in ueRabCb\n", epsBearerId, drbId);
    params->bearerType = DEFAULT_BEARER;
    if(actReq->epsQos.pres == TRUE)
    {
@@ -8813,7 +8798,6 @@ PRIVATE S16 uefillDedEsmInfoToUeCb
    actReq = &evnt->m.esmEvnt->u.actDedBearReq;
    params->bearerType = DEDICATED_BEARER;
    ueCb->ueRabCb[drbId].drbId = drbId;
-   printf("Adding ded ebi=%d to indx=%d in ueRabCb\n", epsBearerId, drbId);
    ueCb->ueRabCb[drbId].epsBearerId = epsBearerId;
    params->lnkEpsBearId = actReq->lnkBearerId;
    /* If this dedicated bearer is for IPv6 or IPv4v6 pdn type,
@@ -10109,7 +10093,6 @@ PUBLIC S16 ueUiProcRelBearerRsp(UeCb *ueCb, NbuRelBearerRsp *relBearerRsp) {
      UE_LOG_ERROR(ueAppCb, "TAU Request Building failed");
      RETVALUE(RFAILED);
    }
-   printf("TAU Request Building success");
    cmMemset((U8 *)&nasEncPdu, 0, sizeof(NhuDedicatedInfoNAS));
    /* Encode the PDU */
    if(ueAppEdmEncode(tauReqEvnt, &nasEncPdu) != ROK) {
@@ -10138,6 +10121,10 @@ PUBLIC S16 ueUiProcRelBearerRsp(UeCb *ueCb, NbuRelBearerRsp *relBearerRsp) {
    CM_FREE_NASEVNT(&tauReqEvnt);
 
    nbUeTauReq = (NbuInitialUeMsg *)ueAlloc(sizeof(NbuInitialUeMsg));
+   if (!nbUeTauReq) {
+     UE_LOG_ERROR(ueAppCb, "Memory allocation failed for TAU Request for ueId=%d", ueId);
+     RETVALUE(RFAILED);
+   }
    nbUeTauReq->ueId = ueId;
    nbUeTauReq->rrcCause = 3;
 

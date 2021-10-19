@@ -524,22 +524,20 @@ PUBLIC S16 ueAppBldAndSndIpInfoRejToNb(UeCb *ueCb, U8 bearerId, Pst *pst) {
   RETVALUE(ret);
 }
 
-PUBLIC S16 ueSendRelBearerReqMsgToNb(NbuRelBearerReq *nbuRelBerReq, Pst *pst)
-{
-   S16 ret = ROK;
-   UeAppCb *ueAppCb;
+PUBLIC S16 ueSendRelBearerReqMsgToNb(NbuRelBearerReq *nbuRelBerReq, Pst *pst) {
+  S16 ret = ROK;
+  UeAppCb *ueAppCb;
 
-   UE_GET_CB(ueAppCb);
-   UE_LOG_ENTERFN(ueAppCb);
+  UE_GET_CB(ueAppCb);
+  UE_LOG_ENTERFN(ueAppCb);
 
-   UE_LOG_DEBUG(ueAppCb, "Sending Release bearer request to EnodeB APP");
+  UE_LOG_DEBUG(ueAppCb, "Sending Release bearer request to EnodeB APP");
 
-   ret = UeLiNbuRelBearerReq(pst, nbuRelBerReq);
-   if (ret != ROK)
-   {
-      UE_LOG_ERROR(ueAppCb, "Sending Release bearer request to NB failed");
-   }
-   UE_LOG_EXITFN(ueAppCb, ret);
+  ret = UeLiNbuRelBearerReq(pst, nbuRelBerReq);
+  if (ret != ROK) {
+    UE_LOG_ERROR(ueAppCb, "Sending Release bearer request to NB failed");
+  }
+  UE_LOG_EXITFN(ueAppCb, ret);
 }
 
 PUBLIC S16 UeLiNbuRelBearerRsp(Pst *pst, NbuRelBearerRsp *p_ueMsg) {
@@ -567,7 +565,6 @@ PUBLIC S16 UeLiNbuRelBearerRsp(Pst *pst, NbuRelBearerRsp *p_ueMsg) {
   }
 
   UE_LOG_DEBUG(ueAppCb, "[UEAPP]: Processing RelBearerRsp ueId = %d", ueId);
-  printf("[UEAPP]: Processing RelBearerRsp ueId = %d\n", ueId);
   /* process the received received */
   if ((ret = ueUiProcRelBearerRsp(ueCb, p_ueMsg)) != ROK) {
     UE_LOG_ERROR(ueAppCb, "Failed to process RelBearerRsp message for ue %d",

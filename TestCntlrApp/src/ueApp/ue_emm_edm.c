@@ -9519,7 +9519,7 @@ U32 len;
  *
  *       Fun:  cmEmmEncEpsBearCtxtSts
  *
- *       Desc:  This function encodes Eps bearer contect status IE
+ *       Desc:  This function encodes Eps bearer context status IE
  *
  *       Ret:  ROK - ok; RFAILED - failed
  *
@@ -9544,31 +9544,9 @@ CmEmmMsg *msg;
 U16 *len;
 #endif
 {
-/*   CmEmmEpsBearCtxtSts *epsBearCtxtSts;;
-   EDM_TRC2(cmEmmEncEpsBearCtxtSts)
-
-   epsBearCtxtSts = &msg->u.tauReq.epsBearCtxtSts;
-   printf("In cmEmmEncEpsBearCtxtSts\n");
-   if (!epsBearCtxtSts->pres) {
-     RETVALUE(ROK);
-   }
-
-   // Encode the IEI
-   buf[(*indx)++] = CM_EMM_IE_EPS_BRR_CTX_STS;
-   // Len
-   buf[(*indx)++] = 2;
-
-   // Encode the value
-  //cmMemcpy(&buf[(*indx)], epsBearCtxtSts->val, epsBearCtxtSts->len);
-   buf[(*indx)] = epsBearCtxtSts->val >> 8;
-   printf("Encoded epsBearCtxtSts buf[indx]=%x\n", buf[(*indx)++]);
-   buf[(*indx)] = epsBearCtxtSts->val;
-   printf("Encoded epsBearCtxtSts buf[indx]=%x\n", buf[(*indx)++]);
-   *len = 2;*/
    EDM_TRC2(cmEmmEncEpsBearCtxtSts)
    CmEmmEpsBearCtxtSts *epsBearCtxtSts;
    epsBearCtxtSts = &msg->u.tauReq.epsBearCtxtSts;
-   printf("In cmEmmEncEpsBearCtxtSts epsBearCtxtSts->pres=%d\n", epsBearCtxtSts->pres);
    if (!epsBearCtxtSts->pres) {
      RETVALUE(ROK);
    }
