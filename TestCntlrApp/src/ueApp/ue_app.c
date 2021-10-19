@@ -10055,7 +10055,8 @@ PRIVATE S16 ueProcDropActDefaultEpsBerCtxtReq(UetMessage *p_ueMsg, Pst *pst) {
  *
  *       Fun: ueUiProcRelBearerRsp
  *
- *       Desc:
+ *       Desc: Handles RelBearerRsp received from enbApp
+ *             and sends TAU request message
  *
  *       Ret:  ROK - ok; RFAILED - failed
  *
@@ -10094,14 +10095,14 @@ PUBLIC S16 ueUiProcRelBearerRsp(UeCb *ueCb, NbuRelBearerRsp *relBearerRsp) {
      RETVALUE(RFAILED);
    }
    cmMemset((U8 *)&nasEncPdu, 0, sizeof(NhuDedicatedInfoNAS));
-   /* Encode the PDU */
+   // Encode the PDU
    if(ueAppEdmEncode(tauReqEvnt, &nasEncPdu) != ROK) {
      UE_LOG_ERROR(ueAppCb, "TAU Request Encode Failed\n");
      CM_FREE_NASEVNT(&tauReqEvnt);
      RETVALUE(RFAILED);
    }
 
-   /** Integrity Protected **/
+   // Integrity Protected
    if (CM_EMM_SEC_HDR_TYPE_PLAIN_NAS_MSG != tauReqEvnt->secHT) {
      isPlainMsg = FALSE;
      srcMsg.val = nasEncPdu.val;

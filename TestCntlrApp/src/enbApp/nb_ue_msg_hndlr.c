@@ -595,7 +595,7 @@ PUBLIC S16 NbHandleUeIpInfoRej(NbuUeIpInfoRej *rej) {
   RETVALUE(ROK);
 }
 
-// This functions sends RelBearerRsp message back to UE
+// This functions sends RelBearerRsp message to ueApp
 PUBLIC S16 nbSendRelBearerRspToUeApp (U32 ueId) {
   S16 ret = ROK;
   NbuRelBearerRsp *msg = NULLP;

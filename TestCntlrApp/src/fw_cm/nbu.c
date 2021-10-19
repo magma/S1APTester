@@ -3060,7 +3060,7 @@ NbuRelBearerReq *req;
 PRIVATE S16 cmPkRelBearerReq(NbuRelBearerReq  *param, Buffer *mBuf) {
   TRC3(NbuRelBearerReq)
   RETVALUE(ROK);
-} /*end of function NbuRelBearerReq */
+} /*end of function cmPkRelBearerReq */
 
 #endif
 
