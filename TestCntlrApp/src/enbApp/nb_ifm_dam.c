@@ -230,6 +230,7 @@ PUBLIC S16 nbIfmDamErabDelReq
 {
    Pst *pst;
    pst = &nbCb.nbDamPst;
+   printf("cmPkErabDelReq \n");
    RETVALUE(cmPkErabDelReq(pst, erabRelReq));
 } /* end of nbIfmDamErabDelReq */
 

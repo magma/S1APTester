@@ -173,6 +173,7 @@ PUBLIC S16 handlTauReq(ueTauReq_t* data)
    if (data->epsBearerCtxSts > 0) {
      ueTauReq->epsBearerCtxSts = data->epsBearerCtxSts;
      printf("Adding epsBearerCtxSts=%x\n", ueTauReq->epsBearerCtxSts);
+     printf("Adding epsBearerCtxSts2=%x\n", ueTauReq->epsBearerCtxSts);
    }
    fwSendToUeApp(uetMsg);
 

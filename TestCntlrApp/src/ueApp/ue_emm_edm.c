@@ -9567,10 +9567,11 @@ U16 *len;
    *len = 2;*/
    EDM_TRC2(cmEmmEncEpsBearCtxtSts)
    CmEmmEpsBearCtxtSts *epsBearCtxtSts;
+   epsBearCtxtSts = &msg->u.tauReq.epsBearCtxtSts;
+   printf("In cmEmmEncEpsBearCtxtSts epsBearCtxtSts->pres=%d\n", epsBearCtxtSts->pres);
    if (!epsBearCtxtSts->pres) {
      RETVALUE(ROK);
    }
-   epsBearCtxtSts = &msg->u.tauReq.epsBearCtxtSts;
    // Encode the IEI
    buf[(*indx)++] = CM_EMM_IE_EPS_BRR_CTX_STS;
    // Len

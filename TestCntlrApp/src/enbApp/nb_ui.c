@@ -1071,7 +1071,7 @@ PUBLIC S16 NbUiNbuHdlRelBearerReq
 )
 {
    S16 retVal = ROK;
-
+   printf("In NbUiNbuHdlRelBearerReq\n");
    retVal = NbEnbRelBearerReqHdl(msg);
    RETVALUE(retVal);
 } /* NbUiNbuHdlRelBearerReq */

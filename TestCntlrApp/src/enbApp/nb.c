@@ -1758,22 +1758,42 @@ PUBLIC S16 NbEnbRelBearerReqHdl
 
    NB_LOG_ENTERFN(&nbCb);
 
+   printf("In NbEnbRelBearerReqHdl\n");
    if(NULLP == relBearerReq)
    {
-      NB_LOG_ERROR(&nbCb, "Recieved empty(NULL) request");
+      NB_LOG_ERROR(&nbCb, "Recieved empty(NULL) NbuRelBearerReq");
+      printf("Recieved empty(NULL) relBearerReq request\n");
       RETVALUE(RFAILED);
    }
 
-   /* Find the ENB and MME UE-S1AP Ids using UeId */
-   if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(relBearerReq->ueId),
+   printf("In NbEnbRelBearerReqHdl 111111111\n");
+   /* Send DamErabDelReq only of ueCb is found.
+    * If UeCb is not found, it means UE is in idle mode and the tunnels are
+    * already deleted
+    */
+   if ( ROK == (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(relBearerReq->ueId),
       sizeof(U32),0,(PTR *)&ueCb)))
    {
-      RETVALUE(RFAILED);
+     NB_LOG_ERROR(&nbCb, "UeCb found for ueId=%d", relBearerReq->ueId);
+     printf("UeCb found for ueId=%d", relBearerReq->ueId);
+     printf("In NbEnbRelBearerReqHdl 22222\n");
+     NB_LOG_DEBUG(&nbCb, "Sending DamErabDelReq for ueId=%d no. of bearers=%d", relBearerReq->ueId,relBearerReq->numOfErabIds);
+     printf("Sending DamErabDelReq for ueId=%d, no. of bearers=%d\n", relBearerReq->ueId, relBearerReq->numOfErabIds);
+     for (int j=0;j<relBearerReq->numOfErabIds; j++) {
+       printf("ebi=%d\n", relBearerReq->erabIdLst[j]);
+     }
+     /* Release all bearers which are their in the erabIdLst */
+     if (nbIfmDamErabDelReq((Void *)relBearerReq) != ROK) {
+       NB_LOG_ERROR(&nbCb, "Failed to release bearers for ueId=%d", relBearerReq->ueId);
+       RETVALUE(RFAILED);
+     }
    }
-
-   /* Release all bearers which are their in the erabIdLst */
-   nbIfmDamErabDelReq((Void *)relBearerReq);
-
+   if(nbSendRelBearerRspToUeApp(relBearerReq->ueId) != ROK) {
+     NB_LOG_ERROR(&nbCb, "Failed to send Release Indication to UeApp for ueId=%d", relBearerReq->ueId);
+     RETVALUE(RFAILED);
+   }
+   NB_LOG_DEBUG(&nbCb, "Sent RelBearerRspToUeApp for ueId=%d", relBearerReq->ueId);
+   printf("Sent RelBearerRspToUeApp for ueId=%d\n", relBearerReq->ueId);
    RETVALUE(ROK);
 } /* NbEnbErabRelIndHdl */
 

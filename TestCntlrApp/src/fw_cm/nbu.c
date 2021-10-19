@@ -3113,6 +3113,7 @@ Buffer *mBuf;
       {
 #ifdef LCNBU
          case NBU_SEL_LC:
+            printf("cmUnPkRelBearerReq\n");
             ret1 = cmUnPkRelBearerReq((NbuRelBearerReq *)&req,mBuf);
 #if(ERRCLASS & ERRCLS_DEBUG)
             if(ret1 != ROK)
@@ -3128,6 +3129,7 @@ Buffer *mBuf;
 #endif
 #ifdef LWLCNBU
          case  NBU_SEL_LWLC:
+            printf("CMCHKUNPKLOG cmUnPkRelBearerReq\n");
             CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &req, mBuf, (ErrVal)ENBU025, pst);
             break;
 #endif
@@ -3175,6 +3177,105 @@ Buffer *mBuf;
    RETVALUE(ROK);
 }
 #endif
+
+/*
+ *
+ *    Fun:   cmPkRelBearerRsp
+ *
+ *    Desc:    pack the primitive NbuRelBearerRsp
+ *
+ *    Ret:    ROK  -ok
+ *
+ *    Notes:    None
+ *
+ *    File:   NbuRelBearerRsp
+ *
+ */
+
+PUBLIC S16 cmPkNbuRelBearerRsp
+(
+ Pst *pst,
+ NbuRelBearerRsp *msg
+)
+{
+   S16 ret1 = ROK;
+   Buffer *mBuf = NULLP;
+
+   if((ret1 = SGetMsg(pst->region, pst->pool, &mBuf)) != ROK)
+   {
+#if (ERRCLASS & ERRCLS_ADD_RES)
+      if(ret1 != ROK)
+      {
+         SLogError(pst->srcEnt, pst->srcInst, pst->srcProcId,
+               __FILE__, __LINE__, (ErrCls)ERRCLS_ADD_RES,
+               (ErrVal)ENBU014, (ErrVal)0, "SGetMsg() failed");
+      }
+#endif /*  ERRCLASS & ERRCLS_ADD_RES  */
+      RETVALUE(ret1);
+   }
+   switch(pst->selector)
+   {
+#ifdef LWLCNBU
+      case NBU_SEL_LWLC:
+         CMCHKPKLOG(cmPkPtr, (PTR)msg, mBuf, ENBU016, pst);
+         break;
+#endif
+     default:
+         break;
+   }
+
+   pst->event = (Event)EVTNBURELBEARERRSP;
+   RETVALUE(SPstTsk(pst, mBuf));
+}
+
+/*
+ *
+ *    Fun:   cmUnPkNbuRelBearerRsp 
+ *
+ *    Desc:    unpack the primitive NbuRelBearerRsp
+ *
+ *    Ret:    ROK  -ok
+ *
+ *    Notes:    None
+ *
+ *    File:   NbuRelBearerRsp
+ *
+ */
+
+PUBLIC S16 cmUnPkNbuRelBearerRsp
+(
+ NbuRelBearerRspHdl func,
+ Pst *pst,
+ Buffer *mBuf
+)
+{
+#ifdef LWLCNBU
+   S16 ret1 = ROK;
+   NbuRelBearerRsp *msg = NULLP;
+#else
+   NbuRelBearerRsp msg;
+#endif
+
+   switch(pst->selector)
+   {
+#ifdef LWLCNBU
+      case  NBU_SEL_LWLC:
+         CMCHKUNPKLOG(cmUnpkPtr, (PTR*)&msg, mBuf, (ErrVal)ENBU025, pst);
+         break;
+#endif
+      default:
+         break;
+   }
+
+   SPutMsg(mBuf);
+#ifdef LWLCNBU
+   ret1 = (*func)(pst, msg);
+   SPutSBuf(pst->region, pst->pool, (Data *)msg, sizeof(NbuRelBearerRsp));
+   RETVALUE(ret1);
+#else
+   RETVALUE((*func)(pst, &msg));
+#endif
+}
 
 /********************************************************************30**
 

@@ -1366,6 +1366,7 @@ NbDamDrbCb                  *drbCb
 {
    NbDamTnlCb *tnlCb = NULLP;
    tnlCb = drbCb->tnlInfo;
+   printf("Delete GTP tunnel\n");
    nbDamDelTunnelAtGtp(tnlCb);
    NB_FREE_DATA_APP(tnlCb, sizeof(NbDamTnlCb));
 
@@ -2061,15 +2062,18 @@ PUBLIC Void nbDamNbErabDelReq
          {
             NB_LOG_ERROR(&nbCb,"Failed to delete DrbCb");
          }
+         printf("nbDamNbErabDelReq\n");
          nbDamDelDrbCb(ueCb, drbCb);
          /* NB_FREE_DATA_APP(drbCb, sizeof(NbDamDrbCb));*/ 
          drbCb = NULLP;
          /* Remove the corresponding packet filter from the list */
          nbDeletePf(ueCb, erabRelReq->erabIdLst[count]);
+         printf("Removed packet filter\n");
       }
    }
    else  /* DAM-UE CB is not present */
    {
+      printf("UeCb not found at nbDamNbErabDelReq. Deleting UE for ueId=%d\n", erabRelReq->ueId);
       pst = &nbDamCb.nbAppPst;
       cmPkUeDelCfm(pst, erabRelReq->ueId);
       RETVOID;
