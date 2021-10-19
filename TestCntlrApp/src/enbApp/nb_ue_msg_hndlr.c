@@ -596,24 +596,26 @@ PUBLIC S16 NbHandleUeIpInfoRej(NbuUeIpInfoRej *rej) {
 }
 
 // This functions sends RelBearerRsp message to ueApp
-PUBLIC S16 nbSendRelBearerRspToUeApp (U32 ueId) {
+PUBLIC S16 nbSendRelBearerRspToUeApp(U32 ueId) {
   S16 ret = ROK;
   NbuRelBearerRsp *msg = NULLP;
 
   NB_ALLOC(&msg, sizeof(NbuRelBearerRsp));
   if (msg == NULLP) {
-    NB_LOG_ERROR(&nbCb, "Failed to allocate memory to Release Bearer Rsp for ueId=%d", ueId);
+    NB_LOG_ERROR(&nbCb,
+                 "Failed to allocate memory to Release Bearer Rsp for ueId=%d",
+                 ueId);
     RETVALUE(RFAILED);
   }
   msg->ueId = ueId;
 
   // pack and send to ue
   ret = cmPkNbuRelBearerRsp(&nbCb.ueAppPst, msg);
-  if(ret != ROK) {
-     NB_LOG_ERROR(&nbCb, "Failed to send Release Bearer Rsp to UeApp for ueId=%d", ueId);
-     RETVALUE(RFAILED);
+  if (ret != ROK) {
+    NB_LOG_ERROR(
+        &nbCb, "Failed to send Release Bearer Rsp to UeApp for ueId=%d", ueId);
+    RETVALUE(RFAILED);
   }
   NB_LOG_DEBUG(&nbCb, "Sent Release Bearer Rsp to UeApp for ueId=%d", ueId);
   RETVALUE(ROK);
 }
-

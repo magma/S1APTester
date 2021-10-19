@@ -114,12 +114,11 @@ PRIVATE NbuUeIpInfoRejHdl UeLiNbuUlUeInfoRejMt[UE_MAX_NBU_SEL] = {
 #endif
 };
 
-PRIVATE NbuRelBearerReqHdl UeLiNbuRelBearerReqMt[UE_MAX_NBU_SEL] = \
-{
+PRIVATE NbuRelBearerReqHdl UeLiNbuRelBearerReqMt[UE_MAX_NBU_SEL] = {
 #ifdef LWLCFWLINBT
-   cmPkNbuRelBearerReq,         /* 0 - loosely coupled */
+    cmPkNbuRelBearerReq, /* 0 - loosely coupled */
 #else
-   PtLiNbuRelBearerReq          /* 1 - tightly coupled, portable */
+    PtLiNbuRelBearerReq /* 1 - tightly coupled, portable */
 #endif
 };
 
@@ -226,14 +225,9 @@ PUBLIC S16 UeLiNbuSendUeIpInfoRej(Pst *pst, NbuUeIpInfoRej *ueInfo) {
   RETVALUE(ROK);
 }
 
-PUBLIC S16 UeLiNbuRelBearerReq
-(
- Pst              *pst,
- NbuRelBearerReq   *msg
-)
-{
-   (*UeLiNbuRelBearerReqMt[pst->selector])(pst, msg);
+PUBLIC S16 UeLiNbuRelBearerReq(Pst *pst, NbuRelBearerReq *msg) {
+  (*UeLiNbuRelBearerReqMt[pst->selector])(pst, msg);
 
-   RETVALUE(ROK);
+  RETVALUE(ROK);
 }
 

@@ -1064,7 +1064,7 @@ PUBLIC S16 NbUiNbuHdlUeIpInfoRej(Pst *pst, NbuUeIpInfoRej *rej) {
 } /* NbUiNbuHdlUeIpInfoRej */
 
 // Handles RelBearerReq received from ueApp
-PUBLIC S16 NbUiNbuHdlRelBearerReq (Pst *pst, NbuRelBearerReq *msg) {
+PUBLIC S16 NbUiNbuHdlRelBearerReq(Pst *pst, NbuRelBearerReq *msg) {
   S16 retVal = ROK;
   retVal = NbEnbRelBearerReqHdl(msg);
   RETVALUE(retVal);

@@ -1758,34 +1758,39 @@ PUBLIC S16 NbHandleConfigTai(NbConfigNewTai *configNewTai) {
  * @return  S16
  *          -# Success : ROK
  */
-PUBLIC S16 NbEnbRelBearerReqHdl (NbuRelBearerReq *relBearerReq) {
-   NbUeCb *ueCb = NULLP;
+PUBLIC S16 NbEnbRelBearerReqHdl(NbuRelBearerReq *relBearerReq) {
+  NbUeCb *ueCb = NULLP;
 
-   NB_LOG_ENTERFN(&nbCb);
+  NB_LOG_ENTERFN(&nbCb);
 
-   if(NULLP == relBearerReq) {
-      NB_LOG_ERROR(&nbCb, "Recieved empty(NULL) NbuRelBearerReq");
+  if (NULLP == relBearerReq) {
+    NB_LOG_ERROR(&nbCb, "Recieved empty(NULL) NbuRelBearerReq");
+    RETVALUE(RFAILED);
+  }
+
+  /* Send DamErabDelReq only if ueCb is found.
+   * If UeCb is not found, it means UE is in idle mode and the tunnels are
+   * already deleted
+   */
+  if (ROK == (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(relBearerReq->ueId),
+                             sizeof(U32), 0, (PTR *)&ueCb))) {
+    NB_LOG_DEBUG(&nbCb, "Sending DamErabDelReq for ueId=%d no. of bearers=%d",
+                 relBearerReq->ueId, relBearerReq->numOfErabIds);
+    // Release all the bearers in the erabIdLst of relBearerReq
+    if (nbIfmDamErabDelReq((Void *)relBearerReq) != ROK) {
+      NB_LOG_ERROR(&nbCb, "Failed to release bearers for ueId=%d",
+                   relBearerReq->ueId);
       RETVALUE(RFAILED);
-   }
-
-   /* Send DamErabDelReq only if ueCb is found.
-    * If UeCb is not found, it means UE is in idle mode and the tunnels are
-    * already deleted
-    */
-   if ( ROK == (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(relBearerReq->ueId),
-      sizeof(U32),0,(PTR *)&ueCb))) {
-     NB_LOG_DEBUG(&nbCb, "Sending DamErabDelReq for ueId=%d no. of bearers=%d", relBearerReq->ueId,relBearerReq->numOfErabIds);
-     // Release all the bearers in the erabIdLst of relBearerReq
-     if (nbIfmDamErabDelReq((Void *)relBearerReq) != ROK) {
-       NB_LOG_ERROR(&nbCb, "Failed to release bearers for ueId=%d", relBearerReq->ueId);
-       RETVALUE(RFAILED);
-     }
-   }
-   if(nbSendRelBearerRspToUeApp(relBearerReq->ueId) != ROK) {
-     NB_LOG_ERROR(&nbCb, "Failed to send release bearer rsp to ueApp for ueId=%d", relBearerReq->ueId);
-     RETVALUE(RFAILED);
-   }
-   NB_LOG_DEBUG(&nbCb, "Sent release bearer rsp to ueApp for ueId=%d", relBearerReq->ueId);
-   RETVALUE(ROK);
+    }
+  }
+  if (nbSendRelBearerRspToUeApp(relBearerReq->ueId) != ROK) {
+    NB_LOG_ERROR(&nbCb,
+                 "Failed to send release bearer rsp to ueApp for ueId=%d",
+                 relBearerReq->ueId);
+    RETVALUE(RFAILED);
+  }
+  NB_LOG_DEBUG(&nbCb, "Sent release bearer rsp to ueApp for ueId=%d",
+               relBearerReq->ueId);
+  RETVALUE(ROK);
 } /* NbEnbRelBearerReqHdl */
 

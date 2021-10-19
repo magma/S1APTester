@@ -9537,29 +9537,29 @@ CmEmmMsg *msg,
 U16 *len
 )
 #else
-PRIVATE S16 cmEmmEncEpsBearCtxtSts (buf, indx, msg, len)
+PRIVATE S16 cmEmmEncEpsBearCtxtSts(buf, indx, msg, len)
 U8 *buf;
 U32 *indx;
 CmEmmMsg *msg;
 U16 *len;
 #endif
-{
-   EDM_TRC2(cmEmmEncEpsBearCtxtSts)
-   CmEmmEpsBearCtxtSts *epsBearCtxtSts;
-   epsBearCtxtSts = &msg->u.tauReq.epsBearCtxtSts;
-   if (!epsBearCtxtSts->pres) {
-     RETVALUE(ROK);
-   }
-   // Encode the IEI
-   buf[(*indx)++] = CM_EMM_IE_EPS_BRR_CTX_STS;
-   // Len
-   buf[(*indx)++] = 2;
-   // Value
-   buf[(*indx)++] = msg->u.tauReq.epsBearCtxtSts.val[0];
-   buf[(*indx)++] = msg->u.tauReq.epsBearCtxtSts.val[1];
-   *len = 32;
-   RETVALUE(ROK);
-}
+  {
+    EDM_TRC2(cmEmmEncEpsBearCtxtSts)
+    CmEmmEpsBearCtxtSts *epsBearCtxtSts;
+    epsBearCtxtSts = &msg->u.tauReq.epsBearCtxtSts;
+    if (!epsBearCtxtSts->pres) {
+      RETVALUE(ROK);
+    }
+    // Encode the IEI
+    buf[(*indx)++] = CM_EMM_IE_EPS_BRR_CTX_STS;
+    // Len
+    buf[(*indx)++] = 2;
+    // Value
+    buf[(*indx)++] = msg->u.tauReq.epsBearCtxtSts.val[0];
+    buf[(*indx)++] = msg->u.tauReq.epsBearCtxtSts.val[1];
+    *len = 32;
+    RETVALUE(ROK);
+  }
 
 #ifdef __cplusplus
 }

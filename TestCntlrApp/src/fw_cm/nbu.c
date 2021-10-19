@@ -79,13 +79,9 @@ PRIVATE S16 cmUnPkDlNasMsg ARGS((NbuDlNasMsg *msg,
  Buffer *mBuf
  ));
 
-PRIVATE S16 cmPkRelBearerReq(NbuRelBearerReq  *param,
- Buffer *mBuf
-);
+PRIVATE S16 cmPkRelBearerReq(NbuRelBearerReq *param, Buffer *mBuf);
 
-PRIVATE S16 cmUnPkRelBearerReq(NbuRelBearerReq *req,
- Buffer *mBuf
-);
+PRIVATE S16 cmUnPkRelBearerReq(NbuRelBearerReq *req, Buffer *mBuf);
 
 #endif
 #if 0
@@ -2991,55 +2987,51 @@ Buffer *mBuf;
 #ifdef ANSI
 PUBLIC S16 cmPkNbuRelBearerReq(Pst *pst, NbuRelBearerReq *req)
 #else
-PUBLIC S16 cmPkNbuRelBearerReq(pst,req)
+PUBLIC S16 cmPkNbuRelBearerReq(pst, req)
 Pst *pst;
 NbuRelBearerReq *req;
 #endif
 {
-   S16 ret1;
-   Buffer *mBuf;
-   mBuf = NULLP;
-   TRC3(cmPkNbuRelBearerReq)
+  S16 ret1;
+  Buffer *mBuf;
+  mBuf = NULLP;
+  TRC3(cmPkNbuRelBearerReq)
 
-      if((ret1 = SGetMsg(pst->region, pst->pool, &mBuf)) != ROK)
-      {
+  if ((ret1 = SGetMsg(pst->region, pst->pool, &mBuf)) != ROK) {
 #if (ERRCLASS & ERRCLS_ADD_RES)
-         if(ret1 != ROK)
-         {
-            SLogError(pst->srcEnt, pst->srcInst, pst->srcProcId,
-                  __FILE__, __LINE__, (ErrCls)ERRCLS_ADD_RES,
-                  (ErrVal)ENBU014, (ErrVal)0, "SGetMsg() failed");
-         }
+    if (ret1 != ROK) {
+      SLogError(pst->srcEnt, pst->srcInst, pst->srcProcId, __FILE__, __LINE__,
+                (ErrCls)ERRCLS_ADD_RES, (ErrVal)ENBU014, (ErrVal)0,
+                "SGetMsg() failed");
+    }
 #endif /*  ERRCLASS & ERRCLS_ADD_RES  */
-         RETVALUE(ret1);
-      }
-   switch(pst->selector)
-   {
-      case NBU_SEL_LC:
+    RETVALUE(ret1);
+  }
+  switch (pst->selector) {
+  case NBU_SEL_LC:
 #ifdef LCNBU
-         ret1 = cmPkRelBearerReq(req, EVTNBURELBEARERREQ ,mBuf);
-#if(ERRCLASS & ERRCLS_ADD_RES)
-         if(ret1 != ROK)
-         {
-            SPutMsg(mBuf);
-            SLogError(pst->srcEnt, pst->srcInst, pst->srcProcId,
-                  __FILE__, __LINE__, (ErrCls)ERRCLS_ADD_RES,
-                  (ErrVal)ENBU015, (ErrVal)ret1, "Packing failure");
-            RETVALUE( ret1 );
-         }
+    ret1 = cmPkRelBearerReq(req, EVTNBURELBEARERREQ, mBuf);
+#if (ERRCLASS & ERRCLS_ADD_RES)
+    if (ret1 != ROK) {
+      SPutMsg(mBuf);
+      SLogError(pst->srcEnt, pst->srcInst, pst->srcProcId, __FILE__, __LINE__,
+                (ErrCls)ERRCLS_ADD_RES, (ErrVal)ENBU015, (ErrVal)ret1,
+                "Packing failure");
+      RETVALUE(ret1);
+    }
 #endif /*  ERRCLASS & ERRCLS_ADD_RES  */
-         break;
+    break;
 #endif
 #ifdef LWLCNBU
-      case NBU_SEL_LWLC:
-         CMCHKPKLOG(cmPkPtr, (PTR)req, mBuf, ENBU016, pst);
-         break;
+  case NBU_SEL_LWLC:
+    CMCHKPKLOG(cmPkPtr, (PTR)req, mBuf, ENBU016, pst);
+    break;
 #endif
-     default:
-         break;
-   }
-   pst->event = (Event)EVTNBURELBEARERREQ;
-   RETVALUE(SPstTsk(pst,mBuf));
+  default:
+    break;
+  }
+  pst->event = (Event)EVTNBURELBEARERREQ;
+  RETVALUE(SPstTsk(pst, mBuf));
 }
 
 #ifdef LCNBU
@@ -3057,7 +3049,7 @@ NbuRelBearerReq *req;
  *
  */
 
-PRIVATE S16 cmPkRelBearerReq(NbuRelBearerReq  *param, Buffer *mBuf) {
+PRIVATE S16 cmPkRelBearerReq(NbuRelBearerReq *param, Buffer *mBuf) {
   TRC3(NbuRelBearerReq)
   RETVALUE(ROK);
 } /*end of function cmPkRelBearerReq */
@@ -3079,12 +3071,8 @@ PRIVATE S16 cmPkRelBearerReq(NbuRelBearerReq  *param, Buffer *mBuf) {
  */
 
 #ifdef ANSI
-PUBLIC S16 cmUnPkNbuRelBearerReq
-(
- NbuRelBearerReqHdl func,
- Pst *pst,
- Buffer *mBuf
-)
+PUBLIC S16 cmUnPkNbuRelBearerReq(NbuRelBearerReqHdl func, Pst *pst,
+                                 Buffer *mBuf)
 #else
 PUBLIC S16 cmUnPkNbuRelBearerReq(func, pst, mBuf)
 NbuRelBearerReqHdl func;
@@ -3093,45 +3081,43 @@ Buffer *mBuf;
 #endif
 {
 #ifdef LWLCNBU
-   S16 ret1 = ROK;
-   NbuRelBearerReq *req = NULLP;
+  S16 ret1 = ROK;
+  NbuRelBearerReq *req = NULLP;
 #else
-   NbuRelBearerReq req;
+  NbuRelBearerReq req;
 #endif
 
-   TRC3(cmUnPkNbuRelBearerReq)
-      switch(pst->selector)
-      {
+  TRC3(cmUnPkNbuRelBearerReq)
+  switch (pst->selector) {
 #ifdef LCNBU
-         case NBU_SEL_LC:
-            ret1 = cmUnPkRelBearerReq((NbuRelBearerReq *)&req,mBuf);
-#if(ERRCLASS & ERRCLS_DEBUG)
-            if(ret1 != ROK)
-            {
-               SPutMsg(mBuf);
-               SLogError(pst->dstEnt, pst->dstInst, pst->dstProcId,
-                     __FILE__, __LINE__, (ErrCls)ERRCLS_DEBUG,
-                     (ErrVal)ENBU024, (ErrVal)ret1, "Unpacking failure");
-               RETVALUE( ret1 );
-            }
+  case NBU_SEL_LC:
+    ret1 = cmUnPkRelBearerReq((NbuRelBearerReq *)&req, mBuf);
+#if (ERRCLASS & ERRCLS_DEBUG)
+    if (ret1 != ROK) {
+      SPutMsg(mBuf);
+      SLogError(pst->dstEnt, pst->dstInst, pst->dstProcId, __FILE__, __LINE__,
+                (ErrCls)ERRCLS_DEBUG, (ErrVal)ENBU024, (ErrVal)ret1,
+                "Unpacking failure");
+      RETVALUE(ret1);
+    }
 #endif /*  ERRCLASS & ERRCLS_DEBUG   */
-            break;
+    break;
 #endif
 #ifdef LWLCNBU
-         case  NBU_SEL_LWLC:
-            CMCHKUNPKLOG(cmUnpkPtr, (PTR*) &req, mBuf, (ErrVal)ENBU025, pst);
-            break;
+  case NBU_SEL_LWLC:
+    CMCHKUNPKLOG(cmUnpkPtr, (PTR *)&req, mBuf, (ErrVal)ENBU025, pst);
+    break;
 #endif
-         default:
-            break;
-      }
+  default:
+    break;
+  }
 
-   SPutMsg(mBuf);
+  SPutMsg(mBuf);
 #ifdef LWLCNBU
-   ret1 = (*func)(pst, req);
-   RETVALUE(ret1);
+  ret1 = (*func)(pst, req);
+  RETVALUE(ret1);
 #else
-   RETVALUE((*func)(pst, &req));
+  RETVALUE((*func)(pst, &req));
 #endif
 }
 
@@ -3151,19 +3137,15 @@ Buffer *mBuf;
  */
 
 #ifdef ANSI
-PRIVATE S16 cmUnPkRelBearerReq
-(
- NbuRelBearerReq *req,
- Buffer *mBuf
- )
+PRIVATE S16 cmUnPkRelBearerReq(NbuRelBearerReq *req, Buffer *mBuf)
 #else
 PRIVATE S16 cmUnPkRelBearerReq(req, mBuf)
 NbuRelBearerReq *req;
 Buffer *mBuf;
 #endif
 {
-   TRC3(cmUnPkRelBearerReq)
-   RETVALUE(ROK);
+  TRC3(cmUnPkRelBearerReq)
+  RETVALUE(ROK);
 }
 #endif
 
@@ -3181,40 +3163,32 @@ Buffer *mBuf;
  *
  */
 
-PUBLIC S16 cmPkNbuRelBearerRsp
-(
- Pst *pst,
- NbuRelBearerRsp *msg
-)
-{
-   S16 ret1 = ROK;
-   Buffer *mBuf = NULLP;
+PUBLIC S16 cmPkNbuRelBearerRsp(Pst *pst, NbuRelBearerRsp *msg) {
+  S16 ret1 = ROK;
+  Buffer *mBuf = NULLP;
 
-   if((ret1 = SGetMsg(pst->region, pst->pool, &mBuf)) != ROK)
-   {
+  if ((ret1 = SGetMsg(pst->region, pst->pool, &mBuf)) != ROK) {
 #if (ERRCLASS & ERRCLS_ADD_RES)
-      if(ret1 != ROK)
-      {
-         SLogError(pst->srcEnt, pst->srcInst, pst->srcProcId,
-               __FILE__, __LINE__, (ErrCls)ERRCLS_ADD_RES,
-               (ErrVal)ENBU014, (ErrVal)0, "SGetMsg() failed");
-      }
+    if (ret1 != ROK) {
+      SLogError(pst->srcEnt, pst->srcInst, pst->srcProcId, __FILE__, __LINE__,
+                (ErrCls)ERRCLS_ADD_RES, (ErrVal)ENBU014, (ErrVal)0,
+                "SGetMsg() failed");
+    }
 #endif /*  ERRCLASS & ERRCLS_ADD_RES  */
-      RETVALUE(ret1);
-   }
-   switch(pst->selector)
-   {
+    RETVALUE(ret1);
+  }
+  switch (pst->selector) {
 #ifdef LWLCNBU
-      case NBU_SEL_LWLC:
-         CMCHKPKLOG(cmPkPtr, (PTR)msg, mBuf, ENBU016, pst);
-         break;
+  case NBU_SEL_LWLC:
+    CMCHKPKLOG(cmPkPtr, (PTR)msg, mBuf, ENBU016, pst);
+    break;
 #endif
-     default:
-         break;
-   }
+  default:
+    break;
+  }
 
-   pst->event = (Event)EVTNBURELBEARERRSP;
-   RETVALUE(SPstTsk(pst, mBuf));
+  pst->event = (Event)EVTNBURELBEARERRSP;
+  RETVALUE(SPstTsk(pst, mBuf));
 }
 
 /*
@@ -3231,38 +3205,32 @@ PUBLIC S16 cmPkNbuRelBearerRsp
  *
  */
 
-PUBLIC S16 cmUnPkNbuRelBearerRsp
-(
- NbuRelBearerRspHdl func,
- Pst *pst,
- Buffer *mBuf
-)
-{
+PUBLIC S16 cmUnPkNbuRelBearerRsp(NbuRelBearerRspHdl func, Pst *pst,
+                                 Buffer *mBuf) {
 #ifdef LWLCNBU
-   S16 ret1 = ROK;
-   NbuRelBearerRsp *msg = NULLP;
+  S16 ret1 = ROK;
+  NbuRelBearerRsp *msg = NULLP;
 #else
-   NbuRelBearerRsp msg;
+  NbuRelBearerRsp msg;
 #endif
 
-   switch(pst->selector)
-   {
+  switch (pst->selector) {
 #ifdef LWLCNBU
-      case  NBU_SEL_LWLC:
-         CMCHKUNPKLOG(cmUnpkPtr, (PTR*)&msg, mBuf, (ErrVal)ENBU025, pst);
-         break;
+  case NBU_SEL_LWLC:
+    CMCHKUNPKLOG(cmUnpkPtr, (PTR *)&msg, mBuf, (ErrVal)ENBU025, pst);
+    break;
 #endif
-      default:
-         break;
-   }
+  default:
+    break;
+  }
 
-   SPutMsg(mBuf);
+  SPutMsg(mBuf);
 #ifdef LWLCNBU
-   ret1 = (*func)(pst, msg);
-   SPutSBuf(pst->region, pst->pool, (Data *)msg, sizeof(NbuRelBearerRsp));
-   RETVALUE(ret1);
+  ret1 = (*func)(pst, msg);
+  SPutSBuf(pst->region, pst->pool, (Data *)msg, sizeof(NbuRelBearerRsp));
+  RETVALUE(ret1);
 #else
-   RETVALUE((*func)(pst, &msg));
+  RETVALUE((*func)(pst, &msg));
 #endif
 }
 
