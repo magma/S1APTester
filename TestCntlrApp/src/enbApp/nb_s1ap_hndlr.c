@@ -3432,11 +3432,8 @@ PUBLIC S16 nbCtxtRelSndRlsCmpl(NbUeCb *ueCb)
    relRsp.spConnId = ueCb->s1ConCb->spConnId;
    relRsp.pdu      = ctxtRelPdu;
 #ifdef MULTI_ENB_SUPPORT
-   for(enbIdx = 0; enbIdx < smCfgCb.numOfEnbs; enbIdx++)
-   {
-      relRsp.enbId = enbIdx;
-      NbIfmS1apRelRsp(&relRsp);
-   }
+   relRsp.enbId = ueCb->enbId;
+   NbIfmS1apRelRsp(&relRsp);
 #else
    NbIfmS1apRelRsp(&relRsp);
 #endif
@@ -4781,6 +4778,7 @@ PUBLIC S16 nbPrcPathSwReqAck
       }
    }
 
+   nbCb.x2HoDone = FALSE;
    nbUiSendPathSwReqAckToUser(nbpathSwReqAck);
    RETVALUE(ROK);
 } /* nbPrcResetAck */

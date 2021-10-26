@@ -1947,8 +1947,13 @@ PUBLIC Void nbDamUeDelReq
       /* If the number of DRBs become zero remove the UeCb */
       if (ueCb->numDrbs == 0)
       {
-         nbDamDelUe(ueId);
-         RETVOID;
+        if (ROK != nbDamDelUe(ueId)) {
+          NB_LOG_ERROR(&nbCb, "Failed to delete ENB Dam UE for UE Id: %u", ueId);
+          RETVOID;
+        }
+        pst = &nbDamCb.nbAppPst;
+        cmPkUeDelCfm(pst, ueId);
+        RETVOID;
       }
       for(;!isEmpty && ((cmHashListGetNext(&(ueCb->drbs),(PTR)prevDrbCb,(PTR*)&drbCb)) == ROK);)
       {   
