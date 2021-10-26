@@ -5586,6 +5586,7 @@ PUBLIC S16 nbPrcPathSwReqAck
       }
    }
 
+   nbCb.x2HoDone = FALSE;
    nbUiSendPathSwReqAckToUser(nbpathSwReqAck);
    RETVALUE(ROK);
 } /* nbPrcResetAck */
