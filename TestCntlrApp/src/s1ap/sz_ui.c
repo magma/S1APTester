@@ -117,6 +117,7 @@ PRIVATE S16 szUiDoAudit ARGS ((SztAudEvnt *audit, SzSztSapCb *sztSapCb, U16 *cau
 
 #ifdef MULTI_ENB_SUPPORT
 PUBLIC U32 currEnbId = 0xFFFFFFFF;
+PUBLIC U8 cntxtRelForS1Ho = FALSE;
 #endif
 
 /*
@@ -1356,7 +1357,19 @@ SztRelRsp *relRsp;     /*  connect sdus */
                "Received RelResp from Application, PeerId = %ld Event  = %d",
                 peer->peerId, evnt, 0, 0)
 #endif
-   szSmExcMt(conCb, peer, relRsp->pdu, evnt, SZ_UI);
+
+#ifdef MULTI_ENB_SUPPORT
+  if (relRsp->cntxtRelForS1Ho == TRUE) {
+    cntxtRelForS1Ho = TRUE;
+    szSmExcMt(conCb, peer, relRsp->pdu, evnt, SZ_UI);
+    cntxtRelForS1Ho = FALSE;
+    conCb->state = SZ_SMSZ_ESTABLISHED;
+  } else {
+#endif
+    szSmExcMt(conCb, peer, relRsp->pdu, evnt, SZ_UI);
+#ifdef MULTI_ENB_SUPPORT
+  }
+#endif
 
    /* sz003.301: Added hooks for PSF-S1AP */
    /* Send the queued update message to peer */

@@ -155,6 +155,12 @@ U32                          delay
         maxTmrs = 1;
         break;
       }
+      case NB_TMR_S1_OVRL_TMR: {
+        ueCb = (NbUeCb *)cb;
+        tmr = &ueCb->s1HoInfo->timer;
+        maxTmrs = 1;
+        break;
+      }
 #endif
       case NB_TMR_MME_SETUP_RSP:
       {
@@ -294,6 +300,15 @@ PUBLIC Void nbStopTmr(PTR cb, S16 event) {
     }
     break;
   }
+  case NB_TMR_S1_OVRL_TMR: {
+    NbUeCb *ueCb = (NbUeCb *)cb;
+    timers = &ueCb->s1HoInfo->timer;
+    max = 1;
+    if (ueCb->s1HoInfo->timer.tmrEvnt == event) {
+      tmrRunning = TRUE;
+    }
+    break;
+  }
 #endif
   case NB_TMR_MME_SETUP_RSP: {
     NbMmeCb *mmeCb = (NbMmeCb *)cb;
@@ -410,6 +425,13 @@ S16                          event
         NB_LOG_ERROR(&nbCb, "Timer NB_TMR_S1_RELOC_TMR Expired for Ue:[%u]",
                      ueCb->ueId);
         nbHandleS1RelocTimerExpiry(ueCb);
+        break;
+      }
+      case NB_TMR_S1_OVRL_TMR: {
+        ueCb = (NbUeCb *)cb;
+        NB_LOG_ERROR(&nbCb, "Timer NB_TMR_S1_OVRL_TMR Expired for Ue:[%u]",
+                     ueCb->ueId);
+        nbHandleS1RelocOverallTimerExpiry(ueCb);
         break;
       }
 #endif

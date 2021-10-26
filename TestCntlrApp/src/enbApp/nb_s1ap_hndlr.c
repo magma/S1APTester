@@ -2384,12 +2384,21 @@ PUBLIC S16 nbPrcIncS1apMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType) {
   {
     ret = nbHandleS1UeReleaseCmd(ueCb);
     if (ret == ROK) {
-      // Inform the ueApp about UE context release
-      ret = nbSendS1RelIndToUeApp(ueCb->ueId);
-      if (ret != ROK) {
-        NB_LOG_ERROR(&nbCb, "Failed to Send S1 Release Indiaction "
-                            "to ueApp");
+#ifdef MULTI_ENB_SUPPORT
+      if (ueCb->s1HoInfo != NULLP) {
+        NB_LOG_DEBUG(&nbCb,"Deleting all the S1 handover context for UE Id: %u", ueCb->ueId);
+        NB_FREE(ueCb->s1HoInfo, sizeof(NbS1HoInfo));
+      } else {
+#endif
+        // Inform the ueApp about UE context release
+        ret = nbSendS1RelIndToUeApp(ueCb->ueId);
+        if (ret != ROK) {
+          NB_LOG_ERROR(&nbCb, "Failed to Send S1 Release Indiaction "
+                              "to ueApp");
+        }
+#ifdef MULTI_ENB_SUPPORT
       }
+#endif
 
       if (nbIsTmrRunning(&nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].timer,
                          NB_TMR_LCL_UE_CTXT_REL_REQ)) {
@@ -3438,7 +3447,15 @@ PUBLIC S16 nbHandleS1UeReleaseCmd(NbUeCb *ueCb) {
   if (nbCb.delayUeCtxtRelCmp[(ueCb->ueId) - 1].delayUeCtxRelComp != TRUE) {
     /* send the release complete to mme */
     ret = nbCtxtRelSndRlsCmpl(ueCb);
-    ret = nbIfmDamUeDelReq(ueCb->ueId);
+#ifdef MULTI_ENB_SUPPORT
+   if (ueCb->s1HoInfo != NULLP) {
+     ret = nbUiSendUeCtxRelIndToUser(ueCb->ueId);
+   } else {
+#endif
+     ret = nbIfmDamUeDelReq(ueCb->ueId);
+#ifdef MULTI_ENB_SUPPORT
+   }
+#endif
   } else {
     nbStartDelayTimerForUeCtxRel(ueCb->ueId);
   }
@@ -3449,9 +3466,6 @@ PUBLIC S16 nbCtxtRelSndRlsCmpl(NbUeCb *ueCb)
 {
    S1apPdu                 *ctxtRelPdu;
    SztRelRsp               relRsp;
-#ifdef MULTI_ENB_SUPPORT
-   U32 enbIdx = 0;
-#endif
    nbS1apFillCtxtRelCmpl(ueCb->s1ConCb, &ctxtRelPdu);
    if(ctxtRelPdu == NULLP)
    {
@@ -3462,11 +3476,15 @@ PUBLIC S16 nbCtxtRelSndRlsCmpl(NbUeCb *ueCb)
    relRsp.spConnId = ueCb->s1ConCb->spConnId;
    relRsp.pdu      = ctxtRelPdu;
 #ifdef MULTI_ENB_SUPPORT
-   relRsp.enbId = ueCb->enbId;
-   NbIfmS1apRelRsp(&relRsp);
-#else
-   NbIfmS1apRelRsp(&relRsp);
+   if (ueCb->s1HoInfo != NULLP) {
+     relRsp.cntxtRelForS1Ho = TRUE;
+     relRsp.enbId = ueCb->s1HoInfo->srcEnbId;
+   } else {
+     relRsp.cntxtRelForS1Ho = FALSE;
+     relRsp.enbId = ueCb->enbId;
+   }
 #endif
+   NbIfmS1apRelRsp(&relRsp);
    RETVALUE(ROK);
 }
 
