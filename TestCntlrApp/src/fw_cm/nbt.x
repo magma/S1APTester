@@ -6,7 +6,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-
 /********************************************************************20**
 
      Name:
@@ -22,46 +21,54 @@
 
 
 *******************************************************************21 */
-typedef enum _nbMsgTypes
-{
-   NB_CONFIG_REQ,
-   NB_CONFIG_CFM,
-   NB_S1_SETUP_REQ,
-   NB_S1_SETUP_RSP,
-   NB_S1_SETUP_TIMEOUT_IND,
-   NB_UE_CNTXT_REL_REQ,
-   NB_RESET_REQUEST,
-   NB_RESET_ACK,
-   NB_ERR_IND_MSG,
-   NB_ERAB_REL_IND,
-   NB_ERAB_REL_CMD_IND,
-   NB_ERAB_REL_RSP,
-   NB_UE_CTX_REL_IND,
-   NB_INT_CTX_SETUP_IND,
-   NB_SCTP_ABORT_REQ,
-   NB_SCTP_SHUTDOWN_REQ,
-   NB_NAS_NON_DEL,
-   NB_NAS_NON_DEL_RSP,
-   NB_INIT_CTXT_SETUP_FAIL,
-   NB_DROP_INIT_CTXT_SETUP,
-   NB_INIT_CTXT_SETUP_DROPPD_IND,
-   NB_DELAY_INIT_CTXT_SETUP_RSP,
-   NB_INIT_CTXT_SETUP_RSP_FAILED_ERABS,
-   NB_SEND_UE_CTXT_REL_FOR_ICS,
-   NB_DELAY_UE_CTXT_REL_CMP,
-   NB_MULTI_ENB_CONFIG_REQ,
-   NB_X2_HO_TRIGGER_REQ,
-   NB_PATH_SW_REQ_ACK,
-   NB_ENB_CONFIG_TRANSFER,
-   NB_MME_CONFIG_TRANSFER,
-   // SCTP SHUTDOWN or ABORT
-   NB_NW_INITIATED_ASSOC_DOWN,
-   NB_DELAY_ERAB_SETUP_RSP,
-   NB_DROP_RA,
-   NB_DROP_ERAB_SETUP_REQ,
-   NB_CONFIG_TAI,
-   NB_UNKNOWN_MSG_TYPE
-}NbMsgTypes;
+typedef enum _nbMsgTypes {
+  NB_CONFIG_REQ,
+  NB_CONFIG_CFM,
+  NB_S1_SETUP_REQ,
+  NB_S1_SETUP_RSP,
+  NB_S1_SETUP_TIMEOUT_IND,
+  NB_UE_CNTXT_REL_REQ,
+  NB_RESET_REQUEST,
+  NB_RESET_ACK,
+  NB_ERR_IND_MSG,
+  NB_ERAB_REL_IND,
+  NB_ERAB_REL_CMD_IND,
+  NB_ERAB_REL_RSP,
+  NB_UE_CTX_REL_IND,
+  NB_INT_CTX_SETUP_IND,
+  NB_SCTP_ABORT_REQ,
+  NB_SCTP_SHUTDOWN_REQ,
+  NB_NAS_NON_DEL,
+  NB_NAS_NON_DEL_RSP,
+  NB_INIT_CTXT_SETUP_FAIL,
+  NB_DROP_INIT_CTXT_SETUP,
+  NB_INIT_CTXT_SETUP_DROPPD_IND,
+  NB_DELAY_INIT_CTXT_SETUP_RSP,
+  NB_INIT_CTXT_SETUP_RSP_FAILED_ERABS,
+  NB_SEND_UE_CTXT_REL_FOR_ICS,
+  NB_DELAY_UE_CTXT_REL_CMP,
+  NB_MULTI_ENB_CONFIG_REQ,
+  NB_X2_HO_TRIGGER_REQ,
+  NB_PATH_SW_REQ_ACK,
+  NB_ENB_CONFIG_TRANSFER,
+  NB_MME_CONFIG_TRANSFER,
+  // SCTP SHUTDOWN or ABORT
+  NB_NW_INITIATED_ASSOC_DOWN,
+  NB_DELAY_ERAB_SETUP_RSP,
+  NB_DROP_RA,
+  NB_DROP_ERAB_SETUP_REQ,
+  NB_CONFIG_TAI,
+#ifdef MULTI_ENB_SUPPORT
+  NB_S1_HANDOVER_REQUIRED,
+  NB_S1_HANDOVER_REQ_IND,
+  NB_S1_HANDOVER_CMD_IND,
+  NB_S1_HANDOVER_CMD_DROP_IND,
+  NB_S1_HANDOVER_PREP_FAIL_IND,
+  NB_S1_HANDOVER_CANCEL_ACK_IND,
+  NB_MME_STATUS_TRNSFR_IND,
+#endif
+  NB_UNKNOWN_MSG_TYPE
+} NbMsgTypes;
 
 typedef enum _cfgFailCause
 {
@@ -431,6 +438,60 @@ typedef struct _nbTunDelReq
    U32 bearerId;
 }NbTunDelReq;
 
+#ifdef MULTI_ENB_SUPPORT
+typedef enum {
+  NB_S1_HO_SUCCESS = 0,
+  NB_S1_HO_FAILURE,
+  NB_S1_HO_CANCEL,
+  NB_S1_HO_TIMER_EXPIRY
+} NbS1HoEvents;
+
+typedef struct _nbS1HandoverRequired {
+  U32 ueId;
+  NbS1HoEvents s1HoEvent;
+} NbS1HandoverRequired;
+
+typedef struct _nbS1HandoverReqInd {
+  U32 ueId;
+  U32 currEnbId;
+  U32 hoSrcEnbId;
+  U32 hoTgtEnbId;
+} NbS1HandoverReqInd;
+
+typedef struct _nbS1HandoverCmdInd {
+  U32 ueId;
+  U32 currEnbId;
+  U32 hoSrcEnbId;
+  U32 hoTgtEnbId;
+} NbS1HandoverCmdInd;
+
+typedef struct _nbS1HandoverCmdDropInd {
+  U32 ueId;
+  U32 currEnbId;
+  U32 hoSrcEnbId;
+  U32 hoTgtEnbId;
+} NbS1HandoverCmdDropInd;
+
+typedef struct _nbS1HandoverPrepFailInd {
+  U32 ueId;
+  U32 currEnbId;
+  U32 hoSrcEnbId;
+  U32 hoTgtEnbId;
+} NbS1HandoverPrepFailInd;
+
+typedef struct _nbS1HandoverCancelAckInd {
+  U32 ueId;
+  U32 currEnbId;
+} NbS1HandoverCancelAckInd;
+
+typedef struct _nbMmeStatusTrnsfrInd {
+  U32 ueId;
+  U32 currEnbId;
+  U32 hoSrcEnbId;
+  U32 hoTgtEnbId;
+} NbMmeStatusTrnsfrInd;
+#endif
+
 typedef struct _nbEnbConfigTrnsf
 {
    U32 ueId;
@@ -467,45 +528,52 @@ typedef struct _nbConfigNewTai {
   U16 tac;
 } NbConfigNewTai;
 
-typedef struct _nbtMsg
-{
-   NbMsgTypes msgType;
-   union
-   {
-      NbConfigReq     configReq;
-      NbConfigCfm     configCfm;
-      NbS1SetupRsp    s1SetupRsp;
-      NbUeCntxtRelReq ueCntxtRelReq;
-      NbResetRequest  resetReq;
-      NbResetAckldg   resetAck;
-      NbErabRelInd   erabRelInd;
-      NbErabRelCmd   erabRelCmdInfo;
-      NbErabRelRsp   erabRelRsp;
-      NbUeCtxRelInd   ueCtxRelInd;
-      NbIntCtxtSetUpInd IntCtxtSetUpInd;
-      NbIntCtxtSetUpDrpdInd intCtxtSetUpDrpdInd;
-      NbErrIndMsg     s1ErrIndMsg;
-      NbSctpAbortReqMsg  sctpAbortReqMsg;
-      NbInitCtxtSetupFail initCtxtSetupFail;
-      NbDropInitCtxtSetup dropInitCtxtSetup;
-      NbDelayICSRsp      delayInitCtxtSetupRsp;
-      NbInitCtxtSetupFailedErabs initCtxtSetupRspFailedErabs;
-      NbSendUeCtxtRelForICSRsp sendUeCtxtRelForICS;
-      NbNasNonDel    nasNondel;
-      NbNasNonDelRsp  nasNondelRsp;
-      NbDelayUeCtxtRelCmp delayUeCtxtRelCmp;
-      NbMultiEnbConfigReq multiEnbConfigReq;
-      NbX2HOTriggerReq    x2HOTriggerReq;
-      NbPathSwReqAck      pathSwReqAck;
-      NbTunDelReq         tunDelReq;
-      NbEnbConfigTrnsf    enbConfigTrnsf;
-      NbMmeConfigTrnsf    mmeConfigTrnsf;
-      NbDelayErabSetupRsp delayErabSetupRsp;
-      NbDropRA dropRA;
-      NbDropErabSetupReq dropErabSetupReq;
-      NbConfigNewTai configNewTai;
-   }t;
-}NbtMsg;
+typedef struct _nbtMsg {
+  NbMsgTypes msgType;
+  union {
+    NbConfigReq configReq;
+    NbConfigCfm configCfm;
+    NbS1SetupRsp s1SetupRsp;
+    NbUeCntxtRelReq ueCntxtRelReq;
+    NbResetRequest resetReq;
+    NbResetAckldg resetAck;
+    NbErabRelInd erabRelInd;
+    NbErabRelCmd erabRelCmdInfo;
+    NbErabRelRsp erabRelRsp;
+    NbUeCtxRelInd ueCtxRelInd;
+    NbIntCtxtSetUpInd IntCtxtSetUpInd;
+    NbIntCtxtSetUpDrpdInd intCtxtSetUpDrpdInd;
+    NbErrIndMsg s1ErrIndMsg;
+    NbSctpAbortReqMsg sctpAbortReqMsg;
+    NbInitCtxtSetupFail initCtxtSetupFail;
+    NbDropInitCtxtSetup dropInitCtxtSetup;
+    NbDelayICSRsp delayInitCtxtSetupRsp;
+    NbInitCtxtSetupFailedErabs initCtxtSetupRspFailedErabs;
+    NbSendUeCtxtRelForICSRsp sendUeCtxtRelForICS;
+    NbNasNonDel nasNondel;
+    NbNasNonDelRsp nasNondelRsp;
+    NbDelayUeCtxtRelCmp delayUeCtxtRelCmp;
+    NbMultiEnbConfigReq multiEnbConfigReq;
+    NbX2HOTriggerReq x2HOTriggerReq;
+    NbPathSwReqAck pathSwReqAck;
+    NbTunDelReq tunDelReq;
+    NbEnbConfigTrnsf enbConfigTrnsf;
+    NbMmeConfigTrnsf mmeConfigTrnsf;
+    NbDelayErabSetupRsp delayErabSetupRsp;
+    NbDropRA dropRA;
+    NbDropErabSetupReq dropErabSetupReq;
+    NbConfigNewTai configNewTai;
+#ifdef MULTI_ENB_SUPPORT
+    NbS1HandoverRequired s1HoRequired;
+    NbS1HandoverReqInd s1HoReqInd;
+    NbS1HandoverCmdInd s1HoCmdInd;
+    NbS1HandoverCmdDropInd s1HoCmdDropInd;
+    NbS1HandoverPrepFailInd s1HoPrepFailInd;
+    NbS1HandoverCancelAckInd s1HoCancelAckInd;
+    NbMmeStatusTrnsfrInd mmeStatusTrnsfrInd;
+#endif
+  } t;
+} NbtMsg;
 
 /* nbt Interface general Structure declerations */
 typedef NbtMsg   NbtRequest;

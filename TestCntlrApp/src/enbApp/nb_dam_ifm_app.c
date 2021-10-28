@@ -294,7 +294,7 @@ PUBLIC S16 nbIfmDamNbTnlDelCfm
 #endif
 
 #ifdef MULTI_ENB_SUPPORT
-   if(!nbCb.x2HoDone)
+   if(!nbCb.x2HoDone && !nbCb.s1HoDone)
    {
 #endif
    if(ROK == nbDamDelUe(ueId))

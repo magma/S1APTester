@@ -84,6 +84,14 @@ PUBLIC S16 sendNbAppIntCtxSetupDrpdIndToTstCntlr(NbIntCtxtSetUpDrpdInd *rsp);
 PUBLIC S16 sendNbAppErabRelCmdToTstCntlr(NbErabRelCmd *rsp);
 PUBLIC S16 sendNbAppNasNonDelIndToTstCntlr(NbNasNonDelRsp *rsp);
 PUBLIC S16 sendNbAppPathSwReqAckToTstCntlr(NbPathSwReqAck *rsp);
+#ifdef MULTI_ENB_SUPPORT
+PUBLIC S16 sendNbAppS1HoReqIndToTstCntlr(FwNbS1HoReqInd_t *rsp);
+PUBLIC S16 sendNbAppS1HoCmdIndToTstCntlr(FwNbS1HoCmdInd_t *rsp);
+PUBLIC S16 sendNbAppS1HoCmdDropIndToTstCntlr(FwNbS1HoCmdDropInd_t *rsp);
+PUBLIC S16 sendNbAppS1HoPrepFailIndToTstCntlr(FwNbS1HoPrepFailInd_t *rsp);
+PUBLIC S16 sendNbAppS1HoCancelAckIndToTstCntlr(FwNbS1HoCancelAckInd_t *rsp);
+PUBLIC S16 sendNbAppMmeStatusTrnsfrIndToTstCntlr(FwNbMmeStatusTrnsfrInd_t *rsp);
+#endif
 
 /*
  *       Fun: sendNbAppConfigRespToTstCntlr 
@@ -465,6 +473,183 @@ PUBLIC S16 sendNbAppPathSwReqAckToTstCntlr(NbPathSwReqAck *rsp)
    FW_LOG_EXITFN(fwCb, ret);
 } /* sendNbAppPathSwReqAckToTstCntlr */
 
+#ifdef MULTI_ENB_SUPPORT
+/*
+ *       Fun: sendNbAppS1HoReqIndToTstCntlr
+ *
+ *       Desc: Sends S1 HO Request Indication message to
+ *             Test controller stub message Queue
+ *
+ *       Ret:  ROK - ok; RFAILED - failed
+ *
+ *       Notes: none
+ *
+ *       File:  fw_nbmsg_handler.c
+ */
+PUBLIC S16 sendNbAppS1HoReqIndToTstCntlr(FwNbS1HoReqInd_t *rsp) {
+  S16 ret = ROK;
+  FwCb *fwCb = NULLP;
+  FwNbS1HoReqInd_t *msg = NULLP;
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  FW_ALLOC_MEM(fwCb, &msg, sizeof(FwNbS1HoReqInd_t));
+  cmMemcpy(msg, rsp, sizeof(FwNbS1HoReqInd_t));
+
+  (*fwCb->testConrollerCallBack)(S1_HANDOVER_REQ_IND, msg,
+                                 sizeof(FwNbS1HoReqInd_t));
+  FW_FREE_MEM(fwCb, msg, sizeof(FwNbS1HoReqInd_t));
+  FW_LOG_EXITFN(fwCb, ret);
+} // sendNbAppS1HoReqIndToTstCntlr
+
+/*
+ *       Fun: sendNbAppS1HoCmdIndToTstCntlr
+ *
+ *       Desc: Sends S1 HO Command Indication message to
+ *             Test controller stub message Queue
+ *
+ *       Ret:  ROK - ok; RFAILED - failed
+ *
+ *       Notes: none
+ *
+ *       File:  fw_nbmsg_handler.c
+ */
+PUBLIC S16 sendNbAppS1HoCmdIndToTstCntlr(FwNbS1HoCmdInd_t *rsp) {
+  S16 ret = ROK;
+  FwCb *fwCb = NULLP;
+  FwNbS1HoCmdInd_t *msg = NULLP;
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  FW_ALLOC_MEM(fwCb, &msg, sizeof(FwNbS1HoCmdInd_t));
+  cmMemcpy(msg, rsp, sizeof(FwNbS1HoCmdInd_t));
+
+  (*fwCb->testConrollerCallBack)(S1_HANDOVER_CMD_IND, msg,
+                                 sizeof(FwNbS1HoCmdInd_t));
+  FW_FREE_MEM(fwCb, msg, sizeof(FwNbS1HoCmdInd_t));
+  FW_LOG_EXITFN(fwCb, ret);
+} // sendNbAppS1HoCmdIndToTstCntlr
+
+/*
+ *       Fun: sendNbAppS1HoCmdDropIndToTstCntlr
+ *
+ *       Desc: Sends S1 HO Command Drop Indication message to
+ *             Test controller stub message Queue
+ *
+ *       Ret:  ROK - ok; RFAILED - failed
+ *
+ *       Notes: none
+ *
+ *       File:  fw_nbmsg_handler.c
+ */
+PUBLIC S16 sendNbAppS1HoCmdDropIndToTstCntlr(FwNbS1HoCmdDropInd_t *rsp) {
+  S16 ret = ROK;
+  FwCb *fwCb = NULLP;
+  FwNbS1HoCmdDropInd_t *msg = NULLP;
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  FW_ALLOC_MEM(fwCb, &msg, sizeof(FwNbS1HoCmdDropInd_t));
+  cmMemcpy(msg, rsp, sizeof(FwNbS1HoCmdDropInd_t));
+
+  (*fwCb->testConrollerCallBack)(S1_HANDOVER_CMD_DROP_IND, msg,
+                                 sizeof(FwNbS1HoCmdDropInd_t));
+  FW_FREE_MEM(fwCb, msg, sizeof(FwNbS1HoCmdDropInd_t));
+  FW_LOG_EXITFN(fwCb, ret);
+} // sendNbAppS1HoCmdDropIndToTstCntlr
+
+/*
+ *       Fun: sendNbAppS1HoPrepFailIndToTstCntlr
+ *
+ *       Desc: Sends S1 HO Preparation Failure Indication message to
+ *             Test controller stub message Queue
+ *
+ *       Ret:  ROK - ok; RFAILED - failed
+ *
+ *       Notes: none
+ *
+ *       File:  fw_nbmsg_handler.c
+ */
+PUBLIC S16 sendNbAppS1HoPrepFailIndToTstCntlr(FwNbS1HoPrepFailInd_t *rsp) {
+  S16 ret = ROK;
+  FwCb *fwCb = NULLP;
+  FwNbS1HoPrepFailInd_t *msg = NULLP;
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  FW_ALLOC_MEM(fwCb, &msg, sizeof(FwNbS1HoPrepFailInd_t));
+  cmMemcpy(msg, rsp, sizeof(FwNbS1HoPrepFailInd_t));
+
+  (*fwCb->testConrollerCallBack)(S1_HANDOVER_PREP_FAIL_IND, msg,
+                                 sizeof(FwNbS1HoPrepFailInd_t));
+  FW_FREE_MEM(fwCb, msg, sizeof(FwNbS1HoPrepFailInd_t));
+  FW_LOG_EXITFN(fwCb, ret);
+} // sendNbAppS1HoPrepFailIndToTstCntlr
+
+/*
+ *       Fun: sendNbAppS1HoCancelAckIndToTstCntlr
+ *
+ *       Desc: Sends S1 HO Cancel Acknowledge Indication message to
+ *             Test controller stub message Queue
+ *
+ *       Ret:  ROK - ok; RFAILED - failed
+ *
+ *       Notes: none
+ *
+ *       File:  fw_nbmsg_handler.c
+ */
+PUBLIC S16 sendNbAppS1HoCancelAckIndToTstCntlr(FwNbS1HoCancelAckInd_t *rsp) {
+  S16 ret = ROK;
+  FwCb *fwCb = NULLP;
+  FwNbS1HoCancelAckInd_t *msg = NULLP;
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  FW_ALLOC_MEM(fwCb, &msg, sizeof(FwNbS1HoCancelAckInd_t));
+  cmMemcpy(msg, rsp, sizeof(FwNbS1HoCancelAckInd_t));
+
+  (*fwCb->testConrollerCallBack)(S1_HANDOVER_CANCEL_ACK_IND, msg,
+                                 sizeof(FwNbS1HoCancelAckInd_t));
+  FW_FREE_MEM(fwCb, msg, sizeof(FwNbS1HoCancelAckInd_t));
+  FW_LOG_EXITFN(fwCb, ret);
+} // sendNbAppS1HoCancelAckIndToTstCntlr
+
+/*
+ *       Fun: sendNbAppMmeStatusTrnsfrIndToTstCntlr
+ *
+ *       Desc: Sends MME Status Transfer Indication message to
+ *             Test controller stub message Queue
+ *
+ *       Ret:  ROK - ok; RFAILED - failed
+ *
+ *       Notes: none
+ *
+ *       File:  fw_nbmsg_handler.c
+ */
+PUBLIC S16
+sendNbAppMmeStatusTrnsfrIndToTstCntlr(FwNbMmeStatusTrnsfrInd_t *rsp) {
+  S16 ret = ROK;
+  FwCb *fwCb = NULLP;
+  FwNbMmeStatusTrnsfrInd_t *msg = NULLP;
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  FW_ALLOC_MEM(fwCb, &msg, sizeof(FwNbMmeStatusTrnsfrInd_t));
+  cmMemcpy(msg, rsp, sizeof(FwNbMmeStatusTrnsfrInd_t));
+
+  (*fwCb->testConrollerCallBack)(S1_MME_STATUS_TRSFR_IND, msg,
+                                 sizeof(FwNbMmeStatusTrnsfrInd_t));
+  FW_FREE_MEM(fwCb, msg, sizeof(FwNbMmeStatusTrnsfrInd_t));
+  FW_LOG_EXITFN(fwCb, ret);
+} // sendNbAppMmeStatusTrnsfrIndToTstCntlr
+#endif
+
  /*
  *       Fun: sendNbAppMmeConfigTrfToTstCntlr
  *
@@ -594,6 +779,32 @@ PUBLIC S16 handleNbAppMsg
          FW_LOG_DEBUG(fwCb, "Recieved NB_MME_CONFIG_TRF from EnodeB");
          sendNbAppMmeConfigTrfToTstCntlr(&nbRspMsg->t.mmeConfigTrnsf);
          break;
+#ifdef MULTI_ENB_SUPPORT
+      case NB_S1_HANDOVER_REQ_IND:
+         FW_LOG_DEBUG(fwCb, "Recieved NB_S1_HANDOVER_REQ_IND from EnodeB");
+         sendNbAppS1HoReqIndToTstCntlr(&nbRspMsg->t.s1HoReqInd);
+         break;
+      case NB_S1_HANDOVER_CMD_IND:
+         FW_LOG_DEBUG(fwCb, "Recieved NB_S1_HANDOVER_CMD_IND from EnodeB");
+         sendNbAppS1HoCmdIndToTstCntlr(&nbRspMsg->t.s1HoCmdInd);
+         break;
+      case NB_S1_HANDOVER_CMD_DROP_IND:
+         FW_LOG_DEBUG(fwCb, "Recieved NB_S1_HANDOVER_CMD_DROP_IND from EnodeB");
+         sendNbAppS1HoCmdDropIndToTstCntlr(&nbRspMsg->t.s1HoCmdDropInd);
+         break;
+      case NB_S1_HANDOVER_PREP_FAIL_IND:
+         FW_LOG_DEBUG(fwCb, "Recieved NB_S1_HANDOVER_PREP_FAIL_IND from EnodeB");
+         sendNbAppS1HoPrepFailIndToTstCntlr(&nbRspMsg->t.s1HoPrepFailInd);
+         break;
+      case NB_S1_HANDOVER_CANCEL_ACK_IND:
+         FW_LOG_DEBUG(fwCb, "Recieved NB_S1_HANDOVER_CANCEL_ACK_IND from EnodeB");
+         sendNbAppS1HoCancelAckIndToTstCntlr(&nbRspMsg->t.s1HoCancelAckInd);
+         break;
+      case NB_MME_STATUS_TRNSFR_IND:
+         FW_LOG_DEBUG(fwCb, "Recieved NB_MME_STATUS_TRNSFR_IND from EnodeB");
+         sendNbAppMmeStatusTrnsfrIndToTstCntlr(&nbRspMsg->t.mmeStatusTrnsfrInd);
+         break;
+#endif
       case NB_NW_INITIATED_ASSOC_DOWN:
          FW_LOG_DEBUG(fwCb, "Recieved NB_NW_INITIATED_ASSOC_DOWN from EnodeB");
          handleNwInitAssocDown();

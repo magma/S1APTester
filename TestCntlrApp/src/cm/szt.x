@@ -82,6 +82,7 @@ typedef struct sztConRsp
 /* Multi eNB support */
 #ifdef MULTI_ENB_SUPPORT
    U32 enbId;
+   U8 cntxtRelForS1Ho;
 #endif
 }SztConRsp;
 

@@ -200,7 +200,7 @@ Reason                       reason
  *
  *         Processing steps:
  *         - Based on the selector value, this primitve will call
- *           tightly colupled, loosely coupled or light weight loosly 
+ *           tightly colupled, loosely coupled or light weight loosly
  *           coupled function to send the S1AP Management message
  *           to S1AP layer.
  *         - This function is invoked by EMM Module.
@@ -210,17 +210,13 @@ Reason                       reason
  * @return  S16
  *        -# Success : ROK
  */
-PUBLIC S16 NbIfmS1apSndMgmtMsg
-(
-SztUDatEvnt                  *uDatEvnt
-)
-{
-   NbLiSapCb                 *s1apSap = nbCb.sztSap[0];
+PUBLIC S16 NbIfmS1apSndMgmtMsg(SztUDatEvnt *uDatEvnt) {
+  S16 ret = ROK;
+  NbLiSapCb *s1apSap = nbCb.sztSap[0];
 
-   (*NbIfmS1apUDatReqMt[(s1apSap->pst.selector)])(&(s1apSap->pst), 
-                                                  s1apSap->spId, uDatEvnt);
-
-   RETVALUE(ROK);
+  ret = (*NbIfmS1apUDatReqMt[(s1apSap->pst.selector)])(&(s1apSap->pst),
+                                                       s1apSap->spId, uDatEvnt);
+  RETVALUE(ret);
 } /* end of NbIfmS1apSndMgmtMsg */
 #ifdef SZTV2
 /** @brief This function sends S1AP Abort Message
