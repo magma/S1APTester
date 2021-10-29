@@ -540,6 +540,7 @@ PUBLIC S16 ueSendRelBearerReqMsgToNb(NbuRelBearerReq *nbuRelBerReq, Pst *pst) {
   UE_LOG_EXITFN(ueAppCb, ret);
 }
 
+// Handles RelBearerRsp received from enb app
 PUBLIC S16 UeLiNbuRelBearerRsp(Pst *pst, NbuRelBearerRsp *p_ueMsg) {
   S16 ret = RFAILED;
   U8 ueId = 0;
@@ -551,7 +552,7 @@ PUBLIC S16 UeLiNbuRelBearerRsp(Pst *pst, NbuRelBearerRsp *p_ueMsg) {
   UE_LOG_ENTERFN(ueAppCb);
 
   if (!pst || !p_ueMsg) {
-    UE_LOG_ERROR(ueAppCb, "[UEAPP]: pst||p_ueMsg is NULL ueId = %d", ueId);
+    UE_LOG_ERROR(ueAppCb, "[UEAPP]: pst||p_ueMsg is NULL ueId = %u", ueId);
     RETVALUE(ret);
   }
 
@@ -559,14 +560,14 @@ PUBLIC S16 UeLiNbuRelBearerRsp(Pst *pst, NbuRelBearerRsp *p_ueMsg) {
   // Fetch the UeCb
   ret = ueDbmFetchUe(ueId, (PTR *)&ueCb);
   if (ret != ROK) {
-    UE_LOG_ERROR(ueAppCb, "[UEAPP]: UeCb List NULL ueId = %d", ueId);
+    UE_LOG_ERROR(ueAppCb, "[UEAPP]: UeCb List NULL ueId = %u", ueId);
     RETVALUE(ret);
   }
 
-  UE_LOG_DEBUG(ueAppCb, "[UEAPP]: Processing RelBearerRsp ueId = %d", ueId);
+  UE_LOG_DEBUG(ueAppCb, "[UEAPP]: Processing RelBearerRsp ueId = %u", ueId);
   // Process the received RelBearerRsp
   if ((ret = ueUiProcRelBearerRsp(ueCb, p_ueMsg)) != ROK) {
-    UE_LOG_ERROR(ueAppCb, "Failed to process RelBearerRsp message for ue %d",
+    UE_LOG_ERROR(ueAppCb, "Failed to process RelBearerRsp message for ue %u",
                  ueId);
     ueFree((U8 *)ueCb->ueUetTauRequest, sizeof(UeUetTauRequest));
     ret = RFAILED;

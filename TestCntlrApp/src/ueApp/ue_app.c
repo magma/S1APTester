@@ -1378,7 +1378,7 @@ PUBLIC S16 ueAppUtlBldTauReq(UeCb *ueCb, CmNasEvnt **ueEvt,
            sizeof(Guti));
   tauReq->epsMi.u.guti.mTMSI = mTmsi;
 
-  if (ueUetTauRequest->epsBearerCtxSts > 0) {
+  if (ueUetTauRequest->epsBearerCtxSts) {
     tauReq->epsBearCtxtSts.pres = TRUE;
     tauReq->epsBearCtxtSts.len = 2;
     cmMemcpy((U8 *)&tauReq->epsBearCtxtSts.val,
@@ -2153,7 +2153,7 @@ PRIVATE S16 ueProcUeTauRequest(UetMessage *p_ueMsg, Pst *pst) {
   UE_GET_CB(ueAppCb);
   UE_LOG_ENTERFN(ueAppCb);
 
-  UE_LOG_DEBUG(ueAppCb, "Processing UE Tracking area update message");
+  UE_LOG_DEBUG(ueAppCb, "Processing TAU request message");
   ueId = p_ueMsg->msg.ueUetTauRequest.ueId;
   U16 epsBearerCtxSts = p_ueMsg->msg.ueUetTauRequest.epsBearerCtxSts;
 
@@ -2163,17 +2163,22 @@ PRIVATE S16 ueProcUeTauRequest(UetMessage *p_ueMsg, Pst *pst) {
     UE_LOG_ERROR(ueAppCb, "ueProcUeTauReq: UeCb List NULL ueId = %u", ueId);
     RETVALUE(ret);
   }
-  /* Deactivate bearer only if epsBearerCtxSts received from test script is
-   * non zero and if its not the last PDN
+  /* In order to simulate local deactivation, deactivate the bearers based on
+   * epsBearerCtxSts received from the test script and then send TAU request.
+   * Deactivate bearer only if epsBearerCtxSts has non zero value
    */
   if (epsBearerCtxSts) {
     for (U8 ebi = CM_ESM_BEARER_ID_INDX; ebi < CM_ESM_MAX_BEARER_ID; ebi++) {
       rbIdx = 0;
-      // Check if the bearer id bit is not set
+      /* If the bearer id bit in epsBearerCtxSts received from test script
+       * is not set and the bearer is active, delete the bearer context and
+       * send NbuRelBearerReq to enb
+       */
       if (!(epsBearerCtxSts & (1 << ebi))) {
         // Find the bearer index
         if ((ueAppUtlFndRbCb(&rbIdx, ueCb, ebi) == ROK)) {
           if (ueCb->ueRabCb[rbIdx].bearerType == DEFAULT_BEARER) {
+            // Do not deactivate the bearer if its the last PDN
             if (ueCb->numPdns == 1) {
               continue;
             }
@@ -10067,12 +10072,13 @@ PUBLIC S16 ueUiProcRelBearerRsp(UeCb *ueCb, NbuRelBearerRsp *relBearerRsp) {
   }
   // Send TAU request
   if (!ueCb->ueUetTauRequest) {
-    UE_LOG_ERROR(ueAppCb, "TAU Request stored in ueCb is NULL for ueId=%d",
+    UE_LOG_ERROR(ueAppCb, "TAU Request stored in ueCb is NULL for ueId=%u",
                  ueId);
     RETVALUE(RFAILED);
   }
   if (ueAppUtlBldTauReq(ueCb, &tauReqEvnt, ueCb->ueUetTauRequest) != ROK) {
     UE_LOG_ERROR(ueAppCb, "TAU Request Building failed");
+    ueFree((U8 *)ueCb->ueUetTauRequest, sizeof(UeUetTauRequest));
     RETVALUE(RFAILED);
   }
   cmMemset((U8 *)&nasEncPdu, 0, sizeof(NhuDedicatedInfoNAS));
@@ -10080,6 +10086,7 @@ PUBLIC S16 ueUiProcRelBearerRsp(UeCb *ueCb, NbuRelBearerRsp *relBearerRsp) {
   if (ueAppEdmEncode(tauReqEvnt, &nasEncPdu) != ROK) {
     UE_LOG_ERROR(ueAppCb, "TAU Request Encode Failed\n");
     CM_FREE_NASEVNT(&tauReqEvnt);
+    ueFree((U8 *)ueCb->ueUetTauRequest, sizeof(UeUetTauRequest));
     RETVALUE(RFAILED);
   }
 
@@ -10094,6 +10101,7 @@ PUBLIC S16 ueUiProcRelBearerRsp(UeCb *ueCb, NbuRelBearerRsp *relBearerRsp) {
       EDM_FREE(nasEncPdu.val, CM_MAX_EMM_ESM_PDU);
       tauReqEvnt->pdu = NULLP;
       CM_FREE_NASEVNT(&tauReqEvnt);
+      ueFree((U8 *)ueCb->ueUetTauRequest, sizeof(UeUetTauRequest));
       RETVALUE(RFAILED);
     }
     EDM_FREE(nasEncPdu.val, CM_MAX_EMM_ESM_PDU);
@@ -10106,6 +10114,7 @@ PUBLIC S16 ueUiProcRelBearerRsp(UeCb *ueCb, NbuRelBearerRsp *relBearerRsp) {
   if (!nbUeTauReq) {
     UE_LOG_ERROR(ueAppCb,
                  "Memory allocation failed for TAU Request for ueId=%d", ueId);
+    ueFree((U8 *)ueCb->ueUetTauRequest, sizeof(UeUetTauRequest));
     RETVALUE(RFAILED);
   }
   nbUeTauReq->ueId = ueId;
@@ -10118,7 +10127,7 @@ PUBLIC S16 ueUiProcRelBearerRsp(UeCb *ueCb, NbuRelBearerRsp *relBearerRsp) {
   } else {
     nbUeTauReq->stmsi.mTMSI = ueCb->ueCtxt.ueGuti.mTMSI;
   }
-
+  ueFree((U8 *)ueCb->ueUetTauRequest, sizeof(UeUetTauRequest));
   nbUeTauReq->nasPdu.pres = TRUE;
   nbUeTauReq->nasPdu.len = nasEncPdu.len;
   nbUeTauReq->nasPdu.val = (U8 *)ueAlloc(nbUeTauReq->nasPdu.len);
@@ -10147,7 +10156,6 @@ PUBLIC S16 ueUiProcRelBearerRsp(UeCb *ueCb, NbuRelBearerRsp *relBearerRsp) {
     UE_LOG_ERROR(ueAppCb, "Sending TAU Request to eNodeB failed=%d\n", ueId);
     UE_LOG_EXITFN(ueAppCb, RFAILED);
   }
-  ueFree((U8 *)ueCb->ueUetTauRequest, sizeof(UeUetTauRequest));
   UE_LOG_EXITFN(ueAppCb, ROK);
 }
 

@@ -153,8 +153,7 @@ Buffer   *mBuf;
               cmUnPkNbuUeIpInfoRej(NbUiNbuHdlUeIpInfoRej, pst, mBuf);
               break;
             }
-            case EVTNBURELBEARERREQ:
-            {
+            case EVTNBURELBEARERREQ: {
               cmUnPkNbuRelBearerReq(NbUiNbuHdlRelBearerReq, pst, mBuf);
               break;
             }

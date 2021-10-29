@@ -1774,22 +1774,22 @@ PUBLIC S16 NbEnbRelBearerReqHdl(NbuRelBearerReq *relBearerReq) {
    */
   if (ROK == (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(relBearerReq->ueId),
                              sizeof(U32), 0, (PTR *)&ueCb))) {
-    NB_LOG_DEBUG(&nbCb, "Sending DamErabDelReq for ueId=%d no. of bearers=%d",
+    NB_LOG_DEBUG(&nbCb, "Sending DamErabDelReq for ueId=%u no. of bearers=%d",
                  relBearerReq->ueId, relBearerReq->numOfErabIds);
     // Release all the bearers in the erabIdLst of relBearerReq
     if (nbIfmDamErabDelReq((Void *)relBearerReq) != ROK) {
-      NB_LOG_ERROR(&nbCb, "Failed to release bearers for ueId=%d",
+      NB_LOG_ERROR(&nbCb, "Failed to release bearers for ueId=%u",
                    relBearerReq->ueId);
       RETVALUE(RFAILED);
     }
   }
   if (nbSendRelBearerRspToUeApp(relBearerReq->ueId) != ROK) {
     NB_LOG_ERROR(&nbCb,
-                 "Failed to send release bearer rsp to ueApp for ueId=%d",
+                 "Failed to send release bearer rsp to ueApp for ueId=%u",
                  relBearerReq->ueId);
     RETVALUE(RFAILED);
   }
-  NB_LOG_DEBUG(&nbCb, "Sent release bearer rsp to ueApp for ueId=%d",
+  NB_LOG_DEBUG(&nbCb, "Sent release bearer rsp to ueApp for ueId=%u",
                relBearerReq->ueId);
   RETVALUE(ROK);
 } /* NbEnbRelBearerReqHdl */
