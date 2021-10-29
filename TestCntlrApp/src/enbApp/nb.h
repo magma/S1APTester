@@ -318,24 +318,42 @@ typedef struct _nbUeTunInfo
   CmTptAddr      sgwAddr;
 }NbUeTunInfo;
 
-struct _nbUeCb
-{
-   CmHashListEnt ueHashEnt;
-   U32 ueId;
-   U32  ueIdx;
-   NbS1ConCb   *s1ConCb;
-   U8 tunnIdx;
+#ifdef MULTI_ENB_SUPPORT
+typedef enum {
+  S1_HO_SUCCESS = 0,
+  S1_HO_FAILURE,
+  S1_HO_CANCEL,
+  S1_HO_TIMER_EXPIRY
+} S1HoEvents;
+
+typedef struct _nbS1HoInfo {
+  U32 srcEnbId;
+  U32 tgtEnbId;
+  S1HoEvents s1HoEvent;
+  CmTimer timer;
+  NbUeTunInfo *tunInfo;
+  NbS1ConCb *s1ConCb;
+} NbS1HoInfo;
+#endif
+
+struct _nbUeCb {
+  CmHashListEnt ueHashEnt;
+  U32 ueId;
+  U32 ueIdx;
+  NbS1ConCb *s1ConCb;
+  U8 tunnIdx;
 #if 0
    NbUeTunInfo *tunnInfo[11];
 #else
-   CmHashListCp   tunnInfo;
+  CmHashListCp tunnInfo;
 #endif
-   CmTimer   timer;
-   /* Multi eNB support */
-   U32 enbId;
+  CmTimer timer;
+  /* Multi eNB support */
+  U32 enbId;
 #ifdef MULTI_ENB_SUPPORT
-   U16 encryptionAlgo;//Updated from ICS Req
-   U16 integrityAlgo;//Updated from ICS Req
+  NbS1HoInfo *s1HoInfo;
+  U16 encryptionAlgo; // Updated from ICS Req
+  U16 integrityAlgo;  // Updated from ICS Req
 #endif
 };
 
@@ -545,6 +563,7 @@ typedef struct _nbCb
    DropErabSetupReq          dropErabSetupReq[NB_MAX_UE_SUPPORTED];
 #ifdef MULTI_ENB_SUPPORT
    Bool                      x2HoDone;
+   Bool                      s1HoDone;
 #endif
    TauParams                 tau[NB_MAX_UE_SUPPORTED];
 }NbCb;

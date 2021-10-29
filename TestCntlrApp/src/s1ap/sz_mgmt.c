@@ -181,19 +181,19 @@ PFSZMGMTUIMSGHANDLER szMgmtUiEnb[SZ_MAX_MSG_ID] =
    szMgmtUiInvldMsgHandler,     /* Setup Response */
    szMgmtUiInvldMsgHandler,     /* Setup Fail */
    szMgmtUiInvldMsgHandler,     /* Paging */
-   szMgmtUiInvldMsgHandler,     /* Handover Required */
+   szMgmtUiMsgHandler,          /* Handover Required */
    szMgmtUiInvldMsgHandler,     /* Handover Command */
    szMgmtUiInvldMsgHandler,     /* Handover Preperation Failure */
    szMgmtUiInvldMsgHandler,     /* Handover Request */
-   szMgmtUiInvldMsgHandler,     /* Handover Request Acknowledge */
-   szMgmtUiInvldMsgHandler,     /* Handover Request Failure */
-   szMgmtUiInvldMsgHandler,     /* Handover Notify */
+   szMgmtUiMsgHandler,          /* Handover Request Acknowledge */
+   szMgmtUiMsgHandler,          /* Handover Request Failure */
+   szMgmtUiMsgHandler,          /* Handover Notify */
    szMgmtUiInvldMsgHandler,     /* Path Switch Request */
    szMgmtUiInvldMsgHandler,     /* Path Switch Request Acknowledge */
    szMgmtUiInvldMsgHandler,     /* Path Switch Request Failure */
-   szMgmtUiInvldMsgHandler,     /* Handover Cancel */
+   szMgmtUiMsgHandler,          /* Handover Cancel */
    szMgmtUiInvldMsgHandler,     /* Handover Cancel Acknowledge */
-   szMgmtUiInvldMsgHandler,     /* ENB Status Transfer */
+   szMgmtUiMsgHandler,          /* ENB Status Transfer */
    szMgmtUiInvldMsgHandler,     /* MME Status Transfer */
    szMgmtUiInvldMsgHandler,     /* Deactivate Trace */
    szMgmtUiInvldMsgHandler,     /* Trace Start */

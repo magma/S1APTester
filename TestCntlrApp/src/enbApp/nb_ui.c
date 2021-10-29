@@ -56,6 +56,9 @@ EXTERN S16 NbEnbDelayErabSetupRsp(NbDelayErabSetupRsp  *);
 EXTERN S16 NbEnbDropRA(NbDropRA *);
 EXTERN S16 NbHandleDropErabSetupReq(NbDropErabSetupReq  *);
 EXTERN S16 NbHandleConfigTai(NbConfigNewTai  *);
+#ifdef MULTI_ENB_SUPPORT
+EXTERN S16 NbS1HoRequiredHdl(NbS1HandoverRequired *s1HoRequired);
+#endif
 
 int atoi(const char *nptr);
 
@@ -252,6 +255,13 @@ PUBLIC S16 NbUiNbtMsgReq
          break;
       }
 
+      case NB_S1_HANDOVER_REQUIRED: {
+        if (ROK != NbS1HoRequiredHdl(&req->t.s1HoRequired)) {
+          NB_LOG_ERROR(&nbCb, "FAILED to process S1 Handover Required "
+                              "from TFW");
+        }
+        break;
+      }
 #endif
       case NB_DELAY_ERAB_SETUP_RSP: {
         if(ROK != NbEnbDelayErabSetupRsp(&req->t.delayErabSetupRsp)) {
@@ -967,6 +977,184 @@ PUBLIC S16 nbUiSendPathSwReqAckToUser(NbPathSwReqAck *pathSwReqAck)
 
    RETVALUE(ROK);
 } /* nbUiSendPathSwReqAckToUser */
+
+#ifdef MULTI_ENB_SUPPORT
+PUBLIC S16 nbUiSendS1HoReqIndToUser(NbS1HandoverReqInd *s1HoReqInd) {
+  NbtResponse *rsp = NULLP;
+  Pst pst;
+
+  NB_ALLOC(&rsp, sizeof(NbtResponse));
+
+  rsp->msgType = NB_S1_HANDOVER_REQ_IND;
+  SM_SET_ZERO(&pst, sizeof(Pst));
+
+  pst.selector = 0;
+  pst.srcEnt = ENTNB;
+  pst.dstEnt = ENTFW;
+  pst.srcProcId = 0;
+  pst.dstProcId = 0;
+  pst.region = smCfgCb.init.region;
+  pst.pool = smCfgCb.init.pool;
+  pst.srcInst = 0;
+
+  cmMemcpy(&rsp->t.s1HoReqInd, s1HoReqInd, sizeof(NbS1HandoverReqInd));
+
+  if (ROK != cmPkNbtMsgRsp(&pst, rsp)) {
+    NB_LOG_ERROR(&nbCb, "Failed to send message to TFW App");
+    RETVOID(RFAILED);
+  }
+
+  RETVALUE(ROK);
+} // nbUiSendS1HoReqIndToUser
+
+PUBLIC S16 nbUiSendS1HoCmdIndToUser(NbS1HandoverCmdInd *s1HoCmdInd) {
+  NbtResponse *rsp = NULLP;
+  Pst pst;
+
+  NB_ALLOC(&rsp, sizeof(NbtResponse));
+
+  rsp->msgType = NB_S1_HANDOVER_CMD_IND;
+  SM_SET_ZERO(&pst, sizeof(Pst));
+
+  pst.selector = 0;
+  pst.srcEnt = ENTNB;
+  pst.dstEnt = ENTFW;
+  pst.srcProcId = 0;
+  pst.dstProcId = 0;
+  pst.region = smCfgCb.init.region;
+  pst.pool = smCfgCb.init.pool;
+  pst.srcInst = 0;
+
+  cmMemcpy(&rsp->t.s1HoCmdInd, s1HoCmdInd, sizeof(NbS1HandoverCmdInd));
+
+  if (ROK != cmPkNbtMsgRsp(&pst, rsp)) {
+    NB_LOG_ERROR(&nbCb, "Failed to send message to TFW App");
+    RETVOID(RFAILED);
+  }
+
+  RETVALUE(ROK);
+} // nbUiSendS1HoCmdIndToUser
+
+PUBLIC S16
+nbUiSendS1HoCmdDropIndToUser(NbS1HandoverCmdDropInd *s1HoCmdDropInd) {
+  NbtResponse *rsp = NULLP;
+  Pst pst;
+
+  NB_ALLOC(&rsp, sizeof(NbtResponse));
+
+  rsp->msgType = NB_S1_HANDOVER_CMD_DROP_IND;
+  SM_SET_ZERO(&pst, sizeof(Pst));
+
+  pst.selector = 0;
+  pst.srcEnt = ENTNB;
+  pst.dstEnt = ENTFW;
+  pst.srcProcId = 0;
+  pst.dstProcId = 0;
+  pst.region = smCfgCb.init.region;
+  pst.pool = smCfgCb.init.pool;
+  pst.srcInst = 0;
+
+  cmMemcpy(&rsp->t.s1HoCmdDropInd, s1HoCmdDropInd,
+           sizeof(NbS1HandoverCmdDropInd));
+
+  if (ROK != cmPkNbtMsgRsp(&pst, rsp)) {
+    NB_LOG_ERROR(&nbCb, "Failed to send message to TFW App");
+    RETVOID(RFAILED);
+  }
+
+  RETVALUE(ROK);
+} // nbUiSendS1HoCmdDropIndToUser
+
+PUBLIC S16
+nbUiSendS1HoPrepFailIndToUser(NbS1HandoverPrepFailInd *s1HoPrepFailInd) {
+  NbtResponse *rsp = NULLP;
+  Pst pst;
+
+  NB_ALLOC(&rsp, sizeof(NbtResponse));
+
+  rsp->msgType = NB_S1_HANDOVER_PREP_FAIL_IND;
+  SM_SET_ZERO(&pst, sizeof(Pst));
+
+  pst.selector = 0;
+  pst.srcEnt = ENTNB;
+  pst.dstEnt = ENTFW;
+  pst.srcProcId = 0;
+  pst.dstProcId = 0;
+  pst.region = smCfgCb.init.region;
+  pst.pool = smCfgCb.init.pool;
+  pst.srcInst = 0;
+
+  cmMemcpy(&rsp->t.s1HoPrepFailInd, s1HoPrepFailInd,
+           sizeof(NbS1HandoverPrepFailInd));
+
+  if (ROK != cmPkNbtMsgRsp(&pst, rsp)) {
+    NB_LOG_ERROR(&nbCb, "Failed to send message to TFW App");
+    RETVOID(RFAILED);
+  }
+
+  RETVALUE(ROK);
+} // nbUiSendS1HoPrepFailIndToUser
+
+PUBLIC S16
+nbUiSendS1HoCancelAckIndToUser(NbS1HandoverCancelAckInd *s1HoCancelAckInd) {
+  NbtResponse *rsp = NULLP;
+  Pst pst;
+
+  NB_ALLOC(&rsp, sizeof(NbtResponse));
+
+  rsp->msgType = NB_S1_HANDOVER_CANCEL_ACK_IND;
+  SM_SET_ZERO(&pst, sizeof(Pst));
+
+  pst.selector = 0;
+  pst.srcEnt = ENTNB;
+  pst.dstEnt = ENTFW;
+  pst.srcProcId = 0;
+  pst.dstProcId = 0;
+  pst.region = smCfgCb.init.region;
+  pst.pool = smCfgCb.init.pool;
+  pst.srcInst = 0;
+
+  cmMemcpy(&rsp->t.s1HoCancelAckInd, s1HoCancelAckInd,
+           sizeof(NbS1HandoverCancelAckInd));
+
+  if (ROK != cmPkNbtMsgRsp(&pst, rsp)) {
+    NB_LOG_ERROR(&nbCb, "Failed to send message to TFW App");
+    RETVOID(RFAILED);
+  }
+
+  RETVALUE(ROK);
+} // nbUiSendS1HoCancelAckIndToUser
+
+PUBLIC S16
+nbUiSendMmeStatusTrnsfrIndToUser(NbMmeStatusTrnsfrInd *mmeStatusTrnfrInd) {
+  NbtResponse *rsp = NULLP;
+  Pst pst;
+
+  NB_ALLOC(&rsp, sizeof(NbtResponse));
+
+  rsp->msgType = NB_MME_STATUS_TRNSFR_IND;
+  SM_SET_ZERO(&pst, sizeof(Pst));
+
+  pst.selector = 0;
+  pst.srcEnt = ENTNB;
+  pst.dstEnt = ENTFW;
+  pst.srcProcId = 0;
+  pst.dstProcId = 0;
+  pst.region = smCfgCb.init.region;
+  pst.pool = smCfgCb.init.pool;
+  pst.srcInst = 0;
+
+  cmMemcpy(&rsp->t.mmeStatusTrnsfrInd, mmeStatusTrnfrInd,
+           sizeof(NbMmeStatusTrnsfrInd));
+
+  if (ROK != cmPkNbtMsgRsp(&pst, rsp)) {
+    NB_LOG_ERROR(&nbCb, "Failed to send message to TFW App");
+    RETVOID(RFAILED);
+  }
+
+  RETVALUE(ROK);
+} // nbUiSendMmeStatusTrnsfrIndToUser
+#endif
 
 //PUBLIC S16 nbUiSendMmeConfigTrfToUser(NbMmeConfigTrf *mmeConfigTrf)
 PUBLIC S16 nbUiSendMmeConfigTrfToUser(NbMmeConfigTrnsf *mmeConfigTrnsf)

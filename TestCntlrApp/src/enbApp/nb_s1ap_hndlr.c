@@ -1199,6 +1199,11 @@ S1apPdu                      *pdu
          NB_LOG_DEBUG(&nbCb, "RECEIVED MME CONFIG TRANSFER");
          ret = nbPrcMMEConfigTrf(peerId, pdu);
          break;
+      case Sztid_HovrResourceAllocn:
+         // S1 HO Request is the Initiating msg for HO Resource Allocation
+         NB_LOG_DEBUG(&nbCb, "Received S1 Handover Request Message");
+         ret = nbPrcS1HoReq(peerId, pdu);
+         break;
 #endif
       default:
          NB_LOG_ERROR(&nbCb,"Err: Msg not handled");
@@ -2379,12 +2384,21 @@ PUBLIC S16 nbPrcIncS1apMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType) {
   {
     ret = nbHandleS1UeReleaseCmd(ueCb);
     if (ret == ROK) {
-      // Inform the ueApp about UE context release
-      ret = nbSendS1RelIndToUeApp(ueCb->ueId);
-      if (ret != ROK) {
-        NB_LOG_ERROR(&nbCb, "Failed to Send S1 Release Indiaction "
-                            "to ueApp");
+#ifdef MULTI_ENB_SUPPORT
+      if (ueCb->s1HoInfo != NULLP) {
+        NB_LOG_DEBUG(&nbCb,"Deleting all the S1 handover context for UE Id: %u", ueCb->ueId);
+        NB_FREE(ueCb->s1HoInfo, sizeof(NbS1HoInfo));
+      } else {
+#endif
+        // Inform the ueApp about UE context release
+        ret = nbSendS1RelIndToUeApp(ueCb->ueId);
+        if (ret != ROK) {
+          NB_LOG_ERROR(&nbCb, "Failed to Send S1 Release Indiaction "
+                              "to ueApp");
+        }
+#ifdef MULTI_ENB_SUPPORT
       }
+#endif
 
       if (nbIsTmrRunning(&nbCb.dropInitCtxtSetup[(ueCb->ueId) - 1].timer,
                          NB_TMR_LCL_UE_CTXT_REL_REQ)) {
@@ -2423,10 +2437,35 @@ PUBLIC S16 nbPrcIncS1apMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType) {
   {
     NB_LOG_DEBUG(&nbCb, "RECEIVED PATH SW REQ ACK");
     ret = nbPrcPathSwReqAck(ueCb, pdu);
+  } else if (procedureCodeVal == 0) // Handover Preparation
+  {
+    if (pdu->pdu.choice.val == 1) {
+      // Choice: 1 (SuccessfulOutcome) -Handover Command
+      ret = nbPrcS1HoCommand(ueCb, pdu);
+    } else if (pdu->pdu.choice.val == 2) {
+      // Choice: 2 (UnsuccessfulOutcome) -Handover Preparation Failure
+      ret = nbPrcS1HoPrepFailure(ueCb, pdu);
+    }
+
+    if (ret != ROK) {
+      NB_LOG_ERROR(&nbCb, "Failed to handle S1 handover preparation");
+    }
+  } else if (procedureCodeVal == 4) // S1 Handover Cancel Ack
+  {
+    ret = nbPrcS1HoCancelAck(ueCb, pdu);
+    if (ret != ROK) {
+      NB_LOG_ERROR(&nbCb, "Failed to handle S1 handover Cancel Ack");
+    }
+  } else if (procedureCodeVal == 25) // MME Status Transfer
+  {
+    ret = nbPrcMmeStatusTrnsfr(ueCb, pdu);
+    if (ret != ROK) {
+      NB_LOG_ERROR(&nbCb, "Failed to handle MME Status Transfer");
+    }
   }
 #endif
   else {
-    NB_LOG_ERROR(&nbCb, "Procedure not handled");
+    NB_LOG_ERROR(&nbCb, "Procedure not handled: %u", procedureCodeVal);
     ret = RFAILED;
   }
 
@@ -3408,7 +3447,15 @@ PUBLIC S16 nbHandleS1UeReleaseCmd(NbUeCb *ueCb) {
   if (nbCb.delayUeCtxtRelCmp[(ueCb->ueId) - 1].delayUeCtxRelComp != TRUE) {
     /* send the release complete to mme */
     ret = nbCtxtRelSndRlsCmpl(ueCb);
-    ret = nbIfmDamUeDelReq(ueCb->ueId);
+#ifdef MULTI_ENB_SUPPORT
+   if (ueCb->s1HoInfo != NULLP) {
+     ret = nbUiSendUeCtxRelIndToUser(ueCb->ueId);
+   } else {
+#endif
+     ret = nbIfmDamUeDelReq(ueCb->ueId);
+#ifdef MULTI_ENB_SUPPORT
+   }
+#endif
   } else {
     nbStartDelayTimerForUeCtxRel(ueCb->ueId);
   }
@@ -3419,9 +3466,6 @@ PUBLIC S16 nbCtxtRelSndRlsCmpl(NbUeCb *ueCb)
 {
    S1apPdu                 *ctxtRelPdu;
    SztRelRsp               relRsp;
-#ifdef MULTI_ENB_SUPPORT
-   U32 enbIdx = 0;
-#endif
    nbS1apFillCtxtRelCmpl(ueCb->s1ConCb, &ctxtRelPdu);
    if(ctxtRelPdu == NULLP)
    {
@@ -3432,14 +3476,15 @@ PUBLIC S16 nbCtxtRelSndRlsCmpl(NbUeCb *ueCb)
    relRsp.spConnId = ueCb->s1ConCb->spConnId;
    relRsp.pdu      = ctxtRelPdu;
 #ifdef MULTI_ENB_SUPPORT
-   for(enbIdx = 0; enbIdx < smCfgCb.numOfEnbs; enbIdx++)
-   {
-      relRsp.enbId = enbIdx;
-      NbIfmS1apRelRsp(&relRsp);
+   if (ueCb->s1HoInfo != NULLP) {
+     relRsp.cntxtRelForS1Ho = TRUE;
+     relRsp.enbId = ueCb->s1HoInfo->srcEnbId;
+   } else {
+     relRsp.cntxtRelForS1Ho = FALSE;
+     relRsp.enbId = ueCb->enbId;
    }
-#else
-   NbIfmS1apRelRsp(&relRsp);
 #endif
+   NbIfmS1apRelRsp(&relRsp);
    RETVALUE(ROK);
 }
 
@@ -4495,6 +4540,784 @@ PUBLIC S16 nbBldENbConfigTransfer
 
    RETVALUE(ROK);
 } /* nbBldS1SetupReq */
+
+/* ====================================== */
+/* S1 HANDOVER REQUIRED MESSAGE BUILDING  */
+/* ====================================== */
+/* @brief This function will allocate memory and build the
+ *    S1AP: S1 Handover Required message
+ *
+ * @details This function allocates the memory for S1AP:
+ *    S1 HANDOVER REQUIRED
+ *    Message PDU and fills the PDU with proper values
+ *
+ * Function: nbBldS1HandoverRequired
+ *
+ *    Processing steps:
+ *     -Allocate Memory for S1AP: S1 Handover Required Message PDU
+ *     -Fill the PDU with proper values
+ *
+ * @param[out] pdu: S1AP: S1 Handover Required PDU
+ *
+ * @return  S16
+ *    -# Success : ROK
+ *    -# Failure : RFAILED
+ */
+PUBLIC S16 nbBldS1HandoverRequired(S1apPdu **pdu, NbUeCb *ueCb, EnbCb *tgtEnbCb,
+                                   NbUeMsgCause *cause) {
+  S1apPdu *s1HoRequiredPdu = NULLP;
+  NbS1ConCb *s1apCon = ueCb->s1ConCb;
+  SztInitiatingMsg *initMsg;
+  SztHovrReqd *s1HoReqd = NULLP;
+  SztProtIE_Field_HovrReqdIEs *ie;
+  SztTgeteNB_ID *ie1;
+  U16 numComp;
+  S16 ret;
+  U32 ieIdx = 0;
+  TRC2(nbBldS1HandoverRequired);
+
+  NB_LOG_DEBUG(&nbCb, "Building S1 Handover Required Message for UE Id: %u",
+               ueCb->ueId);
+
+  // Initialize memory control point
+  ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem,
+                    (Ptr *)&s1HoRequiredPdu);
+  if (ret != ROK) {
+    NB_LOG_ERROR(&nbCb, "cmAllocEvnt failed for s1HoRequiredPdu");
+    RETVALUE(RFAILED);
+  }
+  nbFillTknU8(&(s1HoRequiredPdu->pdu.choice), S1AP_PDU_INITIATINGMSG);
+
+  initMsg = &(s1HoRequiredPdu->pdu.val.initiatingMsg);
+  nbFillTknU8(&(initMsg->pres), PRSNT_NODEF);
+  nbFillTknU32(&(initMsg->procedureCode), Sztid_HovrPrep);
+  nbFillTknU32(&(initMsg->criticality), SztCriticalityrejectEnum);
+
+  /* IEs to be filled in PDU:
+   * 1. MME UE S1AP Id
+   * 2. ENB UE S1AP Id
+   * 3. Handover Type
+   * 4. Cause
+   * 5. Target Id
+   * 6. Source to Target Transparent Container
+   */
+  numComp = 6;
+  s1HoReqd = &initMsg->value.u.sztHovrReqd;
+  nbFillTknU8(&(s1HoReqd->pres), PRSNT_NODEF);
+  nbFillTknU16(&(initMsg->value.u.sztHovrReqd.protocolIEs.noComp), numComp);
+
+  if ((cmGetMem(s1HoRequiredPdu,
+                (numComp * sizeof(SztProtIE_Field_HovrReqdIEs)),
+                (Ptr *)&s1HoReqd->protocolIEs.member)) != ROK) {
+    NB_LOG_ERROR(&nbCb, "Failed to allocate memory for S1HovrReqdIEs");
+    RETVALUE(RFAILED);
+  }
+
+  // IE1 - Filling MME UE S1AP Id
+  ie = &s1HoReqd->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_MME_UE_S1AP_ID);
+  nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);
+  nbFillTknU32(&(ie->value.u.sztMME_UE_S1AP_ID), s1apCon->mme_ue_s1ap_id);
+  ieIdx++;
+
+  // IE2 - Filling ENB UE S1AP Id
+  ie = &s1HoReqd->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_eNB_UE_S1AP_ID);
+  nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);
+  nbFillTknU32(&(ie->value.u.sztENB_UE_S1AP_ID), s1apCon->enb_ue_s1ap_id);
+  ieIdx++;
+
+  // IE3 - Filling S1AP Handover Type
+  ie = &s1HoReqd->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_HovrTyp);
+  nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);
+  nbFillTknU32(&(ie->value.u.sztHovrTyp), SztHovrTypintralteEnum);
+  ieIdx++;
+
+  // IE4 - Filling Handover Cause
+  ie = &s1HoReqd->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_Cause);
+  nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+  nbS1apFillCause(&(ie->value.u.sztCause), cause);
+  ieIdx++;
+
+  // IE5 - Filling Target Id
+  ie = &s1HoReqd->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_TgetID);
+  nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);
+  szFillTknU8(&(ie->value.u.sztTgetID.choice), TGETID_TARGETENB_ID);
+
+  // targeteNB_ID
+  ie1 = &(ie->value.u.sztTgetID.val.targeteNB_ID);
+  szFillTknU8(&(ie1->pres), PRSNT_NODEF);
+
+  // targeteNB_ID -> global_ENB_ID
+  szFillTknU8(&(ie1->global_ENB_ID.pres), PRSNT_NODEF);
+  // ENodeBType : Macro NB or Home NB
+  if (smCfgCb.eNodeBType.pres) {
+    // Value coming from Test Stub
+    nbSztFillS1eNBId(s1HoRequiredPdu, smCfgCb.eNodeBType.val, tgtEnbCb->cell_id,
+                     &(tgtEnbCb->plmnId), &(ie1->global_ENB_ID));
+  } else {
+    nbSztFillS1eNBId(s1HoRequiredPdu, nbCb.enbType, tgtEnbCb->cell_id,
+                     &(tgtEnbCb->plmnId), &(ie1->global_ENB_ID));
+  }
+  ie1->global_ENB_ID.iE_Extns.noComp.pres = NOTPRSNT;
+
+  // targeteNB_ID -> selected_TAI
+  szFillTknU8(&(ie1->selected_TAI.pres), PRSNT_NODEF);
+  nbSztFillPLMNId(s1HoRequiredPdu, &tgtEnbCb->plmnId,
+                  &ie1->selected_TAI.pLMNidentity);
+  nbSztFillTAC(tgtEnbCb->tac, s1HoRequiredPdu, &ie1->selected_TAI.tAC);
+  ie1->selected_TAI.iE_Extns.noComp.pres = NOTPRSNT;
+  ieIdx++;
+
+  // IE6 - Filling Source to Target Transparent Container
+  U16 lenData = 40;
+  U8 *tempData;
+  tempData = (U8 *)malloc(sizeof(U8) * lenData);
+  memcpy(tempData,
+         "\x60\x04\x00\x03\x90\x00\x00\x40\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+         "\xf8\xfd\x00\x00\x00\x58\x30\x31\x32\x33\x34\x30\x36\x0a\x38\x39\x61"
+         "\x62\x63\x64\x65\x66\x00",
+         lenData);
+
+  ie = &s1HoReqd->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_Src_ToTget_TprntCont);
+  nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);
+  nbFillTknStrOSXL(&(ie->value.u.sztid_Src_ToTget_TprntCont), lenData, tempData,
+                   &(s1HoRequiredPdu->memCp));
+
+  // Pass the constructed PDU back to the caller
+  *pdu = s1HoRequiredPdu;
+
+  RETVALUE(ROK);
+} // nbBldS1HandoverRequired
+
+/* ================================================= */
+/* S1 HANDOVER REQUEST ACKNOWLEDGE MESSAGE BUILDING  */
+/* ================================================= */
+/* @brief This function will allocate memory and build the
+ *    S1AP: S1 Handover Request Acknowledge message
+ *
+ * @details This function allocates the memory for S1AP:
+ *    S1 HANDOVER REQUEST ACKNOWLEDGE
+ *    Message PDU and fills the PDU with proper values
+ *
+ * Function: nbBldS1HandoverReqAck
+ *
+ *    Processing steps:
+ *     -Allocate Memory for S1AP: S1 Handover Request Acknowledge Message PDU
+ *     -Fill the PDU with proper values
+ *
+ * @param[out] pdu: S1AP: S1 Handover Request Acknowledge PDU
+ *
+ * @return  S16
+ *    -# Success : ROK
+ *    -# Failure : RFAILED
+ */
+PUBLIC S16 nbBldS1HandoverReqAck(S1apPdu **pdu, NbUeCb *ueCb) {
+  S1apPdu *s1HoReqAckPdu = NULLP;
+  NbS1ConCb *s1apCon = ueCb->s1ConCb;
+  SztSuccessfulOutcome *succMsg;
+  SztHovrRqstAckg *s1HoReqAckg = NULLP;
+  SztProtIE_Field_HovrRqstAckgIEs *ie;
+  SztProtIE_SingleCont_E_RABAdmtdItemIEs *rspMember;
+  U16 numComp;
+  S16 ret;
+  U32 ieIdx = 0;
+  U32 len = 0;
+  U8 offSet = 0;
+  U32 idx = 0;
+  U32 ieIdx2 = 0;
+
+  TRC2(nbBldS1HandoverReqAck);
+
+  NB_LOG_DEBUG(
+      &nbCb,
+      "Building S1 Handover Request Acknowledgement Message for UE Id: %u",
+      ueCb->ueId);
+
+  // Initialize memory control point
+  ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem,
+                    (Ptr *)&s1HoReqAckPdu);
+  if (ret != ROK) {
+    NB_LOG_ERROR(&nbCb, "cmAllocEvnt failed for s1HoReqAckPdu");
+    RETVALUE(RFAILED);
+  }
+  nbFillTknU8(&(s1HoReqAckPdu->pdu.choice), S1AP_PDU_SUCCESSFULOUTCOME);
+
+  succMsg = &(s1HoReqAckPdu->pdu.val.successfulOutcome);
+  nbFillTknU8(&(succMsg->pres), PRSNT_NODEF);
+  nbFillTknU32(&(succMsg->procedureCode), Sztid_HovrResourceAllocn);
+  nbFillTknU32(&(succMsg->criticality), SztCriticalityrejectEnum);
+
+  /* IEs to be filled in PDU:
+   * 1. MME UE S1AP Id
+   * 2. ENB UE S1AP Id
+   * 3. E-RAB Admitted List
+   * 4. Target to Source Transparent Container
+   */
+  numComp = 4;
+  s1HoReqAckg = &succMsg->value.u.sztHovrRqstAckg;
+  nbFillTknU8(&(s1HoReqAckg->pres), PRSNT_NODEF);
+  nbFillTknU16(&(succMsg->value.u.sztHovrRqstAckg.protocolIEs.noComp), numComp);
+
+  if ((cmGetMem(s1HoReqAckPdu,
+                (numComp * sizeof(SztProtIE_Field_HovrRqstAckgIEs)),
+                (Ptr *)&s1HoReqAckg->protocolIEs.member)) != ROK) {
+    NB_LOG_ERROR(&nbCb, "Failed to allocate memory for S1HovrRqstAckgIEs");
+    RETVALUE(RFAILED);
+  }
+
+  // IE1 - Filling MME UE S1AP Id
+  ie = &s1HoReqAckg->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_MME_UE_S1AP_ID);
+  nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+  nbFillTknU32(&(ie->value.u.sztMME_UE_S1AP_ID), s1apCon->mme_ue_s1ap_id);
+  ieIdx++;
+
+  // IE2 - Filling ENB UE S1AP Id
+  ie = &s1HoReqAckg->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_eNB_UE_S1AP_ID);
+  nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+  nbFillTknU32(&(ie->value.u.sztENB_UE_S1AP_ID), s1apCon->enb_ue_s1ap_id);
+  ieIdx++;
+
+  // IE3 - Filling E-RAB Admitted List
+  U16 numRabsAllowed = 1;
+  ie = &s1HoReqAckg->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_E_RABAdmtdLst);
+  nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+  nbFillTknU16(&(ie->value.u.sztE_RABAdmtdLst.noComp), numRabsAllowed);
+  ieIdx++;
+
+  if (numRabsAllowed > 0) {
+    // ERAB Admitted List
+    if ((cmGetMem(
+            s1HoReqAckPdu,
+            (numRabsAllowed * sizeof(SztProtIE_SingleCont_E_RABAdmtdItemIEs)),
+            (Ptr *)&ie->value.u.sztE_RABAdmtdLst.member)) != ROK) {
+      NB_LOG_ERROR(&nbCb, "Failed to allocate memory for E_RABAdmtdItemIEs");
+      RETVALUE(RFAILED);
+    }
+
+    // Locate ERAB to be setup List IE
+    for (idx = 0; idx < numRabsAllowed; idx++) {
+      SztE_RABAdmtdItem *rabIE;
+
+      rspMember = &(ie->value.u.sztE_RABAdmtdLst.member[ieIdx2++]);
+      nbFillTknU8(&(rspMember->pres), PRSNT_NODEF);
+      nbFillTknU32(&(rspMember->id), Sztid_E_RABAdmtdItem);
+      nbFillTknU32(&(rspMember->criticality), SztCriticalityignoreEnum);
+
+      rabIE = &(rspMember->value.u.sztE_RABAdmtdItem);
+      nbFillTknU8(&(rabIE->pres), PRSNT_NODEF);
+      nbFillTknU32(&rabIE->e_RAB_ID, ueCb->s1HoInfo->tunInfo->bearerId);
+
+      if (nbCb.datAppAddr.type == CM_TPTADDR_IPV4) {
+        len = 4;
+        rabIE->transportLyrAddr.pres = PRSNT_NODEF;
+        rabIE->transportLyrAddr.len = (U16)(len * 8);
+        NB_GET_MEM(s1HoReqAckPdu, len, &rabIE->transportLyrAddr.val);
+
+        U16 cnt = 0;
+        for (cnt = 0; cnt < len; cnt++) {
+          offSet = (U8)((len - (cnt + 1)) * 8);
+          rabIE->transportLyrAddr.val[cnt] =
+              (U8)(nbCb.datAppAddr.u.ipv4TptAddr.address >> offSet);
+        }
+      }
+
+      nbFillTknStrOSXL1(&rabIE->gTP_TEID, 4, ueCb->s1HoInfo->tunInfo->lclTeId,
+                        &(s1HoReqAckPdu->memCp));
+      rabIE->iE_Extns.noComp.pres = NOTPRSNT;
+      if (ieIdx2 >= numRabsAllowed) {
+        break;
+      }
+    }
+  }
+
+  // IE4 - Filling Target to Source Transparent Container
+  U16 lenData = 53;
+  U8 *temp;
+  temp = (U8 *)malloc(sizeof(U8) * lenData);
+  memcpy(temp,
+         "\x00\x20\x20\x20\x20\x20\x74\x61\x72\x67\x65\x74\x20\x74\x6f\x20\x73"
+         "\x6f\x75\x72\x63\x65\x20\x74\x72\x61\x6e\x73\x70\x61\x72\x65\x6e\x74"
+         "\x20\x20\x20\x63\x6f\x6e\x74\x20\x00\x31\x32\x33\x34\x35\x36\x00\x01"
+         "\x02\x03\x00",
+         lenData);
+
+  ie = &s1HoReqAckg->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_Tget_ToSrc_TprntCont);
+  nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);
+  nbFillTknStrOSXL(&(ie->value.u.sztTget_ToSrc_TprntCont), lenData, temp,
+                   &(s1HoReqAckPdu->memCp));
+
+  // Pass the constructed PDU back to the caller
+  *pdu = s1HoReqAckPdu;
+
+  RETVALUE(ROK);
+} // nbBldS1HandoverReqAck
+
+/* ====================================== */
+/* ENB STATUS TRANSFER MESSAGE BUILDING   */
+/* ====================================== */
+/* @brief This function will allocate memory and build the
+ *    S1AP: ENB Status Transfer message
+ *
+ * @details This function allocates the memory for S1AP:
+ *    ENB STATUS TRANSFER
+ *    Message PDU and fills the PDU with proper values
+ *
+ * Function: nbBldS1HoEnbStatusTransfer
+ *
+ *    Processing steps:
+ *     -Allocate Memory for S1AP: ENB Status Transfer Message PDU
+ *     -Fill the PDU with proper values
+ *
+ * @param[out] pdu: S1AP: ENB Status Transfer PDU
+ *
+ * @return  S16
+ *    -# Success : ROK
+ *    -# Failure : RFAILED
+ */
+PUBLIC S16 nbBldS1HoEnbStatusTransfer(S1apPdu **pdu, NbUeCb *ueCb) {
+  S1apPdu *enbStatusTransferPdu = NULLP;
+  NbS1ConCb *s1apCon = ueCb->s1ConCb;
+  SztInitiatingMsg *initMsg;
+  SztENBStatusTfr *s1ENBStatusTfr = NULLP;
+  SztProtIE_Field_ENBStatusTfrIEs *ie;
+  SztENB_StatusTfr_TprntCont *ie1;
+  SztProtIE_SingleCont_Brs_SubjToStatusTfr_ItemIEs *ie2;
+  U16 numComp;
+  S16 ret;
+  U32 ieIdx = 0;
+
+  TRC2(nbBldS1HoEnbStatusTransfer);
+
+  NB_LOG_DEBUG(&nbCb, "Building ENB Status Transfer Message for UE Id: %u",
+               ueCb->ueId);
+
+  // Initialize memory control point
+  ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem,
+                    (Ptr *)&enbStatusTransferPdu);
+  if (ret != ROK) {
+    NB_LOG_ERROR(&nbCb, "cmAllocEvnt failed for enbStatusTransferPdu");
+    RETVALUE(RFAILED);
+  }
+  nbFillTknU8(&(enbStatusTransferPdu->pdu.choice), S1AP_PDU_INITIATINGMSG);
+
+  initMsg = &(enbStatusTransferPdu->pdu.val.initiatingMsg);
+  nbFillTknU8(&(initMsg->pres), PRSNT_NODEF);
+  nbFillTknU32(&(initMsg->procedureCode), Sztid_eNBStatusTfr);
+  nbFillTknU32(&(initMsg->criticality), SztCriticalityignoreEnum);
+
+  /* IEs to be filled in PDU:
+   * 1. MME UE S1AP Id
+   * 2. ENB UE S1AP Id
+   * 3. ENB Status Transfer Transparent Container
+   */
+  numComp = 3;
+  s1ENBStatusTfr = &initMsg->value.u.sztENBStatusTfr;
+  nbFillTknU8(&(s1ENBStatusTfr->pres), PRSNT_NODEF);
+  nbFillTknU16(&(initMsg->value.u.sztENBStatusTfr.protocolIEs.noComp), numComp);
+
+  if ((cmGetMem(enbStatusTransferPdu,
+                (numComp * sizeof(SztProtIE_Field_ENBStatusTfrIEs)),
+                (Ptr *)&s1ENBStatusTfr->protocolIEs.member)) != ROK) {
+    NB_LOG_ERROR(&nbCb, "Failed to allocate memory for ENBStatusTfrIEs");
+    RETVALUE(RFAILED);
+  }
+
+  // IE1 - Filling MME UE S1AP Id
+  ie = &s1ENBStatusTfr->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_MME_UE_S1AP_ID);
+  nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);
+  nbFillTknU32(&(ie->value.u.sztMME_UE_S1AP_ID), s1apCon->mme_ue_s1ap_id);
+  ieIdx++;
+
+  // IE2 - Filling ENB UE S1AP Id
+  ie = &s1ENBStatusTfr->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_eNB_UE_S1AP_ID);
+  nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);
+  nbFillTknU32(&(ie->value.u.sztENB_UE_S1AP_ID), s1apCon->enb_ue_s1ap_id);
+  ieIdx++;
+
+  // IE3 - Filling ENB Status Transfer Transparent Container
+  ie = &s1ENBStatusTfr->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_eNB_StatusTfr_TprntCont);
+  nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);
+
+  ie1 = &ie->value.u.sztENB_StatusTfr_TprntCont;
+  nbFillTknU8(&(ie1->pres), PRSNT_NODEF);
+  ie1->iE_Extns.noComp.pres = NOTPRSNT;
+
+  numComp = 1;
+  nbFillTknU16(&(ie1->bearers_SubjToStatusTfrLst.noComp), numComp);
+
+  if ((cmGetMem(
+          enbStatusTransferPdu,
+          (numComp * sizeof(SztProtIE_SingleCont_Brs_SubjToStatusTfr_ItemIEs)),
+          (Ptr *)&ie1->bearers_SubjToStatusTfrLst.member)) != ROK) {
+    NB_LOG_ERROR(&nbCb,
+                 "Failed to allocate memory for Brs_SubjToStatusTfr_ItemIEs");
+    RETVALUE(RFAILED);
+  }
+
+  ie2 = &ie1->bearers_SubjToStatusTfrLst.member[0];
+  nbFillTknU8(&(ie2->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie2->id), Sztid_Brs_SubjToStatusTfr_Item);
+  nbFillTknU32(&(ie2->criticality), SztCriticalityignoreEnum);
+
+  nbFillTknU8(&(ie2->value.u.sztBrs_SubjToStatusTfr_Item.pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie2->value.u.sztBrs_SubjToStatusTfr_Item.e_RAB_ID), 5);
+  nbFillTknU8(&(ie2->value.u.sztBrs_SubjToStatusTfr_Item.uL_COUNTvalue.pres),
+              PRSNT_NODEF);
+  nbFillTknU32(
+      &(ie2->value.u.sztBrs_SubjToStatusTfr_Item.uL_COUNTvalue.pDCP_SN), 0);
+  nbFillTknU32(&(ie2->value.u.sztBrs_SubjToStatusTfr_Item.uL_COUNTvalue.hFN),
+               0);
+  ie2->value.u.sztBrs_SubjToStatusTfr_Item.uL_COUNTvalue.iE_Extns.noComp.pres =
+      NOTPRSNT;
+  nbFillTknU8(&(ie2->value.u.sztBrs_SubjToStatusTfr_Item.dL_COUNTvalue.pres),
+              PRSNT_NODEF);
+  nbFillTknU32(
+      &(ie2->value.u.sztBrs_SubjToStatusTfr_Item.dL_COUNTvalue.pDCP_SN), 0);
+  nbFillTknU32(&(ie2->value.u.sztBrs_SubjToStatusTfr_Item.dL_COUNTvalue.hFN),
+               0);
+  ie2->value.u.sztBrs_SubjToStatusTfr_Item.dL_COUNTvalue.iE_Extns.noComp.pres =
+      NOTPRSNT;
+  ie2->value.u.sztBrs_SubjToStatusTfr_Item.receiveStatusofULPDCPSDUs.pres =
+      NOTPRSNT;
+  ie2->value.u.sztBrs_SubjToStatusTfr_Item.iE_Extns.noComp.pres = NOTPRSNT;
+
+  // Pass the constructed PDU back to the caller
+  *pdu = enbStatusTransferPdu;
+
+  RETVALUE(ROK);
+} // nbBldS1HoEnbStatusTransfer
+
+/* ==================================== */
+/* S1 HANDOVER NOTIFY MESSAGE BUILDING  */
+/* ==================================== */
+/* @brief This function will allocate memory and build the
+ *    S1AP: S1 Handover Notify message
+ *
+ * @details This function allocates the memory for S1AP:
+ *    S1 HANDOVER NOTIFY
+ *    Message PDU and fills the PDU with proper values
+ *
+ * Function: nbBldS1HandoverNotify
+ *
+ *    Processing steps:
+ *     -Allocate Memory for S1AP: S1 Handover Notify Message PDU
+ *     -Fill the PDU with proper values
+ *
+ * @param[out] pdu: S1AP: S1 Handover Notify PDU
+ *
+ * @return  S16
+ *    -# Success : ROK
+ *    -# Failure : RFAILED
+ */
+PUBLIC S16 nbBldS1HandoverNotify(S1apPdu **pdu, EnbCb *tgtEnbCb, NbUeCb *ueCb) {
+  S1apPdu *s1HoNotifyPdu = NULLP;
+  NbS1ConCb *s1apCon = ueCb->s1ConCb;
+  SztInitiatingMsg *initMsg;
+  SztHovrNtfy *s1HoNotify = NULLP;
+  SztProtIE_Field_HovrNtfyIEs *ie;
+  U16 numComp;
+  S16 ret;
+  U32 ieIdx = 0;
+  NbTai tai;
+
+  TRC2(nbBldS1HandoverNotify);
+
+  NB_LOG_DEBUG(&nbCb, "Building S1 Handover Notify Message for UE Id: %u",
+               ueCb->ueId);
+
+  // Initialize memory control point
+  ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem,
+                    (Ptr *)&s1HoNotifyPdu);
+  if (ret != ROK) {
+    NB_LOG_ERROR(&nbCb, "cmAllocEvnt failed for s1HoNotifyPdu");
+    RETVALUE(RFAILED);
+  }
+  nbFillTknU8(&(s1HoNotifyPdu->pdu.choice), S1AP_PDU_INITIATINGMSG);
+
+  initMsg = &(s1HoNotifyPdu->pdu.val.initiatingMsg);
+  nbFillTknU8(&(initMsg->pres), PRSNT_NODEF);
+  nbFillTknU32(&(initMsg->procedureCode), Sztid_HovrNotification);
+  nbFillTknU32(&(initMsg->criticality), SztCriticalityignoreEnum);
+
+  /* IEs to be filled in PDU:
+   * 1. MME UE S1AP Id
+   * 2. ENB UE S1AP Id
+   * 3. EUTRAN CGI
+   * 4. TAI
+   */
+  numComp = 4;
+  s1HoNotify = &initMsg->value.u.sztHovrNtfy;
+  nbFillTknU8(&(s1HoNotify->pres), PRSNT_NODEF);
+  nbFillTknU16(&(initMsg->value.u.sztHovrNtfy.protocolIEs.noComp), numComp);
+
+  if ((cmGetMem(s1HoNotifyPdu, (numComp * sizeof(SztProtIE_Field_HovrNtfyIEs)),
+                (Ptr *)&s1HoNotify->protocolIEs.member)) != ROK) {
+    NB_LOG_ERROR(&nbCb, "Failed to allocate memory for S1HovrNtfyIEs");
+    RETVALUE(RFAILED);
+  }
+
+  // IE1 - Filling MME UE S1AP Id
+  ie = &s1HoNotify->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_MME_UE_S1AP_ID);
+  nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);
+  nbFillTknU32(&(ie->value.u.sztMME_UE_S1AP_ID), s1apCon->mme_ue_s1ap_id);
+  ieIdx++;
+
+  // IE2 - Filling ENB UE S1AP Id
+  ie = &s1HoNotify->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_eNB_UE_S1AP_ID);
+  nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);
+  nbFillTknU32(&(ie->value.u.sztENB_UE_S1AP_ID), s1apCon->enb_ue_s1ap_id);
+  ieIdx++;
+
+  // IE3 - Filling  EUTRAN CGI
+  ie = &s1HoNotify->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_EUTRAN_CGI);
+  nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+
+  nbFillTknU8(&(ie->value.u.sztEUTRAN_CGI.pres), PRSNT_NODEF);
+  nbSztFillPLMNId(s1HoNotifyPdu, &tgtEnbCb->plmnId,
+                  &ie->value.u.sztEUTRAN_CGI.pLMNidentity);
+  nbFillTknBStr32(&(ie->value.u.sztEUTRAN_CGI.cell_ID), 28, tgtEnbCb->cell_id);
+  ie->value.u.sztEUTRAN_CGI.iE_Extns.noComp.pres = NOTPRSNT;
+  ieIdx++;
+
+  // IE4 - Filling  TAI
+  ie = &s1HoNotify->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_TAI);
+  nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+  nbFillTknU8(&(ie->value.u.sztTAI.pres), PRSNT_NODEF);
+
+  tai.plmnId = tgtEnbCb->plmnId;
+  tai.tac = tgtEnbCb->tac;
+  nbFillTknU8(&(ie->value.u.sztTAI.pres), PRSNT_NODEF);
+  if (nbSztFillPLMNId(s1HoNotifyPdu, &tai.plmnId,
+                      &(ie->value.u.sztTAI.pLMNidentity)) != ROK) {
+    RETVALUE(RFAILED);
+  }
+  nbSztFillTAC(tai.tac, s1HoNotifyPdu, &(ie->value.u.sztTAI.tAC));
+
+  // Pass the constructed PDU back to the caller
+  *pdu = s1HoNotifyPdu;
+
+  RETVALUE(ROK);
+} // nbBldS1HandoverNotify
+
+/* ====================================== */
+/* S1 HANDOVER CANCEL MESSAGE BUILDING    */
+/* ====================================== */
+/* @brief This function will allocate memory and build the
+ *    S1AP: S1 Handover Cancel message
+ *
+ * @details This function allocates the memory for S1AP:
+ *    S1 HANDOVER CANCEL
+ *    Message PDU and fills the PDU with proper values
+ *
+ * Function: nbBldS1HandoverCancel
+ *
+ *    Processing steps:
+ *     -Allocate Memory for S1AP: S1 Handover Cancel Message PDU
+ *     -Fill the PDU with proper values
+ *
+ * @param[out] pdu: S1AP: S1 Handover Cancel PDU
+ *
+ * @return  S16
+ *     -# Success : ROK
+ *     -# Failure : RFAILED
+ */
+PUBLIC S16 nbBldS1HandoverCancel(S1apPdu **pdu, NbUeCb *ueCb,
+                                 NbUeMsgCause *cause) {
+  S1apPdu *s1HoCancelPdu = NULLP;
+  NbS1ConCb *s1apCon = ueCb->s1ConCb;
+  SztInitiatingMsg *initMsg;
+  SztHovrCancel *s1HoCancel = NULLP;
+  U16 numComp;
+  S16 ret;
+  SztProtIE_Field_HovrCancelIEs *ie;
+  U32 ieIdx = 0;
+
+  TRC2(nbBldS1HandoverCancel);
+
+  NB_LOG_DEBUG(&nbCb, "Building S1 Handover Cancel Message for UE Id: %u",
+               ueCb->ueId);
+
+  // Initialize memory control point
+  ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem,
+                    (Ptr *)&s1HoCancelPdu);
+  if (ret != ROK) {
+    NB_LOG_ERROR(&nbCb, "cmAllocEvnt failed for s1HoCancelPdu");
+    RETVALUE(RFAILED);
+  }
+  nbFillTknU8(&(s1HoCancelPdu->pdu.choice), S1AP_PDU_INITIATINGMSG);
+
+  initMsg = &(s1HoCancelPdu->pdu.val.initiatingMsg);
+  nbFillTknU8(&(initMsg->pres), PRSNT_NODEF);
+  nbFillTknU32(&(initMsg->procedureCode), Sztid_HovrCancel);
+  nbFillTknU32(&(initMsg->criticality), SztCriticalityrejectEnum);
+
+  /* IEs to be filled in PDU:
+   * 1. MME UE S1AP Id
+   * 2. ENB UE S1AP Id
+   * 3. Cause
+   */
+  numComp = 3;
+  s1HoCancel = &initMsg->value.u.sztHovrCancel;
+  nbFillTknU8(&(s1HoCancel->pres), PRSNT_NODEF);
+  nbFillTknU16(&(initMsg->value.u.sztHovrCancel.protocolIEs.noComp), numComp);
+
+  if ((cmGetMem(s1HoCancelPdu,
+                (numComp * sizeof(SztProtIE_Field_HovrCancelIEs)),
+                (Ptr *)&s1HoCancel->protocolIEs.member)) != ROK) {
+    NB_LOG_ERROR(&nbCb, "Failed to allocate memory for S1HovrCancelIEs");
+    RETVALUE(RFAILED);
+  }
+
+  // IE1 - Filling MME UE S1AP Id
+  ie = &s1HoCancel->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_MME_UE_S1AP_ID);
+  nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);
+  nbFillTknU32(&(ie->value.u.sztMME_UE_S1AP_ID), s1apCon->mme_ue_s1ap_id);
+  ieIdx++;
+
+  // IE2 - Filling ENB UE S1AP Id
+  ie = &s1HoCancel->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_eNB_UE_S1AP_ID);
+  nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);
+  nbFillTknU32(&(ie->value.u.sztENB_UE_S1AP_ID), s1apCon->enb_ue_s1ap_id);
+  ieIdx++;
+
+  // IE3 - Filling S1ap Handover Cancel Cause
+  ie = &s1HoCancel->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_Cause);
+  nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+  nbS1apFillCause(&(ie->value.u.sztCause), cause);
+
+  // Pass the constructed PDU back to the caller
+  *pdu = s1HoCancelPdu;
+
+  RETVALUE(ROK);
+} // nbBldS1HandoverCancel
+
+/* ====================================== */
+/* S1 HANDOVER FAILURE MESSAGE BUILDING   */
+/* ====================================== */
+/* @brief This function will allocate memory and build the
+ *    S1AP: S1 Handover Failure message
+ *
+ * @details This function allocates the memory for S1AP:
+ *    S1 HANDOVER FAILURE
+ *    Message PDU and fills the PDU with proper values
+ *
+ * Function: nbBldS1HandoverFailure
+ *
+ *    Processing steps:
+ *     -Allocate Memory for S1AP: S1 Handover Failure Message PDU
+ *     -Fill the PDU with proper values
+ *
+ * @param[out] pdu: S1AP: S1 Handover Failure PDU
+ *
+ * @return  S16
+ *    -# Success : ROK
+ *    -# Failure : RFAILED
+ */
+PUBLIC S16 nbBldS1HandoverFailure(S1apPdu **pdu, NbUeCb *ueCb,
+                                  NbUeMsgCause *cause) {
+  S1apPdu *s1HoFailurePdu = NULLP;
+  NbS1ConCb *s1apCon = ueCb->s1ConCb;
+  SztUnsuccessfulOutcome *unsuccOut;
+  SztHovrFail *s1HoFailure = NULLP;
+  SztProtIE_Field_HovrFailIEs *ie;
+  U16 numComp;
+  S16 ret;
+  U32 ieIdx = 0;
+
+  TRC2(nbBldS1HandoverFailure);
+
+  NB_LOG_DEBUG(&nbCb,
+               "Building S1 Handover Request Failure Message for UE Id: %u",
+               ueCb->ueId);
+
+  // Initialize memory control point
+  ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem,
+                    (Ptr *)&s1HoFailurePdu);
+  if (ret != ROK) {
+    NB_LOG_ERROR(&nbCb, "cmAllocEvnt failed for s1HoFailurePdu");
+    RETVALUE(RFAILED);
+  }
+  nbFillTknU8(&(s1HoFailurePdu->pdu.choice), S1AP_PDU_UNSUCCESSFULOUTCOME);
+
+  unsuccOut = &(s1HoFailurePdu->pdu.val.unsuccessfulOutcome);
+  nbFillTknU8(&(unsuccOut->pres), PRSNT_NODEF);
+  nbFillTknU32(&(unsuccOut->procedureCode), Sztid_HovrResourceAllocn);
+  nbFillTknU32(&(unsuccOut->criticality), SztCriticalityrejectEnum);
+
+  /* IEs to be filled in PDU:
+   * 1. MME UE S1AP Id
+   * 2. Cause
+   */
+  numComp = 2;
+  s1HoFailure = &unsuccOut->value.u.sztHovrFail;
+  nbFillTknU8(&(s1HoFailure->pres), PRSNT_NODEF);
+  nbFillTknU16(&(unsuccOut->value.u.sztHovrFail.protocolIEs.noComp), numComp);
+
+  if ((cmGetMem(s1HoFailurePdu, (numComp * sizeof(SztProtIE_Field_HovrFailIEs)),
+                (Ptr *)&s1HoFailure->protocolIEs.member)) != ROK) {
+    NB_LOG_ERROR(&nbCb, "Failed to allocate memory for S1HovrFailIEs");
+    RETVALUE(RFAILED);
+  }
+
+  // IE1 - Filling MME UE S1AP Id
+  ie = &s1HoFailure->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_MME_UE_S1AP_ID);
+  nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+  nbFillTknU32(&(ie->value.u.sztMME_UE_S1AP_ID), s1apCon->mme_ue_s1ap_id);
+  ieIdx++;
+
+  // IE2 - Filling S1ap Handover Failure Cause
+  ie = &s1HoFailure->protocolIEs.member[ieIdx];
+  nbFillTknU8(&(ie->pres), PRSNT_NODEF);
+  nbFillTknU32(&(ie->id), Sztid_Cause);
+  nbFillTknU32(&(ie->criticality), SztCriticalityignoreEnum);
+  nbS1apFillCause(&(ie->value.u.sztCause), cause);
+
+  // Pass the constructed PDU back to the caller
+  *pdu = s1HoFailurePdu;
+
+  RETVALUE(ROK);
+} // nbBldS1HandoverFailure
 #endif
 
 /* ================================================= */
@@ -4781,6 +5604,7 @@ PUBLIC S16 nbPrcPathSwReqAck
       }
    }
 
+   nbCb.x2HoDone = FALSE;
    nbUiSendPathSwReqAckToUser(nbpathSwReqAck);
    RETVALUE(ROK);
 } /* nbPrcResetAck */

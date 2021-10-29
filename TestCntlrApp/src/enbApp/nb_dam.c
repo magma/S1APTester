@@ -1945,9 +1945,13 @@ PUBLIC Void nbDamUeDelReq
       /* Invoke delete towards EGTP for all the tunnels but do not wait for */
       /* response. If any response is failure, raise a DEBUG ERROR */
       /* If the number of DRBs become zero remove the UeCb */
-      if (ueCb->numDrbs == 0)
-      {
-         nbDamDelUe(ueId);
+      if (ueCb->numDrbs == 0) {
+         if (ROK != nbDamDelUe(ueId)) {
+            NB_LOG_ERROR(&nbCb, "Failed to delete ENB Dam UE for UE Id: %u", ueId);
+            RETVOID;
+         }
+         pst = &nbDamCb.nbAppPst;
+         cmPkUeDelCfm(pst, ueId);
          RETVOID;
       }
       for(;!isEmpty && ((cmHashListGetNext(&(ueCb->drbs),(PTR)prevDrbCb,(PTR*)&drbCb)) == ROK);)

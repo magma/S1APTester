@@ -675,16 +675,21 @@ S1apPdu  *pdu;
             "szSmSndUeCtxRlsCmp: Lower Interface send failed");
 #endif
    }
-   /* Deallocate connection control block */
-   ret = szNdbDeallocConCb(conCb->lclConRefNo,peerCb, SZ_CONN_REF_LCL);
-#if (ERRCLASS & ERRCLS_DEBUG)
-   if(ret == RFAILED)
-   {
-      SZLOGERROR(ERRCLS_DEBUG, ESZ161, (ErrVal) conCb->lclConRefNo,
-           "szSmSndUeCtxRlsCmp: Couldn't retreive connection CB");
-   }
+#ifdef MULTI_ENB_SUPPORT
+  if (cntxtRelForS1Ho == FALSE) {
 #endif
-   RETVALUE(ret);
+    /* Deallocate connection control block */
+    ret = szNdbDeallocConCb(conCb->lclConRefNo, peerCb, SZ_CONN_REF_LCL);
+#if (ERRCLASS & ERRCLS_DEBUG)
+    if (ret == RFAILED) {
+      SZLOGERROR(ERRCLS_DEBUG, ESZ161, (ErrVal)conCb->lclConRefNo,
+                 "szSmSndUeCtxRlsCmp: Couldn't retreive connection CB");
+    }
+#endif
+#ifdef MULTI_ENB_SUPPORT
+  }
+#endif
+  RETVALUE(ret);
 } /* end of szSmSndUeCtxRlsCmp */
 
 #endif

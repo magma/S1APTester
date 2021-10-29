@@ -31,6 +31,9 @@ extern "C" {
 #endif /* __cplusplus */
 
 EXTERN U32 currEnbId;
+#ifdef MULTI_ENB_SUPPORT
+EXTERN U8 cntxtRelForS1Ho;
+#endif
 
 /* TODO LIST */
 typedef U32 SzConRefNo;
