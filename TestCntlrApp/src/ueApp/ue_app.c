@@ -1330,7 +1330,7 @@ PUBLIC S16 ueAppUtlBldTauReq(UeCb *ueCb, CmNasEvnt **ueEvt,
     UE_LOG_ERROR(ueAppCb, "ueEvnt NULL Pointer !");
     RETVALUE(RFAILED);
   }
-  /* Allocate memory for pdu */
+  // Allocate memory for pdu
   CM_ALLOC_NASEVNT(ueEvt, CM_EMM_PD);
 
   if (*ueEvt == NULLP) {
@@ -1352,20 +1352,20 @@ PUBLIC S16 ueAppUtlBldTauReq(UeCb *ueCb, CmNasEvnt **ueEvt,
   (*ueEvt)->m.emmEvnt = emmMsg;
   tauReq = &((*ueEvt)->m.emmEvnt->u.tauReq);
 
-  /*Fill header information*/
+  // Fill header information
   (*ueEvt)->secHT = CM_NAS_SEC_HDR_TYPE_INT_PRTD;
 
-  /* Security header type is "Plain NAS message, not security protected" */
+  // Security header type is "Plain NAS message, not security protected
   emmMsg->protDisc = CM_EMM_PD;
   emmMsg->secHdrType = CM_EMM_SEC_HDR_TYPE_PLAIN_NAS_MSG;
   emmMsg->msgId = CM_EMM_MSG_TAU_REQ;
 
-  /* Fill mandatory IEs */
+  // Fill mandatory IEs
   tauReq->epsUpdType.pres = TRUE;
   tauReq->epsUpdType.actv = ueUetTauRequest->ActvFlag;
   tauReq->epsUpdType.type = ueUetTauRequest->epsUpdtType;
 
-  /*NAS key set identifier IE*/
+  // NAS key set identifier IE
   tauReq->nasKsi.pres = TRUE;
   tauReq->nasKsi.id = ueCb->secCtxt.ksi;
   tauReq->nasKsi.tsc = ueCb->secCtxt.tsc;
@@ -2160,15 +2160,16 @@ PRIVATE S16 ueProcUeTauRequest(UetMessage *p_ueMsg, Pst *pst) {
   // Fetching the UeCb
   ret = ueDbmFetchUe(ueId, (PTR *)&ueCb);
   if (ret != ROK) {
-    UE_LOG_ERROR(ueAppCb, "ueProcUeTauReq: UeCb List NULL ueId = %d", ueId);
+    UE_LOG_ERROR(ueAppCb, "ueProcUeTauReq: UeCb List NULL ueId = %u", ueId);
     RETVALUE(ret);
   }
   /* Deactivate bearer only if epsBearerCtxSts received from test script is
-   * non zero and there is more than 1 PDN
+   * non zero and if its not the last PDN
    */
-  if (epsBearerCtxSts > 0) {
+  if (epsBearerCtxSts) {
     for (U8 ebi = CM_ESM_BEARER_ID_INDX; ebi < CM_ESM_MAX_BEARER_ID; ebi++) {
       rbIdx = 0;
+      // Check if the bearer id bit is not set
       if (!(epsBearerCtxSts & (1 << ebi))) {
         // Find the bearer index
         if ((ueAppUtlFndRbCb(&rbIdx, ueCb, ebi) == ROK)) {
@@ -2180,19 +2181,13 @@ PRIVATE S16 ueProcUeTauRequest(UetMessage *p_ueMsg, Pst *pst) {
             cmMemset((U8 *)&(ueCb->ueRabCb[rbIdx]), 0,
                      sizeof(ueCb->ueRabCb[rbIdx]));
             ueCb->drbs[rbIdx] = UE_APP_DRB_AVAILABLE;
-            tmpBearerList[bearerToBeRel] = ebi;
-            UE_LOG_DEBUG(ueAppCb, "Adding default ebi=%d to tmpBearerList\n",
-                         ebi);
-            bearerToBeRel++;
+            tmpBearerList[bearerToBeRel++] = ebi;
           } else if (ueCb->ueRabCb[rbIdx].bearerType == DEDICATED_BEARER) {
             // Clear the bearer context
             cmMemset((U8 *)&(ueCb->ueRabCb[rbIdx]), 0,
                      sizeof(ueCb->ueRabCb[rbIdx]));
-            ueCb->drbs[rbIdx + 1] = UE_APP_DRB_AVAILABLE;
-            tmpBearerList[bearerToBeRel] = ebi;
-            UE_LOG_DEBUG(ueAppCb, "Adding dedicated ebi=%d to tmpBearerList\n",
-                         ebi);
-            bearerToBeRel++;
+            ueCb->drbs[rbIdx] = UE_APP_DRB_AVAILABLE;
+            tmpBearerList[bearerToBeRel++] = ebi;
           }
         }
       }
@@ -2201,7 +2196,7 @@ PRIVATE S16 ueProcUeTauRequest(UetMessage *p_ueMsg, Pst *pst) {
       nbuRelBerReq = (NbuRelBearerReq *)ueAlloc(sizeof(NbuRelBearerReq));
       if (!nbuRelBerReq) {
         UE_LOG_ERROR(ueAppCb,
-                     "Failed to allocate memory to nbuRelBerReq for ueId=%d",
+                     "Failed to allocate memory to nbuRelBerReq for ueId=%u",
                      ueId);
         RETVALUE(RFAILED);
       }
@@ -2211,12 +2206,10 @@ PRIVATE S16 ueProcUeTauRequest(UetMessage *p_ueMsg, Pst *pst) {
           (U8 *)ueAlloc((sizeof(U8)) * nbuRelBerReq->numOfErabIds);
       if (!nbuRelBerReq->erabIdLst) {
         UE_LOG_ERROR(ueAppCb,
-                     "Failed to allocate memory to erabIdLst for ueId=%d",
+                     "Failed to allocate memory to erabIdLst for ueId=%u",
                      ueId);
         RETVALUE(RFAILED);
       }
-      cmMemset((U8 *)(nbuRelBerReq->erabIdLst), 0,
-               ((sizeof(U8)) * nbuRelBerReq->numOfErabIds));
       cmMemcpy(nbuRelBerReq->erabIdLst, tmpBearerList, bearerToBeRel);
       if (ueSendRelBearerReqMsgToNb(nbuRelBerReq, &ueAppCb->nbPst) == ROK) {
         // Store TAU req in ueCb and send after receiving RelBearerRsp from enb
@@ -2225,7 +2218,7 @@ PRIVATE S16 ueProcUeTauRequest(UetMessage *p_ueMsg, Pst *pst) {
         if (!ueCb->ueUetTauRequest) {
           UE_LOG_ERROR(
               ueAppCb,
-              "Failed to allocate memory to ueCb->ueUetTauRequest for ueId=%d",
+              "Failed to allocate memory to ueCb->ueUetTauRequest for ueId=%u",
               ueId);
           RETVALUE(RFAILED);
         }
@@ -2233,7 +2226,7 @@ PRIVATE S16 ueProcUeTauRequest(UetMessage *p_ueMsg, Pst *pst) {
                  sizeof(UeUetTauRequest));
         RETVALUE(ROK);
       } else {
-        UE_LOG_ERROR(ueAppCb, "Failed to send RelBearerReq to enb for ueId=%d",
+        UE_LOG_ERROR(ueAppCb, "Failed to send RelBearerReq to enb for ueId=%u",
                      ueId);
         RETVALUE(RFAILED);
       }
@@ -10153,7 +10146,6 @@ PUBLIC S16 ueUiProcRelBearerRsp(UeCb *ueCb, NbuRelBearerRsp *relBearerRsp) {
   if (ret != ROK) {
     UE_LOG_ERROR(ueAppCb, "Sending TAU Request to eNodeB failed=%d\n", ueId);
     UE_LOG_EXITFN(ueAppCb, RFAILED);
-    ;
   }
   ueFree((U8 *)ueCb->ueUetTauRequest, sizeof(UeUetTauRequest));
   UE_LOG_EXITFN(ueAppCb, ROK);

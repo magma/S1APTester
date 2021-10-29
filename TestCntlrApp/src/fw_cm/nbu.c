@@ -79,8 +79,6 @@ PRIVATE S16 cmUnPkDlNasMsg ARGS((NbuDlNasMsg *msg,
  Buffer *mBuf
  ));
 
-PRIVATE S16 cmPkRelBearerReq(NbuRelBearerReq *param, Buffer *mBuf);
-
 PRIVATE S16 cmUnPkRelBearerReq(NbuRelBearerReq *req, Buffer *mBuf);
 
 #endif
@@ -3009,19 +3007,7 @@ NbuRelBearerReq *req;
   }
   switch (pst->selector) {
   case NBU_SEL_LC:
-#ifdef LCNBU
-    ret1 = cmPkRelBearerReq(req, EVTNBURELBEARERREQ, mBuf);
-#if (ERRCLASS & ERRCLS_ADD_RES)
-    if (ret1 != ROK) {
-      SPutMsg(mBuf);
-      SLogError(pst->srcEnt, pst->srcInst, pst->srcProcId, __FILE__, __LINE__,
-                (ErrCls)ERRCLS_ADD_RES, (ErrVal)ENBU015, (ErrVal)ret1,
-                "Packing failure");
-      RETVALUE(ret1);
-    }
-#endif /*  ERRCLASS & ERRCLS_ADD_RES  */
     break;
-#endif
 #ifdef LWLCNBU
   case NBU_SEL_LWLC:
     CMCHKPKLOG(cmPkPtr, (PTR)req, mBuf, ENBU016, pst);
@@ -3033,28 +3019,6 @@ NbuRelBearerReq *req;
   pst->event = (Event)EVTNBURELBEARERREQ;
   RETVALUE(SPstTsk(pst, mBuf));
 }
-
-#ifdef LCNBU
-/*
- *
- *     Fun:    cmPkRelBearerReq
- *
- *     Desc:   pack the structure NbuRelBearerReq
- *
- *     Ret:    ROK  -ok
- *
- *     Notes:  None
- *
- *     File:
- *
- */
-
-PRIVATE S16 cmPkRelBearerReq(NbuRelBearerReq *param, Buffer *mBuf) {
-  TRC3(NbuRelBearerReq)
-  RETVALUE(ROK);
-} /*end of function cmPkRelBearerReq */
-
-#endif
 
 /*
  *

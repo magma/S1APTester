@@ -560,7 +560,7 @@ CmEmmEdmMsgFormat emmMsgTab[CM_EMM_MAX_MSG][CM_EMM_MAX_IE] =
       { 0, EDM_PRES_MANDATORY, EDM_FMTLV, FALSE, 776,
          NULLP, NULLP, NULLP},
       {CM_EMM_IE_EPS_BRR_CTX_STS, EDM_PRES_OPTIONAL, EDM_FMTTLV, TRUE, 0,
-         NULLP, NULLP, cmEmmDecEpsBearCtxSts}
+         NULLP, NULLP, cmEmmDecEpsBearCtxtSts}
    },
 
    /* Tracking Area Update Complete */

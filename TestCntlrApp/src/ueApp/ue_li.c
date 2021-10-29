@@ -550,14 +550,13 @@ PUBLIC S16 UeLiNbuRelBearerRsp(Pst *pst, NbuRelBearerRsp *p_ueMsg) {
 
   UE_LOG_ENTERFN(ueAppCb);
 
-  /* sanity check */
   if (!pst || !p_ueMsg) {
     UE_LOG_ERROR(ueAppCb, "[UEAPP]: pst||p_ueMsg is NULL ueId = %d", ueId);
     RETVALUE(ret);
-  } /* end of if pst or p_ueMsg are not valid pointers */
+  }
 
   ueId = p_ueMsg->ueId;
-  /* Fetching the UeCb */
+  // Fetch the UeCb
   ret = ueDbmFetchUe(ueId, (PTR *)&ueCb);
   if (ret != ROK) {
     UE_LOG_ERROR(ueAppCb, "[UEAPP]: UeCb List NULL ueId = %d", ueId);
@@ -565,11 +564,12 @@ PUBLIC S16 UeLiNbuRelBearerRsp(Pst *pst, NbuRelBearerRsp *p_ueMsg) {
   }
 
   UE_LOG_DEBUG(ueAppCb, "[UEAPP]: Processing RelBearerRsp ueId = %d", ueId);
-  /* process the received received */
+  // Process the received RelBearerRsp
   if ((ret = ueUiProcRelBearerRsp(ueCb, p_ueMsg)) != ROK) {
     UE_LOG_ERROR(ueAppCb, "Failed to process RelBearerRsp message for ue %d",
                  ueId);
+    ueFree((U8 *)ueCb->ueUetTauRequest, sizeof(UeUetTauRequest));
     ret = RFAILED;
-  } /* end of if processing the message fails */
+  }
   RETVALUE(ret);
 }
