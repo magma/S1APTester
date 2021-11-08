@@ -649,7 +649,12 @@ PUBLIC S16 nbSndCtxtRelReq
          RETVALUE(RFAILED);
       }
 #ifdef MULTI_ENB_SUPPORT
-      nbIfmS1apSndUeMsg(ueCb->s1ConCb->spConnId, ctxtRelReqPdu, ueCb->enbId);
+      if (ueCb->s1HoInfo != NULLP) {
+        nbIfmS1apSndUeMsg(ueCb->s1ConCb->spConnId, ctxtRelReqPdu,
+                          ueCb->s1HoInfo->srcEnbId);
+      } else {
+        nbIfmS1apSndUeMsg(ueCb->s1ConCb->spConnId, ctxtRelReqPdu, ueCb->enbId);
+      }
 #else
 
       nbIfmS1apSndUeMsg(ueCb->s1ConCb->spConnId, ctxtRelReqPdu);
@@ -1512,8 +1517,1025 @@ PUBLIC S16 NbEnbConfigTransferHdl
    RETVALUE(ROK);
 
 } /* NbEnbConfigTransferHdl */
-#endif
 
+// Function to get the ueCB from nbCb based on mme_ue_s1ap_id
+PUBLIC S16 getUeCbForMmeUeS1apId(U32 mmeUeS1apId, NbUeCb **ueCb) {
+  NbUeCb *prev = NULLP;
+  while (cmHashListGetNext(&(nbCb.ueCbLst), (PTR)prev, (PTR *)ueCb) == ROK) {
+    if ((*ueCb)->s1ConCb->mme_ue_s1ap_id == mmeUeS1apId) {
+      RETVALUE(ROK);
+    }
+    prev = ueCb;
+  }
+
+  RETVALUE(RFAILED);
+} // getUeCbForMmeUeS1apId
+
+// Function to copy SGW address from S1AP-PDU IE to Tunnel Information
+PUBLIC S16 copyTransportLayerAddress(SztTportLyrAddr *tptLyrAdr,
+                                     CmTptAddr *sgwAddr) {
+  U8 shiftBits = 0;
+  U32 addrMask = 0;
+  U8 indx = 0;
+
+  switch (tptLyrAdr->len) {
+  case 32: {
+    sgwAddr->type = CM_TPTADDR_IPV4;
+    sgwAddr->u.ipv4TptAddr.port = NB_DFLT_EGTP_PORT;
+
+    // copy 4bytes into the U32
+    shiftBits = tptLyrAdr->len / 8;
+    addrMask = 0xFF000000;
+    for (indx = 0; indx < 4; indx++) {
+      shiftBits--;
+      sgwAddr->u.ipv4TptAddr.address |=
+          ((U32)(tptLyrAdr->val[indx] << (8 * shiftBits)) & addrMask);
+      addrMask = addrMask >> 8;
+    }
+    break;
+  }
+  case 128: {
+    sgwAddr->type = CM_TPTADDR_IPV6;
+    sgwAddr->u.ipv6TptAddr.port = NB_DFLT_EGTP_PORT;
+
+    for (indx = 0; indx < 16; indx++) {
+      sgwAddr->u.ipv6TptAddr.ipv6NetAddr[indx] = tptLyrAdr->val[indx];
+    }
+    break;
+  }
+  default: {
+    /* This means both IPv4 and IPv6 addresses are present.
+     * We are yet to support this option
+     */
+    RETVALUE(RFAILED);
+  }
+  }
+
+  RETVALUE(ROK);
+} // copyTransportLayerAddress
+
+/*
+ * @details: This function is used to send the S1 Handover Cancel to MME
+ *
+ * Function: sendS1HoCancel
+ *
+ * @param[in]
+ *  -NbUeCb *ueCb
+ *  -NbUeMsgCause *cause
+ *
+ * @return  S16
+ *  -# Success : ROK
+ *  -# Failure : RFAILED
+ */
+PUBLIC S16 sendS1HoCancel(NbUeCb *ueCb, NbUeMsgCause *cause) {
+  SztUDatEvnt uDatEvnt;
+  NbMmeCb *mmeCb = NULLP;
+  mmeCb = &nbCb.mmeInfo;
+  NB_LOG_ENTERFN(&nbCb);
+
+  // Build the S1AP pdu to be sent to MME
+  if (nbBldS1HandoverCancel(&(uDatEvnt.pdu), ueCb, cause) != ROK) {
+    NB_LOG_ERROR(&nbCb,
+                 "Failed to build S1 Handover Cancel Message for UE Id: %u",
+                 ueCb->ueId);
+    RETVALUE(RFAILED);
+  }
+
+  // Send the S1AP pdu to the MME
+  uDatEvnt.enbId = ueCb->s1HoInfo->srcEnbId;
+  uDatEvnt.transId.pres = PRSNT_NODEF;
+  uDatEvnt.transId.val = 1;
+  uDatEvnt.peerId.pres = PRSNT_NODEF;
+  uDatEvnt.peerId.val = mmeCb->mmeId;
+  if ((NbIfmS1apSndMgmtMsg(&uDatEvnt)) != ROK) {
+    NB_LOG_ERROR(&nbCb,
+                 "Failed to send S1 Handover Cancel Message to MME for "
+                 "UE Id: %u",
+                 ueCb->ueId);
+    RETVALUE(RFAILED);
+  }
+  NB_LOG_DEBUG(&nbCb, "Sent S1 Handover Cancel Message to MME for UE Id: %u",
+               ueCb->ueId);
+
+  // Clear all the S1 Handover context for the selected UE
+  NB_FREE(ueCb->s1HoInfo, sizeof(NbS1HoInfo));
+
+  RETVALUE(ROK);
+} // sendS1HoCancel
+
+/*
+ * @details: This function is used to send the S1 Handover Failure to MME
+ *
+ * Function: sendS1HoFailure
+ *
+ * @param[in]
+ *  -NbUeCb *ueCb
+ *  -NbUeMsgCause *cause
+ *
+ * @return  S16
+ *  -# Success : ROK
+ *  -# Failure : RFAILED
+ */
+PUBLIC S16 sendS1HoFailure(NbUeCb *ueCb, NbUeMsgCause *cause) {
+  SztUDatEvnt uDatEvnt;
+  NbMmeCb *mmeCb = NULLP;
+  mmeCb = &nbCb.mmeInfo;
+  NB_LOG_ENTERFN(&nbCb);
+
+  // Build the S1AP pdu to be sent to MME
+  if (nbBldS1HandoverFailure(&(uDatEvnt.pdu), ueCb, cause) != ROK) {
+    NB_LOG_ERROR(&nbCb,
+                 "Failed to build S1 Handover Failure Message for UE Id: %u",
+                 ueCb->ueId);
+    RETVALUE(RFAILED);
+  }
+
+  // Send the S1AP pdu to the MME
+  uDatEvnt.enbId = ueCb->s1HoInfo->tgtEnbId;
+  uDatEvnt.transId.pres = PRSNT_NODEF;
+  uDatEvnt.transId.val = 1;
+  uDatEvnt.peerId.pres = PRSNT_NODEF;
+  uDatEvnt.peerId.val = mmeCb->mmeId;
+  if ((NbIfmS1apSndMgmtMsg(&uDatEvnt)) != ROK) {
+    NB_LOG_ERROR(&nbCb,
+                 "Failed to send S1 Handover Failure Message to MME for "
+                 "UE Id: %u",
+                 ueCb->ueId);
+    RETVALUE(RFAILED);
+  }
+  NB_LOG_DEBUG(&nbCb, "Sent S1 Handover Failure Message to MME for UE Id: %u",
+               ueCb->ueId);
+
+  RETVALUE(ROK);
+} // sendS1HoFailure
+
+/*
+ * @details: This function is used to Process the Received
+ *          S1 Handover Required Trigger Message from TFW
+ *
+ * Function: NbS1HoRequiredHdl
+ *
+ * @param[in]
+ *  -NbS1HandoverRequired *s1HoRequired
+ *
+ * @return  S16
+ *  -# Success : ROK
+ *  -# Failure : RFAILED
+ */
+PUBLIC S16 NbS1HoRequiredHdl(NbS1HandoverRequired *s1HoRequired) {
+  NbMmeCb *mmeCb = NULLP;
+  mmeCb = &nbCb.mmeInfo;
+  SztUDatEvnt uDatEvnt;
+  NbUeCb *ueCb = NULLP;
+  EnbCb *tgtEnbCb = NULLP;
+  EnbCb *prevnbCb = NULLP;
+  S16 retVal = RFAILED;
+  NbUeMsgCause cause = {0};
+  NB_LOG_ENTERFN(&nbCb);
+
+  NB_LOG_DEBUG(&nbCb,
+               "Processing trigger message from TFW to send S1 HO Required "
+               "message to MME for UE Id: %u",
+               s1HoRequired->ueId);
+
+  // Get the ueCb for the selected UE Id
+  if (ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(s1HoRequired->ueId),
+                             sizeof(U32), 0, (PTR *)&ueCb))) {
+    NB_LOG_ERROR(&nbCb, "UeCb not found for UE Id: %u", s1HoRequired->ueId);
+    NB_LOG_EXITFN(&nbCb, RFAILED);
+  }
+
+  // Check if S1 Handover is already in progress for this UE
+  if (ueCb->s1HoInfo != NULLP) {
+    NB_LOG_ERROR(&nbCb, "S1 Handover Procedure is already running for UE: %u",
+                 s1HoRequired->ueId);
+    NB_LOG_EXITFN(&nbCb, RFAILED);
+  }
+
+  // Getting the target EnbCb
+  for (; ((cmHashListGetNext(&(nbCb.eNBCbLst), (PTR)prevnbCb,
+                             (PTR *)&tgtEnbCb)) == ROK);) {
+    if (!tgtEnbCb) {
+      NB_LOG_ERROR(&nbCb, "Failed to find the target ENB");
+      NB_LOG_EXITFN(&nbCb, RFAILED);
+    }
+    if (tgtEnbCb->enbId == ueCb->enbId) {
+      prevnbCb = tgtEnbCb;
+      continue;
+    }
+    prevnbCb = NULLP;
+    break;
+  }
+
+  // Create the S1 Handover Context in UE
+  NB_ALLOC(&ueCb->s1HoInfo, sizeof(NbS1HoInfo));
+  if (ueCb->s1HoInfo == NULLP) {
+    NB_LOG_ERROR(&nbCb,
+                 "Failed to allocate memory for S1 Handover Information for "
+                 "UE Id: %u",
+                 ueCb->ueId);
+    NB_LOG_EXITFN(&nbCb, RFAILED);
+  }
+  ueCb->s1HoInfo->s1HoEvent = s1HoRequired->s1HoEvent;
+  ueCb->s1HoInfo->srcEnbId = ueCb->enbId;
+  ueCb->s1HoInfo->tgtEnbId = tgtEnbCb->enbId;
+
+  // Set the S1 handover trigger cause
+  cause.causeTyp = NB_CAUSE_RADIONW;
+  cause.causeVal = SztCauseRadioNws1_intra_system_handover_triggeredEnum;
+
+  // Build the S1AP pdu to be sent to MME
+  if (nbBldS1HandoverRequired(&(uDatEvnt.pdu), ueCb, tgtEnbCb, &cause) != ROK) {
+    NB_LOG_ERROR(&nbCb,
+                 "Failed to build S1 Handover Required Message for UE Id: %u",
+                 ueCb->ueId);
+    NB_FREE(ueCb->s1HoInfo, sizeof(NbS1HoInfo));
+    NB_LOG_EXITFN(&nbCb, RFAILED);
+  }
+
+  // Send the S1AP pdu to the MME
+  uDatEvnt.enbId = ueCb->s1HoInfo->srcEnbId;
+  uDatEvnt.transId.pres = PRSNT_NODEF;
+  uDatEvnt.transId.val = 1;
+  uDatEvnt.peerId.pres = PRSNT_NODEF;
+  uDatEvnt.peerId.val = mmeCb->mmeId;
+  if ((NbIfmS1apSndMgmtMsg(&uDatEvnt)) != ROK) {
+    NB_LOG_ERROR(&nbCb,
+                 "Failed to send S1 Handover Required Message to MME for"
+                 " UE Id: %u",
+                 ueCb->ueId);
+    NB_FREE(ueCb->s1HoInfo, sizeof(NbS1HoInfo));
+    NB_LOG_EXITFN(&nbCb, RFAILED);
+  }
+  NB_LOG_DEBUG(&nbCb, "Sent S1 Handover Required Message to MME for UE Id: %u",
+               ueCb->ueId);
+
+  // Start the S1 Reloc Timer for S1 HO Preparation
+  cmInitTimers(&ueCb->s1HoInfo->timer, 1);
+  retVal = nbStartTmr((PTR)ueCb, NB_TMR_S1_RELOC_TMR, smCfgCb.s1PrepTimerVal);
+  if (retVal != ROK) {
+    NB_LOG_ERROR(&nbCb,
+                 "Failed to start timer NB_TMR_S1_RELOC_TMR for UE Id: %u",
+                 ueCb->ueId);
+    NB_FREE(ueCb->s1HoInfo, sizeof(NbS1HoInfo));
+    NB_LOG_EXITFN(&nbCb, RFAILED);
+  }
+  NB_LOG_DEBUG(&nbCb,
+               "Started NB_TMR_S1_RELOC_TMR timer of (%u) secs for UE Id: %u",
+               smCfgCb.s1PrepTimerVal, ueCb->ueId);
+
+  RETVALUE(ROK);
+} // NbS1HoRequiredHdl
+
+/*
+ * @details: This function is used to send the S1 Handover Request Ack to MME
+ *
+ * Function: sendS1HoReqAck
+ *
+ * @param[in]
+ *  -NbUeCb *ueCb
+ *
+ * @return  S16
+ *  -# Success : ROK
+ *  -# Failure : RFAILED
+ */
+PUBLIC S16 sendS1HoReqAck(NbUeCb *ueCb) {
+  SztUDatEvnt uDatEvnt;
+  NbMmeCb *mmeCb = NULLP;
+  mmeCb = &nbCb.mmeInfo;
+  NB_LOG_ENTERFN(&nbCb);
+
+  // Build the S1AP pdu to be sent to MME
+  if (nbBldS1HandoverReqAck(&(uDatEvnt.pdu), ueCb) != ROK) {
+    NB_LOG_ERROR(&nbCb,
+                 "Failed to build S1 Handover Request Acknowledgement "
+                 "message for UE Id: %u",
+                 ueCb->ueId);
+    RETVALUE(RFAILED);
+  }
+
+  // Send the S1AP pdu to the MME
+  uDatEvnt.enbId = ueCb->s1HoInfo->tgtEnbId;
+  uDatEvnt.transId.pres = PRSNT_NODEF;
+  uDatEvnt.transId.val = 1;
+  uDatEvnt.peerId.pres = PRSNT_NODEF;
+  uDatEvnt.peerId.val = mmeCb->mmeId;
+  if ((NbIfmS1apSndMgmtMsg(&uDatEvnt)) != ROK) {
+    NB_LOG_ERROR(
+        &nbCb,
+        "Failed to send S1 Handover Request Acknowledgement Message to MME for"
+        " UE Id: %u",
+        ueCb->ueId);
+    RETVALUE(RFAILED);
+  }
+  NB_LOG_DEBUG(&nbCb,
+               "Sent S1 Handover Request Acknowledgement Message to MME for "
+               "UE Id: %u",
+               ueCb->ueId);
+
+  RETVALUE(ROK);
+} // sendS1HoReqAck
+
+/*
+ * @details: This function is used to Process the Received
+ *           S1 Handover Request Message from MME
+ *
+ * Function: nbPrcS1HoReq
+ *
+ * @param[in]
+ *  -U32 peerId
+ *  -S1apPdu *pdu
+ *
+ * @return  S16
+ *  -# Success : ROK
+ *  -# Failure : RFAILED
+ */
+PUBLIC S16 nbPrcS1HoReq(U32 peerId, S1apPdu *pdu) {
+  NbUeCb *ueCb = NULLP;
+  SztInitiatingMsg *initMsg = &pdu->pdu.val.initiatingMsg;
+  SztHovrRqst *s1HoRqst = &initMsg->value.u.sztHovrRqst;
+  SztProtIE_Field_HovrRqstIEs *ie = NULLP;
+  NbS1HandoverReqInd s1HoReqInd = {0};
+  S16 ret = RFAILED;
+  NbUeMsgCause cause = {0};
+  EnbCb *tgtEnbCb = NULLP;
+  NbS1ConCb *s1apConCb = NULLP;
+  NbUeTunInfo *tunInfo = NULLP;
+  U32 suConId = 0;
+  U16 idx = 0;
+
+  SztGTP_TEID *remTeIdStr = NULLP;
+  SztTportLyrAddr *tptLyrAdr = NULLP;
+  U32 addrMask = 0;
+  U8 shiftBits = 0;
+  U8 indx = 0;
+  U8 indx1 = 0;
+  U16 numOfErabIds = 0;
+  NB_LOG_ENTERFN(&nbCb);
+
+  NB_LOG_DEBUG(&nbCb, "Processing incoming S1 Handover Request Message");
+
+  // Allocate new tunnel for storing new tunnel info
+  NB_ALLOC(&(tunInfo), (sizeof(NbUeTunInfo)));
+  if (tunInfo == NULLP) {
+    NB_LOG_ERROR(&nbCb, "Failed to allocate memory for tunnel information");
+    RETVALUE(RFAILED);
+  }
+
+  // Processing the IEs from the received S1AP pdu
+  for (idx = 0; idx < s1HoRqst->protocolIEs.noComp.val; idx++) {
+    ie = s1HoRqst->protocolIEs.member + idx;
+    switch (ie->id.val) {
+    case Sztid_MME_UE_S1AP_ID:
+      if (ROK !=
+          getUeCbForMmeUeS1apId(ie->value.u.sztid_MME_UE_S1AP_ID.val, &ueCb)) {
+        NB_LOG_ERROR(&nbCb, "UeCb not found for mme_ue_s1ap_id: %u",
+                     ie->value.u.sztid_MME_UE_S1AP_ID);
+        NB_LOG_EXITFN(&nbCb, RFAILED);
+      }
+
+      if (ueCb->s1HoInfo == NULLP) {
+        NB_LOG_ERROR(&nbCb,
+                     "S1 Handover Procedure is not initiated for UE Id: %u. "
+                     "Ignoring the message.",
+                     ueCb->ueId);
+        NB_LOG_EXITFN(&nbCb, RFAILED);
+      }
+      break;
+    case Sztid_HovrTyp:
+    case Sztid_Cause:
+    case Sztid_uEaggregateMaxBitrate:
+      break;
+    case Sztid_E_RABToBeSetupLstHOReq:
+      numOfErabIds = ie->value.u.sztE_RABToBeSetupLstHOReq.noComp.val;
+      for (indx = 0; indx < numOfErabIds; indx++) {
+        // TunnelInfo -Bearer Id
+        tunInfo->bearerId =
+            ie->value.u.sztE_RABToBeSetupLstHOReq.member[indx]
+                .value.u.sztE_RABToBeSetupItemHOReq.e_RAB_ID.val;
+
+        // TunnelInfo -Remote TeId
+        remTeIdStr = &(ie->value.u.sztE_RABToBeSetupLstHOReq.member[indx]
+                           .value.u.sztE_RABToBeSetupItemHOReq.gTP_TEID);
+        shiftBits = (remTeIdStr->len);
+        addrMask = 0xFF000000;
+        for (indx1 = 0; indx1 < remTeIdStr->len; indx1++) {
+          shiftBits--;
+          tunInfo->remTeId |=
+              ((U32)(remTeIdStr->val[indx1] << (8 * shiftBits)) & addrMask);
+          addrMask = addrMask >> 8;
+        }
+
+        // TunnelInfo -Local TeId
+        tunInfo->lclTeId = nbGetUeLclTeid(ueCb->ueId, tunInfo->bearerId,
+                                          ueCb->s1HoInfo->tgtEnbId);
+
+        // TunnelInfo -SGW Transport Layer Address
+        tptLyrAdr = &(ie->value.u.sztE_RABToBeSetupLstHOReq.member[indx]
+                          .value.u.sztE_RABToBeSetupItemHOReq.transportLyrAddr);
+
+        copyTransportLayerAddress(tptLyrAdr, &tunInfo->sgwAddr);
+      }
+      break;
+    case Sztid_Src_ToTget_TprntCont:
+    case Sztid_UESecurCapabilities:
+    case Sztid_SecurCntxt:
+      break;
+
+    default:
+      NB_LOG_ERROR(&nbCb,
+                   "Unsupported IE(%u) in S1 Handover Request for UE Id: %u",
+                   ie->id.val, ueCb->ueId);
+      break;
+    }
+  }
+
+  // Send received S1 Handover Request indication to TFW
+  s1HoReqInd.ueId = ueCb->ueId;
+  s1HoReqInd.currEnbId = ueCb->enbId;
+  s1HoReqInd.hoSrcEnbId = ueCb->s1HoInfo->srcEnbId;
+  s1HoReqInd.hoTgtEnbId = ueCb->s1HoInfo->tgtEnbId;
+  nbUiSendS1HoReqIndToUser(&s1HoReqInd);
+
+  // Check if it is configured to send Handover Failure for this UE
+  if (ueCb->s1HoInfo->s1HoEvent == S1_HO_FAILURE) {
+    NB_LOG_DEBUG(
+        &nbCb,
+        "S1_HO_FAILURE is configured. Sending Handover Failure Message to MME "
+        "for UE Id: %u "
+        "(RadioNetwork-cause=no-radio-resources-available-in-target-cell");
+    // Set the Handover Failure cause
+    cause.causeTyp = NB_CAUSE_RADIONW;
+    cause.causeVal =
+        SztCauseRadioNwno_radio_resources_available_in_target_cellEnum;
+    ret = sendS1HoFailure(ueCb, &cause);
+    RETVALUE(ret);
+  }
+
+  // Allocate resources for UE in the target ENB before sending S1 HO Req Ack
+  if (ROK !=
+      (cmHashListFind(&(nbCb.eNBCbLst), (U32 *)&(ueCb->s1HoInfo->tgtEnbId),
+                      sizeof(U32), 0, (PTR *)&tgtEnbCb))) {
+    NB_LOG_ERROR(&nbCb, "EnbCb not found for ENB Id: %u",
+                 ueCb->s1HoInfo->tgtEnbId);
+    RETVALUE(RFAILED);
+  }
+  if (tgtEnbCb == NULLP) {
+    NB_LOG_ERROR(&nbCb, "EnbCb is NULL");
+    RETVALUE(RFAILED);
+  }
+
+  // Update new tunnel info to S1 Handover Details
+  ueCb->s1HoInfo->tunInfo = tunInfo;
+
+  // Create new connection Id for the UE in new Enb
+  NB_ALLOC(&s1apConCb, sizeof(NbS1ConCb));
+  if (s1apConCb == NULLP) {
+    NB_LOG_ERROR(&nbCb, "Failed to allocate memory for S1ap Control block");
+    RETVALUE(RFAILED);
+  }
+  suConId = (((tgtEnbCb->cell_id & 0xFFFF) << 16) | (ueCb->ueId & 0xFFFF));
+  s1apConCb->spConnId = ueCb->s1ConCb->spConnId;
+  s1apConCb->suConnId = suConId;
+  s1apConCb->s1apConnState = NB_S1AP_CONNECTED;
+  s1apConCb->enb_ue_s1ap_id = suConId;
+  s1apConCb->mme_ue_s1ap_id = ueCb->s1ConCb->mme_ue_s1ap_id;
+  ueCb->s1HoInfo->s1ConCb = s1apConCb;
+
+  // Send S1 Handover Request Acknowledge to MME
+  NB_LOG_DEBUG(&nbCb, "Sending S1 HO Request Acknowledgement for Ue Id: %u",
+               ueCb->ueId);
+  sendS1HoReqAck(ueCb);
+
+  RETVALUE(ROK);
+} // nbPrcS1HoReq
+
+/*
+ * @details: This function is used to send the ENB Status Transfer to MME
+ *
+ * Function: sendEnbStatusTrnsfr
+ *
+ * @param[in]
+ *  -NbUeCb *ueCb
+ *
+ * @return  S16
+ *  -# Success : ROK
+ *  -# Failure : RFAILED
+ */
+PUBLIC S16 sendEnbStatusTrnsfr(NbUeCb *ueCb) {
+  SztUDatEvnt uDatEvnt;
+  NbMmeCb *mmeCb = NULLP;
+  mmeCb = &nbCb.mmeInfo;
+  NB_LOG_ENTERFN(&nbCb);
+
+  // Build the S1AP pdu to be sent to MME
+  if (nbBldS1HoEnbStatusTransfer(&(uDatEvnt.pdu), ueCb) != ROK) {
+    NB_LOG_ERROR(&nbCb, "Failed to build ENB Status Transfer for UE Id: %u",
+                 ueCb->ueId);
+    RETVALUE(RFAILED);
+  }
+
+  // Send the pdu to the MME
+  uDatEvnt.enbId = ueCb->s1HoInfo->srcEnbId;
+  uDatEvnt.transId.pres = PRSNT_NODEF;
+  uDatEvnt.transId.val = 1;
+  uDatEvnt.peerId.pres = PRSNT_NODEF;
+  uDatEvnt.peerId.val = mmeCb->mmeId;
+  if ((NbIfmS1apSndMgmtMsg(&uDatEvnt)) != ROK) {
+    NB_LOG_ERROR(&nbCb,
+                 "Failed to send ENB Status Transfer Message to MME for "
+                 "UE Id: %u",
+                 ueCb->ueId);
+    RETVALUE(RFAILED);
+  }
+  NB_LOG_DEBUG(&nbCb, "Sent ENB Status Transfer Message to MME for UE Id: %u",
+               ueCb->ueId);
+
+  RETVALUE(ROK);
+} // sendEnbStatusTrnsfr
+
+/*
+ * @details: This function is used to send the S1 Handover Notify to MME
+ *
+ * Function: sendS1HoNotify
+ *
+ * @param[in]
+ *  -NbUeCb *ueCb
+ *
+ * @return  S16
+ *  -# Success : ROK
+ *  -# Failure : RFAILED
+ */
+PUBLIC S16 sendS1HoNotify(NbUeCb *ueCb) {
+  SztUDatEvnt uDatEvnt;
+  NbMmeCb *mmeCb = NULLP;
+  mmeCb = &nbCb.mmeInfo;
+  EnbCb *tgtEnbCb = NULLP;
+  NB_LOG_ENTERFN(&nbCb);
+
+  // Getting the target EnbCb
+  if (ROK !=
+      (cmHashListFind(&(nbCb.eNBCbLst), (U32 *)&(ueCb->s1HoInfo->tgtEnbId),
+                      sizeof(U32), 0, (PTR *)&tgtEnbCb))) {
+    NB_LOG_ERROR(&nbCb, "EnbCb not found for ENB Id: %u",
+                 ueCb->s1HoInfo->tgtEnbId);
+    RETVALUE(RFAILED);
+  }
+  if (tgtEnbCb == NULLP) {
+    NB_LOG_ERROR(&nbCb, "EnbCb is NULL");
+    RETVALUE(RFAILED);
+  }
+
+  // Build the S1AP pdu to be sent to MME
+  if (nbBldS1HandoverNotify(&(uDatEvnt.pdu), tgtEnbCb, ueCb) != ROK) {
+    NB_LOG_ERROR(&nbCb, "Failed to build S1 Handover Notify for UE Id: %u",
+                 ueCb->ueId);
+    RETVALUE(RFAILED);
+  }
+
+  // Send the S1AP pdu to the MME
+  uDatEvnt.enbId = ueCb->s1HoInfo->tgtEnbId;
+  uDatEvnt.transId.pres = PRSNT_NODEF;
+  uDatEvnt.transId.val = 1;
+  uDatEvnt.peerId.pres = PRSNT_NODEF;
+  uDatEvnt.peerId.val = mmeCb->mmeId;
+  if ((NbIfmS1apSndMgmtMsg(&uDatEvnt)) != ROK) {
+    NB_LOG_ERROR(&nbCb,
+                 "Failed to send S1 Handover Notify Message to MME for "
+                 "UE Id: %u",
+                 ueCb->ueId);
+    RETVALUE(RFAILED);
+  }
+  NB_LOG_DEBUG(&nbCb, "Sent S1 Handover Notify Message to MME for UE Id: %u",
+               ueCb->ueId);
+
+  RETVALUE(ROK);
+} // sendS1HoNotify
+
+/*
+ * @details: This function is used to Process the Received
+ *           S1 Handover Command Message from MME
+ *
+ * Function: nbPrcS1HoCommand
+ *
+ * @param[in]
+ *  -NbUeCb *ueCb
+ *  -S1apPdu *pdu
+ *
+ * @return  S16
+ *  -# Success : ROK
+ *  -# Failure : RFAILED
+ */
+PUBLIC S16 nbPrcS1HoCommand(NbUeCb *ueCb, S1apPdu *pdu) {
+  SztSuccessfulOutcome *succMsg = &pdu->pdu.val.successfulOutcome;
+  SztHovrCmmd *s1HoCmd = &succMsg->value.u.sztHovrCmmd;
+  SztProtIE_Field_HovrCmmdIEs *ie = s1HoCmd->protocolIEs.member;
+  NbS1HandoverCmdInd s1HoReqCmdInd = {0};
+  NbS1HandoverCmdDropInd s1HoReqCmdDropInd = {0};
+  NbUeMsgCause cause = {0};
+  NbUeTunInfo *tunInfo = NULLP;
+  NbUeTunInfo *prevTunnCb = NULLP;
+  NbUeTunInfo *tunnCb = NULLP;
+  NbTunDelReq *tunDelReq = NULLP;
+  U32 erabId = 0;
+  U16 idx = 0;
+  S16 ret = RFAILED;
+  NB_LOG_ENTERFN(&nbCb);
+
+  NB_LOG_DEBUG(&nbCb, "Processing incoming S1 Handover Command for UE Id: %u",
+               ueCb->ueId);
+
+  // Check if S1 Handover Procedure is already running for the selected UE
+  if (ueCb->s1HoInfo == NULLP) {
+    NB_LOG_ERROR(&nbCb,
+                 "S1 Handover Procedure is not initiated for UE Id: %u. "
+                 "Ignoring the message.",
+                 ueCb->ueId);
+    NB_LOG_EXITFN(&nbCb, RFAILED);
+  }
+
+  // Send S1 Handover Command Indication Message to TFW
+  s1HoReqCmdInd.ueId = ueCb->ueId;
+  s1HoReqCmdInd.currEnbId = ueCb->enbId;
+  s1HoReqCmdInd.hoSrcEnbId = ueCb->s1HoInfo->srcEnbId;
+  s1HoReqCmdInd.hoTgtEnbId = ueCb->s1HoInfo->tgtEnbId;
+  nbUiSendS1HoCmdIndToUser(&s1HoReqCmdInd);
+
+  // Processing the IEs from the received S1AP pdu
+  for (idx = 0; idx < s1HoCmd->protocolIEs.noComp.val; idx++) {
+    ie = s1HoCmd->protocolIEs.member + idx;
+    switch (ie->id.val) {
+    case Sztid_MME_UE_S1AP_ID:
+    case Sztid_eNB_UE_S1AP_ID:
+    case Sztid_HovrTyp:
+    case Sztid_Tget_ToSrc_TprntCont:
+      break;
+
+    default:
+      NB_LOG_ERROR(
+          &nbCb,
+          "Unsupported IE(%u) in S1 Handover Command Message for UE Id: %u",
+          ie->id.val, ueCb->ueId);
+      break;
+    }
+  }
+
+  // Check if it is configured to send Handover Cancel for this UE
+  if (ueCb->s1HoInfo->s1HoEvent == S1_HO_CANCEL) {
+    // Stopping the S1 Reloc Timer
+    NB_LOG_DEBUG(&nbCb, "Stopping timer NB_TMR_S1_RELOC_TMR for UE Id: %u",
+                 ueCb->ueId);
+    nbStopTmr((PTR)ueCb, NB_TMR_S1_RELOC_TMR);
+
+    // Send S1 Handover Cancel Message to MME
+    NB_LOG_DEBUG(&nbCb, "S1_HO_CANCEL is configured. Sending Handover Cancel "
+                        "Message to MME for Ue Id: %u "
+                        "(RadioNetwork-cause=handover-cancelled");
+    cause.causeTyp = NB_CAUSE_RADIONW;
+    cause.causeVal = SztCauseRadioNwhandover_cancelledEnum;
+    sendS1HoCancel(ueCb, &cause);
+
+    RETVALUE(ROK);
+  } else if (ueCb->s1HoInfo->s1HoEvent == S1_HO_TIMER_EXPIRY) {
+    // Drop the S1 Handover Command for NB_TMR_S1_RELOC_TMR to expire
+    NB_LOG_DEBUG(&nbCb,
+                 "S1_HO_TIMER_EXPIRY is configured. Dropping incoming S1 "
+                 "Handover Command for UE Id: %u",
+                 ueCb->ueId);
+    // Send S1 Handover Command Dropped Indication Message to TFW
+    s1HoReqCmdDropInd.ueId = ueCb->ueId;
+    s1HoReqCmdDropInd.currEnbId = ueCb->enbId;
+    s1HoReqCmdDropInd.hoSrcEnbId = ueCb->s1HoInfo->srcEnbId;
+    s1HoReqCmdDropInd.hoTgtEnbId = ueCb->s1HoInfo->tgtEnbId;
+    nbUiSendS1HoCmdDropIndToUser(&s1HoReqCmdDropInd);
+    RETVALUE(ROK);
+  }
+
+  // Stopping the S1 Reloc Timer
+  NB_LOG_DEBUG(&nbCb, "Stopping timer NB_TMR_S1_RELOC_TMR for UE Id: %u",
+               ueCb->ueId);
+  nbStopTmr((PTR)ueCb, NB_TMR_S1_RELOC_TMR);
+
+  // Start the S1 Reloc Overall Timer
+  cmInitTimers(&ueCb->s1HoInfo->timer, 1);
+  ret = nbStartTmr((PTR)ueCb, NB_TMR_S1_OVRL_TMR, smCfgCb.s1OvrAllTimerVal);
+  if (ret != ROK) {
+    NB_LOG_ERROR(&nbCb,
+                 "Failed to start timer NB_TMR_S1_OVRL_TMR for UE Id: %u",
+                 ueCb->ueId);
+    NB_LOG_EXITFN(&nbCb, RFAILED);
+  }
+  NB_LOG_DEBUG(&nbCb,
+               "Started timer NB_TMR_S1_OVRL_TMR of (%u) secs for UE Id: %u",
+               smCfgCb.s1OvrAllTimerVal, ueCb->ueId);
+
+  // Send the ENB Status Transfer
+  NB_LOG_DEBUG(&nbCb, "Sending ENB Status Transfer to MME for UE Id: %u",
+               ueCb->ueId);
+  sendEnbStatusTrnsfr(ueCb);
+
+  // Update the UeCb based on new tunnel information
+  nbCb.s1HoDone = TRUE;
+  NB_ALLOC(&(tunInfo), (sizeof(NbUeTunInfo)));
+  if (tunInfo == NULLP) {
+    NB_LOG_ERROR(&nbCb, "Failed to allocate memory for tunnel information");
+    RETVALUE(RFAILED);
+  }
+  // Delete the Existing tunnels from Hash List
+  for (; ((cmHashListGetNext(&(ueCb->tunnInfo), (PTR)prevTunnCb,
+                             (PTR *)&tunnCb)) == ROK);) {
+    erabId = tunnCb->bearerId;
+    cmMemcpy(tunInfo, tunnCb, sizeof(NbUeTunInfo));
+
+    NB_LOG_DEBUG(&nbCb, "Deleting tunnel info for UE Id: %u and Bearer Id: %u",
+                 ueCb->ueId, tunnCb->bearerId);
+    ret = cmHashListDelete(&(ueCb->tunnInfo), (PTR)tunnCb);
+    if (ret == RFAILED) {
+      NB_LOG_ERROR(&nbCb, "Failed to delete TunnelCb");
+    }
+    NB_FREE(tunnCb, sizeof(NbUeTunInfo))
+    tunnCb = NULLP;
+    ueCb->tunnIdx--;
+  }
+
+  // Delete the existing tunnel from DAM
+  NB_ALLOC(&tunDelReq, sizeof(NbTunDelReq));
+  tunDelReq->bearerId = erabId;
+  tunDelReq->ueId = ueCb->ueId;
+  nbIfmDamTunDelReq(tunDelReq);
+  NB_LOG_DEBUG(&nbCb,
+               "Sent Tunnel Delete Req to DAM for UE Id: %u and Bearer Id: %u",
+               ueCb->ueId, tunDelReq->bearerId);
+
+  // Create a new Tunnel entry for UE relocated to new ENB
+  tunInfo->lclTeId = ueCb->s1HoInfo->tunInfo->lclTeId;
+  tunInfo->remTeId = ueCb->s1HoInfo->tunInfo->remTeId;
+  tunInfo->bearerId = ueCb->s1HoInfo->tunInfo->bearerId;
+
+  if (ROK != cmHashListInsert(&(ueCb->tunnInfo), (PTR)tunInfo,
+                              (U8 *)&tunInfo->bearerId, sizeof(U32))) {
+    NB_FREE(tunInfo, sizeof(NbUeTunInfo))
+    NB_LOG_ERROR(&nbCb,
+                 "Failed to Insert tunnel info for Ue Id: %u and Bearer Id: %u",
+                 ueCb->ueId, tunInfo->bearerId);
+    RETVALUE(RFAILED);
+  }
+  NB_LOG_DEBUG(&nbCb,
+               "Inserted new tunnel info for UE Id: %u and Bearer Id: %u",
+               ueCb->ueId, tunInfo->bearerId);
+  nbHandleUeIpInfoReq(ueCb->ueId, erabId);
+  ueCb->enbId = ueCb->s1HoInfo->tgtEnbId;
+
+  // Send the S1 Handover Notify
+  NB_LOG_DEBUG(&nbCb, "Sending S1 Handover Notify to MME for UE Id: %u",
+               ueCb->ueId);
+  sendS1HoNotify(ueCb);
+  nbCb.s1HoDone = FALSE;
+
+  RETVALUE(ROK);
+} // nbPrcS1HoCommand
+
+/*
+ * @details: This function is used to Process the Received
+ *           S1 Handover Preparation failure Message from MME
+ *
+ * Function: nbPrcS1HoPrepFailure
+ *
+ * @param[in]
+ *  -NbUeCb *ueCb
+ *  -S1apPdu *pdu
+ *
+ * @return  S16
+ *  -# Success : ROK
+ *  -# Failure : RFAILED
+ */
+PUBLIC S16 nbPrcS1HoPrepFailure(NbUeCb *ueCb, S1apPdu *pdu) {
+  SztUnsuccessfulOutcome *unsuccMsg = &pdu->pdu.val.unsuccessfulOutcome;
+  SztHovrPrepFail *s1HoPrepFail = &unsuccMsg->value.u.sztHovrPrepFail;
+  SztProtIE_Field_HovrPrepFailIEs *ie = s1HoPrepFail->protocolIEs.member;
+  NbS1HandoverPrepFailInd s1HoPreFailInd = {0};
+  U16 idx = 0;
+  NB_LOG_ENTERFN(&nbCb);
+
+  NB_LOG_DEBUG(
+      &nbCb,
+      "Processing incoming S1 Handover Preparation Failure for UE Id: %u",
+      ueCb->ueId);
+
+  // Check if S1 Handover Procedure is already running for the selected UE
+  if (ueCb->s1HoInfo == NULLP) {
+    NB_LOG_ERROR(&nbCb,
+                 "S1 Handover Procedure is not initiated for UE Id: %u. "
+                 "Ignoring the message.",
+                 ueCb->ueId);
+    NB_LOG_EXITFN(&nbCb, RFAILED);
+  }
+
+  // Sending the received message indication to TFW
+  s1HoPreFailInd.ueId = ueCb->ueId;
+  s1HoPreFailInd.currEnbId = ueCb->enbId;
+  s1HoPreFailInd.hoSrcEnbId = ueCb->s1HoInfo->srcEnbId;
+  s1HoPreFailInd.hoTgtEnbId = ueCb->s1HoInfo->tgtEnbId;
+  nbUiSendS1HoPrepFailIndToUser(&s1HoPreFailInd);
+
+  // Processing the IEs from the received S1AP pdu
+  for (idx = 0; idx < s1HoPrepFail->protocolIEs.noComp.val; idx++) {
+    ie = s1HoPrepFail->protocolIEs.member + idx;
+    switch (ie->id.val) {
+    case Sztid_MME_UE_S1AP_ID:
+    case Sztid_eNB_UE_S1AP_ID:
+    case Sztid_Cause:
+      break;
+
+    default:
+      NB_LOG_ERROR(&nbCb,
+                   "Unsupported IE(%u) in S1 Handover Preparation Failure "
+                   "Message for UE Id: %u",
+                   ie->id.val, ueCb->ueId);
+      break;
+    }
+  }
+
+  NB_LOG_DEBUG(&nbCb, "Stopping timer NB_TMR_S1_RELOC_TMR for UE Id: %u",
+               ueCb->ueId);
+  nbStopTmr((PTR)ueCb, NB_TMR_S1_RELOC_TMR);
+
+  // Clear all the S1 Handover context for the selected UE
+  NB_FREE(ueCb->s1HoInfo, sizeof(NbS1HoInfo));
+
+  RETVALUE(ROK);
+} // nbPrcS1HoPrepFailure
+
+/*
+ * @details: This function is used to Process the Received
+ *           S1 Handover Cancel Acknowledgement Message from MME
+ *
+ * Function: nbPrcS1HoCancelAck
+ *
+ * @param[in]
+ *  -NbUeCb *ueCb
+ *  -S1apPdu *pdu
+ *
+ * @return  S16
+ *  -# Success : ROK
+ *  -# Failure : RFAILED
+ */
+PUBLIC S16 nbPrcS1HoCancelAck(NbUeCb *ueCb, S1apPdu *pdu) {
+  SztSuccessfulOutcome *succMsg = &pdu->pdu.val.successfulOutcome;
+  SztHovrCancelAckg *s1HoCancelAckg = &succMsg->value.u.sztHovrCancelAckg;
+  SztProtIE_Field_HovrCancelAckgIEs *ie = s1HoCancelAckg->protocolIEs.member;
+  NbS1HandoverCancelAckInd s1HoCancelAckInd = {0};
+  U16 idx = 0;
+  NB_LOG_ENTERFN(&nbCb);
+
+  NB_LOG_DEBUG(&nbCb, "Processing incoming S1 Handover Cancel Ack for UeId: %u",
+               ueCb->ueId);
+
+  // Sending the received message indication to TFW
+  s1HoCancelAckInd.ueId = ueCb->ueId;
+  s1HoCancelAckInd.currEnbId = ueCb->enbId;
+  nbUiSendS1HoCancelAckIndToUser(&s1HoCancelAckInd);
+
+  // Processing the IEs from the received S1AP pdu
+  for (idx = 0; idx < s1HoCancelAckg->protocolIEs.noComp.val; idx++) {
+    ie = s1HoCancelAckg->protocolIEs.member + idx;
+    switch (ie->id.val) {
+    case Sztid_MME_UE_S1AP_ID:
+    case Sztid_eNB_UE_S1AP_ID:
+      break;
+
+    default:
+      NB_LOG_ERROR(
+          &nbCb,
+          "Unsupported IE(%u) in S1 Handover Cancel Ack Message for UE Id: %u",
+          ie->id.val, ueCb->ueId);
+      break;
+    }
+  }
+
+  if (ueCb->s1HoInfo != NULLP) {
+    // Clear all the S1 Handover context for the selected UE
+    NB_FREE(ueCb->s1HoInfo, sizeof(NbS1HoInfo));
+  }
+
+  RETVALUE(ROK);
+} // nbPrcS1HoCancelAck
+
+/*
+ * @details: This function is used to Process the Received
+ *           MME Status Transfer Message from MME
+ *
+ * Function: nbPrcMmeStatusTrnsfr
+ *
+ * @param[in]
+ *  -NbUeCb *ueCb
+ *  -S1apPdu *pdu
+ *
+ * @return  S16
+ *  -# Success : ROK
+ *  -# Failure : RFAILED
+ */
+PUBLIC S16 nbPrcMmeStatusTrnsfr(NbUeCb *ueCb, S1apPdu *pdu) {
+  SztInitiatingMsg *initMsg = &pdu->pdu.val.initiatingMsg;
+  SztMMEStatusTfr *mmeStatusTfr = &initMsg->value.u.sztMMEStatusTfr;
+  SztProtIE_Field_MMEStatusTfrIEs *ie = mmeStatusTfr->protocolIEs.member;
+  NbMmeStatusTrnsfrInd mmeStatusTrnfrInd = {0};
+  U16 idx = 0;
+  NB_LOG_ENTERFN(&nbCb);
+
+  NB_LOG_DEBUG(&nbCb, "Processing incoming MME Status Transfer for Ue Id: %u",
+               ueCb->ueId);
+
+  // Check if S1 Handover Procedure is already running for the selected UE
+  if (ueCb->s1HoInfo == NULLP) {
+    NB_LOG_ERROR(&nbCb,
+                 "S1 Handover Procedure is not initiated for UE Id: %u. "
+                 "Ignoring the message.",
+                 ueCb->ueId);
+    NB_LOG_EXITFN(&nbCb, RFAILED);
+  }
+
+  // Sending the received message indication to TFW
+  mmeStatusTrnfrInd.ueId = ueCb->ueId;
+  mmeStatusTrnfrInd.currEnbId = ueCb->enbId;
+  mmeStatusTrnfrInd.hoSrcEnbId = ueCb->s1HoInfo->srcEnbId;
+  mmeStatusTrnfrInd.hoTgtEnbId = ueCb->s1HoInfo->tgtEnbId;
+  nbUiSendMmeStatusTrnsfrIndToUser(&mmeStatusTrnfrInd);
+
+  // Processing the IEs from the received S1AP pdu
+  for (idx = 0; idx < mmeStatusTfr->protocolIEs.noComp.val; idx++) {
+    ie = mmeStatusTfr->protocolIEs.member + idx;
+    switch (ie->id.val) {
+    case Sztid_MME_UE_S1AP_ID:
+    case Sztid_eNB_UE_S1AP_ID:
+    case Sztid_eNB_StatusTfr_TprntCont:
+      break;
+
+    default:
+      NB_LOG_ERROR(
+          &nbCb,
+          "Unsupported IE(%u) in MME Status Transfer Message for UE Id: %u",
+          ie->id.val, ueCb->ueId);
+      break;
+    }
+  }
+  ueCb->enbId = ueCb->s1HoInfo->tgtEnbId;
+
+  RETVALUE(ROK);
+} // nbPrcMmeStatusTrnsfr
+
+/*
+ * This function is used to handle the S1 Reloc Timer Expiry during the S1
+ * Handover Procedure. Send S1 Handover Cancel message from source ENB to MME
+ */
+PUBLIC Void nbHandleS1RelocTimerExpiry(NbUeCb *ueCb) {
+  NbUeMsgCause cause = {0};
+
+  // Check if the ueCb is valid
+  if (ueCb == NULLP) {
+    NB_LOG_ERROR(&nbCb,
+                 "Invalid ueCb. Failed to handle NB_TMR_S1_RELOC_TMR Expiry");
+    RETVOID;
+  }
+
+  // NB_TMR_S1_RELOC_TMR has Expired. Send S1 Handover Cancel Message to MME
+  NB_LOG_DEBUG(&nbCb,
+               "Sending Handover Cancel Message to MME for UE Id: %u "
+               "(RadioNetwork-cause=tS1relocprep-expiry)",
+               ueCb->ueId);
+  cause.causeTyp = NB_CAUSE_RADIONW;
+  cause.causeVal = SztCauseRadioNwtS1relocprep_expiryEnum;
+  sendS1HoCancel(ueCb, &cause);
+
+  RETVOID;
+} // nbHandleS1RelocTimerExpiry
+
+/*
+ * This function is used to handle the S1 Reloc Overall Timer Expiry during the
+ * S1 Handover Procedure. Send UE context release request from source ENB
+ */
+PUBLIC Void nbHandleS1RelocOverallTimerExpiry(NbUeCb *ueCb) {
+  NbUeMsgCause cause = {0};
+
+  // Check if the ueCb is valid
+  if (ueCb == NULLP) {
+    NB_LOG_ERROR(&nbCb,
+                 "Invalid ueCb. Failed to handle NB_TMR_S1_OVRL_TMR Expiry");
+    RETVOID;
+  }
+
+  // NB_TMR_S1_OVRL_TMR has Expired. Send S1 UE Context Release Message to MME
+  NB_LOG_DEBUG(&nbCb,
+               "Sending S1 UE Context Release Message to MME for UE Id: %u "
+               "(RadioNetwork-cause=tS1relocoverall-expiry)",
+               ueCb->ueId);
+  cause.causeTyp = NB_CAUSE_RADIONW;
+  cause.causeVal = SztCauseRadioNwtS1relocoverall_expiryEnum;
+  nbSndCtxtRelReq(ueCb->ueId, &cause);
+
+  RETVOID;
+} // nbHandleS1RelocOverallTimerExpiry
+#endif
 
 #ifdef MULTI_ENB_SUPPORT
 /*
