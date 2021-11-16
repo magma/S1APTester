@@ -99,4 +99,4 @@ free IP address pool.
 
 ## License
 
-S1APTester is BSD License licensed, as found in the LICENSE file.
+S1APTester is licensed under the BSD License, as found in the [LICENSE](./LICENSE) file.
