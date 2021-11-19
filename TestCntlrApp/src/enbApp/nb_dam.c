@@ -1937,8 +1937,10 @@ PUBLIC Void nbDamUeDelReq
    Pst *pst;
    /* Delete all the tunnels that have been established for this UE */
    ueCb = nbDamGetUe(ueId);
+   printf("---- Inside nbDamUeDelReq\n");
    if (ueCb != NULLP)
    {
+      printf("---- Inside nbDamUeDelReq-1\n");
       /* Stop the Inactivity timer for this perticular UE */
       nbDamStopTmr((PTR)ueCb, NB_TMR_INACTIVITY);
 
@@ -1946,7 +1948,9 @@ PUBLIC Void nbDamUeDelReq
       /* response. If any response is failure, raise a DEBUG ERROR */
       /* If the number of DRBs become zero remove the UeCb */
       if (ueCb->numDrbs == 0) {
+         printf("---- Inside nbDamUeDelReq-2\n");
          if (ROK != nbDamDelUe(ueId)) {
+            printf("---- Inside nbDamUeDelReq-3\n");
             NB_LOG_ERROR(&nbCb, "Failed to delete ENB Dam UE for UE Id: %u", ueId);
             RETVOID;
          }
@@ -1956,6 +1960,7 @@ PUBLIC Void nbDamUeDelReq
       }
       for(;!isEmpty && ((cmHashListGetNext(&(ueCb->drbs),(PTR)prevDrbCb,(PTR*)&drbCb)) == ROK);)
       {   
+         printf("---- Inside nbDamUeDelReq-4\n");
          ueCb->numDrbs--;
          ret  = cmHashListDelete(&(ueCb->drbs), (PTR)drbCb);
          if (ret == RFAILED)
@@ -1971,6 +1976,7 @@ PUBLIC Void nbDamUeDelReq
    }
    else  /* DAM-UE CB is not present */ 
    {
+      printf("---- Inside nbDamUeDelReq-0\n");
       pst = &nbDamCb.nbAppPst;
       cmPkUeDelCfm (pst, ueId);
       RETVOID;

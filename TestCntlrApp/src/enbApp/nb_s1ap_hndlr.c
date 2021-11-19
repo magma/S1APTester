@@ -2386,11 +2386,16 @@ PUBLIC S16 nbPrcIncS1apMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType) {
     if (ret == ROK) {
 #ifdef MULTI_ENB_SUPPORT
       if (ueCb->s1HoInfo != NULLP) {
-        NB_LOG_DEBUG(&nbCb,"Deleting all the S1 handover context for UE Id: %u", ueCb->ueId);
+        NB_LOG_DEBUG(&nbCb,"Released UE context from source ENB after S1AP "
+			"handover as part of S1 overall reloc timer expiry. "
+			"Deleting the S1 handover context for UE Id: %u",
+			ueCb->ueId);
+        nbCb.s1HoDone = FALSE;
         NB_FREE(ueCb->s1HoInfo, sizeof(NbS1HoInfo));
       } else {
 #endif
         // Inform the ueApp about UE context release
+        NB_LOG_DEBUG(&nbCb, "Sending S1 Release Indication to ueApp");
         ret = nbSendS1RelIndToUeApp(ueCb->ueId);
         if (ret != ROK) {
           NB_LOG_ERROR(&nbCb, "Failed to Send S1 Release Indiaction "
@@ -2412,6 +2417,7 @@ PUBLIC S16 nbPrcIncS1apMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType) {
           RETVALUE(RFAILED);
         } else {
           nbStopTmr((PTR)ueCb, NB_TMR_LCL_UE_CTXT_REL_REQ);
+          NB_LOG_DEBUG(&nbCb, "Stopped the local UE context release timer");
         }
       }
 #if 0
@@ -3449,14 +3455,18 @@ PUBLIC S16 nbHandleS1UeReleaseCmd(NbUeCb *ueCb) {
     ret = nbCtxtRelSndRlsCmpl(ueCb);
 #ifdef MULTI_ENB_SUPPORT
    if (ueCb->s1HoInfo != NULLP) {
+     NB_LOG_DEBUG(&nbCb, "UE context release cmd received due to S1 overall reloc timer"
+		    " expiry. Sending UE context release indication to TFW");
      ret = nbUiSendUeCtxRelIndToUser(ueCb->ueId);
    } else {
+     NB_LOG_DEBUG(&nbCb, "Sending Dam request to delete UE context as part of UE context release cmd handling");
 #endif
      ret = nbIfmDamUeDelReq(ueCb->ueId);
 #ifdef MULTI_ENB_SUPPORT
    }
 #endif
   } else {
+    NB_LOG_DEBUG(&nbCb, "Starting delay timer NB_TMR_DELAY_UE_CTX_REL_COMP for UE context release");
     nbStartDelayTimerForUeCtxRel(ueCb->ueId);
   }
   RETVALUE(ret);
