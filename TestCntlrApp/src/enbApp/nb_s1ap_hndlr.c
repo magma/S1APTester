@@ -2456,7 +2456,6 @@ PUBLIC S16 nbPrcIncS1apMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType) {
     if (ret != ROK) {
       NB_LOG_ERROR(&nbCb, "Failed to handle S1 handover Cancel Ack");
     }
-      NB_LOG_ERROR(&nbCb, "Failed to handle S1 handover Cancel Ack");
   } else if (procedureCodeVal == 25) // MME Status Transfer
   {
     ret = nbPrcMmeStatusTrnsfr(ueCb, pdu);

@@ -2786,7 +2786,7 @@ PUBLIC S16 NbEnbRelBearerReqHdl(NbuRelBearerReq *relBearerReq) {
   NB_LOG_ENTERFN(&nbCb);
 
   if (NULLP == relBearerReq) {
-    NB_LOG_ERROR(&nbCb, "Recieved empty(NULL) NbuRelBearerReq");
+    NB_LOG_ERROR(&nbCb, "Received empty(NULL) NbuRelBearerReq");
     RETVALUE(RFAILED);
   }
 
