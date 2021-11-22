@@ -467,6 +467,9 @@ PUBLIC S16 nbCreateUeTunnReq(U32 ueId, U8 bearerId, U32 ueIp4Addr, U8 *ipv6_addr
         nbCpyCmTptAddr(&tnlInfo->dstAddr, &(tunInfo->sgwAddr));
         nbCpyCmTptAddr(&tnlInfo->srcAddr, &(nbCb.datAppAddr));
         tnlInfo->tft.lnkEpsBearId = rsp->lnkEpsBearId;
+        //ueCb->bearerReestablishmentAfterCtxtRel  = rsp->bearerReestablishmentAfterCtxtRel;
+        tnlInfo->bearerReestablishmentAfterCtxtRel = rsp->bearerReestablishmentAfterCtxtRel;
+
         // Fill TFT info
         if (rsp->noOfPfs) {
           tnlInfo->tft.num_pf = rsp->noOfPfs;

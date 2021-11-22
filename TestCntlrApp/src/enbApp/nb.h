@@ -355,6 +355,8 @@ struct _nbUeCb {
   U16 encryptionAlgo; // Updated from ICS Req
   U16 integrityAlgo;  // Updated from ICS Req
 #endif
+  U8 noIpInfo;
+  Bool bearerReestablishmentAfterCtxtRel;
 };
 
 typedef struct _nbUeCb NbUeCb;
@@ -566,6 +568,7 @@ typedef struct _nbCb
    Bool                      s1HoDone;
 #endif
    TauParams                 tau[NB_MAX_UE_SUPPORTED];
+   U8                        nbIpInfo[NB_MAX_UE_SUPPORTED];
 }NbCb;
 /** @brief This structure is temparerly store on stack which contains
  * UE specific Paging Message information.

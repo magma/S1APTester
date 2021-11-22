@@ -501,9 +501,11 @@ PUBLIC S16 NbHandleUeIpInfoRsp(NbuUeIpInfoRsp *rsp) {
   U8 bearerId;
   U8 *ueIp6Addr = NULLP;
   U32 ueIp4Addr = 0;
+  NbUeCb *ueCb = NULLP;
 
   ueId = rsp->ueId;
   bearerId = rsp->bearerId;
+
   if ((rsp->pdnType == NB_PDN_IPV4) || (rsp->pdnType == NB_PDN_IPV4V6)) {
     cmInetAddr(rsp->Ip4Addr, &ueIp4Addr);
     ueIp4Addr = CM_INET_NTOH_U32(ueIp4Addr);
@@ -519,7 +521,29 @@ PUBLIC S16 NbHandleUeIpInfoRsp(NbuUeIpInfoRsp *rsp) {
   }
  /* set the datrcvd flag for ue */
   nbDamSetDatFlag(ueId);
-  RETVALUE(nbCreateUeTunnReq(ueId, bearerId, ueIp4Addr, ueIp6Addr, rsp));
+  if(nbCreateUeTunnReq(ueId, bearerId, ueIp4Addr, ueIp6Addr, rsp) != ROK) {
+    NB_LOG_ERROR(&nbCb, "Failed to create Tunnel for ueId %u\n", ueId);
+    RETVALUE(RFAILED);
+  }
+  /*if (nbCb->nbIpInfo > 0) {
+    ueCb->nbIpInfo --;
+  }
+
+  printf("Before sending ResetBearerReestablishmentFlag msg to ueApp bearerReestablishmentAfterCtxtRel-%d, ueCb->noIpInfo=%d\n",ueCb->bearerReestablishmentAfterCtxtRel,ueCb->noIpInfo);
+  if ((ueCb->bearerReestablishmentAfterCtxtRel) && (!ueCb->noIpInfo)) {
+    ueCb->bearerReestablishmentAfterCtxtRel = FALSE;
+    // Send ResetBearerReestablishmentFlag msg to ueApp
+    NbuUeIpInfoReq *msg = NULLP;
+
+    NB_ALLOC(&msg, sizeof(NbuUeIpInfoReq));
+    msg->ueId      = ueId;
+
+    if(cmPkNbuResetBearerReestablishmentFlag(&nbCb.ueAppPst, msg) != ROK) {
+      NB_LOG_ERROR(&nbCb, "Failed to send ResetBearerReestablishmentFlag msg to ueApp for ueId %u\n", ueId);
+      RETVALUE(RFAILED);
+    }
+    printf("Sent ResetBearerReestablishmentFlag msg to ueApp\n");
+  }*/
 }
 
 PUBLIC Void nbHandleUeIpInfoReq(U32 ueId,U8 bearerId)

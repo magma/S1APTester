@@ -2967,7 +2967,114 @@ Buffer *mBuf;
   RETVALUE((*func)(pst, &msg));
 #endif
 }
+#if 0
+/*
+ *
+ *    Fun:     cmPkNbuResetBearerReestablishmentFlag
+ *
+ *    Desc:    pack the NbuResetBearerReestablishmentFlagInd msg
+ *
+ *    Ret:    ROK  -ok
+ *
+ *    Notes:    None
+ *
+ *    File:
+ *
+ */
+#ifdef ANSI
+PUBLIC S16 cmPkNbuResetBearerReestablishmentFlag
+(
+ Pst *pst,
+ NbuResetBearerReestablishmentFlagInd *msg
+)
+#else
+PUBLIC S16 cmPkNbuResetBearerReestablishmentFlag (pst, msg)
+Pst *pst;
+NbuResetBearerReestablishmentFlagInd *msg;
+#endif
+{
+   S16 ret1;
+   Buffer *mBuf;
+   mBuf = NULLP;
+   TRC3(cmPkNbuResetBearerReestablishmentFlag)
 
+      if((ret1 = SGetMsg(pst->region, pst->pool, &mBuf)) != ROK)
+      {
+#if (ERRCLASS & ERRCLS_ADD_RES)
+         if(ret1 != ROK)
+         {
+            SLogError(pst->srcEnt, pst->srcInst, pst->srcProcId,
+                  __FILE__, __LINE__, (ErrCls)ERRCLS_ADD_RES,
+                  (ErrVal)ENBU014, (ErrVal)0, "SGetMsg() failed");
+         }
+#endif /*  ERRCLASS & ERRCLS_ADD_RES  */
+         RETVALUE(ret1);
+      }
+   switch(pst->selector)
+   {
+#ifdef LWLCNBU
+      case NBU_SEL_LWLC:
+         CMCHKPKLOG(cmPkPtr, (PTR)msg, mBuf, ENBU016, pst);
+         break;
+#endif
+     default:
+         break;
+   }
+   pst->event = (Event)EVTNBURESETBEARERREESTFLG;
+   RETVALUE(SPstTsk(pst,mBuf));
+}
+
+
+/*
+ *
+ *    Fun:    cmUnPkNbuResetBearerReestablishmentFlag
+ *
+ *    Desc:   unpack  NbuResetBearerReestablishmentFlagInd Msg
+ *
+ *    Ret:    ROK  -ok
+ *
+ *    Notes:  None
+ *
+ *    File:   nbu.c
+ *
+ */
+
+#ifdef ANSI
+PUBLIC S16 cmUnPkNbuResetBearerReestablishmentFlag(NbuResetBearerReestablishmentFlagHdl func, Pst *pst, Buffer *mBuf)
+#else
+PUBLIC S16 cmUnPkNbuResetBearerReestablishmentFlag(NbuResetBearerReestablishmentFlagHdl func, pst, mBuf) NbuResetBearerReestablishmentFlagHdl func;
+Pst *pst;
+Buffer *mBuf;
+#endif
+{
+#ifdef LWLCNBU
+  S16 ret1 = ROK;
+  NbuResetBearerReestablishmentFlagInd *msg = NULLP;
+#else
+  NbuResetBearerReestablishmentFlagInd msg;
+#endif
+
+  TRC3(cmUnPkNbuResetBearerReestablishmentFlag)
+  switch (pst->selector) {
+#ifdef LWLCNBU
+  case NBU_SEL_LWLC:
+    CMCHKUNPKLOG(cmUnpkPtr, (PTR *)&msg, mBuf, (ErrVal)ENBU025, pst);
+    break;
+#endif
+  default:
+    break;
+  }
+
+  SPutMsg(mBuf);
+#ifdef LWLCNBU
+  ret1 = (*func)(pst, msg);
+  SPutSBuf(pst->region, pst->pool, (Data *)msg, sizeof(NbuResetBearerReestablishmentFlagInd));
+  RETVALUE(ret1);
+#else
+  RETVALUE((*func)(pst, &msg));
+#endif
+}
+#endif
 /********************************************************************30**
 
          End of file:

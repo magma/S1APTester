@@ -231,6 +231,7 @@ typedef struct _nbuUeIpInfoRsp {
   U32 lnkEpsBearId;
   U8 noOfPfs;
   TftPfs pfList[CM_MAX_PKT_FILTERS];
+  Bool bearerReestablishmentAfterCtxtRel;
 } NbuUeIpInfoRsp;
 
 typedef struct _nbuUeIpInfoRej {
@@ -250,6 +251,10 @@ typedef struct _nbuNotifyPlmnInfo
    U8 plmnId[3];
 }NbuNotifyPlmnInfo;
 
+typedef struct _nbuResetBearerReestablishmentFlagInd {
+  U32 ueId;
+} NbuResetBearerReestablishmentFlagInd;
+
 typedef S16 (*NbuInitialUeMsgHdl)(Pst*, NbuInitialUeMsg*);
 typedef S16 (*NbuUlNasMsgHdl)(Pst*, NbuUlNasMsg*);
 typedef S16 (*NbuDlNasMsgHdl)(Pst*, NbuDlNasMsg*);
@@ -265,6 +270,7 @@ typedef S16 (*NbuErabRelIndHdl)(Pst *, NbuErabRelIndList*);/*NbErabRelInd*);*/
 typedef S16 (*NbuNotifyPlmnInfoHdl) (Pst *, NbuNotifyPlmnInfo*);
 typedef S16 (*NbuUeIpInfoUpdtHdl)(Pst *, NbuUeIpInfoUpdt *);
 typedef S16 (*NbuUeIpInfoRejHdl)(Pst *, NbuUeIpInfoRej *);
+typedef S16 (*NbuResetBearerReestablishmentFlagHdl)(Pst *, NbuResetBearerReestablishmentFlagInd *);
 EXTERN S16 cmPkNbuInitialUeMsg(Pst *pst,NbuInitialUeMsg *req);
 EXTERN S16 cmPkNbuErabRelInd(Pst *pst, NbuErabRelIndList *);
 EXTERN S16 cmPkNbuUlNasMsg(Pst *pst,NbuUlNasMsg *msg);
@@ -278,6 +284,7 @@ EXTERN S16 cmPkNbuUlRrcMsg ARGS((Pst *pst, NbuUlRrcMsg *msg));
 EXTERN S16 cmPkNbuErabsRelInfo (Pst *pst,NbuErabsRelInfo *msg);
 EXTERN S16 cmPkNbuNotifyPlmnInfo ARGS((Pst *pst,NbuNotifyPlmnInfo *req));
 EXTERN S16 cmPkNbuUeIpInfoRej (Pst *pst,NbuUeIpInfoRej *msg);
+EXTERN S16 cmPkNbuResetBearerReestablishmentFlag (Pst *pst,NbuResetBearerReestablishmentFlagInd *msg);
 
 EXTERN S16 cmUnPkNbuInitialUeMsg(NbuInitialUeMsgHdl, Pst*, Buffer*);
 EXTERN S16 cmUnPkNbuErabRelInd(NbuErabRelIndHdl, Pst*, Buffer*);
@@ -301,6 +308,7 @@ EXTERN S16 cmUnPkNbuNotifyPlmnInfo (NbuNotifyPlmnInfoHdl func,Pst *pst,Buffer *m
 EXTERN S16 cmUnPkNbuUeIpInfoUpdt(NbuUeIpInfoUpdtHdl func, Pst *pst,
                                  Buffer *mBuf);
 EXTERN S16 cmUnPkNbuUeIpInfoRej(NbuUeIpInfoRejHdl func, Pst *pst, Buffer *mBuf);
+EXTERN S16 cmUnPkNbuResetBearerReestablishmentFlag(NbuResetBearerReestablishmentFlagHdl func, Pst *pst, Buffer *mBuf);
 
 /********************************************************************30**
 

@@ -1373,7 +1373,9 @@ PUBLIC S16 ueAppUtlBldTauReq
    tauReq->epsUpdType.pres = TRUE;
    tauReq->epsUpdType.actv = p_ueMsg->msg.ueUetTauRequest.ActvFlag;
    tauReq->epsUpdType.type = p_ueMsg->msg.ueUetTauRequest.epsUpdtType;
-
+   /*if (tauReq->epsUpdType.actv) {
+     ueCb->bearerReestablishmentAfterCtxtRel = TRUE;
+   }*/
    /*NAS key set identifier IE*/
    tauReq->nasKsi.pres = TRUE;
    tauReq->nasKsi.id = ueCb->secCtxt.ksi;
@@ -2118,7 +2120,7 @@ PRIVATE S16 ueProcUeAttachReq(UetMessage *p_ueMsg, Pst *pst) {
   if (isPlainMsg) {
     EDM_FREE(nasEncPdu.val, CM_MAX_EMM_ESM_PDU);
   }
-
+  ueCb->emmCb.state = UE_EMM_UE_DEREGISTERED;
   UE_LOG_EXITFN(ueAppCb, ret);
 }
 
@@ -3472,6 +3474,8 @@ PRIVATE S16 ueProcUeAttachComplete(UetMessage *p_ueMsg, Pst *pst)
    }
    /* mark as ue connected */
    ueCb->ecmCb.state = UE_ECM_CONNECTED;
+   ueCb->emmCb.state = UE_EMM_UE_REGISTERED;
+   printf("Setting ueCb->emmCb.state set to UE_EMM_UE_REGISTERED after sending attach complete\n");
    ret = ueAppSndAttachComplete(ueCb);
 
    UE_LOG_EXITFN(ueAppCb, ret);
@@ -4661,7 +4665,8 @@ PRIVATE S16 ueSendServiceRequest
       UE_LOG_ERROR(ueAppCb, "Could not Send the Service request");
       RETVALUE(RFAILED);
    }
-
+   //printf("Setting >bearerReestablishmentAfterCtxtRel in ueApp\n");
+   //ueCb->bearerReestablishmentAfterCtxtRel = TRUE;
    UE_LOG_EXITFN(ueAppCb, ROK);
 }
 
@@ -6364,6 +6369,11 @@ PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId,
       ueAppFormIpv4Addr(ueIpInfoRsp, pdn_addr);
     } else if (pdn_addr->pdnType == CM_ESM_PDN_IPV6) {
       ueIpInfoRsp->pdnType = CM_ESM_PDN_IPV6;
+        printf("ueCb->emmCb.state in ueIpInfoRsp=%d\n", ueCb->emmCb.state);
+      if (ueCb->emmCb.state == UE_EMM_UE_REGISTERED) {
+        printf("Setting >bearerReestablishmentAfterCtxtRel in ueIpInfoRsp\n");
+        ueIpInfoRsp->bearerReestablishmentAfterCtxtRel = TRUE;
+      }
       // Convert IPv6 address arrary to ":" separated notation(x:x:x:x:x:x:x:x)
       ueAppFormIpv6Addr(ueIpInfoRsp, &ueCb->ueRabCb[idx - 1]);
     } else if (pdn_addr->pdnType == CM_ESM_PDN_IPV4V6) {
@@ -6372,6 +6382,11 @@ PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId,
       ueAppFormIpv4Addr(ueIpInfoRsp, pdn_addr);
       // Convert IPv6 address arrary to ":" separated notation(x:x:x:x:x:x:x:x)
       ueAppFormIpv6Addr(ueIpInfoRsp, &(ueCb->ueRabCb[idx - 1]));
+      if (ueCb->emmCb.state == UE_EMM_UE_REGISTERED) {
+        printf("Setting >bearerReestablishmentAfterCtxtRel in ueIpInfoRsp\n");
+        ueIpInfoRsp->bearerReestablishmentAfterCtxtRel = TRUE;
+      }
+
     }
   }
 }
@@ -6804,6 +6819,7 @@ PRIVATE S16 ueAppEmmHndlInServiceRej
 
    UE_LOG_DEBUG(ueAppCb, "Handling Incoming Service Reject message");
    /*send message to USER*/
+   //ueCb->bearerReestablishmentAfterCtxtRel = FALSE;
    ret = ueAppRcvEmmMsg(evnt, evnt->m.emmEvnt->msgId, ueCb);
 
    UE_LOG_EXITFN(ueAppCb, ret);
@@ -7579,6 +7595,7 @@ PRIVATE S16 ueAppEmmHndlInTauReject(CmNasEvnt *evnt, UeCb *ueCb)
 
    UE_LOG_DEBUG(ueAppCb, "Handling UE Tracking Area Update Reject Messsage");
 
+   //ueCb->bearerReestablishmentAfterCtxtRel = FALSE;
    ret = ueAppRcvEmmMsg(evnt, evnt->m.emmEvnt->msgId, ueCb);
 
    UE_LOG_EXITFN(ueAppCb, ret);

@@ -143,6 +143,7 @@ typedef struct NbDamTunInfo {
   U32 pdnIp4Addr;
   U8 pdnIp6Addr[NB_IPV6_ADDRESS_LEN];
   NbTft tft;
+  Bool bearerReestablishmentAfterCtxtRel;
 } NbDamTnlInfo;
 
 /**

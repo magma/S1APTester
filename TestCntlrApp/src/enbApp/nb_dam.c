@@ -1278,7 +1278,8 @@ NbDamTnlInfo                 *tnlInfo
       // Send Router Solicit only for default bearer
       if (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp6Addr),
                          NB_IPV6_ADDRESS_LEN, 0, (PTR *)&pdnCb) == ROK) {
-        if (pdnCb->lnkEpsBearId == tnlInfo->tft.lnkEpsBearId) {
+        printf("In nb_dam bearerReestablishmentAfterCtxtRel=%d\n",tnlInfo->bearerReestablishmentAfterCtxtRel);
+        if ((pdnCb->lnkEpsBearId == tnlInfo->tft.lnkEpsBearId) && !(tnlInfo->bearerReestablishmentAfterCtxtRel)) {
           // Send ICMPv6 Router Solicit message
           // Convert IPv6 addr to : separated string for printing
           struct in6_addr in6addr = {};
@@ -1613,6 +1614,7 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
     RETVALUE(ROK);
   }
 
+  printf("Data packet received\n");
   // Fetch Version field
   if ((SExamMsg(&ipPkt[0], mBuf, ipIdx) != ROK)) {
     NB_LOG_ERROR(&nbCb, "Failed to fetch IP version");

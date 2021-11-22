@@ -2251,11 +2251,13 @@ PRIVATE S16 nbHandleInitCtxtPrcSetup(NbUeCb *ueCb, S1apPdu *pdu) {
               continue;
             }
             nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId);
+            //ueCb->noIpInfo ++;
           }
           nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].numFailedErabs = 0;
         } else {
           for (idx = 0; idx < erabInfo->noOfComp; idx++) {
             nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId);
+            //ueCb->noIpInfo ++;
           }
         }
         NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
@@ -2265,6 +2267,7 @@ PRIVATE S16 nbHandleInitCtxtPrcSetup(NbUeCb *ueCb, S1apPdu *pdu) {
         // Do the IP-query to ueapp for received bearers
         for (idx = 0; idx < erabInfo->noOfComp; idx++) {
           nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId);
+          //ueCb->noIpInfo ++;
         }
         nbStartDelayTimerForICSRsp(ueCb->ueId, erabInfo);
       }
