@@ -3475,7 +3475,6 @@ PRIVATE S16 ueProcUeAttachComplete(UetMessage *p_ueMsg, Pst *pst)
    /* mark as ue connected */
    ueCb->ecmCb.state = UE_ECM_CONNECTED;
    ueCb->emmCb.state = UE_EMM_UE_REGISTERED;
-   printf("Setting ueCb->emmCb.state set to UE_EMM_UE_REGISTERED after sending attach complete\n");
    ret = ueAppSndAttachComplete(ueCb);
 
    UE_LOG_EXITFN(ueAppCb, ret);
@@ -6369,9 +6368,7 @@ PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId,
       ueAppFormIpv4Addr(ueIpInfoRsp, pdn_addr);
     } else if (pdn_addr->pdnType == CM_ESM_PDN_IPV6) {
       ueIpInfoRsp->pdnType = CM_ESM_PDN_IPV6;
-        printf("ueCb->emmCb.state in ueIpInfoRsp=%d\n", ueCb->emmCb.state);
       if (ueCb->emmCb.state == UE_EMM_UE_REGISTERED) {
-        printf("Setting >bearerReestablishmentAfterCtxtRel in ueIpInfoRsp\n");
         ueIpInfoRsp->bearerReestablishmentAfterCtxtRel = TRUE;
       }
       // Convert IPv6 address arrary to ":" separated notation(x:x:x:x:x:x:x:x)
@@ -6383,7 +6380,6 @@ PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId,
       // Convert IPv6 address arrary to ":" separated notation(x:x:x:x:x:x:x:x)
       ueAppFormIpv6Addr(ueIpInfoRsp, &(ueCb->ueRabCb[idx - 1]));
       if (ueCb->emmCb.state == UE_EMM_UE_REGISTERED) {
-        printf("Setting >bearerReestablishmentAfterCtxtRel in ueIpInfoRsp\n");
         ueIpInfoRsp->bearerReestablishmentAfterCtxtRel = TRUE;
       }
 

@@ -1278,7 +1278,6 @@ NbDamTnlInfo                 *tnlInfo
       // Send Router Solicit only for default bearer
       if (cmHashListFind(&(ueCb->pdnCb), (U8 *)&(tnlInfo->pdnIp6Addr),
                          NB_IPV6_ADDRESS_LEN, 0, (PTR *)&pdnCb) == ROK) {
-        printf("In nb_dam bearerReestablishmentAfterCtxtRel=%d\n",tnlInfo->bearerReestablishmentAfterCtxtRel);
         if ((pdnCb->lnkEpsBearId == tnlInfo->tft.lnkEpsBearId) && !(tnlInfo->bearerReestablishmentAfterCtxtRel)) {
           // Send ICMPv6 Router Solicit message
           // Convert IPv6 addr to : separated string for printing
