@@ -2290,7 +2290,6 @@ PUBLIC S16 nbPrcS1HoCommand(NbUeCb *ueCb, S1apPdu *pdu) {
   NB_LOG_DEBUG(&nbCb, "Sending S1 Handover Notify to MME for UE Id: %u",
                ueCb->ueId);
   sendS1HoNotify(ueCb);
-  nbCb.s1HoDone = FALSE;
 
   RETVALUE(ROK);
 } // nbPrcS1HoCommand

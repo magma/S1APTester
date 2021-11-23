@@ -2386,7 +2386,12 @@ PUBLIC S16 nbPrcIncS1apMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType) {
     if (ret == ROK) {
 #ifdef MULTI_ENB_SUPPORT
       if (ueCb->s1HoInfo != NULLP) {
-        NB_LOG_DEBUG(&nbCb,"Deleting all the S1 handover context for UE Id: %u", ueCb->ueId);
+        NB_LOG_DEBUG(&nbCb,
+                     "Released UE context from source ENB after S1AP "
+                     "handover as part of S1 overall reloc timer expiry. "
+                     "Deleting the S1 handover context for UE Id: %u",
+                     ueCb->ueId);
+        nbCb.s1HoDone = FALSE;
         NB_FREE(ueCb->s1HoInfo, sizeof(NbS1HoInfo));
       } else {
 #endif
@@ -3449,6 +3454,8 @@ PUBLIC S16 nbHandleS1UeReleaseCmd(NbUeCb *ueCb) {
     ret = nbCtxtRelSndRlsCmpl(ueCb);
 #ifdef MULTI_ENB_SUPPORT
    if (ueCb->s1HoInfo != NULLP) {
+     NB_LOG_DEBUG(&nbCb, "UE context release cmd received due to S1 overall reloc timer"
+                   " expiry. Sending UE context release indication to TFW");
      ret = nbUiSendUeCtxRelIndToUser(ueCb->ueId);
    } else {
 #endif
