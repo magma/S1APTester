@@ -294,13 +294,11 @@ PUBLIC S16 nbIfmDamNbTnlDelCfm
 #endif
 
 #ifdef MULTI_ENB_SUPPORT
-   printf("--------------------------------------------------Finally deleting the UE\n");
    if(!nbCb.x2HoDone && !nbCb.s1HoDone)
    {
 #endif
    if(ROK == nbDamDelUe(ueId))
    {
-      printf("--------------------------------------------------Yes, deleted...!\n");
       pst = &nbDamCb.nbAppPst;
       RETVALUE(cmPkUeDelCfm(pst, ueId));
    }

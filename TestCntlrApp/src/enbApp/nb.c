@@ -415,7 +415,6 @@ PUBLIC S16 nbUeTnlCreatCfm(U8 status, U32 lclTeid)
 PUBLIC S16 nbPrcDamUeDelCfm(U32 ueId)
 {
    S16 ret = ROK;
-   printf("---- Inside nbPrcDamUeDelCfm\n");
 
    NB_LOG_ENTERFN(&nbCb);
 
@@ -489,7 +488,6 @@ PUBLIC S16 nbDelUeCb(U32 ueId)
    NbUeTunInfo  *tunnCb = NULLP;
 
    NB_LOG_ENTERFN(&nbCb);
-   printf("---- Inside nbDelUeCb-1\n");
 #if 0
    U8 idx = 0;
    for(idx = 0; idx < nbCb.crntUeIdx; idx++)
@@ -517,7 +515,6 @@ PUBLIC S16 nbDelUeCb(U32 ueId)
    if ( ROK != (cmHashListFind(&(nbCb.ueCbLst), (U8 *)&(ueId),
       sizeof(U32),0,(PTR *)&ueCb)))
    {
-      printf("---- Inside nbDelUeCb-2\n");
       ret = RFAILED;
    }
    else
@@ -526,18 +523,15 @@ PUBLIC S16 nbDelUeCb(U32 ueId)
       NB_FREE(ueCb->tunnInfo,sizeof(NbUeTunInfo));
 #endif
       /* delete the s1apcb */
-      printf("---- Inside nbDelUeCb-3\n");
       NB_FREE(ueCb->s1ConCb,sizeof(NbS1ConCb));
       /* delete the ueCb */
       for(;((cmHashListGetNext(&(ueCb->tunnInfo),(PTR)prevTunnCb,(PTR*)&tunnCb)) == ROK);)
       {
-         printf("---- Inside nbDelUeCb-4\n");
          if(ueCb->tunnIdx == 0)
             break;
          ret  = cmHashListDelete(&(ueCb->tunnInfo), (PTR)tunnCb);
          if (ret == RFAILED)
          {
-            printf("---- Inside nbDelUeCb-5\n");
             NB_LOG_ERROR(&nbCb,"Failed to delete TunnelCb");
 
          }
@@ -545,7 +539,6 @@ PUBLIC S16 nbDelUeCb(U32 ueId)
          tunnCb = NULLP;
          ueCb->tunnIdx--;
       }
-      printf("---- Inside nbDelUeCb-6\n");
       cmHashListDeinit(&(ueCb->tunnInfo));
       cmHashListDelete(&(nbCb.ueCbLst), (PTR)ueCb);
       NB_FREE(ueCb,sizeof(NbUeCb));
@@ -553,7 +546,6 @@ PUBLIC S16 nbDelUeCb(U32 ueId)
       NB_LOG_DEBUG(&nbCb,"UE context successfully deleted with ueId:[%d]",
                ueId);
    }
-   printf("---- Inside nbDelUeCb-7\n");
    nbRelCntxtInTrafficHandler(ueId);
    /* - Inform the Tfw about UE context release
       - When the ue release is local release i.e
@@ -563,10 +555,8 @@ PUBLIC S16 nbDelUeCb(U32 ueId)
    */
    if(uesLocalRel == FALSE)
    {
-      NB_LOG_DEBUG(&nbCb, "Sending UE context release indication to TFW (uesLocalRel = %u)", uesLocalRel);
       ret = nbUiSendUeCtxRelIndToUser(ueId);
    }
-   printf("---- Inside nbDelUeCb-8\n");
    RETVALUE(ret);
 }
 
@@ -660,11 +650,9 @@ PUBLIC S16 nbSndCtxtRelReq
       }
 #ifdef MULTI_ENB_SUPPORT
       if (ueCb->s1HoInfo != NULLP) {
-	NB_LOG_DEBUG(&nbCb, "Sending UE context release due to S1 overall reloc timer expiry during S1 Handover procedure");
         nbIfmS1apSndUeMsg(ueCb->s1ConCb->spConnId, ctxtRelReqPdu,
                           ueCb->s1HoInfo->srcEnbId);
       } else {
-	NB_LOG_DEBUG(&nbCb, "Sending normal UE context release");
         nbIfmS1apSndUeMsg(ueCb->s1ConCb->spConnId, ctxtRelReqPdu, ueCb->enbId);
       }
 #else
