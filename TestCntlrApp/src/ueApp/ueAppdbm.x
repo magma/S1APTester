@@ -299,7 +299,6 @@ typedef struct _ueCb
    U8      actv_dflt_eps_bear_ctxt_reject_cause;
    U8      numPdns;
    Bool is_drop_actv_dflt_eps_ber_ctxt_req;
-   Bool bearerReestablishmentAfterCtxtRel;
 }UeCb;
 
 

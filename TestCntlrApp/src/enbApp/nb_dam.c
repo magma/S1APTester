@@ -1613,7 +1613,6 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
     RETVALUE(ROK);
   }
 
-  printf("Data packet received\n");
   // Fetch Version field
   if ((SExamMsg(&ipPkt[0], mBuf, ipIdx) != ROK)) {
     NB_LOG_ERROR(&nbCb, "Failed to fetch IP version");

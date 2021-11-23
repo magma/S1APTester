@@ -523,26 +523,3 @@ PUBLIC S16 ueAppBldAndSndIpInfoRejToNb(UeCb *ueCb, U8 bearerId, Pst *pst) {
   ret = UeLiNbuSendUeIpInfoRej(pst, ueIpInfoRej);
   RETVALUE(ret);
 }
-
-// Reset bearerReestablishmentAfterCtxtRel
-/*PUBLIC S16 UeLiNbuResetBearerReestablishmentFlag(Pst *pst, NbuResetBearerReestablishmentFlagInd *p_ueMsg) {
-  UeAppCb *ueAppCb = NULLP;
-  UeCb *ueCb = NULLP;
-
-  UE_GET_CB(ueAppCb);
-
-  UE_LOG_ENTERFN(ueAppCb);
-
-  if (!pst || !p_ueMsg) {
-    UE_LOG_ERROR(ueAppCb, "[UEAPP]: pst||p_ueMsg is NULL ueId = %u", p_ueMsg->ueId);
-    RETVALUE(RFAILED);
-  } 
-
-  if (ueDbmFetchUe(p_ueMsg->ueId, (PTR *)&ueCb) != ROK) {
-    UE_LOG_ERROR(ueAppCb, "[UEAPP]: UeCb List NULL ueId = %u",p_ueMsg->ueId);
-    RETVALUE(RFAILED);
-  }
-  printf("Reset bearerReestablishmentAfterCtxtRel flag");
-  ueCb->bearerReestablishmentAfterCtxtRel = FALSE;
-  RETVALUE(ROK);
-}*/

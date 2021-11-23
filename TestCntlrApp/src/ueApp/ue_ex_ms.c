@@ -93,7 +93,6 @@ EXTERN S16 ueUiProcErabsRelInfoMsg(Pst *pst,NbuErabsRelInfo *pNbuErabsRelInfo);
 EXTERN S16 UeLiNbuNotifyPlmnInfo(Pst *pst,NbuNotifyPlmnInfo  *p_ueMsg);
 EXTERN S16 cmUnPkNbuNotifyPlmnInfo(NbuNotifyPlmnInfoHdl func,Pst *pst,Buffer *mBuf);
 EXTERN S16 UeLiNbuUeIpInfoUpdt(Pst * pst, NbuUeIpInfoUpdt * p_ueMsg);
-EXTERN S16 UeLiNbuResetBearerReestablishmentFlag(Pst * pst, NbuResetBearerReestablishmentFlagInd * p_ueMsg);
 
 PRIVATE S16 ueHandleEvtFromTfw
 (
@@ -184,11 +183,6 @@ PRIVATE S16 ueHandleEvtFromEnodeB
         ret = cmUnPkNbuUeIpInfoUpdt(UeLiNbuUeIpInfoUpdt, pst, mBuf);
         break;
       }
-      /*case EVTNBURESETBEARERREESTFLG:
-      {
-         ret = cmUnPkNbuResetBearerReestablishmentFlag(UeLiNbuResetBearerReestablishmentFlag, pst, mBuf);
-         break;
-      }*/
 
       default:
       {

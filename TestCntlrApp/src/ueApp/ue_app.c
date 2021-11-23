@@ -1373,9 +1373,6 @@ PUBLIC S16 ueAppUtlBldTauReq
    tauReq->epsUpdType.pres = TRUE;
    tauReq->epsUpdType.actv = p_ueMsg->msg.ueUetTauRequest.ActvFlag;
    tauReq->epsUpdType.type = p_ueMsg->msg.ueUetTauRequest.epsUpdtType;
-   /*if (tauReq->epsUpdType.actv) {
-     ueCb->bearerReestablishmentAfterCtxtRel = TRUE;
-   }*/
    /*NAS key set identifier IE*/
    tauReq->nasKsi.pres = TRUE;
    tauReq->nasKsi.id = ueCb->secCtxt.ksi;
@@ -4664,8 +4661,6 @@ PRIVATE S16 ueSendServiceRequest
       UE_LOG_ERROR(ueAppCb, "Could not Send the Service request");
       RETVALUE(RFAILED);
    }
-   //printf("Setting >bearerReestablishmentAfterCtxtRel in ueApp\n");
-   //ueCb->bearerReestablishmentAfterCtxtRel = TRUE;
    UE_LOG_EXITFN(ueAppCb, ROK);
 }
 
@@ -6815,7 +6810,6 @@ PRIVATE S16 ueAppEmmHndlInServiceRej
 
    UE_LOG_DEBUG(ueAppCb, "Handling Incoming Service Reject message");
    /*send message to USER*/
-   //ueCb->bearerReestablishmentAfterCtxtRel = FALSE;
    ret = ueAppRcvEmmMsg(evnt, evnt->m.emmEvnt->msgId, ueCb);
 
    UE_LOG_EXITFN(ueAppCb, ret);
@@ -7591,7 +7585,6 @@ PRIVATE S16 ueAppEmmHndlInTauReject(CmNasEvnt *evnt, UeCb *ueCb)
 
    UE_LOG_DEBUG(ueAppCb, "Handling UE Tracking Area Update Reject Messsage");
 
-   //ueCb->bearerReestablishmentAfterCtxtRel = FALSE;
    ret = ueAppRcvEmmMsg(evnt, evnt->m.emmEvnt->msgId, ueCb);
 
    UE_LOG_EXITFN(ueAppCb, ret);

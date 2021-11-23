@@ -568,7 +568,6 @@ typedef struct _nbCb
    Bool                      s1HoDone;
 #endif
    TauParams                 tau[NB_MAX_UE_SUPPORTED];
-   U8                        nbIpInfo[NB_MAX_UE_SUPPORTED];
 }NbCb;
 /** @brief This structure is temparerly store on stack which contains
  * UE specific Paging Message information.
