@@ -2386,10 +2386,11 @@ PUBLIC S16 nbPrcIncS1apMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType) {
     if (ret == ROK) {
 #ifdef MULTI_ENB_SUPPORT
       if (ueCb->s1HoInfo != NULLP) {
-        NB_LOG_DEBUG(&nbCb,"Released UE context from source ENB after S1AP "
-                       "handover as part of S1 overall reloc timer expiry. "
-                       "Deleting the S1 handover context for UE Id: %u",
-                       ueCb->ueId);
+        NB_LOG_DEBUG(&nbCb,
+                     "Released UE context from source ENB after S1AP "
+                     "handover as part of S1 overall reloc timer expiry. "
+                     "Deleting the S1 handover context for UE Id: %u",
+                     ueCb->ueId);
         nbCb.s1HoDone = FALSE;
         NB_FREE(ueCb->s1HoInfo, sizeof(NbS1HoInfo));
       } else {
