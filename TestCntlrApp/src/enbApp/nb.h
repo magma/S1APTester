@@ -355,8 +355,6 @@ struct _nbUeCb {
   U16 encryptionAlgo; // Updated from ICS Req
   U16 integrityAlgo;  // Updated from ICS Req
 #endif
-  U8 noIpInfo;
-  Bool bearerReestablishmentAfterCtxtRel;
 };
 
 typedef struct _nbUeCb NbUeCb;

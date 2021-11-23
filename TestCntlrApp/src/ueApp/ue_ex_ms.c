@@ -183,7 +183,6 @@ PRIVATE S16 ueHandleEvtFromEnodeB
         ret = cmUnPkNbuUeIpInfoUpdt(UeLiNbuUeIpInfoUpdt, pst, mBuf);
         break;
       }
-
       default:
       {
          /* should hopefully never get here */
