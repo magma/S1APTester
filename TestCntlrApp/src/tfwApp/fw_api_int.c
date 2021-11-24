@@ -164,6 +164,7 @@ PUBLIC S16 handlTauReq(ueTauReq_t* data)
    FW_ALLOC_MEM(fwCb, &uetMsg, sizeof(UetMessage));
    uetMsg->msgType = UE_TAU_REQUEST_TYPE;
    ueTauReq = &uetMsg->msg.ueUetTauRequest;
+   cmMemset((U8 *)(ueTauReq), 0, sizeof(UeUetTauRequest));
    FW_ALLOC_MEM(fwCb, &ueIdCb, sizeof(UeIdCb));
    insertUeCb(data->ue_Id, data->type, data->Actv_flag, ueIdCb);
 
@@ -172,6 +173,7 @@ PUBLIC S16 handlTauReq(ueTauReq_t* data)
    ueTauReq->ueMtmsi.mTmsi = data->ueMtmsi.mTmsi;
    ueTauReq->epsUpdtType = data->type;
    ueTauReq->ActvFlag = data->Actv_flag;
+   ueTauReq->epsBearerCtxSts = data->epsBearerCtxSts;
    fwSendToUeApp(uetMsg);
 
    FW_LOG_DEBUG(fwCb, "\n-------------------------------\n\

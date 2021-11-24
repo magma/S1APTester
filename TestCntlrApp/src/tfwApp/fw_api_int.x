@@ -1080,6 +1080,7 @@ typedef struct ueTauReq
    ueMtmsi_t ueMtmsi;
    Eps_Updt_Type type;
    U8 Actv_flag;
+   U16 epsBearerCtxSts;
 }ueTauReq_t;
 
 typedef struct ueTauAccept
