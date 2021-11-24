@@ -95,7 +95,7 @@ EXTERN S16 ueAppBldAndSndIpAddrToNb(U8, U8*, U8, Pst*);
 EXTERN S16 ueDbmFetchUeWithS_TMSI(UePagingMsg*, PTR*);
 EXTERN S16 ueDbmDelUe(UeAppCb*, U32);
 EXTERN S16 ueUiProcErabsInfoMsg(Pst*, NbuErabsInfo*);
-EXTERN S16 ueAppBldAndSndIpInfoRspToNb(UeCb*, U8, Pst*);
+EXTERN S16 ueAppBldAndSndIpInfoRspToNb(UeCb *ueCb, NbuUeIpInfoReq  *p_ueMsg, Pst *pst);
 PUBLIC S16 ueSendErabRelInd(NbuErabRelIndList*, Pst*);
 PRIVATE S16 ueProcUeActvDedBerAcc(UetMessage *p_ueMsg,Pst *pst);
 PRIVATE S16 ueProcUeDeActvBerAcc(UetMessage *p_ueMsg,Pst *pst);
@@ -159,7 +159,7 @@ PRIVATE S16 ueAppEmmHndlInAuthReq(CmNasEvnt *evnt, UeCb *ueCb);
 PRIVATE S16 ueAppEmmHndlInSecModecmd(CmNasEvnt *evnt, UeCb *ueCb);
 PRIVATE S16 ueAppEsmHndlIncActDefBearerReq(UeEsmCb*, CmNasEvnt*, UeCb*,U8*,U8);
 PRIVATE S16 ueAppEmmHndlInAttachAccept(CmNasEvnt *evnt, UeCb  *ueCb);
-EXTERN S16 ueUiProcIpInfoReqMsg(UeCb * p_ueCb, U8 bearerId);
+EXTERN S16 ueUiProcIpInfoReqMsg(UeCb * p_ueCb, NbuUeIpInfoReq  *p_ueMsg);
 EXTERN S16 ueUiProcIpInfoUpdtMsg(UeCb *p_ueCb, NbuUeIpInfoUpdt *);
 PRIVATE S16 ueAppEsmHndlOutEsmInformationRsp(UeEsmCb *esmCb, CmNasEvnt *evnt);
 #if 0
@@ -177,7 +177,7 @@ PRIVATE Void updateGutiInUeCb(UeCb *ueCb, CmEmmEpsMI *guti);
 PRIVATE S16 compareGutiInUeCb(UeCb *ueCb, CmEmmEpsMI *epsMi);
 PRIVATE Void reverse(U8* str);
 PRIVATE U8* itoa(int num, U8* str, int base);
-PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId, NbuUeIpInfoRsp *);
+PUBLIC Void populateIpInfo(UeCb *ueCb, NbuUeIpInfoRsp *, NbuUeIpInfoReq *);
 PRIVATE S16 ueAppRcvEmmMsg(CmNasEvnt *evnt, U8 emmMsgType, UeCb *ueCb);
 PRIVATE S16 ueAppUtlMovEsmCbTransToBid(UeEsmCb *esmCb, UeCb *ueCb);
 PRIVATE S16 uefillDefEsmInfoToUeCb(UeCb *ueCb, CmNasEvnt*, U8, U8);
@@ -6336,20 +6336,20 @@ PRIVATE Void ueAppFormIpv6Addr(NbuUeIpInfoRsp *ueIpInfoRsp, UeRabCb *ueRabCb) {
  *       File:  ue_app.c
  *
  */
-PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId,
-                           NbuUeIpInfoRsp *ueIpInfoRsp)
+PUBLIC Void populateIpInfo(UeCb *ueCb,
+                           NbuUeIpInfoRsp *ueIpInfoRsp, NbuUeIpInfoReq  *ueIpInfoReq)
 {
   U8 idx = 0;
   CmEsmPdnAdd *pdn_addr = NULLP;
   ueIpInfoRsp->ueId = ueCb->ueId;
-  ueIpInfoRsp->bearerId = bearerId;
+  ueIpInfoRsp->bearerId = ueIpInfoReq->bearerId;
 
   for (idx = 1; idx < UE_APP_MAX_DRBS; idx++) {
     if (ueCb->drbs[idx] == UE_APP_DRB_INUSE) {
-      if (ueCb->ueRabCb[idx - 1].epsBearerId == bearerId) {
+      if (ueCb->ueRabCb[idx - 1].epsBearerId == ueIpInfoReq->bearerId) {
         pdn_addr = &ueCb->ueRabCb[idx - 1].pAddr;
         ueIpInfoRsp->berType = ueCb->ueRabCb[idx - 1].bearerType;
-        ueIpInfoRsp->lnkEpsBearId = bearerId;
+        ueIpInfoRsp->lnkEpsBearId = ueIpInfoReq->bearerId;
         _fill_pf_comp(idx, ueCb, ueIpInfoRsp);
         break;
       }
@@ -6363,7 +6363,11 @@ PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId,
       ueAppFormIpv4Addr(ueIpInfoRsp, pdn_addr);
     } else if (pdn_addr->pdnType == CM_ESM_PDN_IPV6) {
       ueIpInfoRsp->pdnType = CM_ESM_PDN_IPV6;
-      if (ueCb->emmCb.state == UE_EMM_UE_REGISTERED) {
+      /* If Initial Context Setup Req is received, and UE is already
+       * in UE_EMM_UE_REGISTERED state,
+       * set bearerReestablishmentAfterCtxtRel flag
+       */
+      if ((ueIpInfoReq->isInitCtxtSetUp) && (ueCb->emmCb.state == UE_EMM_UE_REGISTERED)) {
         ueIpInfoRsp->bearerReestablishmentAfterCtxtRel = TRUE;
       }
       // Convert IPv6 address arrary to ":" separated notation(x:x:x:x:x:x:x:x)
@@ -6374,7 +6378,11 @@ PUBLIC Void populateIpInfo(UeCb *ueCb, U8 bearerId,
       ueAppFormIpv4Addr(ueIpInfoRsp, pdn_addr);
       // Convert IPv6 address arrary to ":" separated notation(x:x:x:x:x:x:x:x)
       ueAppFormIpv6Addr(ueIpInfoRsp, &(ueCb->ueRabCb[idx - 1]));
-      if (ueCb->emmCb.state == UE_EMM_UE_REGISTERED) {
+      /* If Initial Context Setup Req is received, and UE is already
+       * in UE_EMM_UE_REGISTERED state,
+       * set bearerReestablishmentAfterCtxtRel flag
+       */
+      if ((ueIpInfoReq->isInitCtxtSetUp) && (ueCb->emmCb.state == UE_EMM_UE_REGISTERED)) {
         ueIpInfoRsp->bearerReestablishmentAfterCtxtRel = TRUE;
       }
 
@@ -8259,7 +8267,7 @@ PUBLIC S16 ueUiProcIpInfoUpdtMsg(UeCb *ueCb, NbuUeIpInfoUpdt *ipInfoUpdt) {
   RETVALUE(ROK);
 }
 
-PUBLIC S16 ueUiProcIpInfoReqMsg(UeCb *p_ueCb, U8 bearerId) {
+PUBLIC S16 ueUiProcIpInfoReqMsg(UeCb *p_ueCb, NbuUeIpInfoReq  *p_ueMsg) {
   UeAppCb *ueAppCb = NULLP;
   UE_GET_CB(ueAppCb);
   UE_LOG_ENTERFN(ueAppCb);
@@ -8273,10 +8281,10 @@ PUBLIC S16 ueUiProcIpInfoReqMsg(UeCb *p_ueCb, U8 bearerId) {
     p_ueCb->is_actv_dflt_eps_ber_ctxt_rej = FALSE;
     UE_LOG_DEBUG(ueAppCb, "Sending IpInfoRej message as "
                           "is_actv_dflt_eps_ber_ctxt_rej flag is set \n");
-    ueAppBldAndSndIpInfoRejToNb(p_ueCb, bearerId, &ueAppCb->nbPst);
+    ueAppBldAndSndIpInfoRejToNb(p_ueCb, p_ueMsg->bearerId, &ueAppCb->nbPst);
     RETVALUE(ROK);
   }
-  ueAppBldAndSndIpInfoRspToNb(p_ueCb, bearerId, &ueAppCb->nbPst);
+  ueAppBldAndSndIpInfoRspToNb(p_ueCb, p_ueMsg, &ueAppCb->nbPst);
   RETVALUE(ROK);
 }
 

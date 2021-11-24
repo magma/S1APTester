@@ -759,7 +759,7 @@ EXTERN Void nbStopTmr(PTR cb, S16 event);
 
 EXTERN Bool nbIsTmrRunning(CmTimer *tmr, S16 event);
 
-EXTERN  Void nbHandleUeIpInfoReq(U32 ueId,U8 bearerId);
+EXTERN  Void nbHandleUeIpInfoReq(U32 ueId,U8 bearerId, Bool isInitCtxtSetUp);
 
 EXTERN Void nbSendLmAlarm(U16 category, U16 event, U16 cause);
 

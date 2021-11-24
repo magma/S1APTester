@@ -98,11 +98,11 @@ EXTERN S16 ueDbmFetchUe(U32 ueId, PTR *ueCb);
 EXTERN S16 UeLiNbuInitialUeMsg(Pst *pst, NbuInitialUeMsg *msg);
 EXTERN S16 UeLiNbuUlNasMsgDatRsp(Pst *pst, NbuUlNasMsg *msg);
 EXTERN S16 UeLiNbuSendUeIpInfo(Pst *pst,NbuUeIpInfoRsp   *ueInfo);
-EXTERN S16 ueUiProcIpInfoReqMsg(UeCb * p_ueCb, U8 bearerId);
-EXTERN S16 ueAppBldAndSndIpInfoRspToNb(UeCb *ueCb,U8 bearerId, Pst *pst);
+EXTERN S16 ueUiProcIpInfoReqMsg(UeCb * p_ueCb, NbuUeIpInfoReq  *p_ueMsg);
+EXTERN S16 ueAppBldAndSndIpInfoRspToNb(UeCb *ueCb, NbuUeIpInfoReq  *ueIpInfoReq, Pst *pst);
 EXTERN S16 UeLiNbuUeIpInfoReq(Pst *pst,NbuUeIpInfoReq  *p_ueMsg);
 EXTERN S16 ueSendUeIpInfoRsp(U32 ueId,U8 bearedId, S8 * ipAddr);
-EXTERN Void populateIpInfo(UeCb *ueCb, U8 bearerId, NbuUeIpInfoRsp *);
+EXTERN Void populateIpInfo(UeCb *ueCb, NbuUeIpInfoRsp *, NbuUeIpInfoReq *);
 
 EXTERN S16 UeLiNbuPagingMsg(Pst *pst, UePagingMsg  *p_ueMsg);
 EXTERN S16 ueUiProcPagingMsg(UePagingMsg *p_ueMsg, Pst *pst);
@@ -113,12 +113,12 @@ PUBLIC S16 UeLiNbuErabRelInd(Pst *pst,NbuErabRelIndList *msg);
 EXTERN S16 UeLiNbuNotifyPlmnInfo(Pst *pst,NbuNotifyPlmnInfo  *p_ueMsg);
 EXTERN S16 UeLiNbuSendUeIpInfoRej(Pst *pst, NbuUeIpInfoRej *ueInfo);
 
-PUBLIC S16 ueAppBldAndSndIpInfoRspToNb(UeCb *ueCb, U8 bearerId, Pst *pst)
+PUBLIC S16 ueAppBldAndSndIpInfoRspToNb(UeCb *ueCb, NbuUeIpInfoReq  *ueIpInfoReq, Pst *pst)
 {
   S16 ret = ROK;
   NbuUeIpInfoRsp *ueIpInfoRsp = NULLP;
   ueIpInfoRsp = (NbuUeIpInfoRsp *)ueAlloc(sizeof(NbuUeIpInfoRsp));
-  populateIpInfo(ueCb, bearerId, ueIpInfoRsp);
+  populateIpInfo(ueCb, ueIpInfoRsp, ueIpInfoReq);
 
   ret = UeLiNbuSendUeIpInfo(pst, ueIpInfoRsp);
   RETVALUE(ret);
@@ -416,7 +416,7 @@ PUBLIC S16 UeLiNbuUeIpInfoReq
    }
 
    /* process the received received TFW message */
-   if((ret = ueUiProcIpInfoReqMsg(ueCb, bearerId)) != ROK)
+   if((ret = ueUiProcIpInfoReqMsg(ueCb, p_ueMsg)) != ROK)
    {
       UE_LOG_ERROR(ueAppCb, "Failed while processing the Msg Request");
       ret = RFAILED;

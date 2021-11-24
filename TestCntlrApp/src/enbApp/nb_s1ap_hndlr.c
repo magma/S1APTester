@@ -2250,12 +2250,12 @@ PRIVATE S16 nbHandleInitCtxtPrcSetup(NbUeCb *ueCb, S1apPdu *pdu) {
               found = FALSE;
               continue;
             }
-            nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId);
+            nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId, TRUE);
           }
           nbCb.initCtxtSetupFailedErabs[ueCb->ueId - 1].numFailedErabs = 0;
         } else {
           for (idx = 0; idx < erabInfo->noOfComp; idx++) {
-            nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId);
+            nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId, TRUE);
           }
         }
         NB_FREE(erabInfo->erabs, (erabInfo->noOfComp * sizeof(NbErabCb)));
@@ -2264,7 +2264,7 @@ PRIVATE S16 nbHandleInitCtxtPrcSetup(NbUeCb *ueCb, S1apPdu *pdu) {
         retVal = nbSendErabsInfo(ueCb, erabInfo, NULL, ueRadCapRcvd);
         // Do the IP-query to ueapp for received bearers
         for (idx = 0; idx < erabInfo->noOfComp; idx++) {
-          nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId);
+          nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId, TRUE);
         }
         nbStartDelayTimerForICSRsp(ueCb->ueId, erabInfo);
       }
@@ -2302,7 +2302,7 @@ PRIVATE S16 nbHandleRabSetupMsg(NbUeCb *ueCb, S1apPdu *pdu) {
     /* query the ip address from ueapp for the received bearers */
     if (erabInfo->noOfComp > 0) {
       for (idx = 0; idx < erabInfo->noOfComp; idx++) {
-        nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId);
+        nbHandleUeIpInfoReq(ueCb->ueId, erabInfo->erabs[idx].erabId, FALSE);
       }
     }
     // Check if erab setup req needs to be dropped
@@ -5587,7 +5587,7 @@ PUBLIC S16 nbPrcPathSwReqAck
               tunCb->remTeId = remTeId;
               NB_LOG_DEBUG(&nbCb, "tunCb updated with remTeID%d", remTeId);
               // Create new tunnel
-              nbHandleUeIpInfoReq(ueCb->ueId,bearerId);
+              nbHandleUeIpInfoReq(ueCb->ueId,bearerId, FALSE);
 	        }
 
             break;

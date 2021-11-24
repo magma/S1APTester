@@ -169,6 +169,7 @@ typedef struct _nbuUeIpInfoReq
 {
    U32 ueId;
    U8 bearerId;
+   Bool isInitCtxtSetUp;
 }NbuUeIpInfoReq;
 
 typedef struct _nbuUeIpInfoUpdt {

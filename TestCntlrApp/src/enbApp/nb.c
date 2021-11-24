@@ -1433,7 +1433,7 @@ PUBLIC S16 NbEnbX2HOTriggerReqHdl
    s1apConCb->mme_ue_s1ap_id = mme_ue_s1ap_id;
    ueCb->s1ConCb             = s1apConCb;
 
-   nbHandleUeIpInfoReq(ueCb->ueId,erabId);
+   nbHandleUeIpInfoReq(ueCb->ueId,erabId, FALSE);
    if(nbS1apFillPathSwReq(ueCb,&datEvt.pdu,erabId,tunInfo->lclTeId,numOfErabIds,mme_ue_s1ap_id) != ROK)
    {
      NB_LOG_ERROR(&nbCb, "Failed to build s1ap Context Rel Request");
@@ -2285,7 +2285,7 @@ PUBLIC S16 nbPrcS1HoCommand(NbUeCb *ueCb, S1apPdu *pdu) {
   NB_LOG_DEBUG(&nbCb,
                "Inserted new tunnel info for UE Id: %u and Bearer Id: %u",
                ueCb->ueId, tunInfo->bearerId);
-  nbHandleUeIpInfoReq(ueCb->ueId, erabId);
+  nbHandleUeIpInfoReq(ueCb->ueId, erabId, FALSE);
   ueCb->enbId = ueCb->s1HoInfo->tgtEnbId;
 
   // Send the S1 Handover Notify
