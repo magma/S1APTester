@@ -6363,7 +6363,7 @@ PUBLIC Void populateIpInfo(UeCb *ueCb,
       ueAppFormIpv4Addr(ueIpInfoRsp, pdn_addr);
     } else if (pdn_addr->pdnType == CM_ESM_PDN_IPV6) {
       ueIpInfoRsp->pdnType = CM_ESM_PDN_IPV6;
-      /* If Initial Context Setup Req is received, and UE is already
+      /* If Initial Context Setup Req is received and UE is already
        * in UE_EMM_UE_REGISTERED state,
        * set bearerReestablishmentAfterCtxtRel flag
        */
@@ -6378,7 +6378,7 @@ PUBLIC Void populateIpInfo(UeCb *ueCb,
       ueAppFormIpv4Addr(ueIpInfoRsp, pdn_addr);
       // Convert IPv6 address arrary to ":" separated notation(x:x:x:x:x:x:x:x)
       ueAppFormIpv6Addr(ueIpInfoRsp, &(ueCb->ueRabCb[idx - 1]));
-      /* If Initial Context Setup Req is received, and UE is already
+      /* If Initial Context Setup Req is received and UE is already
        * in UE_EMM_UE_REGISTERED state,
        * set bearerReestablishmentAfterCtxtRel flag
        */
