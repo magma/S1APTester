@@ -522,7 +522,7 @@ PUBLIC S16 NbHandleUeIpInfoRsp(NbuUeIpInfoRsp *rsp) {
   RETVALUE(nbCreateUeTunnReq(ueId, bearerId, ueIp4Addr, ueIp6Addr, rsp));
 }
 
-PUBLIC Void nbHandleUeIpInfoReq(U32 ueId,U8 bearerId)
+PUBLIC Void nbHandleUeIpInfoReq(U32 ueId,U8 bearerId, Bool isInitCtxtSetUp)
 {
    S16 ret             = ROK;
    NbuUeIpInfoReq *msg = NULLP;
@@ -530,6 +530,7 @@ PUBLIC Void nbHandleUeIpInfoReq(U32 ueId,U8 bearerId)
    NB_ALLOC(&msg, sizeof(NbuUeIpInfoReq));
    msg->ueId      = ueId;
    msg->bearerId  = bearerId;
+   msg->isInitCtxtSetUp  = isInitCtxtSetUp;
 
    /* Send the Ue-ip info request to UEAPP */
    ret = cmPkNbuUeIpInfoReq(&nbCb.ueAppPst, msg);

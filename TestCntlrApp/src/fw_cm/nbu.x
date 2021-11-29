@@ -169,6 +169,7 @@ typedef struct _nbuUeIpInfoReq
 {
    U32 ueId;
    U8 bearerId;
+   Bool isInitCtxtSetUp;
 }NbuUeIpInfoReq;
 
 typedef struct _nbuUeIpInfoUpdt {
@@ -231,6 +232,13 @@ typedef struct _nbuUeIpInfoRsp {
   U32 lnkEpsBearId;
   U8 noOfPfs;
   TftPfs pfList[CM_MAX_PKT_FILTERS];
+  /* bearerReestablishmentAfterCtxtRel flag indicates
+   * bearer/s re-establishment due to UE
+   * moving from idle to connected state. No need to
+   * send router solicit message as UE has
+   * already been allocated ipv6 address
+   */
+  Bool bearerReestablishmentAfterCtxtRel;
 } NbuUeIpInfoRsp;
 
 typedef struct _nbuUeIpInfoRej {

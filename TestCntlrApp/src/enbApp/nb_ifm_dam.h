@@ -143,6 +143,13 @@ typedef struct NbDamTunInfo {
   U32 pdnIp4Addr;
   U8 pdnIp6Addr[NB_IPV6_ADDRESS_LEN];
   NbTft tft;
+  /* bearerReestablishmentAfterCtxtRel flag
+   * indicates bearer/s re-establishment is due to UE
+   * moving from idle to connected state. No need to
+   * send router solicit message as UE has
+   * already been allocated ipv6 address
+   */
+  Bool bearerReestablishmentAfterCtxtRel;
 } NbDamTnlInfo;
 
 /**
