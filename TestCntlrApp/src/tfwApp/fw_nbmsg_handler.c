@@ -284,32 +284,32 @@ PUBLIC S16 sendNbAppS1SetupTimeOutIndToTstCntlr(Void)
 /*
  *       Fun: sendNbAppUeCtxRelIndToTstCntlr
  *
- *       Desc: 
- * 
+ *       Desc:
+ *
  *       Ret:  ROK - ok; RFAILED - failed
  *
  *       Notes: none
  *
  *       File:  fw_nbmsg_handler.c
  */
-PUBLIC S16 sendNbAppUeCtxRelIndToTstCntlr(NbUeCtxRelInd *rsp)
-{
-   S16 ret = ROK;
-   FwCb *fwCb = NULLP;
-   FwNbUeCtxRelInd_t *msg = NULLP;
+PUBLIC S16 sendNbAppUeCtxRelIndToTstCntlr(NbUeCtxRelInd *rsp) {
+  S16 ret = ROK;
+  FwCb *fwCb = NULLP;
+  FwNbUeCtxRelInd_t *msg = NULLP;
 
-   FW_GET_CB(fwCb);
-   FW_LOG_ENTERFN(fwCb);
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
 
-   FW_ALLOC_MEM(fwCb, &msg, sizeof(FwErabRelInd_t));
+  FW_ALLOC_MEM(fwCb, &msg, sizeof(FwNbUeCtxRelInd_t));
 
-   msg->ueId = rsp->ueId;
+  msg->ueId = rsp->ueId;
+  cmMemcpy(&msg->relCause, &rsp->relCause, sizeof(RelCause));
 
-   (*fwCb->testConrollerCallBack)(UE_CTX_REL_IND, msg,
-         sizeof(FwNbUeCtxRelInd_t));
-   FW_FREE_MEM(fwCb, msg, sizeof(FwNbUeCtxRelInd_t));
-   FW_LOG_EXITFN(fwCb, ret);
-} /* sendNbAppUeCtxRelIndToTstCntlr */
+  (*fwCb->testConrollerCallBack)(UE_CTX_REL_IND, msg,
+                                 sizeof(FwNbUeCtxRelInd_t));
+  FW_FREE_MEM(fwCb, msg, sizeof(FwNbUeCtxRelInd_t));
+  FW_LOG_EXITFN(fwCb, ret);
+} // sendNbAppUeCtxRelIndToTstCntlr
 
 /*
  *       Fun: sendNbAppIntCtxSetupIndToTstCntlr
@@ -340,7 +340,7 @@ PUBLIC S16 sendNbAppIntCtxSetupIndToTstCntlr(NbIntCtxtSetUpInd *rsp)
          sizeof(FwNbIntCtxSetupInd_t));
    FW_FREE_MEM(fwCb, msg, sizeof(FwNbIntCtxSetupInd_t));
    FW_LOG_EXITFN(fwCb, ret);
-} /* sendNbAppUeCtxRelIndToTstCntlr */
+} // sendNbAppIntCtxSetupIndToTstCntlr
 
 /*
  *
@@ -800,8 +800,8 @@ PUBLIC S16 handleNbAppMsg
          FW_LOG_DEBUG(fwCb, "Recieved NB_S1_HANDOVER_CANCEL_ACK_IND from EnodeB");
          sendNbAppS1HoCancelAckIndToTstCntlr(&nbRspMsg->t.s1HoCancelAckInd);
          break;
-      case NB_MME_STATUS_TRNSFR_IND:
-         FW_LOG_DEBUG(fwCb, "Recieved NB_MME_STATUS_TRNSFR_IND from EnodeB");
+      case NB_S1_MME_STATUS_TRNSFR_IND:
+         FW_LOG_DEBUG(fwCb, "Recieved NB_S1_MME_STATUS_TRNSFR_IND from EnodeB");
          sendNbAppMmeStatusTrnsfrIndToTstCntlr(&nbRspMsg->t.mmeStatusTrnsfrInd);
          break;
 #endif

@@ -323,7 +323,8 @@ typedef enum {
   S1_HO_SUCCESS = 0,
   S1_HO_FAILURE,
   S1_HO_CANCEL,
-  S1_HO_TIMER_EXPIRY
+  S1_HO_RELOC_TMR_EXPIRY,
+  S1_HO_OVRALL_TMR_EXPIRY
 } S1HoEvents;
 
 typedef struct _nbS1HoInfo {
