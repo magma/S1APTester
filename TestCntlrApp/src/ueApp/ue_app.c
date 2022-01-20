@@ -9382,7 +9382,7 @@ PRIVATE S16 ueBldEmmInformationToTfw(UetMessage *tfwMsg, UeCb *ueCb)
    UE_GET_CB(ueAppCb);
    UE_LOG_ENTERFN(ueAppCb);
 
-   UE_LOG_DEBUG(ueAppCb, "Building Detach Accept Indication to TFWAPP");
+   UE_LOG_DEBUG(ueAppCb, "Building EMM Information Indication to TFWAPP");
    tfwMsg->msgType = UE_EMM_INFORMATION_TYPE;
    tfwMsg->msg.ueEmmInformation.ueId = ueCb->ueId;
 
