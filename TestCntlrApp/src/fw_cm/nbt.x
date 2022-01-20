@@ -61,11 +61,16 @@ typedef enum _nbMsgTypes {
 #ifdef MULTI_ENB_SUPPORT
   NB_S1_HANDOVER_REQUIRED,
   NB_S1_HANDOVER_REQ_IND,
+  NB_S1_HANDOVER_REQ_ACK,
   NB_S1_HANDOVER_CMD_IND,
   NB_S1_HANDOVER_CMD_DROP_IND,
+  NB_S1_HANDOVER_FAILURE,
   NB_S1_HANDOVER_PREP_FAIL_IND,
+  NB_S1_HANDOVER_CANCEL,
   NB_S1_HANDOVER_CANCEL_ACK_IND,
-  NB_MME_STATUS_TRNSFR_IND,
+  NB_S1_ENB_STATUS_TRANSFER,
+  NB_S1_MME_STATUS_TRNSFR_IND,
+  NB_S1_HANDOVER_NOTIFY,
 #endif
   NB_UNKNOWN_MSG_TYPE
 } NbMsgTypes;
@@ -336,10 +341,10 @@ typedef struct _nbErabRelRsp
 }NbErabRelRsp;
 /*typedef NbErabRelCmd NbErabRelRsp;*/
 
-typedef struct _nbUeCtxRelInd
-{
-   U32 ueId;
-}NbUeCtxRelInd;
+typedef struct _nbUeCtxRelInd {
+  U32 ueId;
+  NbRelCause relCause;
+} NbUeCtxRelInd;
 typedef struct _nbIntCtxtSetUpInd
 {
    U32 ueId;
@@ -443,7 +448,8 @@ typedef enum {
   NB_S1_HO_SUCCESS = 0,
   NB_S1_HO_FAILURE,
   NB_S1_HO_CANCEL,
-  NB_S1_HO_TIMER_EXPIRY
+  NB_S1_HO_RELOC_TMR_EXPIRY,
+  NB_S1_HO_OVRALL_TMR_EXPIRY
 } NbS1HoEvents;
 
 typedef struct _nbS1HandoverRequired {
@@ -490,6 +496,26 @@ typedef struct _nbMmeStatusTrnsfrInd {
   U32 hoSrcEnbId;
   U32 hoTgtEnbId;
 } NbMmeStatusTrnsfrInd;
+
+typedef struct _nbS1HandoverReqAck {
+  U32 ueId;
+} NbS1HandoverReqAck;
+
+typedef struct _nbS1HandoverCancel {
+  U32 ueId;
+} NbS1HandoverCancel;
+
+typedef struct _nbS1HandoverFailure {
+  U32 ueId;
+} NbS1HandoverFailure;
+
+typedef struct _nbEnbStatusTrnsfr {
+  U32 ueId;
+} NbEnbStatusTrnsfr;
+
+typedef struct _nbS1HandoverNotify {
+  U32 ueId;
+} NbS1HandoverNotify;
 #endif
 
 typedef struct _nbEnbConfigTrnsf
@@ -566,11 +592,16 @@ typedef struct _nbtMsg {
 #ifdef MULTI_ENB_SUPPORT
     NbS1HandoverRequired s1HoRequired;
     NbS1HandoverReqInd s1HoReqInd;
+    NbS1HandoverReqAck s1HoReqAck;
     NbS1HandoverCmdInd s1HoCmdInd;
     NbS1HandoverCmdDropInd s1HoCmdDropInd;
+    NbS1HandoverFailure s1HoFailure;
     NbS1HandoverPrepFailInd s1HoPrepFailInd;
+    NbS1HandoverCancel s1HoCancel;
     NbS1HandoverCancelAckInd s1HoCancelAckInd;
+    NbEnbStatusTrnsfr enbStatusTrnsfr;
     NbMmeStatusTrnsfrInd mmeStatusTrnsfrInd;
+    NbS1HandoverNotify s1HoNotify;
 #endif
   } t;
 } NbtMsg;
@@ -597,7 +628,7 @@ EXTERN S16 NbUiNbtMsgReq(Pst *pst, NbtMsg *req);
 EXTERN Void nbUiSendSuccessResponseToUser(NbMsgTypes msgType);
 EXTERN S16 NbEnbCfgReqHdl(NbConfigReq   *cfg);
 EXTERN S16 nbUiSendResetAckToUser(NbResetAckldg *resetAck);
-EXTERN S16 nbUiSendUeCtxRelIndToUser(U32 ueId);
+EXTERN S16 nbUiSendUeCtxRelIndToUser(U32 ueId, NbRelCause relCause);
 EXTERN S16 nbUiSendIntCtxtSetupIndToUser(U32 ueId, U8 status);
 EXTERN S16 nbUiSendErabRelCmdInfoToUser(NbErabRelCmd *erabRelInfo);
 /********************************************************************30**

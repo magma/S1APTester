@@ -116,6 +116,11 @@ handleEnableOrDisableActvDfltBerReq(UeDropActvDefaultEpsBearCtxtReq_t *data);
 PRIVATE S16 configTaiReq(nbConfigTai_t *data);
 #ifdef MULTI_ENB_SUPPORT
 PUBLIC Void handleS1HandoverRequired(FwNbS1HoRequired_t *data);
+PUBLIC Void handleS1HandoverReqAck(FwNbS1HoReqAck_t *data);
+PUBLIC Void handleS1HandoverFailure(FwNbS1HoFailure_t *data);
+PUBLIC Void handleS1HandoverCancel(FwNbS1HoCancel_t *data);
+PUBLIC Void handleENBStatusTrnsfr(FwNbEnbStatusTrnsfr_t *data);
+PUBLIC Void handleS1HandoverNotify(FwNbS1HoNotify_t *data);
 #endif
 PUBLIC FwCb gfwCb;
 
@@ -1853,7 +1858,182 @@ PUBLIC Void handleS1HandoverRequired(FwNbS1HoRequired_t *data) {
   // Send S1_HANDOVER_REQUIRED to NB APP
   fwSendToNbApp(msgReq);
   RETVOID;
-}
+} // handleS1HandoverRequired
+
+/*
+ *   Fun:   handleS1HandoverReqAck
+ *
+ *   Desc:  This function is used to handle S1 Handover Request Ack
+ *          from Test Controller
+ *
+ *   Ret:   None
+ *
+ *   Notes: None
+ *
+ *   File:  fw_api_int.c
+ */
+PUBLIC Void handleS1HandoverReqAck(FwNbS1HoReqAck_t *data) {
+  FwCb *fwCb = NULLP;
+  NbtRequest *msgReq = NULLP;
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  if (SGetSBuf(fwCb->init.region, fwCb->init.pool, (Data **)&msgReq,
+               (Size)sizeof(NbtRequest)) == ROK) {
+    cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
+  } else {
+    FW_LOG_ERROR(fwCb, "Failed to allocate memory in handleS1HandoverReqAck");
+    RETVOID;
+  }
+
+  msgReq->msgType = NB_S1_HANDOVER_REQ_ACK;
+  cmMemcpy(&msgReq->t.s1HoReqAck, data, sizeof(FwNbS1HoReqAck_t));
+
+  // Send S1_HANDOVER_REQ_ACK to NB APP
+  fwSendToNbApp(msgReq);
+  RETVOID;
+} // handleS1HandoverReqAck
+
+/*
+ *   Fun:   handleS1HandoverFailure
+ *
+ *   Desc:  This function is used to handle S1 Handover Failure
+ *          from Test Controller
+ *
+ *   Ret:   None
+ *
+ *   Notes: None
+ *
+ *   File:  fw_api_int.c
+ */
+PUBLIC Void handleS1HandoverFailure(FwNbS1HoFailure_t *data) {
+  FwCb *fwCb = NULLP;
+  NbtRequest *msgReq = NULLP;
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  if (SGetSBuf(fwCb->init.region, fwCb->init.pool, (Data **)&msgReq,
+               (Size)sizeof(NbtRequest)) == ROK) {
+    cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
+  } else {
+    FW_LOG_ERROR(fwCb, "Failed to allocate memory in handleS1HandoverFailure");
+    RETVOID;
+  }
+
+  msgReq->msgType = NB_S1_HANDOVER_FAILURE;
+  cmMemcpy(&msgReq->t.s1HoFailure, data, sizeof(FwNbS1HoFailure_t));
+
+  // Send S1_HANDOVER_FAILURE to NB APP
+  fwSendToNbApp(msgReq);
+  RETVOID;
+} // handleS1HandoverFailure
+
+/*
+ *   Fun:   handleS1HandoverCancel
+ *
+ *   Desc:  This function is used to handle S1 Handover Cancel
+ *          from Test Controller
+ *
+ *   Ret:   None
+ *
+ *   Notes: None
+ *
+ *   File:  fw_api_int.c
+ */
+PUBLIC Void handleS1HandoverCancel(FwNbS1HoCancel_t *data) {
+  FwCb *fwCb = NULLP;
+  NbtRequest *msgReq = NULLP;
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  if (SGetSBuf(fwCb->init.region, fwCb->init.pool, (Data **)&msgReq,
+               (Size)sizeof(NbtRequest)) == ROK) {
+    cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
+  } else {
+    FW_LOG_ERROR(fwCb, "Failed to allocate memory in handleS1HandoverCancel");
+    RETVOID;
+  }
+
+  msgReq->msgType = NB_S1_HANDOVER_CANCEL;
+  cmMemcpy(&msgReq->t.s1HoCancel, data, sizeof(FwNbS1HoCancel_t));
+
+  // Send S1_HANDOVER_CANCEL to NB APP
+  fwSendToNbApp(msgReq);
+  RETVOID;
+} // handleS1HandoverCancel
+
+/*
+ *   Fun:   handleENBStatusTrnsfr
+ *
+ *   Desc:  This function is used to handle ENB Status Transfer
+ *          from Test Controller
+ *
+ *   Ret:   None
+ *
+ *   Notes: None
+ *
+ *   File:  fw_api_int.c
+ */
+PUBLIC Void handleENBStatusTrnsfr(FwNbEnbStatusTrnsfr_t *data) {
+  FwCb *fwCb = NULLP;
+  NbtRequest *msgReq = NULLP;
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  if (SGetSBuf(fwCb->init.region, fwCb->init.pool, (Data **)&msgReq,
+               (Size)sizeof(NbtRequest)) == ROK) {
+    cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
+  } else {
+    FW_LOG_ERROR(fwCb, "Failed to allocate memory in handleENBStatusTrnsfr");
+    RETVOID;
+  }
+
+  msgReq->msgType = NB_S1_ENB_STATUS_TRANSFER;
+  cmMemcpy(&msgReq->t.enbStatusTrnsfr, data, sizeof(FwNbEnbStatusTrnsfr_t));
+
+  // Send S1_ENB_STATUS_TRANSFER to NB APP
+  fwSendToNbApp(msgReq);
+  RETVOID;
+} // handleENBStatusTrnsfr
+
+/*
+ *   Fun:   handleS1HandoverNotify
+ *
+ *   Desc:  This function is used to handle S1 Handover Notify
+ *          from Test Controller
+ *
+ *   Ret:   None
+ *
+ *   Notes: None
+ *
+ *   File:  fw_api_int.c
+ */
+PUBLIC Void handleS1HandoverNotify(FwNbS1HoNotify_t *data) {
+  FwCb *fwCb = NULLP;
+  NbtRequest *msgReq = NULLP;
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  if (SGetSBuf(fwCb->init.region, fwCb->init.pool, (Data **)&msgReq,
+               (Size)sizeof(NbtRequest)) == ROK) {
+    cmMemset((U8 *)(msgReq), 0, sizeof(NbtRequest));
+  } else {
+    FW_LOG_ERROR(fwCb, "Failed to allocate memory in handleS1HandoverNotify");
+    RETVOID;
+  }
+
+  msgReq->msgType = NB_S1_HANDOVER_NOTIFY;
+  cmMemcpy(&msgReq->t.s1HoNotify, data, sizeof(FwNbS1HoNotify_t));
+
+  // Send S1_HANDOVER_NOTIFY to NB APP
+  fwSendToNbApp(msgReq);
+  RETVOID;
+} // handleS1HandoverNotify
 #endif
 
 /*
@@ -2451,6 +2631,31 @@ PUBLIC S16 tfwApi
       case S1_HANDOVER_REQUIRED: {
          FW_LOG_DEBUG(fwCb, "S1_HANDOVER_REQUIRED");
          handleS1HandoverRequired((FwNbS1HoRequired_t *)msg);
+         break;
+      }
+      case S1_HANDOVER_REQ_ACK: {
+         FW_LOG_DEBUG(fwCb, "S1_HANDOVER_REQ_ACK");
+         handleS1HandoverReqAck((FwNbS1HoReqAck_t *)msg);
+         break;
+      }
+      case S1_HANDOVER_FAILURE: {
+         FW_LOG_DEBUG(fwCb, "S1_HANDOVER_FAILURE");
+         handleS1HandoverFailure((FwNbS1HoFailure_t *)msg);
+         break;
+      }
+      case S1_HANDOVER_CANCEL: {
+         FW_LOG_DEBUG(fwCb, "S1_HANDOVER_CANCEL");
+         handleS1HandoverCancel((FwNbS1HoCancel_t *)msg);
+         break;
+      }
+      case S1_ENB_STATUS_TRANSFER: {
+         FW_LOG_DEBUG(fwCb, "S1_ENB_STATUS_TRANSFER");
+         handleENBStatusTrnsfr((FwNbEnbStatusTrnsfr_t *)msg);
+         break;
+      }
+      case S1_HANDOVER_NOTIFY: {
+         FW_LOG_DEBUG(fwCb, "S1_HANDOVER_NOTIFY");
+         handleS1HandoverNotify((FwNbS1HoNotify_t *)msg);
          break;
       }
 #endif

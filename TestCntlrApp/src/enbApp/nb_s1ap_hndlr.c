@@ -57,7 +57,7 @@ PRIVATE S16 nbS1apFillTAI(NbUeCb*, S1apPdu*, SztTAI*);
 #endif
 PUBLIC S16 nbBuildAndSendIntCtxtSetupRsp(NbUeCb*, NbErabLst*);
 PRIVATE S16 nbBuildIntCtxtSetupRsp(NbUeCb*, NbErabLst*, S1apPdu**);
-PUBLIC S16 nbHandleS1UeReleaseCmd(NbUeCb *ueCb);
+PUBLIC S16 nbHandleS1UeReleaseCmd(NbUeCb *ueCb, NbRelCause relCause);
 PRIVATE S16 nbPrcSuccPdu(U32, S1apPdu*);
 PRIVATE S16 nbPrcUnsuccPdu(U32, S1apPdu*);
 PRIVATE S16 nbRabSetupSndS1apRsp(NbUeCb *ueCb, NbErabLst *erabInfo,
@@ -2333,6 +2333,41 @@ PRIVATE S16 nbHandleRabSetupMsg(NbUeCb *ueCb, S1apPdu *pdu) {
   RETVALUE(retVal);
 }
 
+PUBLIC S16 nbGetS1UeRelCause(S1apPdu *pdu, NbRelCause *relCause) {
+  U8 idx = 0;
+  SztInitiatingMsg *initMsg = &pdu->pdu.val.initiatingMsg;
+  SztUECntxtRlsCmmd *s1UeCtxtRelCmd = &initMsg->value.u.sztUECntxtRlsCmmd;
+  SztProtIE_Field_UECntxtRlsCmmd_IEs *ie = NULLP;
+
+  for (idx = 0; idx < s1UeCtxtRelCmd->protocolIEs.noComp.val; idx++) {
+    ie = s1UeCtxtRelCmd->protocolIEs.member + idx;
+    if (ie->id.val == Sztid_Cause) {
+      relCause->causeType = ie->value.u.sztCause.choice.val;
+      switch (relCause->causeType) {
+      case NB_CAUSE_RADIONW:
+        relCause->causeVal = ie->value.u.sztCause.val.radioNw.val;
+        break;
+      case NB_CAUSE_TRANSPORT:
+        relCause->causeVal = ie->value.u.sztCause.val.transport.val;
+        break;
+      case NB_CAUSE_NAS:
+        relCause->causeVal = ie->value.u.sztCause.val.nas.val;
+        break;
+      case NB_CAUSE_PROTOCOL:
+        relCause->causeVal = ie->value.u.sztCause.val.protocol.val;
+        break;
+      case NB_CAUSE_MISC:
+        relCause->causeVal = ie->value.u.sztCause.val.misc.val;
+        break;
+      default:
+        NB_LOG_ERROR(&nbCb, "Unknown cause received");
+        break;
+      }
+      break;
+    }
+  }
+} // nbGetS1UeRelCause
+
 /** @brief  This function is called by IFM module to pass the received S1AP
 *          PDU
 *
@@ -2356,6 +2391,7 @@ PRIVATE S16 nbHandleRabSetupMsg(NbUeCb *ueCb, S1apPdu *pdu) {
 PUBLIC S16 nbPrcIncS1apMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType) {
   U32 procedureCodeVal;
   U8 ret = RFAILED;
+  NbRelCause relCause = {0};
   // Get the procedure code
   procedureCodeVal = pdu->pdu.val.initiatingMsg.procedureCode.val;
   if (procedureCodeVal == 11) // downlink NAS Transport MSG
@@ -2382,17 +2418,22 @@ PUBLIC S16 nbPrcIncS1apMsg(NbUeCb *ueCb, S1apPdu *pdu, U8 msgType) {
     ret = nbHandleRabSetupMsg(ueCb, pdu);
   } else if (procedureCodeVal == 23) // context release command message
   {
-    ret = nbHandleS1UeReleaseCmd(ueCb);
+    nbGetS1UeRelCause(pdu, &relCause);
+    ret = nbHandleS1UeReleaseCmd(ueCb, relCause);
     if (ret == ROK) {
 #ifdef MULTI_ENB_SUPPORT
       if (ueCb->s1HoInfo != NULLP) {
-        NB_LOG_DEBUG(&nbCb,
-                     "Released UE context from source ENB after S1AP "
-                     "handover as part of S1 overall reloc timer expiry. "
-                     "Deleting the S1 handover context for UE Id: %u",
-                     ueCb->ueId);
-        nbCb.s1HoDone = FALSE;
-        NB_FREE(ueCb->s1HoInfo, sizeof(NbS1HoInfo));
+        if (!(ueCb->s1HoInfo->s1HoEvent == S1_HO_OVRALL_TMR_EXPIRY &&
+              relCause.causeType == NB_CAUSE_RADIONW &&
+              relCause.causeVal == SztCauseRadioNwsuccessful_handoverEnum)) {
+
+          NB_LOG_DEBUG(&nbCb,
+                       "Released UE context from source ENB. "
+                       "Deleting the S1 handover context for UE Id: %u",
+                       ueCb->ueId);
+          nbCb.s1HoDone = FALSE;
+          NB_FREE(ueCb->s1HoInfo, sizeof(NbS1HoInfo));
+        }
       } else {
 #endif
         // Inform the ueApp about UE context release
@@ -3447,21 +3488,48 @@ PRIVATE S16 nbBuildIntCtxtSetupRsp(NbUeCb *ueCb, NbErabLst *erabInfo,
   RETVALUE(ROK);
 }
 
-PUBLIC S16 nbHandleS1UeReleaseCmd(NbUeCb *ueCb) {
+PUBLIC S16 nbHandleS1UeReleaseCmd(NbUeCb *ueCb, NbRelCause relCause) {
   S16 ret;
+
   if (nbCb.delayUeCtxtRelCmp[(ueCb->ueId) - 1].delayUeCtxRelComp != TRUE) {
+    if (ueCb->s1HoInfo != NULLP &&
+        ueCb->s1HoInfo->s1HoEvent == S1_HO_OVRALL_TMR_EXPIRY) {
+      if (relCause.causeType == NB_CAUSE_RADIONW &&
+          relCause.causeVal == SztCauseRadioNwsuccessful_handoverEnum) {
+        NB_LOG_DEBUG(
+            &nbCb, "UE context release cmd received after successful handover. "
+                   "Sending UE context release indication to TFW");
+        ret = nbUiSendUeCtxRelIndToUser(ueCb->ueId, relCause);
+        RETVALUE(ret);
+      }
+    }
+
     /* send the release complete to mme */
     ret = nbCtxtRelSndRlsCmpl(ueCb);
 #ifdef MULTI_ENB_SUPPORT
-   if (ueCb->s1HoInfo != NULLP) {
-     NB_LOG_DEBUG(&nbCb, "UE context release cmd received due to S1 overall reloc timer"
-                   " expiry. Sending UE context release indication to TFW");
-     ret = nbUiSendUeCtxRelIndToUser(ueCb->ueId);
-   } else {
+    if (ueCb->s1HoInfo != NULLP) {
+      if (relCause.causeType == NB_CAUSE_RADIONW &&
+          relCause.causeVal == SztCauseRadioNwsuccessful_handoverEnum) {
+        // Stopping the S1 Reloc Overall Timer
+        NB_LOG_DEBUG(&nbCb, "Stopping timer NB_TMR_S1_OVRL_TMR for UE Id: %u",
+                     ueCb->ueId);
+        nbStopTmr((PTR)ueCb, NB_TMR_S1_OVRL_TMR);
+
+        NB_LOG_DEBUG(
+            &nbCb, "UE context release cmd received after successful "
+                   "S1 handover. Sending UE context release indication to TFW");
+      } else {
+        NB_LOG_DEBUG(
+            &nbCb,
+            "UE context release cmd received due to S1 overall reloc timer"
+            " expiry. Sending UE context release indication to TFW");
+      }
+      ret = nbUiSendUeCtxRelIndToUser(ueCb->ueId, relCause);
+    } else {
 #endif
-     ret = nbIfmDamUeDelReq(ueCb->ueId);
+      ret = nbIfmDamUeDelReq(ueCb->ueId);
 #ifdef MULTI_ENB_SUPPORT
-   }
+    }
 #endif
   } else {
     nbStartDelayTimerForUeCtxRel(ueCb->ueId);
