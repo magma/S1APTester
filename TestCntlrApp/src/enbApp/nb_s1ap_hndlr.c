@@ -192,7 +192,7 @@ PUBLIC S16 nbBuildAndSendS1SetupReq
 
 PUBLIC S16 nbBuildAndSendResetRequest
 (
- NbResetMsgInfo *resetMsgInfo
+ NbResetMsgInfo *resetMsgInfo, UConnId spConnId
 )
 {
    SztUDatEvnt uDatEvnt;
@@ -213,6 +213,7 @@ PUBLIC S16 nbBuildAndSendResetRequest
    uDatEvnt.transId.val = 1;
    uDatEvnt.peerId.pres = PRSNT_NODEF;
    uDatEvnt.peerId.val = nbCb.mmeInfo.mmeId;
+   uDatEvnt.spConnId = spConnId;
 #ifdef MULTI_ENB_SUPPORT
    uDatEvnt.enbId = resetMsgInfo->enbId;
 #endif

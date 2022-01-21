@@ -516,7 +516,7 @@ SztUDatEvnt *uDatEvnt; /* connectionless sdus */
 #ifdef SZ_ENB
    if(peer->nodeType == LSZ_NODE_MME)
    {
-      ret = szMgmtUiEnb[evnt](peer, uDatEvnt->pdu, uSapCb, &cause);
+      ret = szMgmtUiEnb[evnt](peer, uDatEvnt->pdu, uSapCb, &cause, uDatEvnt->spConnId);
    }
 #endif /* SZ_ENB */
 

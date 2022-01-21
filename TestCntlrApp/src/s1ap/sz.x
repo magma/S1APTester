@@ -293,7 +293,7 @@ EXTERN SzCb  szCb;
 typedef S16 (*PFRAM) ARGS((SzConCb *conCb, SzPeerCb *peerCb, S1apPdu *pdu));
 typedef S16 (*PFSZLIMSGHANDLER) ARGS((SzPeerCb *peerCb, S1apPdu *pdu));
 typedef S16 (*PFSZMGMTUIMSGHANDLER) ARGS((SzPeerCb *peerCb, S1apPdu *pdu,
-                                          SzSztSapCb *uSapCb, U8 *cause));
+                                          SzSztSapCb *uSapCb, U8 *cause, UConnId suConnId));
 
 /**********************************************************************
  Externs
@@ -454,7 +454,7 @@ EXTERN S16 szUbndSztSap ARGS((SpId uSapId, U8 opn));
 
 #ifdef SZ_ENB
 EXTERN S16 szMgmtUiSetupReq     ARGS((SzPeerCb *peerCb, S1apPdu *pdu, 
-                                      SzSztSapCb *uSapCb, U8 *cause));
+                                      SzSztSapCb *uSapCb, U8 *cause, UConnId suConnId));
 EXTERN S16 szMgmtLiPaging       ARGS((SzPeerCb *peerCb, S1apPdu *pdu));
 EXTERN S16 szMgmtLiSetupRsp     ARGS((SzPeerCb *peerCb, S1apPdu *pdu));
 EXTERN S16 szMgmtLiSetupFailure ARGS((SzPeerCb *peerCb, S1apPdu *pdu));
@@ -475,17 +475,17 @@ EXTERN S16 szMgmtLiEnbDirTrans  ARGS((SzPeerCb *peerCb, S1apPdu *pdu));
 #endif
 
 EXTERN S16 szMgmtUiInvldMsgHandler ARGS((SzPeerCb *peerCb, S1apPdu *pdu,
-                                      SzSztSapCb *uSapCb, U8 *cause));
+                                      SzSztSapCb *uSapCb, U8 *cause, UConnId suConnId));
 EXTERN S16 szMgmtUiMsgHandler   ARGS((SzPeerCb *peerCb, S1apPdu *pdu,
-                                      SzSztSapCb *uSapCb, U8 *cause));
+                                      SzSztSapCb *uSapCb, U8 *cause, UConnId suConnId));
 EXTERN S16 szMgmtUiRst          ARGS((SzPeerCb *peerCb, S1apPdu *pdu,
-                                      SzSztSapCb *uSapCb, U8 *cause));
+                                      SzSztSapCb *uSapCb, U8 *cause, UConnId suConnId));
 EXTERN S16 szMgmtUiRstAck       ARGS((SzPeerCb *peerCb, S1apPdu *pdu,
-                                      SzSztSapCb *uSapCb, U8 *cause));
+                                      SzSztSapCb *uSapCb, U8 *cause, UConnId suConnId));
 EXTERN S16 szMgmtLiRst          ARGS((SzPeerCb *peerCb, S1apPdu *pdu));
 EXTERN S16 szMgmtLiRstAck       ARGS((SzPeerCb *peerCb, S1apPdu *pdu));
 EXTERN S16 szMgmtUiErrInd       ARGS((SzPeerCb *peerCb, S1apPdu *pdu,
-                                      SzSztSapCb *uSapCb, U8 *cause));
+                                      SzSztSapCb *uSapCb, U8 *cause, UConnId suConnId));
 EXTERN S16 szMgmtLiErrInd       ARGS((SzPeerCb *peerCb, S1apPdu *pdu));
 EXTERN S16 szMgmtLiMsgHandler   ARGS((SzPeerCb *peerCb, S1apPdu *pdu));
 
