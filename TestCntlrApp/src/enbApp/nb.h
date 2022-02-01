@@ -779,7 +779,7 @@ EXTERN S16 nbSendS1RelIndToUeApp(U32 ueId);
 
 EXTERN S16 nbBuildAndSendS1SetupReq(NbMmeId mmeId);
 
-EXTERN S16 nbBuildAndSendResetRequest(NbResetMsgInfo *resetMsgInfo);
+EXTERN S16 nbBuildAndSendResetRequest(NbResetMsgInfo *resetMsgInfo, UConnId spConnId);
 
 EXTERN S16 nbBuildAndSendErabRelInd(U32 enbUeS1apId, U32 mmeUeS1apId,
       U8 numOfErabIds, U8 *erabIdLst);

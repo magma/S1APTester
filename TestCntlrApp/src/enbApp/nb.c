@@ -890,6 +890,7 @@ PUBLIC S16 NbEnbResetReqHdl
 {
    U32 idx = 0;
    S16 ret = ROK;
+   UConnId spConnId = 0;
    NbUeCb *ueCb = NULLP, *prev = NULLP;
    NbResetMsgInfo resetMsgInfo = {0};
    NB_LOG_ENTERFN(&nbCb);
@@ -934,7 +935,9 @@ PUBLIC S16 NbEnbResetReqHdl
    {
       while (cmHashListGetNext(&(nbCb.ueCbLst), (PTR)prev, (PTR *)&ueCb) == ROK)
       {
+	  if (ueCb->enbId ==  resetReq->u.completeRst.enbId) {
          NB_LOG_DEBUG(&nbCb, "Found ueCb->ueId=%d in HashList", ueCb->ueId);
+	 spConnId = ueCb->s1ConCb->spConnId;
          /* Inform the UeApp about UE context release */
          NB_LOG_DEBUG(&nbCb, "Inform UE to release context");
          ret = nbSendS1RelIndToUeApp(ueCb->ueId);
@@ -954,12 +957,16 @@ PUBLIC S16 NbEnbResetReqHdl
          prev = NULLP;
          /* Delete hash list entry for ueCb */
          cmHashListDelete(&(nbCb.ueCbLst), (PTR)ueCb);
+	 break;
+	  } else {
+         prev = ueCb;
+	  }
       }
 #ifdef MULTI_ENB_SUPPORT
    resetMsgInfo.enbId = resetReq->u.completeRst.enbId;
 #endif
    }
-   if(nbBuildAndSendResetRequest(&resetMsgInfo) != ROK)
+   if(nbBuildAndSendResetRequest(&resetMsgInfo, spConnId) != ROK)
    {
       NB_LOG_ERROR(&nbCb,"Failed to send Reset request");
       NB_FREE(resetMsgInfo.enbUeS1apIdLst, sizeof(U32) * resetMsgInfo.s1apIdCnt);

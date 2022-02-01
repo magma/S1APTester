@@ -136,6 +136,7 @@ typedef struct sztUDatEvnt
    TknU32               transId;       /* Transaction Id */
    TknU32               peerId;        /* Peer Identifier */
    S1apPdu              *pdu;          /* S1AP event structure */ 
+   UConnId              spConnId;      /* service provider instance identifier */
 /* Multi eNB support */
 #ifdef MULTI_ENB_SUPPORT
    U32 enbId;
