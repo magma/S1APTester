@@ -122,6 +122,7 @@ PUBLIC Void handleS1HandoverCancel(FwNbS1HoCancel_t *data);
 PUBLIC Void handleENBStatusTrnsfr(FwNbEnbStatusTrnsfr_t *data);
 PUBLIC Void handleS1HandoverNotify(FwNbS1HoNotify_t *data);
 #endif
+PRIVATE S16 handleTfwCleanup(Void);
 PUBLIC FwCb gfwCb;
 
 /* Adding UEID, epsupdate type, active flag into linked list for
@@ -2064,7 +2065,8 @@ PUBLIC S16 tfwApi
 
    if ((NULLP == msg) &&
        (type != ENB_S1_SETUP_REQ) &&
-       (type != SCTP_SHUTDOWN_REQ))
+       (type != SCTP_SHUTDOWN_REQ) &&
+       (type != TFW_CLEANUP))
    {
       FW_LOG_ERROR(fwCb, "recieved NULL parameter in msg");
       FW_LOG_EXITFN(fwCb, RFAILED);
@@ -2726,6 +2728,11 @@ PUBLIC S16 tfwApi
         configTaiReq(
             (nbConfigTai_t *)msg);
         break;
+      }
+      case TFW_CLEANUP: {
+         FW_LOG_DEBUG(fwCb, "Process TFW_CLEANUP");
+         handleTfwCleanup();
+         break;
       }
      default:
       {
@@ -3887,3 +3894,23 @@ PRIVATE S16 configTaiReq(nbConfigTai_t *data)
    FW_LOG_EXITFN(fwCb, ROK);
 }
 
+/*
+ *   Fun:   handleTfwCleanup
+ *
+ *   Ret:   ROK/RFAILED
+ *
+ *   Notes: None
+ *
+ *   File:  fw_api_int.c
+ */
+PRIVATE S16 handleTfwCleanup(Void) {
+  FwCb *fwCb = NULLP;
+  S16 ret = ROK;
+
+  FW_GET_CB(fwCb);
+  FW_LOG_ENTERFN(fwCb);
+
+  ret = fwDeregTmr(fwCb);
+
+  FW_LOG_EXITFN(fwCb, ret);
+} // handleTfwCleanup
