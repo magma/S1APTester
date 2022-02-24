@@ -2905,7 +2905,8 @@ PUBLIC S16 nbGetErabInfoFrmErabSetup(NbUeCb *ueCb,
             {
                /* This means both IPv4 and IPv6 addresses are present. We are */
                /* yet to support this option                                  */
-               RETVALUE(RFAILED);
+               // TODO: Add ipv4v6 support
+               break;
             }
       }
       if (ROK != cmHashListInsert(&(ueCb->tunnInfo), (PTR)tunInfo,
@@ -2996,7 +2997,6 @@ PUBLIC S16 nbGetErabInfoFrmIntCnxt
             erabItem->e_RAB_ID.val);
 #endif
       /* store the SGW IP Address */
-      printf("transportLyrAddr.len=%d\n", erabItem->transportLyrAddr.len);
       switch(erabItem->transportLyrAddr.len)
       {
          case 32:
@@ -3034,6 +3034,7 @@ PUBLIC S16 nbGetErabInfoFrmIntCnxt
             {
                /* This means both IPv4 and IPv6 addresses are present. We are */
                /* yet to support this option                                  */
+              // TODO: Add ipv4v6 support
               break;
             }
       }
