@@ -620,6 +620,8 @@ typedef struct _ueUetTauRequest
    UeUetMtmsi ueMtmsi;
    U8 epsUpdtType;
    U8 ActvFlag;
+   // Indicates the state of each EPS bearer context
+   U16 epsBearerCtxSts;
 }UeUetTauRequest;
 
 typedef struct _ueUetTauAccept

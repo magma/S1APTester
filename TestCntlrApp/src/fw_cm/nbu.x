@@ -169,6 +169,7 @@ typedef struct _nbuUeIpInfoReq
 {
    U32 ueId;
    U8 bearerId;
+   Bool isInitCtxtSetUp;
 }NbuUeIpInfoReq;
 
 typedef struct _nbuUeIpInfoUpdt {
@@ -231,6 +232,13 @@ typedef struct _nbuUeIpInfoRsp {
   U32 lnkEpsBearId;
   U8 noOfPfs;
   TftPfs pfList[CM_MAX_PKT_FILTERS];
+  /* bearerReestablishmentAfterCtxtRel flag indicates
+   * bearer/s re-establishment due to UE
+   * moving from idle to connected state. No need to
+   * send router solicit message as UE has
+   * already been allocated ipv6 address
+   */
+  Bool bearerReestablishmentAfterCtxtRel;
 } NbuUeIpInfoRsp;
 
 typedef struct _nbuUeIpInfoRej {
@@ -250,6 +258,16 @@ typedef struct _nbuNotifyPlmnInfo
    U8 plmnId[3];
 }NbuNotifyPlmnInfo;
 
+typedef struct _nbuRelBearerReq {
+  U32 ueId;
+  U8 numOfErabIds;
+  U8 *erabIdLst;
+} NbuRelBearerReq;
+
+typedef struct _nbuRelBearerRsp {
+  U32 ueId;
+} NbuRelBearerRsp;
+
 typedef S16 (*NbuInitialUeMsgHdl)(Pst*, NbuInitialUeMsg*);
 typedef S16 (*NbuUlNasMsgHdl)(Pst*, NbuUlNasMsg*);
 typedef S16 (*NbuDlNasMsgHdl)(Pst*, NbuDlNasMsg*);
@@ -265,6 +283,8 @@ typedef S16 (*NbuErabRelIndHdl)(Pst *, NbuErabRelIndList*);/*NbErabRelInd*);*/
 typedef S16 (*NbuNotifyPlmnInfoHdl) (Pst *, NbuNotifyPlmnInfo*);
 typedef S16 (*NbuUeIpInfoUpdtHdl)(Pst *, NbuUeIpInfoUpdt *);
 typedef S16 (*NbuUeIpInfoRejHdl)(Pst *, NbuUeIpInfoRej *);
+typedef S16 (*NbuRelBearerReqHdl)(Pst *, NbuRelBearerReq *);
+typedef S16 (*NbuRelBearerRspHdl)(Pst *, NbuRelBearerRsp *);
 EXTERN S16 cmPkNbuInitialUeMsg(Pst *pst,NbuInitialUeMsg *req);
 EXTERN S16 cmPkNbuErabRelInd(Pst *pst, NbuErabRelIndList *);
 EXTERN S16 cmPkNbuUlNasMsg(Pst *pst,NbuUlNasMsg *msg);
@@ -278,6 +298,8 @@ EXTERN S16 cmPkNbuUlRrcMsg ARGS((Pst *pst, NbuUlRrcMsg *msg));
 EXTERN S16 cmPkNbuErabsRelInfo (Pst *pst,NbuErabsRelInfo *msg);
 EXTERN S16 cmPkNbuNotifyPlmnInfo ARGS((Pst *pst,NbuNotifyPlmnInfo *req));
 EXTERN S16 cmPkNbuUeIpInfoRej (Pst *pst,NbuUeIpInfoRej *msg);
+EXTERN S16 cmPkNbuRelBearerReq (Pst *pst,NbuRelBearerReq *msg);
+EXTERN S16 cmPkNbuRelBearerRsp (Pst *pst,NbuRelBearerRsp *msg);
 
 EXTERN S16 cmUnPkNbuInitialUeMsg(NbuInitialUeMsgHdl, Pst*, Buffer*);
 EXTERN S16 cmUnPkNbuErabRelInd(NbuErabRelIndHdl, Pst*, Buffer*);
@@ -288,6 +310,7 @@ EXTERN S16 cmUnPkNbuUeInActvInd(NbuUeInactivHdl, Pst*, Buffer*);
 EXTERN S16 cmUnPkNbuS1RelInd(NbuS1RelIndMsgHdl, Pst*, Buffer*);
 EXTERN S16 NbUiNbuHdlInitialUeMsg(Pst*, NbuInitialUeMsg*);
 EXTERN S16 NbUiNbuHdlErabRelInd(Pst*, NbuErabRelIndList*); /*NbErabRelInd*);*/
+EXTERN S16 NbUiNbuHdlRelBearerReq(Pst*, NbuRelBearerReq*);
 EXTERN S16 NbUiNbuHdlUlNasMsg(Pst*, NbuUlNasMsg*);
 EXTERN S16 cmUnPkNbuErabsInfo(NbuErabsInfoMsgHdl func, Pst *pst, Buffer *mBuf);
 EXTERN S16 cmPkNbuPagingMsg(Pst *pst, UePagingMsg *msg);
@@ -301,6 +324,7 @@ EXTERN S16 cmUnPkNbuNotifyPlmnInfo (NbuNotifyPlmnInfoHdl func,Pst *pst,Buffer *m
 EXTERN S16 cmUnPkNbuUeIpInfoUpdt(NbuUeIpInfoUpdtHdl func, Pst *pst,
                                  Buffer *mBuf);
 EXTERN S16 cmUnPkNbuUeIpInfoRej(NbuUeIpInfoRejHdl func, Pst *pst, Buffer *mBuf);
+EXTERN S16 cmUnPkNbuRelBearerReq(NbuRelBearerReqHdl func, Pst *pst, Buffer *mBuf);
 
 /********************************************************************30**
 

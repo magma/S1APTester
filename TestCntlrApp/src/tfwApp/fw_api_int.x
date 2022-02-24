@@ -133,11 +133,16 @@ typedef enum {
   ENB_CONFIG_TAI,
   S1_HANDOVER_REQUIRED,
   S1_HANDOVER_REQ_IND,
+  S1_HANDOVER_REQ_ACK,
   S1_HANDOVER_CMD_IND,
   S1_HANDOVER_CMD_DROP_IND,
+  S1_HANDOVER_FAILURE,
   S1_HANDOVER_PREP_FAIL_IND,
+  S1_HANDOVER_CANCEL,
   S1_HANDOVER_CANCEL_ACK_IND,
-  S1_MME_STATUS_TRSFR_IND
+  S1_ENB_STATUS_TRANSFER,
+  S1_MME_STATUS_TRSFR_IND,
+  S1_HANDOVER_NOTIFY
 } tfwCmd;
 
 typedef enum
@@ -1080,6 +1085,7 @@ typedef struct ueTauReq
    ueMtmsi_t ueMtmsi;
    Eps_Updt_Type type;
    U8 Actv_flag;
+   U16 epsBearerCtxSts;
 }ueTauReq_t;
 
 typedef struct ueTauAccept
@@ -1529,10 +1535,10 @@ typedef struct _fwFwErabRelCmd_t
    U8 *erabIdLst;
 }FwErabRelCmd_t;
 
-typedef struct _fwNbUeCtxRelInd
-{
-   U32 ueId;
-}FwNbUeCtxRelInd_t;
+typedef struct _fwNbUeCtxRelInd {
+  U32 ueId;
+  RelCause relCause;
+} FwNbUeCtxRelInd_t;
 
 typedef struct _fwNbIntCtxSetupInd
 {
@@ -1603,7 +1609,8 @@ typedef enum {
   FW_S1_HO_SUCCESS = 0,
   FW_S1_HO_FAILURE,
   FW_S1_HO_CANCEL,
-  FW_S1_HO_TIMER_EXPIRY
+  FW_S1_HO_RELOC_TMR_EXPIRY,
+  FW_S1_HO_OVRALL_TMR_EXPIRY
 } FwS1HoEvents;
 
 typedef struct _fwNbS1HoRequired {
@@ -1650,6 +1657,26 @@ typedef struct _fwNbMmeStatusTrnsfrInd {
   U32 hoSrcEnbId;
   U32 hoTgtEnbId;
 } FwNbMmeStatusTrnsfrInd_t;
+
+typedef struct _fwNbS1HoReqAck {
+  U32 ueId;
+} FwNbS1HoReqAck_t;
+
+typedef struct _fwNbS1HoFailure {
+  U32 ueId;
+} FwNbS1HoFailure_t;
+
+typedef struct _fwNbS1HoCancel {
+  U32 ueId;
+} FwNbS1HoCancel_t;
+
+typedef struct _fwNbEnbStatusTrnsfr {
+  U32 ueId;
+} FwNbEnbStatusTrnsfr_t;
+
+typedef struct _fwNbS1HoNotify {
+  U32 ueId;
+} FwNbS1HoNotify_t;
 
 typedef struct _fwNbMmeConfigTrnsf
 {

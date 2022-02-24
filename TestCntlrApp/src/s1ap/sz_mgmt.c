@@ -256,14 +256,16 @@ PUBLIC S16 szMgmtUiInvldMsgHandler
 SzPeerCb    *peerCb,                  /* Peer control block */
 S1apPdu     *pdu,                     /* S1AP PDU */
 SzSztSapCb  *uSapCb,                  /* SZT Sap control block */
-U8          *cause                    /* Error cause */
+U8          *cause,                    /* Error cause */
+UConnId suConnId
 )
 #else
-PUBLIC S16 szMgmtUiInvldMsgHandler(peerCb, pdu, uSapCb, cause)
+PUBLIC S16 szMgmtUiInvldMsgHandler(peerCb, pdu, uSapCb, cause, suConnId)
 SzPeerCb    *peerCb;                 /* Peer control block */
 S1apPdu     *pdu;                    /* S1AP PDU */
 SzSztSapCb  *uSapCb;                  /* SZT Sap control block */
 U8          *cause;                  /* Error cause */
+UConnId     suConnId;
 #endif
 {
    S16        ret = RFAILED;
@@ -334,14 +336,16 @@ PUBLIC S16 szMgmtUiSetupReq
 SzPeerCb    *peerCb,                  /* Peer control block */
 S1apPdu     *pdu,                     /* S1AP PDU */
 SzSztSapCb  *uSapCb,                  /* SZT Sap control block */
-U8          *cause                    /* Error cause */
+U8          *cause,                    /* Error cause */
+UConnId suConnId
 )
 #else
-PUBLIC S16 szMgmtUiSetupReq(peerCb, pdu, uSapCb, cause)
+PUBLIC S16 szMgmtUiSetupReq(peerCb, pdu, uSapCb, cause, suConnId)
 SzPeerCb    *peerCb;                 /* Peer control block */
 S1apPdu     *pdu;                    /* S1AP PDU */
 SzSztSapCb  *uSapCb;                 /* SZT Sap control block */
 U8          *cause;                  /* Error cause */
+UConnId     suConnId;
 #endif
 {
    S16        ret = ROK;             /* return value */
@@ -588,14 +592,16 @@ PUBLIC S16 szMgmtUiMsgHandler
 SzPeerCb    *peerCb,                  /* Peer control block */
 S1apPdu     *pdu,                     /* S1AP PDU */
 SzSztSapCb  *uSapCb,                  /* SZT Sap control block */
-U8          *cause                    /* Error cause */
+U8          *cause,                    /* Error cause */
+UConnId suConnId
 )
 #else
-PUBLIC S16 szMgmtUiMsgHandler(peerCb, pdu, uSapCb, cause)
+PUBLIC S16 szMgmtUiMsgHandler(peerCb, pdu, uSapCb, cause, suConnId)
 SzPeerCb    *peerCb;                 /* Peer control block */
 S1apPdu     *pdu;                    /* S1AP PDU */
 SzSztSapCb  *uSapCb;                 /* SZT Sap control block */
 U8          *cause;                  /* Error cause */
+UConnId     suConnId;
 #endif
 {
    S16        ret = ROK;             /* return value */ 
@@ -647,14 +653,16 @@ PUBLIC S16 szMgmtUiRst
 SzPeerCb    *peerCb,                  /* Peer control block */
 S1apPdu     *pdu,                     /* S1AP PDU */
 SzSztSapCb  *uSapCb,                  /* SZT Sap control block */
-U8          *cause                    /* Error cause */
+U8          *cause,                    /* Error cause */
+UConnId lclRefNum
 )
 #else
-PUBLIC S16 szMgmtUiRst(peerCb, pdu, uSapCb, cause)
+PUBLIC S16 szMgmtUiRst(peerCb, pdu, uSapCb, cause, lclRefNum)
 SzPeerCb    *peerCb;                 /* Peer control block */
 S1apPdu     *pdu;                    /* S1AP PDU */
 SzSztSapCb  *uSapCb;                 /* SZT Sap control block */
-U8          *cause;                  /* Error cause */
+U8          *cause;                    /* Error cause */
+UConnId lclRefNum;
 #endif
 {
    S16         ret = ROK;             /* return value */
@@ -734,7 +742,7 @@ U8          *cause;                  /* Error cause */
          as per the choice in the reset */
       if (((SztResetTyp *)tknIE)->choice.val == SZ_FULL_RESET)
       {
-         (Void) szNdbRelConns(peerCb);
+         ret = szNdbDeallocConCb(lclRefNum, peerCb, SZ_CONN_REF_LCL);
       }
       else
       {
@@ -846,14 +854,16 @@ PUBLIC S16 szMgmtUiRstAck
 SzPeerCb    *peerCb,                  /* Peer control block */
 S1apPdu     *pdu,                     /* S1AP PDU */
 SzSztSapCb  *uSapCb,                  /* SZT Sap control block */
-U8          *cause                    /* Error cause */ 
+U8          *cause,                    /* Error cause */
+UConnId suConnId
 )
 #else
-PUBLIC S16 szMgmtUiRstAck(peerCb, pdu, uSapCb, cause)
+PUBLIC S16 szMgmtUiRstAck(peerCb, pdu, uSapCb, cause, suConnId)
 SzPeerCb    *peerCb;                 /* Peer control block */
 S1apPdu     *pdu;                    /* S1AP PDU */
 SzSztSapCb *uSapCb;                  /* SZT Sap control block */
-U8          *cause;                  /* Error cause */
+U8          *cause;                    /* Error cause */
+UConnId suConnId;
 #endif
 {
    S16         ret = ROK;             /* return value */
@@ -1173,14 +1183,17 @@ PUBLIC S16 szMgmtUiErrInd
 SzPeerCb    *peerCb,                  /* Peer control block */
 S1apPdu     *pdu,                     /* S1AP PDU */
 SzSztSapCb  *uSapCb,                  /* SZT Sap control block */
-U8          *cause                    /* Error cause */
+U8          *cause,                    /* Error cause */
+UConnId     suConnId
 )
 #else
-PUBLIC S16 szMgmtUiErrInd(peerCb, pdu, uSapCb, cause)
+PUBLIC S16 szMgmtUiErrInd(peerCb, pdu, uSapCb, cause, suConnId)
 SzPeerCb    *peerCb;                 /* Peer control block */
 S1apPdu     *pdu;                    /* S1AP PDU */
 SzSztSapCb  *uSapCb;                  /* SZT Sap control block */
 U8          *cause;                  /* Error cause */
+UConnId      suConnId;
+
 #endif
 {
    S16        ret = ROK;             /* return value */

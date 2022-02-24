@@ -1229,7 +1229,8 @@ typedef struct cmEmmTAURequest
  */
    CmEmmEpsUpdType epsUpdType;
    CmEmmNasKsi nasKsi;
-   CmEmmEpsMI epsMi; /* Old GUTI or IMSI */
+   CmEmmEpsMI epsMi; // Old GUTI or IMSI
+   CmEmmEpsBearCtxtSts epsBearCtxtSts;
 }CmEmmTAURequest;
 
 typedef struct cmEmmGprsTimer2

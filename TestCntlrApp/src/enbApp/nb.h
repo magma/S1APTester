@@ -323,7 +323,8 @@ typedef enum {
   S1_HO_SUCCESS = 0,
   S1_HO_FAILURE,
   S1_HO_CANCEL,
-  S1_HO_TIMER_EXPIRY
+  S1_HO_RELOC_TMR_EXPIRY,
+  S1_HO_OVRALL_TMR_EXPIRY
 } S1HoEvents;
 
 typedef struct _nbS1HoInfo {
@@ -759,7 +760,7 @@ EXTERN Void nbStopTmr(PTR cb, S16 event);
 
 EXTERN Bool nbIsTmrRunning(CmTimer *tmr, S16 event);
 
-EXTERN  Void nbHandleUeIpInfoReq(U32 ueId,U8 bearerId);
+EXTERN  Void nbHandleUeIpInfoReq(U32 ueId,U8 bearerId, Bool isInitCtxtSetUp);
 
 EXTERN Void nbSendLmAlarm(U16 category, U16 event, U16 cause);
 
@@ -778,7 +779,7 @@ EXTERN S16 nbSendS1RelIndToUeApp(U32 ueId);
 
 EXTERN S16 nbBuildAndSendS1SetupReq(NbMmeId mmeId);
 
-EXTERN S16 nbBuildAndSendResetRequest(NbResetMsgInfo *resetMsgInfo);
+EXTERN S16 nbBuildAndSendResetRequest(NbResetMsgInfo *resetMsgInfo, UConnId spConnId);
 
 EXTERN S16 nbBuildAndSendErabRelInd(U32 enbUeS1apId, U32 mmeUeS1apId,
       U8 numOfErabIds, U8 *erabIdLst);

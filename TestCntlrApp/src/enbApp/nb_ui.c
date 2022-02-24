@@ -58,6 +58,11 @@ EXTERN S16 NbHandleDropErabSetupReq(NbDropErabSetupReq  *);
 EXTERN S16 NbHandleConfigTai(NbConfigNewTai  *);
 #ifdef MULTI_ENB_SUPPORT
 EXTERN S16 NbS1HoRequiredHdl(NbS1HandoverRequired *s1HoRequired);
+EXTERN S16 NbS1HoReqAckHdl(NbS1HandoverReqAck *s1HoReqAck);
+EXTERN S16 NbS1HoFailureHdl(NbS1HandoverFailure *s1HoFailure);
+EXTERN S16 NbS1HoCancelHdl(NbS1HandoverCancel *s1HoCancel);
+EXTERN S16 NbEnbStatusTrnsfrHdl(NbEnbStatusTrnsfr *enbStatusTrnsfr);
+EXTERN S16 NbS1HoNotifyHdl(NbS1HandoverNotify *s1HoNotify);
 #endif
 
 int atoi(const char *nptr);
@@ -257,7 +262,47 @@ PUBLIC S16 NbUiNbtMsgReq
 
       case NB_S1_HANDOVER_REQUIRED: {
         if (ROK != NbS1HoRequiredHdl(&req->t.s1HoRequired)) {
-          NB_LOG_ERROR(&nbCb, "FAILED to process S1 Handover Required "
+          NB_LOG_ERROR(&nbCb, "Failed to process S1 Handover Required "
+                              "from TFW");
+        }
+        break;
+      }
+
+      case NB_S1_HANDOVER_REQ_ACK: {
+        if (ROK != NbS1HoReqAckHdl(&req->t.s1HoReqAck)) {
+          NB_LOG_ERROR(&nbCb, "Failed to process S1 Handover Request Ack "
+                              "from TFW");
+        }
+        break;
+      }
+
+      case NB_S1_HANDOVER_FAILURE: {
+        if (ROK != NbS1HoFailureHdl(&req->t.s1HoFailure)) {
+          NB_LOG_ERROR(&nbCb, "Failed to process S1 Handover Failure "
+                              "from TFW");
+        }
+        break;
+      }
+
+      case NB_S1_HANDOVER_CANCEL: {
+        if (ROK != NbS1HoCancelHdl(&req->t.s1HoCancel)) {
+          NB_LOG_ERROR(&nbCb, "Failed to process S1 Handover Cancel "
+                              "from TFW");
+        }
+        break;
+      }
+
+      case NB_S1_ENB_STATUS_TRANSFER: {
+        if (ROK != NbEnbStatusTrnsfrHdl(&req->t.enbStatusTrnsfr)) {
+          NB_LOG_ERROR(&nbCb, "Failed to process ENB Status Transfer "
+                              "from TFW");
+        }
+        break;
+      }
+
+      case NB_S1_HANDOVER_NOTIFY: {
+        if (ROK != NbS1HoNotifyHdl(&req->t.s1HoNotify)) {
+          NB_LOG_ERROR(&nbCb, "Failed to process S1 Handover Notify "
                               "from TFW");
         }
         break;
@@ -820,34 +865,33 @@ PUBLIC S16 nbUiSendResetAckToUser(NbResetAckldg *resetAck)
    RETVALUE(ROK);
 } /* nbUiSendResetAckToUser */
 
-PUBLIC S16 nbUiSendUeCtxRelIndToUser(U32 ueId)
-{
-   NbtResponse *rsp = NULLP;
-   Pst pst;
+PUBLIC S16 nbUiSendUeCtxRelIndToUser(U32 ueId, NbRelCause relCause) {
+  NbtResponse *rsp = NULLP;
+  Pst pst;
 
-   NB_ALLOC(&rsp, sizeof(NbtResponse));
+  NB_ALLOC(&rsp, sizeof(NbtResponse));
 
-   rsp->msgType = NB_UE_CTX_REL_IND;
-   SM_SET_ZERO(&pst, sizeof(Pst));
+  rsp->msgType = NB_UE_CTX_REL_IND;
+  SM_SET_ZERO(&pst, sizeof(Pst));
 
-   pst.selector  = 0;
-   pst.srcEnt    = ENTNB;
-   pst.dstEnt    = ENTFW;
-   pst.srcProcId = 0;
-   pst.dstProcId = 0;
-   pst.region = smCfgCb.init.region;
-   pst.pool = smCfgCb.init.pool;
-   pst.srcInst = 0;
+  pst.selector = 0;
+  pst.srcEnt = ENTNB;
+  pst.dstEnt = ENTFW;
+  pst.srcProcId = 0;
+  pst.dstProcId = 0;
+  pst.region = smCfgCb.init.region;
+  pst.pool = smCfgCb.init.pool;
+  pst.srcInst = 0;
 
-   rsp->t.ueCtxRelInd.ueId = ueId;
+  rsp->t.ueCtxRelInd.ueId = ueId;
+  cmMemcpy(&rsp->t.ueCtxRelInd.relCause, &relCause, sizeof(NbRelCause));
 
-   if(ROK != cmPkNbtMsgRsp(&pst, rsp))
-   {
-      NB_LOG_ERROR(&nbCb,"Failed to send message to TFW App");
-      RETVOID(RFAILED);
-   }
+  if (ROK != cmPkNbtMsgRsp(&pst, rsp)) {
+    NB_LOG_ERROR(&nbCb, "Failed to send message to TFW App");
+    RETVOID(RFAILED);
+  }
 
-   RETVALUE(ROK);
+  RETVALUE(ROK);
 } /* nbUiSendUeCtxRelIndToUser */
 
 PUBLIC S16 nbUiSendIntCtxtSetupIndToUser(U32 ueId, U8 status)
@@ -1132,7 +1176,7 @@ nbUiSendMmeStatusTrnsfrIndToUser(NbMmeStatusTrnsfrInd *mmeStatusTrnfrInd) {
 
   NB_ALLOC(&rsp, sizeof(NbtResponse));
 
-  rsp->msgType = NB_MME_STATUS_TRNSFR_IND;
+  rsp->msgType = NB_S1_MME_STATUS_TRNSFR_IND;
   SM_SET_ZERO(&pst, sizeof(Pst));
 
   pst.selector = 0;
@@ -1250,3 +1294,10 @@ PUBLIC S16 NbUiNbuHdlUeIpInfoRej(Pst *pst, NbuUeIpInfoRej *rej) {
   retVal = NbHandleUeIpInfoRej(rej);
   RETVALUE(retVal);
 } /* NbUiNbuHdlUeIpInfoRej */
+
+// Handles RelBearerReq received from ueApp
+PUBLIC S16 NbUiNbuHdlRelBearerReq(Pst *pst, NbuRelBearerReq *msg) {
+  S16 retVal = ROK;
+  retVal = NbEnbRelBearerReqHdl(msg);
+  RETVALUE(retVal);
+} /* NbUiNbuHdlRelBearerReq */

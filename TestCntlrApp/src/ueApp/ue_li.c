@@ -98,11 +98,11 @@ EXTERN S16 ueDbmFetchUe(U32 ueId, PTR *ueCb);
 EXTERN S16 UeLiNbuInitialUeMsg(Pst *pst, NbuInitialUeMsg *msg);
 EXTERN S16 UeLiNbuUlNasMsgDatRsp(Pst *pst, NbuUlNasMsg *msg);
 EXTERN S16 UeLiNbuSendUeIpInfo(Pst *pst,NbuUeIpInfoRsp   *ueInfo);
-EXTERN S16 ueUiProcIpInfoReqMsg(UeCb * p_ueCb, U8 bearerId);
-EXTERN S16 ueAppBldAndSndIpInfoRspToNb(UeCb *ueCb,U8 bearerId, Pst *pst);
+EXTERN S16 ueUiProcIpInfoReqMsg(UeCb * p_ueCb, NbuUeIpInfoReq  *p_ueMsg);
+EXTERN S16 ueAppBldAndSndIpInfoRspToNb(UeCb *ueCb, NbuUeIpInfoReq  *ueIpInfoReq, Pst *pst);
 EXTERN S16 UeLiNbuUeIpInfoReq(Pst *pst,NbuUeIpInfoReq  *p_ueMsg);
 EXTERN S16 ueSendUeIpInfoRsp(U32 ueId,U8 bearedId, S8 * ipAddr);
-EXTERN Void populateIpInfo(UeCb *ueCb, U8 bearerId, NbuUeIpInfoRsp *);
+EXTERN Void populateIpInfo(UeCb *ueCb, NbuUeIpInfoRsp *, NbuUeIpInfoReq *);
 
 EXTERN S16 UeLiNbuPagingMsg(Pst *pst, UePagingMsg  *p_ueMsg);
 EXTERN S16 ueUiProcPagingMsg(UePagingMsg *p_ueMsg, Pst *pst);
@@ -113,12 +113,12 @@ PUBLIC S16 UeLiNbuErabRelInd(Pst *pst,NbuErabRelIndList *msg);
 EXTERN S16 UeLiNbuNotifyPlmnInfo(Pst *pst,NbuNotifyPlmnInfo  *p_ueMsg);
 EXTERN S16 UeLiNbuSendUeIpInfoRej(Pst *pst, NbuUeIpInfoRej *ueInfo);
 
-PUBLIC S16 ueAppBldAndSndIpInfoRspToNb(UeCb *ueCb, U8 bearerId, Pst *pst)
+PUBLIC S16 ueAppBldAndSndIpInfoRspToNb(UeCb *ueCb, NbuUeIpInfoReq  *ueIpInfoReq, Pst *pst)
 {
   S16 ret = ROK;
   NbuUeIpInfoRsp *ueIpInfoRsp = NULLP;
   ueIpInfoRsp = (NbuUeIpInfoRsp *)ueAlloc(sizeof(NbuUeIpInfoRsp));
-  populateIpInfo(ueCb, bearerId, ueIpInfoRsp);
+  populateIpInfo(ueCb, ueIpInfoRsp, ueIpInfoReq);
 
   ret = UeLiNbuSendUeIpInfo(pst, ueIpInfoRsp);
   RETVALUE(ret);
@@ -416,7 +416,7 @@ PUBLIC S16 UeLiNbuUeIpInfoReq
    }
 
    /* process the received received TFW message */
-   if((ret = ueUiProcIpInfoReqMsg(ueCb, bearerId)) != ROK)
+   if((ret = ueUiProcIpInfoReqMsg(ueCb, p_ueMsg)) != ROK)
    {
       UE_LOG_ERROR(ueAppCb, "Failed while processing the Msg Request");
       ret = RFAILED;
@@ -521,5 +521,56 @@ PUBLIC S16 ueAppBldAndSndIpInfoRejToNb(UeCb *ueCb, U8 bearerId, Pst *pst) {
   ueIpInfoRej->ueId = ueCb->ueId;
   ueIpInfoRej->bearerId = bearerId;
   ret = UeLiNbuSendUeIpInfoRej(pst, ueIpInfoRej);
+  RETVALUE(ret);
+}
+
+PUBLIC S16 ueSendRelBearerReqMsgToNb(NbuRelBearerReq *nbuRelBerReq, Pst *pst) {
+  S16 ret = ROK;
+  UeAppCb *ueAppCb;
+
+  UE_GET_CB(ueAppCb);
+  UE_LOG_ENTERFN(ueAppCb);
+
+  UE_LOG_DEBUG(ueAppCb, "Sending Release bearer request to EnodeB APP");
+
+  ret = UeLiNbuRelBearerReq(pst, nbuRelBerReq);
+  if (ret != ROK) {
+    UE_LOG_ERROR(ueAppCb, "Sending Release bearer request to NB failed");
+  }
+  UE_LOG_EXITFN(ueAppCb, ret);
+}
+
+// Handles RelBearerRsp received from enb app
+PUBLIC S16 UeLiNbuRelBearerRsp(Pst *pst, NbuRelBearerRsp *p_ueMsg) {
+  S16 ret = RFAILED;
+  U8 ueId = 0;
+  UeAppCb *ueAppCb = NULLP;
+  UeCb *ueCb = NULLP;
+
+  UE_GET_CB(ueAppCb);
+
+  UE_LOG_ENTERFN(ueAppCb);
+
+  if (!pst || !p_ueMsg) {
+    UE_LOG_ERROR(ueAppCb, "[UEAPP]: pst||p_ueMsg is NULL ueId = %u", ueId);
+    RETVALUE(ret);
+  }
+
+  ueId = p_ueMsg->ueId;
+  // Fetch the UeCb
+  ret = ueDbmFetchUe(ueId, (PTR *)&ueCb);
+  if (ret != ROK) {
+    UE_LOG_ERROR(ueAppCb, "[UEAPP]: UeCb List NULL ueId = %u", ueId);
+    RETVALUE(ret);
+  }
+
+  UE_LOG_DEBUG(ueAppCb, "[UEAPP]: Processing RelBearerRsp ueId = %u", ueId);
+  // Process the received RelBearerRsp
+  if ((ret = ueUiProcRelBearerRsp(ueCb, p_ueMsg)) != ROK) {
+    UE_LOG_ERROR(ueAppCb, "Failed to process RelBearerRsp message for ue %u",
+                 ueId);
+    ueFree((U8 *)ueCb->ueUetTauRequest, sizeof(UeUetTauRequest));
+    ret = RFAILED;
+  }
   RETVALUE(ret);
 }

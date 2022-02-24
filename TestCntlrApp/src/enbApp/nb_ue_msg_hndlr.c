@@ -522,7 +522,7 @@ PUBLIC S16 NbHandleUeIpInfoRsp(NbuUeIpInfoRsp *rsp) {
   RETVALUE(nbCreateUeTunnReq(ueId, bearerId, ueIp4Addr, ueIp6Addr, rsp));
 }
 
-PUBLIC Void nbHandleUeIpInfoReq(U32 ueId,U8 bearerId)
+PUBLIC Void nbHandleUeIpInfoReq(U32 ueId,U8 bearerId, Bool isInitCtxtSetUp)
 {
    S16 ret             = ROK;
    NbuUeIpInfoReq *msg = NULLP;
@@ -530,6 +530,7 @@ PUBLIC Void nbHandleUeIpInfoReq(U32 ueId,U8 bearerId)
    NB_ALLOC(&msg, sizeof(NbuUeIpInfoReq));
    msg->ueId      = ueId;
    msg->bearerId  = bearerId;
+   msg->isInitCtxtSetUp  = isInitCtxtSetUp;
 
    /* Send the Ue-ip info request to UEAPP */
    ret = cmPkNbuUeIpInfoReq(&nbCb.ueAppPst, msg);
@@ -592,5 +593,30 @@ PUBLIC S16 NbHandleUeIpInfoRej(NbuUeIpInfoRej *rej) {
                  rej->ueId, rej->bearerId);
     RETVALUE(RFAILED);
   }
+  RETVALUE(ROK);
+}
+
+// This function sends RelBearerRsp message to ueApp
+PUBLIC S16 nbSendRelBearerRspToUeApp(U32 ueId) {
+  S16 ret = ROK;
+  NbuRelBearerRsp *msg = NULLP;
+
+  NB_ALLOC(&msg, sizeof(NbuRelBearerRsp));
+  if (msg == NULLP) {
+    NB_LOG_ERROR(&nbCb,
+                 "Failed to allocate memory to Release Bearer Rsp for ueId=%u",
+                 ueId);
+    RETVALUE(RFAILED);
+  }
+  msg->ueId = ueId;
+
+  // pack and send to ue
+  ret = cmPkNbuRelBearerRsp(&nbCb.ueAppPst, msg);
+  if (ret != ROK) {
+    NB_LOG_ERROR(
+        &nbCb, "Failed to send Release Bearer Rsp to UeApp for ueId=%u", ueId);
+    RETVALUE(RFAILED);
+  }
+  NB_LOG_DEBUG(&nbCb, "Sent Release Bearer Rsp to UeApp for ueId=%u", ueId);
   RETVALUE(ROK);
 }
