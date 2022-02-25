@@ -2952,7 +2952,8 @@ PUBLIC S16 nbGetErabInfoFrmErabSetup(NbUeCb *ueCb,
             {
                /* This means both IPv4 and IPv6 addresses are present. We are */
                /* yet to support this option                                  */
-               RETVALUE(RFAILED);
+               // TODO: Add ipv4v6 support
+               break;
             }
       }
       if (ROK != cmHashListInsert(&(ueCb->tunnInfo), (PTR)tunInfo,
@@ -3080,7 +3081,8 @@ PUBLIC S16 nbGetErabInfoFrmIntCnxt
             {
                /* This means both IPv4 and IPv6 addresses are present. We are */
                /* yet to support this option                                  */
-               RETVALUE(RFAILED);
+              // TODO: Add ipv4v6 support
+              break;
             }
       }
       if (ROK != cmHashListInsert(&(ueCb->tunnInfo),(PTR)tunInfo,
