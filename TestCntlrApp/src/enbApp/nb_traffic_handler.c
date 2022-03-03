@@ -17,6 +17,7 @@
 #include <sys/ioctl.h>
 #include <net/if.h>
 #include <netinet/in.h>
+#include <ifaddrs.h>
 
 #include "nb.h"
 #include "rl_interface.h"
@@ -398,8 +399,49 @@ PRIVATE S16 nbAppGetNwParam
    S32                ifclen;
    U8                 found = FALSE;
 
+   struct ifaddrs *ifaddr;
    NB_LOG_DEBUG(&nbCb,"Getting the network parameters");
 
+   if (getifaddrs(&ifaddr) == -1) {
+     NB_LOG_ERROR(&nbCb,"getifaddrs failed");
+     perror("getifaddrs");
+     RETVALUE(RFAILED);
+   }
+
+   sockfd= socket( PF_INET, SOCK_DGRAM, 0 );
+   if(sockfd < 0 ) {
+     NB_LOG_ERROR(&nbCb,"Failed to open a socket");
+     perror("socket");
+     close(sockfd);
+     RETVALUE(RFAILED);
+   }
+
+   /* Walk through linked list, maintaining head pointer so we
+      can free list later. */
+
+   for (struct ifaddrs *ifa = ifaddr; ifa != NULLP;
+      ifa = ifa->ifa_next) {
+     if (ifa->ifa_addr == NULLP) {
+       continue;
+     }
+     if(!strcmp(ifa->ifa_name, ueIntf)) {
+       strcpy(ethInf, ifa->ifa_name);
+       NB_LOG_DEBUG(&nbCb,"ethInf=%s", ethInf);
+       struct ifreq req;
+       strcpy(req.ifr_name, ifa->ifa_name );
+       if(ioctl(sockfd, SIOCGIFHWADDR, &req ) != -1 ) {
+          uint8_t* mac = (uint8_t*)req.ifr_ifru.ifru_hwaddr.sa_data;
+          NB_LOG_DEBUG(&nbCb, "%s:MAC[%02X:%02X:%02X:%02X:%02X:%02X]\n",
+                ifa->ifa_name,
+                mac[0], mac[1], mac[2], mac[3], mac[4], mac[5] );
+       }
+       cmMemcpy(lclMACAddr, (U8 *)req.ifr_ifru.ifru_hwaddr.sa_data, NB_APP_MAC_ADDR_LEN);
+       NB_LOG_DEBUG(&nbCb,"MAC address=%02X:%02X:%02X:%02X:%02X:%02X", lclMACAddr[0], lclMACAddr[1],lclMACAddr[2],lclMACAddr[3],lclMACAddr[4],lclMACAddr[5]);
+       found = TRUE;
+       break;
+     }
+   }
+#if 0
    /* Open a socket for ioctl */
    if((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP)) < 0)
    {
@@ -409,43 +451,9 @@ PRIVATE S16 nbAppGetNwParam
       RETVALUE(RFAILED);
    }
 
-   /* Get the length of configuration info of all interfaces */
-   cmMemset((U8 *)&ifc, 0, sizeof(struct ifconf));
-   if(ioctl(sockfd, SIOCGIFCONF, &ifc))
-   {
-      NB_LOG_ERROR(&nbCb,"Failed to get length of config info of interfaces"); 
-      perror("ioctl SIOCGIFCONF");
-      close(sockfd);
-      RETVALUE(RFAILED);
-   }
-   ifclen = ifc.ifc_len;
-
-   /* Get the configuration info of all interfaces */
-   cmMemset((U8 *)&ifc, 0, sizeof(struct ifconf));
-
-   NBAPP_ALLOC((&ifc.ifc_req), ifclen);
-
-   if(NULLP == ifc.ifc_req)
-   {
-      NB_LOG_ERROR(&nbCb,"Failed to alloc memory for ifc.ifc_req"); 
-      close(sockfd);
-      RETVALUE(RFAILED);
-   }
-
-   ifc.ifc_len = ifclen;
-   if(ioctl(sockfd, SIOCGIFCONF, &ifc))
-   {
-
-      NB_LOG_ERROR(&nbCb,"Failed to get config info of all interfaces"); 
-      perror("ioctl SIOCGIFCONF");
-      NBAPP_FREE(ifc.ifc_req, ifclen);
-      close(sockfd);
-      RETVALUE(RFAILED);
-   }
-
    /* Get the ethernet interface name and address matching the selfIp from
       all configured interfaces */
-   for(ifr = ifc.ifc_req; 
+   for(ifr = ifc.ifc_req;
         (ifr && ((char *)ifr < (char *) ifc.ifc_req + ifc.ifc_len)); ++ifr)
    {
 
@@ -453,7 +461,7 @@ PRIVATE S16 nbAppGetNwParam
       {
          /* Found the interface matching selfIp, get other details */
          strcpy(ethInf, ifr->ifr_name);
-
+         
          /* Get Ethernet (Hardware) Address */
          if(ioctl(sockfd, SIOCGIFHWADDR, ifr))
          {
@@ -471,7 +479,7 @@ PRIVATE S16 nbAppGetNwParam
 
    NBAPP_FREE(ifc.ifc_req, ifclen);
    close(sockfd);
-
+#endif
    if(FALSE == found)
    {
       NB_LOG_ERROR(&nbCb,"Failed to get network parameters"); 

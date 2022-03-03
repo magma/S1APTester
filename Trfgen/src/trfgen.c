@@ -378,6 +378,7 @@ void trfgen_start_test(int test_id, char *host_ip, char *bind_ip, char *host_por
 
    }
    else if (tstcfg[test_id].trfgen_type == CLIENT){
+      printf("Running as client, host ip=%s\n",host_ip);
       iperf_set_test_server_hostname( test, host_ip);
       iperf_set_test_bind_address(test, bind_ip);
       iperf_set_test_server_port( test, port );
@@ -414,6 +415,7 @@ void trfgen_start_test(int test_id, char *host_ip, char *bind_ip, char *host_por
       procIds.pids[procIds.noOfPids++] = pid;
       if(pid == 0)
       {
+         printf("Starting client\n");
          start_client((void*)test);
          exit(0);
       }
