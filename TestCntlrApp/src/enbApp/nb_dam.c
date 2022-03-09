@@ -1490,9 +1490,18 @@ PRIVATE S16 nbProcIpv4Packet(Buffer *mBuf, NbIpPktFields *ipPktFields) {
  *    -#Failure : RFAILED
  */
 PRIVATE S16 nbProcIpv6Packet(Buffer *mBuf, NbIpPktFields *ipPktFields) {
-  U8 ipPkt[NB_PACKET_SIZE] = {0};
-  MsgLen ipIdx = 0;
+  //U8 ipPkt[NB_PACKET_SIZE] = {0};
+  U8 ipPkt[80] = {0};
+  MsgLen ipIdx = 0, ipIdx_n =0;
   U8 idx = 0;
+ 
+  /*for (idx = 0; idx < 50; idx++) {
+    SExamMsg(&ipPkt[idx], mBuf, ipIdx_n);
+    ipIdx_n++;
+  }*/
+  /*for (int i=0;i<50;i++) {
+    printf("%x\n",ipPkt[i]);
+  }*/
 
   /* Fetch ToS or DSCP*/
   for (idx = 0; idx < 2; idx++) {
@@ -1597,7 +1606,8 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
   MsgLen len = 0;
   NbDamTnlCb *tnl;
   NbDamUeCb *ueCb = NULLP;
-  U8 ipPkt[NB_PACKET_SIZE] = {0};
+  //U8 ipPkt[NB_PACKET_SIZE] = {0};
+  U8 ipPkt[80] = {0};
   U8 drbId;
   MsgLen ipIdx = 0;
   NbIpPktFields ipPktFields = {0};
@@ -1614,12 +1624,18 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
   }
 
   // Fetch Version field
+  /*for (int i=0;i<80;i++) {
+    SExamMsg(&ipPkt[i], mBuf, ipIdx);
+    printf("%x\n", ipPkt[i]);
+    ipIdx ++;
+  }*/
   if ((SExamMsg(&ipPkt[0], mBuf, ipIdx) != ROK)) {
     NB_LOG_ERROR(&nbCb, "Failed to fetch IP version");
     SPutMsg(mBuf);
     RETVALUE(RFAILED);
   }
   U8 ipVersion = (ipPkt[0] >> 4);
+  printf("ipVersion =%d", ipVersion);
   ipPktFields.ipVersion = ipVersion;
   if (ipVersion == NB_IPV4_VERSION) {
     if (ROK != (nbProcIpv4Packet(mBuf, &ipPktFields))) {
@@ -1633,6 +1649,7 @@ PUBLIC S16 nbDamPcapDatInd(Buffer *mBuf)
     }
   }
 
+  printf("After nbProcIpv6Packet\n");
   // get the ueCb
   ueCb = nbDamGetueCbkeyUeIp(&ipPktFields, &drbId);
   if (ueCb == NULLP) {
@@ -2688,6 +2705,7 @@ PUBLIC S16 nbDamDeInit
 
 PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId)
 {
+  printf("nbDamGetueCbkeyUeIp\n");
   NbDamUeCb *ueCb = NULLP;
   NbDamUeCb *prevUeCb = NULLP;
   U8 ueIpMatchFound = 0;
@@ -2699,6 +2717,7 @@ PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId)
   for (; ((cmHashListGetNext(&(nbDamCb.ueCbs), (PTR)prevUeCb, (PTR *)&ueCb)) ==
           ROK);) {
     /* Fetch the pdnCb*/
+    printf("localIpv6Addr =%s, ipPktFields->localIpv6Addr\n");
     if (ROK == (cmHashListFind(&((ueCb)->pdnCb),
                                ((ipPktFields->ipVersion == NB_IPV4_VERSION)
                                     ? (U8 *)&(ipPktFields->locIpv4Addr)
@@ -2707,6 +2726,7 @@ PRIVATE NbDamUeCb *nbDamGetueCbkeyUeIp(NbIpPktFields *ipPktFields, U8 *drbId)
                                    ? sizeof(U32)
                                    : NB_IPV6_ADDRESS_LEN,
                                0, (PTR *)&pdnCb))) {
+      printf("pdncb found\n");
       NB_LOG_DEBUG(&nbCb, "pdncb found\n");
       ueIpMatchFound = TRUE;
       /* Fetch TFT Packet Filter list*/
