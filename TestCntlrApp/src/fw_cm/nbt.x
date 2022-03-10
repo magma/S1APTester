@@ -72,6 +72,7 @@ typedef enum _nbMsgTypes {
   NB_S1_MME_STATUS_TRNSFR_IND,
   NB_S1_HANDOVER_NOTIFY,
 #endif
+  NB_CLEANUP,
   NB_UNKNOWN_MSG_TYPE
 } NbMsgTypes;
 
