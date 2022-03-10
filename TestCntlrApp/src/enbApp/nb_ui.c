@@ -39,7 +39,7 @@ EXTERN S16 NbEnUeRelReqHdl(NbUeCntxtRelReq*);
 EXTERN S16 NbEnbCfgReqHdl(NbConfigReq*);
 EXTERN S16 NbEnbUeRelReqHdl(NbUeCntxtRelReq*);
 EXTERN S16 NbEnbResetReqHdl(NbResetRequest*);
-EXTERN  S16 NbBuildAndSndErrIndMsg(NbErrIndMsg*);
+EXTERN S16 NbBuildAndSndErrIndMsg(NbErrIndMsg *);
 EXTERN S16 NbEnbErabRelIndHdl(NbuErabRelIndList*);
 EXTERN S16 NbEnbErabRelRspHdl(NbErabRelRsp*);
 EXTERN S16 NbEnbNasNonDel(NbNasNonDel *nasNonDel);
@@ -337,6 +337,12 @@ PUBLIC S16 NbUiNbtMsgReq
           NB_LOG_ERROR(&nbCb, "Failed to process config New TAI"
                      "from TFW");
         }
+        break;
+      }
+
+      case NB_CLEANUP: {
+        NB_LOG_ERROR(&nbCb, "Closing EGTP servers for ENB Application");
+        smBuildEgShutDownCntrl();
         break;
       }
 

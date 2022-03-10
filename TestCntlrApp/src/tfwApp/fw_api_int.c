@@ -3905,12 +3905,16 @@ PRIVATE S16 configTaiReq(nbConfigTai_t *data)
  */
 PRIVATE S16 handleTfwCleanup(Void) {
   FwCb *fwCb = NULLP;
+  NbtRequest *msgReq = NULLP;
   S16 ret = ROK;
 
   FW_GET_CB(fwCb);
   FW_LOG_ENTERFN(fwCb);
 
-  ret = fwDeregTmr(fwCb);
+  FW_ALLOC_MEM(fwCb, &msgReq, sizeof(NbtMsg));
+  msgReq->msgType = NB_CLEANUP;
+  fwSendToNbApp(msgReq);
 
+  ret = fwDeregTmr(fwCb);
   FW_LOG_EXITFN(fwCb, ret);
-} // handleTfwCleanup
+}  // handleTfwCleanup
