@@ -378,15 +378,8 @@ void trfgen_start_test(int test_id, char *host_ip, char *bind_ip, char *host_por
 
    }
    else if (tstcfg[test_id].trfgen_type == CLIENT){
-#if 0
-      printf("Running as client, host ip=%s\n",host_ip);
-      char tmp_host_ip[100] = "";
-      memcpy(tmp_host_ip, host_ip, 36);
-      iperf_set_test_server_hostname( test, tmp_host_ip);
-      //iperf_set_test_server_hostname(test, host_ip);
-      printf("set_test_server_hostname\n");
-      //iperf_set_test_bind_address(test, bind_ip);
-      printf("iperf_set_test_bind_address=%s\n", bind_ip);
+      iperf_set_test_server_hostname(test, host_ip);
+      iperf_set_test_bind_address(test, bind_ip);
       iperf_set_test_server_port( test, port );
       iperf_set_test_role( test, 'c' );
 
@@ -404,7 +397,6 @@ void trfgen_start_test(int test_id, char *host_ip, char *bind_ip, char *host_por
          iperf_set_test_rate(test, 5000);
          iperf_set_test_socket_bufsize(test,200);
       }
-#endif
 #if 0
       /* create client thread */
       pthread_attr_init(&attr);
@@ -422,13 +414,18 @@ void trfgen_start_test(int test_id, char *host_ip, char *bind_ip, char *host_por
       procIds.pids[procIds.noOfPids++] = pid;
       if(pid == 0)
       {
-         //start_client((void*)test);
-         char command[200] = "";
+         printf("Sleeping for 5 secs\n");
+         sleep(5);
+         start_client((void*)test);
+         /*char command[200] = "";
          sprintf(command, "sudo iperf3 -6 -c %s -B %s -p %d -J -b 10000000",host_ip, bind_ip, 7001);
          //sprintf(command, "sudo iperf3 -6 -c %s -p %d -J -b 10000000",host_ip, 7001);
          FILE *pf = NULL;
          char data[1000];
          printf("Starting client cmd=%s\n", command);
+         printf("Sleeping for 5 secs\n");
+         sleep(5);
+         printf("Woken up\n");
          //int err = system(command);
          pf = popen(command,"r");
          if(!pf){
@@ -439,7 +436,7 @@ void trfgen_start_test(int test_id, char *host_ip, char *bind_ip, char *host_por
          printf("- Hi %s-\n",data);
          }
          printf("Started client\n");
-         pclose(pf);
+         pclose(pf);*/
          exit(0);
       }
       else if(pid < 0)

@@ -35,7 +35,7 @@
 #include "nb_traffic_handler.x"
 
 #define NB_APP_PCAP_BUF_SIZE 65536
-#define NB_APP_PCAP_TIMEOUT 60
+#define NB_APP_PCAP_TIMEOUT 10
 #define NB_APP_ETH_TYPE_IP 0x0008
 #define NB_APP_ETH_TYPE_IP6 0xDD86
 #define NB_APP_ETH_TYPE_ARP 0x0608
@@ -348,7 +348,6 @@ PRIVATE Void nbAppRcvdPktHndlr
    pktType = (pktData[13] << 8) + pktData[12];
    if(pktType == NB_APP_ETH_TYPE_IP || (pktType == NB_APP_ETH_TYPE_IP6))
    {
-      printf("nbAppDlvrIpPkt, bytesRcvd=%d\n", bytesRcvd);
       /* Handle the IP packet */
       nbAppDlvrIpPkt(pktData, bytesRcvd);
    }
