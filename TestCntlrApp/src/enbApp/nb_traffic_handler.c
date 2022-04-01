@@ -115,9 +115,10 @@ PRIVATE S16 nbAppInitAdaptor
          "packets");
    
    /*sockFd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);*/
-   sockFd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
+   sockFd = socket(AF_INET6, SOCK_RAW, IPPROTO_RAW);
    if(sockFd == -1)
    {
+      printf("Failed to open socket\n");
       NB_LOG_ERROR(&nbCb,"Failed to open socket");
       RETVALUE(RFAILED);
    }
@@ -155,11 +156,63 @@ PRIVATE Void nbAppSendEthPkt
    if(sendto(sockFd, &ethPkt[14], len - 14, 0,
             (struct sockaddr *)&ueConn, sizeof(ueConn)) == -1)
    {
-      perror("Failed to send socket\n");
+      perror("Failed to send socket nbAppSendEthPkt\n");
    }
 
    RETVOID;
 }/* nbAppSendEthPkt */
+
+PRIVATE Void nbAppSendEthPktIpv6
+(
+ U8 *ethPktSnd,
+ U32 len
+)
+{
+   S8 srcIp6Addr[16] = {0};
+   S8 dstIp6Addr[16] = {0};
+   char ip6Addr[100] = {0};
+   U16 uePort = 0;
+   U16 ipPktLen = 0;
+   struct sockaddr_in6 ueConn;
+   struct in6_addr temp_ipv6_addr;
+
+   cmMemset((U8 *)&ueConn, 0, sizeof(ueConn));
+   cmMemset((U8 *)&temp_ipv6_addr, 0, sizeof(struct in6_addr));
+   cmMemcpy(srcIp6Addr, &ethPkt[22], 16);
+   cmMemcpy(dstIp6Addr, &ethPkt[38], 16);
+
+   sprintf(ip6Addr, "%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x",
+            (int)ethPkt[38], (int)ethPkt[39], (int)ethPkt[40], (int)ethPkt[41], (int)ethPkt[42], (int)ethPkt[43],
+            (int)ethPkt[44], (int)ethPkt[45], (int)ethPkt[46], (int)ethPkt[47], (int)ethPkt[48], (int)ethPkt[49],
+            (int)ethPkt[50], (int)ethPkt[51], (int)ethPkt[52], (int)ethPkt[53]);
+
+   printf("nbAppSendEthPktIpv6 ip6Addr=%s\n",ip6Addr);
+   printf("\n===================================================================================================\n");
+   printf("len=%d\n",len);
+   for (int i=14; i<len;i++) {
+     printf("%x\t", ethPkt[i]);
+   }
+   //ipPktLen = 40;
+   printf("\n===================================================================================================\n");
+   ueConn.sin6_family = AF_INET6;
+   /* When using an IPv6 raw socket, sin6_port must be set to 0
+    * to avoid an EINVAL ("Invalid Argument") error
+    */
+   //ueConn.sin6_port = htons(0);
+   ueConn.sin6_port = 0;
+
+   /*int val = 1;
+   setsockopt(sockFd, IPPROTO_IPV6, IPV6_HDRINCL, &val, sizeof (val));*/
+   if(inet_pton(AF_INET6, ip6Addr, &ueConn.sin6_addr) != 1) {
+     perror("inet_pton");
+   }
+   if(sendto(sockFd, &ethPkt[14], (len-14), 0,
+            (const struct sockaddr *)&ueConn, sizeof(struct sockaddr_in6)) == -1)
+   {
+      perror("sendto\n");
+   }
+   RETVOID;
+}/* nbAppSendEthPktIpv6 */
 
 PRIVATE Void nbAppDlvrIpPkt
 (
@@ -340,9 +393,6 @@ PRIVATE Void nbAppRcvdPktHndlr
 
    bytesRcvd = hdr->caplen;
 
-   /*for (int i=0; i<80;i++) {
-     printf("%x\n",pktData[i]);
-   }*/
    /* Find out the type of Ethernet packet (bytes 12-13 in Ethernet header),
       handle IP and ARP packets */
    pktType = (pktData[13] << 8) + pktData[12];
@@ -583,6 +633,7 @@ PRIVATE Void nbAppBuildEthPkt
    U16 idx = 0;
    U16 idx1 = 0;
    U32 dstIPAddr;
+   U8 dstIP6Addr[NB_IPV6_ADDRESS_LEN] = {0};
    U8 isFound = FALSE;
    UeDataCb *ueDatCb = NULLP;
 
@@ -595,8 +646,10 @@ PRIVATE Void nbAppBuildEthPkt
    cmMemcpy(ethPkt + 14, ipPkt, len);
 
    /* Find out the destination MAC address using destination IP address */
-   dstIPAddr = (ethPkt[30] << 24) + (ethPkt[31] << 16) + (ethPkt[32] << 8) + \
-               ethPkt[33];
+   /*dstIPAddr = (ethPkt[30] << 24) + (ethPkt[31] << 16) + (ethPkt[32] << 8) + \
+               ethPkt[33];*/
+   cmMemcpy(dstIP6Addr, &ethPkt[38], 16);
+   //printf("dstIPAddr=%s\n", dstIPAddr);
 
    /* Search the MAC map for destination MAC address */
    for(idx = 0; idx < ueCnt; idx++)
@@ -606,9 +659,14 @@ PRIVATE Void nbAppBuildEthPkt
          ueDatCb = ueDataCbLst[idx];
          for( idx1 = 0 ; idx1 < ueDatCb->noOfIpsAssigned ; idx1++)
       {
-            if((ueDatCb->ipInfo[idx1] != NULLP) && (dstIPAddr == ueDatCb->ipInfo[idx1]->ipAddr))
+            /*for (int i=0; i<16;i++) {
+              printf("ip6AddrStr %x\n", ueDatCb->ipInfo[idx1]->ip6AddrStr[i]);
+              printf("dstMACAddr %x\n", dstIP6Addr[i]);
+            }*/
+            if((ueDatCb->ipInfo[idx1] != NULLP) && (!cmMemcmp(dstIP6Addr, ueDatCb->ipInfo[idx1]->ip6AddrStr, 16)/*dstIPAddr == ueDatCb->ipInfo[idx1]->ipAddr*/ ))
             {
                dstMACAddr = ueDatCb->ipInfo[idx1]->macAddr;
+               printf("dstMACAddr found\n");
                isFound = TRUE;
                break;
             }
@@ -985,6 +1043,7 @@ PUBLIC S16 nbAppFrwdIpPkt
    if(len < NB_APP_MAX_IP_PKT)
    {
       /* Encapsulate the IP packet in an Ethernet packet */
+     printf("nbAppBuildEthPkt\n");
       nbAppBuildEthPkt(ipPkt, len);
 
       /*NB_LOG_DEBUG(&nbCb,"nbAppFrwdIpPkt: Received IP packet from eNodeB: SRC from "\
@@ -997,7 +1056,8 @@ PUBLIC S16 nbAppFrwdIpPkt
       }
       */
       /* Send out Ethernet packet */
-      nbAppSendEthPkt(ethPkt, len + 14);
+      //nbAppSendEthPkt(ethPkt, len + 14);
+      nbAppSendEthPktIpv6(ethPkt, len + 14);
    }
    else
    {

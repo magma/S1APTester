@@ -414,6 +414,7 @@ void trfgen_start_test(int test_id, char *host_ip, char *bind_ip, char *host_por
       procIds.pids[procIds.noOfPids++] = pid;
       if(pid == 0)
       {
+         printf("Starting client with bind ip=%s, port=%d\n", bind_ip, port);
          printf("Sleeping for 5 secs\n");
          sleep(5);
          start_client((void*)test);
