@@ -186,14 +186,6 @@ PRIVATE Void nbAppSendEthPktIpv6
             (int)ethPkt[44], (int)ethPkt[45], (int)ethPkt[46], (int)ethPkt[47], (int)ethPkt[48], (int)ethPkt[49],
             (int)ethPkt[50], (int)ethPkt[51], (int)ethPkt[52], (int)ethPkt[53]);
 
-   printf("nbAppSendEthPktIpv6 ip6Addr=%s\n",ip6Addr);
-   printf("\n===================================================================================================\n");
-   printf("len=%d\n",len);
-   for (int i=14; i<len;i++) {
-     printf("%x\t", ethPkt[i]);
-   }
-   //ipPktLen = 40;
-   printf("\n===================================================================================================\n");
    ueConn.sin6_family = AF_INET6;
    /* When using an IPv6 raw socket, sin6_port must be set to 0
     * to avoid an EINVAL ("Invalid Argument") error
@@ -201,8 +193,6 @@ PRIVATE Void nbAppSendEthPktIpv6
    //ueConn.sin6_port = htons(0);
    ueConn.sin6_port = 0;
 
-   /*int val = 1;
-   setsockopt(sockFd, IPPROTO_IPV6, IPV6_HDRINCL, &val, sizeof (val));*/
    if(inet_pton(AF_INET6, ip6Addr, &ueConn.sin6_addr) != 1) {
      perror("inet_pton");
    }
@@ -659,14 +649,9 @@ PRIVATE Void nbAppBuildEthPkt
          ueDatCb = ueDataCbLst[idx];
          for( idx1 = 0 ; idx1 < ueDatCb->noOfIpsAssigned ; idx1++)
       {
-            /*for (int i=0; i<16;i++) {
-              printf("ip6AddrStr %x\n", ueDatCb->ipInfo[idx1]->ip6AddrStr[i]);
-              printf("dstMACAddr %x\n", dstIP6Addr[i]);
-            }*/
             if((ueDatCb->ipInfo[idx1] != NULLP) && (!cmMemcmp(dstIP6Addr, ueDatCb->ipInfo[idx1]->ip6AddrStr, 16)/*dstIPAddr == ueDatCb->ipInfo[idx1]->ipAddr*/ ))
             {
                dstMACAddr = ueDatCb->ipInfo[idx1]->macAddr;
-               printf("dstMACAddr found\n");
                isFound = TRUE;
                break;
             }
@@ -1043,7 +1028,6 @@ PUBLIC S16 nbAppFrwdIpPkt
    if(len < NB_APP_MAX_IP_PKT)
    {
       /* Encapsulate the IP packet in an Ethernet packet */
-     printf("nbAppBuildEthPkt\n");
       nbAppBuildEthPkt(ipPkt, len);
 
       /*NB_LOG_DEBUG(&nbCb,"nbAppFrwdIpPkt: Received IP packet from eNodeB: SRC from "\

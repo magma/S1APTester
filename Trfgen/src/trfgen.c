@@ -368,6 +368,8 @@ void trfgen_start_test(int test_id, char *host_ip, char *bind_ip, char *host_por
          iperf_set_test_bind_address(test, bind_ip);
          iperf_set_test_server_port( test, port );
          iperf_set_test_duration( test, tstcfg[test_id].duration);
+         printf("Sleeping for 5 secs\n");
+         sleep(5);
          start_server((void*)test);
          exit(0);
       }
