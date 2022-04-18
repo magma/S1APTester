@@ -643,14 +643,8 @@ PRIVATE S16 nbBldS1SetupReq
       {
          tACItem = &ie->value.u.sztSuppTAs.member[taIdx];
          nbFillTknU8(&(tACItem->pres), PRSNT_NODEF);
-
-         #ifdef MULTI_ENB_SUPPORT
-         nbSztFillTAC(enbCb->tac, setupReqPdu,
-                      &tACItem->tAC);
-         #else
          nbSztFillTAC(smCfgCb.suppTAs.suppTA[taIdx].tac, setupReqPdu,
                       &tACItem->tAC);
-         #endif
          numComp = smCfgCb.suppTAs.suppTA[taIdx].bPlmnList.numBPlmns;
          /* Allocate memory for broadcast PLMNs */
          if ((cmGetMem(setupReqPdu, numComp * sizeof(SztBPLMNs),
@@ -663,15 +657,9 @@ PRIVATE S16 nbBldS1SetupReq
          nbFillTknU16(&(tACItem->broadcastPLMNs.noComp), numComp);
          for (idx = 0; idx < numComp; idx++)
          {
-         #ifdef MULTI_ENB_SUPPORT
-            nbSztFillPLMNId(setupReqPdu,
-                           &(enbCb->plmnId),
-                           &(tACItem->broadcastPLMNs.member[idx]));
-         #else
             nbSztFillPLMNId(setupReqPdu,
                            &(smCfgCb.suppTAs.suppTA[taIdx].bPlmnList.plmnIds[idx]),
                            &(tACItem->broadcastPLMNs.member[idx]));
-         #endif
          }
       }
       ieIdx++;

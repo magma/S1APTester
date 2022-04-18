@@ -1326,20 +1326,20 @@ PUBLIC S16 handlEnbConfig(FwNbConfigReq_t *data)
 
    if (data->enbName_pr.pres  == TRUE)
    {
-      strcpy((S8*)msgReq->t.configReq.enbName, (S8*)data->enbName_pr.enb_name);
+      strncpy((S8*)msgReq->t.configReq.enbName, (S8*)data->enbName_pr.enb_name, MAX_ENB_NAME_LEN);
    }
    else
    {
-      strcpy((S8*)msgReq->t.configReq.enbName, (S8*)fwCb->nbAppCfgCb.enbName);
+      strncpy((S8*)msgReq->t.configReq.enbName, (S8*)fwCb->nbAppCfgCb.enbName, MAX_ENB_NAME_LEN);
    }
 
    if (data->plmnId_pr.pres  == TRUE)
    {
-      strcpy((S8*)msgReq->t.configReq.plmnId, (S8*)data->plmnId_pr.plmn_id);
+      strncpy((S8*)msgReq->t.configReq.plmnId, (S8*)data->plmnId_pr.plmn_id, MAX_PLMN_ID);
    }
    else
    {
-      strcpy((S8*)msgReq->t.configReq.plmnId, (S8*)fwCb->nbAppCfgCb.plmnId);
+      strncpy((S8*)msgReq->t.configReq.plmnId, (S8*)fwCb->nbAppCfgCb.plmnId, MAX_PLMN_ID);
    }
 
    if (data->heratbeatInterval_pr.pres  == TRUE)
