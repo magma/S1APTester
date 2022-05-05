@@ -1895,8 +1895,9 @@ PUBLIC S16 nbDamEgtpDatInd(Pst *pst, EgtUEvnt *eguMsg) {
     }
     RETVALUE(RFAILED);
   }
+  U8 version = (flatBuf[0] >> 4) == NB_IPV6_VERSION ? 6 :4;
   /* send the downlink packet to pcap */
-  nbAppFrwdIpPkt(flatBuf, cnt);
+  nbAppFrwdIpPkt(flatBuf, cnt, version);
   NB_FREE(flatBuf, len);
 
   cmFreeMem(eguMsg->u.egMsg);

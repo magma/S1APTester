@@ -102,6 +102,7 @@ typedef struct _nbAppCfgCb
    U16  noOfSctpInStreams;       /* No of In SCTP Streams */
    U16  noOfSctpOutStreams;      /* No of Out SCTP Streams */
    S8   ueEthIntf[10];
+   S8   ueEthIntfIpv6[10];
    U32  numOfEnbs; /* Max number of enbs supported */
 }NbAppCfgCb;
 
@@ -139,6 +140,7 @@ typedef enum {
    NO_OF_SCTP_IN_STREAMS,
    NO_OF_SCTP_OUT_STREAMS,
    UE_ETH_INTF,
+   UE_ETH_INTF_IPV6,
    VS_IP_ADDR,
    MAX_NB_CFG_PARAM
 }nbAppCfgTagNum;

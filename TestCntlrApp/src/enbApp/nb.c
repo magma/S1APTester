@@ -56,7 +56,7 @@ PUBLIC S16 NbHandleDropErabSetupReq(NbDropErabSetupReq *dropErabSetupReq);
 
 EXTERN S16 nbIfmDamTnlCreatReq(NbDamTnlInfo*);
 EXTERN S16 nbIfmDamUeRelReq(U32, U8);
-EXTERN S16 nbAppRouteInit(U32 selfIp, S8*);
+EXTERN S16 nbAppRouteInit(U32 selfIp, S8*, U8);
 
 EXTERN NbDamCb nbDamCb;
 
@@ -691,6 +691,8 @@ NbConfigReq   *cfg
    U8  plmnLen;
    U8  tmpPlmn[NB_THREE] = {0};
    SztPLMNidentity pLMNidentity;
+   S8   ueEthIf[10];
+   U8   cnt = 0;
 
    NB_LOG_ENTERFN(&nbCb);
 
@@ -799,8 +801,20 @@ NbConfigReq   *cfg
    smCfgCb.numOfEnbs             = cfg->numOfEnbs;
 #endif
 
-
-   if(nbAppRouteInit(smCfgCb.enbIpAddr, cfg->ueEthIntf) != ROK)
+   if (cfg->ip_version == 4) {
+     while(cfg->ueEthIntf[cnt]) {
+        ueEthIf[cnt] = cfg->ueEthIntf[cnt];
+        cnt++;
+     }
+   } else {
+      while(cfg->ueEthIntfIpv6[cnt]) {
+        ueEthIf[cnt] = cfg->ueEthIntfIpv6[cnt];
+        cnt++;
+     }
+   }
+   ueEthIf[cnt] = '\0';
+   //printf("In nb.c ueEthIf = %s\n", ueEthIf);
+   if(nbAppRouteInit(smCfgCb.enbIpAddr, ueEthIf, cfg->ip_version) != ROK)
    {
       NB_LOG_ERROR(&nbCb,"Failed to initialize Pcap");
       nbUiSendConfigFailIndToUser(NB_PCAP_CFG_FAILED);

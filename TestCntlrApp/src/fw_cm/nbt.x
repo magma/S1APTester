@@ -203,7 +203,9 @@ typedef struct _nbConfigReq
    U16    noOfSctpInStreams;      /* No of Sctp In Streams  */
    U16    noOfSctpOutStreams;     /* No of Sctp Out Streams  */
    S8     ueEthIntf[10];
+   S8     ueEthIntfIpv6[10];
    U8     numOfEnbs;              /* No. of eNBs */
+   U8     ip_version;
 }NbConfigReq;
 
 typedef struct _nbConfigCfm
