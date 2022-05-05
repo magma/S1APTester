@@ -98,7 +98,7 @@ S16 sockFd = 0;
 
 PRIVATE S16 nbAppInitAdaptor
 (
- Void
+ U8 version 
 )
 {
    S8 errBuf[PCAP_ERRBUF_SIZE];
@@ -115,7 +115,10 @@ PRIVATE S16 nbAppInitAdaptor
          "packets");
    
    /*sockFd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);*/
-   sockFd = socket(AF_INET6, SOCK_RAW, IPPROTO_RAW);
+   //sockFd = socket(AF_INET6, SOCK_RAW, IPPROTO_RAW);
+   //sockFd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
+   printf("In nbAppInitAdaptor version=%d\n",version);
+   sockFd = (version == 4) ? (socket(AF_INET, SOCK_RAW, IPPROTO_RAW)) : (version == 6) ? (socket(AF_INET6, SOCK_RAW, IPPROTO_RAW)): -1;
    if(sockFd == -1)
    {
       printf("Failed to open socket\n");
@@ -468,9 +471,9 @@ PRIVATE S16 nbAppGetNwParam
      if (ifa->ifa_addr == NULLP) {
        continue;
      }
+     printf("ifa->ifa_addr=%s, ueIntf=%s, ifa->ifa_name=%s\n",ifa->ifa_addr, ueIntf, ifa->ifa_name);
      if(!strcmp(ifa->ifa_name, ueIntf)) {
        strcpy(ethInf, ifa->ifa_name);
-       NB_LOG_DEBUG(&nbCb,"ethInf=%s", ethInf);
        struct ifreq req;
        strcpy(req.ifr_name, ifa->ifa_name );
        if(ioctl(sockfd, SIOCGIFHWADDR, &req ) != -1 ) {
@@ -533,10 +536,13 @@ PRIVATE S16 nbAppGetNwParam
    RETVALUE(ROK);
 }/* nbAppGetNwParam */
 
-PRIVATE S16 nbAppInitEthPkt(Void)
+PRIVATE S16 nbAppInitEthPkt(U8 version)
 {
-   //U16 ethType = NB_APP_ETH_TYPE_IP;
-   U16 ethType = NB_APP_ETH_TYPE_IP6;
+   U16 ethType = (version == 4) ? NB_APP_ETH_TYPE_IP : (version == 6) ? NB_APP_ETH_TYPE_IP6 : 0;
+   if (ethType == 0) {
+     NB_LOG_DEBUG(&nbCb,"nbAppInitEthPkt: Invalid version=%d", version);
+     RETVALUE(RFAILED);
+   }
 
    TRC2(nbAppInitEthPkt)
 
@@ -615,6 +621,63 @@ PRIVATE S16 nbAppInitArpPkt(Void)
 }/* nbAppInitArpPkt */
 
 PRIVATE Void nbAppBuildEthPkt
+(
+ U8   *ipPkt, 
+ U32   len
+)
+{
+   U16 idx = 0;
+   U16 idx1 = 0;
+   U32 dstIPAddr;
+   U8 isFound = FALSE;
+   UeDataCb *ueDatCb = NULLP;
+
+   U8 *dstMACAddr = NULLP;
+
+   TRC2(nbAppBuildEthPkt)
+   
+   /*NB_LOG_DEBUG(&nbCb,"nbAppBuildEthPkt: Encapsulating IP packet in a Eth packet");*/
+   /* Copy IP packet into Ethernet payload */
+   cmMemcpy(ethPkt + 14, ipPkt, len);
+
+   /* Find out the destination MAC address using destination IP address */
+   dstIPAddr = (ethPkt[30] << 24) + (ethPkt[31] << 16) + (ethPkt[32] << 8) + \
+               ethPkt[33];
+   //printf("dstIPAddr=%s\n", dstIPAddr);
+
+   /* Search the MAC map for destination MAC address */
+   for(idx = 0; idx < ueCnt; idx++)
+   {
+      if(ueDataCbLst[idx] != NULLP)
+      {
+         ueDatCb = ueDataCbLst[idx];
+         for( idx1 = 0 ; idx1 < ueDatCb->noOfIpsAssigned ; idx1++)
+      {
+            if((ueDatCb->ipInfo[idx1] != NULLP) && (dstIPAddr == ueDatCb->ipInfo[idx1]->ipAddr))
+            {
+               dstMACAddr = ueDatCb->ipInfo[idx1]->macAddr;
+               isFound = TRUE;
+               break;
+            }
+         }
+         if(isFound == TRUE)
+            break;
+      }
+   }
+   if(dstMACAddr == NULLP)
+   {
+      NB_LOG_ERROR(&nbCb,"nbAppBuildEthPkt: Could not find MAC address");
+      RETVOID;
+   }
+
+   /* Copy the destination MAC address */
+   cmMemcpy(ethPkt, dstMACAddr, NB_APP_MAC_ADDR_LEN);
+
+   RETVOID;
+}/* nbAppBuildEthPkt */
+
+
+PRIVATE Void nbAppBuildEthPktIPv6
 (
  U8   *ipPkt, 
  U32   len
@@ -1009,7 +1072,8 @@ PUBLIC Void nbRelCntxtInTrafficHandler
 PUBLIC S16 nbAppFrwdIpPkt
 (
  U8 *ipPkt,
- U32 len
+ U32 len,
+ U8 version
 )
 {
    TRC2(nbAppFrwdIpPkt)
@@ -1027,21 +1091,21 @@ PUBLIC S16 nbAppFrwdIpPkt
       Maximum data size */
    if(len < NB_APP_MAX_IP_PKT)
    {
-      /* Encapsulate the IP packet in an Ethernet packet */
-      nbAppBuildEthPkt(ipPkt, len);
+      /* Encapsulate the IP packet in an Ethernet packet and
+       * send out Ethernet packet
+       */
+      printf("nbAppFrwdIpPkt version=%d\n", version);
+      if (version == 4) {
+        nbAppBuildEthPkt(ipPkt, len);
+        nbAppSendEthPkt(ethPkt, len + 14);
+      } else {
+        nbAppBuildEthPktIPv6(ipPkt, len);
+        nbAppSendEthPktIpv6(ethPkt, len + 14);
+      }
 
       /*NB_LOG_DEBUG(&nbCb,"nbAppFrwdIpPkt: Received IP packet from eNodeB: SRC from "\
            "%d.%d.%d.%d to %d.%d.%d.%d\n", ipPkt[12], ipPkt[13], ipPkt[14],
            ipPkt[15],ipPkt[16], ipPkt[17], ipPkt[18], ipPkt[19]);*/
-
-      /*for(indx = 0; indx < (len); indx++)
-      {
-         NB_LOG_DEBUG(&nbCb,"%02x ", ipPkt[indx]);
-      }
-      */
-      /* Send out Ethernet packet */
-      //nbAppSendEthPkt(ethPkt, len + 14);
-      nbAppSendEthPktIpv6(ethPkt, len + 14);
    }
    else
    {
@@ -1055,7 +1119,8 @@ PUBLIC S16 nbAppFrwdIpPkt
 PUBLIC S16 nbAppRouteInit
 (
  U32 selfIp,
- S8 *ethIntf
+ S8 *ethIntf,
+ U8 version
 )
 {
    S16 ret = ROK;
@@ -1104,7 +1169,7 @@ PUBLIC S16 nbAppRouteInit
       addr[1], addr[2], addr[3]);
 
    /* Initialize Ethernet packet */
-   ret = nbAppInitEthPkt();
+   ret = nbAppInitEthPkt(version);
    if(ret != ROK)
    {
       NB_LOG_ERROR(&nbCb,"Failed to initialise Ethernet Packet"); 
@@ -1120,7 +1185,7 @@ PUBLIC S16 nbAppRouteInit
    }
 
    /* Open the adaptor for capturing packets - LibPcap */
-   ret = nbAppInitAdaptor();
+   ret = nbAppInitAdaptor(version);
    if(ret != ROK)
    {
       NB_LOG_ERROR(&nbCb,"Failed to initialise Adaptor"); 

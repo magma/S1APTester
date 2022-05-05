@@ -1434,6 +1434,7 @@ typedef struct _fwNbConfigReq
    no_Of_Sctp_In_Streams   noOfSctpInStreams_pr;
    no_Of_Sctp_Out_Streams   noOfSctpOutStreams_pr;
    num_Of_Enbs_t numOfEnbs;
+   U8 ip_version;
 }FwNbConfigReq_t;
 
 typedef struct _fwNbConfigCfm

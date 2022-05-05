@@ -3082,6 +3082,22 @@ PUBLIC S16 nbGetErabInfoFrmIntCnxt
                /* This means both IPv4 and IPv6 addresses are present. We are */
                /* yet to support this option                                  */
               // TODO: Add ipv4v6 support
+               tunInfo->sgwAddr.type = CM_TPTADDR_IPV4;
+               tunInfo->sgwAddr.u.ipv4TptAddr.\
+                  port = NB_DFLT_EGTP_PORT;
+
+               /* copy 4bytes into the U32 */
+               shiftBits = erabItem->transportLyrAddr.len / 8;
+               addrMask = 0xFF000000;
+               for(indx = 0; indx < 4; indx++)
+               {
+                  shiftBits--;
+                  tunInfo->sgwAddr.u.ipv4TptAddr.address |=
+                     ((U32)(erabItem->transportLyrAddr.val[indx]
+                        << (8 * shiftBits)) & addrMask);
+                  addrMask = addrMask >> 8;
+               }
+
               break;
             }
       }

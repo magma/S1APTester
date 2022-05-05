@@ -1504,6 +1504,16 @@ PUBLIC S16 handlEnbConfig(FwNbConfigReq_t *data)
       cnt++;
    }
    msgReq->t.configReq.ueEthIntf[cnt] = '\0';
+
+   cnt = 0;
+   while(fwCb->nbAppCfgCb.ueEthIntfIpv6[cnt])
+   {
+      msgReq->t.configReq.ueEthIntfIpv6[cnt] = fwCb->nbAppCfgCb.ueEthIntfIpv6[cnt];
+      cnt++;
+   }
+   msgReq->t.configReq.ueEthIntfIpv6[cnt] = '\0';
+
+
 #ifdef MULTI_ENB_SUPPORT
    /* Number of ENBs */
    msgReq->t.configReq.numOfEnbs = MAX_NUM_OF_ENBS;
@@ -1511,6 +1521,14 @@ PUBLIC S16 handlEnbConfig(FwNbConfigReq_t *data)
    msgReq->t.configReq.numOfEnbs = 1;
 #endif
    FW_LOG_DEBUG(fwCb, "*********numOfEnbs = %d MAX_NUM_OF_ENBS = %d\n", msgReq->t.configReq.numOfEnbs, MAX_NUM_OF_ENBS);
+
+   // By default ip_version is set to 4 unless sent from the test
+   FW_LOG_DEBUG(fwCb, "*********In fw_api_int.c ip_version = %d \n", data->ip_version);
+   if (data->ip_version == 6) {
+     msgReq->t.configReq.ip_version = data->ip_version;
+   } else {
+     msgReq->t.configReq.ip_version = 4;
+   }
 
    fwCb->nbState = NB_CONFIG_INITIATED;
 

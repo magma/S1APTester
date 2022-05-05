@@ -15,6 +15,7 @@
 #include <stdint.h>
 #include <sys/types.h>          
 #include <sys/socket.h>
+#include <arpa/inet.h>
 
 #include <iperf_api.h>
 #include <iperf_util.h>
@@ -342,6 +343,14 @@ void trfgen_start_test(int test_id, char *host_ip, char *bind_ip, char *host_por
    else
       printf("\n Error: protocol type is not supported");
 
+   char ip_buf[16];
+   uint8_t ip_version = 0;
+   if (inet_pton(AF_INET, bind_ip, ip_buf)) {
+     ip_version = 4;
+   } else if (inet_pton(AF_INET6, bind_ip, ip_buf)) {
+     ip_version = 6;
+   }
+
    if(tstcfg[test_id].trfgen_type == SERVER){
 #if 0
       iperf_set_test_role( test, 's' );
@@ -368,8 +377,11 @@ void trfgen_start_test(int test_id, char *host_ip, char *bind_ip, char *host_por
          iperf_set_test_bind_address(test, bind_ip);
          iperf_set_test_server_port( test, port );
          iperf_set_test_duration( test, tstcfg[test_id].duration);
-         printf("Sleeping for 5 secs\n");
-         sleep(5);
+         // Add delay to make sure that ipv6 addr is configured on eth2 i/f
+         if (ip_version == 6) {
+           printf("Sleeping for 5 secs\n");
+           sleep(5);
+         }
          start_server((void*)test);
          exit(0);
       }
@@ -417,8 +429,11 @@ void trfgen_start_test(int test_id, char *host_ip, char *bind_ip, char *host_por
       if(pid == 0)
       {
          printf("Starting client with bind ip=%s, port=%d\n", bind_ip, port);
-         printf("Sleeping for 5 secs\n");
-         sleep(5);
+         // Add delay to make sure that ipv6 addr is configured on eth2 i/f
+         if (ip_version == 6) {
+           printf("Sleeping for 5 secs\n");
+           sleep(5);
+         }
          start_client((void*)test);
          /*char command[200] = "";
          sprintf(command, "sudo iperf3 -6 -c %s -B %s -p %d -J -b 10000000",host_ip, bind_ip, 7001);
