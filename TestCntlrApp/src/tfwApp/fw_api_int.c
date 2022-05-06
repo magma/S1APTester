@@ -1507,10 +1507,9 @@ PUBLIC S16 handlEnbConfig(FwNbConfigReq_t *data)
    msgReq->t.configReq.ueEthIntf[cnt] = '\0';
 
    cnt = 0;
-   while(fwCb->nbAppCfgCb.ueEthIntfIpv6[cnt])
-   {
-      msgReq->t.configReq.ueEthIntfIpv6[cnt] = fwCb->nbAppCfgCb.ueEthIntfIpv6[cnt];
-      cnt++;
+   while(fwCb->nbAppCfgCb.ueEthIntfIpv6[cnt]) {
+     msgReq->t.configReq.ueEthIntfIpv6[cnt] = fwCb->nbAppCfgCb.ueEthIntfIpv6[cnt];
+     cnt++;
    }
    msgReq->t.configReq.ueEthIntfIpv6[cnt] = '\0';
 
@@ -1529,7 +1528,6 @@ PUBLIC S16 handlEnbConfig(FwNbConfigReq_t *data)
    } else {
      msgReq->t.configReq.ip_version = 4;
    }
-
    fwCb->nbState = NB_CONFIG_INITIATED;
 
    fwSendToNbApp(msgReq);

@@ -189,16 +189,14 @@ PRIVATE Void nbAppSendEthPktIpv6
    /* When using an IPv6 raw socket, sin6_port must be set to 0
     * to avoid an EINVAL ("Invalid Argument") error
     */
-   //ueConn.sin6_port = htons(0);
    ueConn.sin6_port = 0;
 
    if(inet_pton(AF_INET6, ip6Addr, &ueConn.sin6_addr) != 1) {
      perror("inet_pton");
    }
    if(sendto(sockFd, &ethPkt[14], (len-14), 0,
-            (const struct sockaddr *)&ueConn, sizeof(struct sockaddr_in6)) == -1)
-   {
-      perror("sendto\n");
+            (const struct sockaddr *)&ueConn, sizeof(struct sockaddr_in6)) == -1) {
+     perror("sendto\n");
    }
    RETVOID;
 }/* nbAppSendEthPktIpv6 */
@@ -459,9 +457,6 @@ PRIVATE S16 nbAppGetNwParam
      RETVALUE(RFAILED);
    }
 
-   /* Walk through linked list, maintaining head pointer so we
-      can free list later. */
-
    for (struct ifaddrs *ifa = ifaddr; ifa != NULLP;
       ifa = ifa->ifa_next) {
      if (ifa->ifa_addr == NULLP) {
@@ -476,19 +471,18 @@ PRIVATE S16 nbAppGetNwParam
           NB_LOG_DEBUG(&nbCb, "%s:MAC[%02X:%02X:%02X:%02X:%02X:%02X]\n",
                 ifa->ifa_name,
                 mac[0], mac[1], mac[2], mac[3], mac[4], mac[5] );
+         cmMemcpy(lclMACAddr, (U8 *)req.ifr_ifru.ifru_hwaddr.sa_data, NB_APP_MAC_ADDR_LEN);
+         found = TRUE;
+         break;
        }
-       cmMemcpy(lclMACAddr, (U8 *)req.ifr_ifru.ifru_hwaddr.sa_data, NB_APP_MAC_ADDR_LEN);
-       found = TRUE;
-       break;
      }
    }
    close(sockfd);
-   if(FALSE == found)
-   {
-      NB_LOG_ERROR(&nbCb,"Failed to get network parameters"); 
-      RETVALUE(RFAILED);
+   if(FALSE == found) {
+     NB_LOG_ERROR(&nbCb,"Failed to get network parameters");
+     RETVALUE(RFAILED);
    }
-   
+
    RETVALUE(ROK);
 }/* nbAppGetNwParam */
 
@@ -634,58 +628,53 @@ PRIVATE Void nbAppBuildEthPkt
 
 PRIVATE Void nbAppBuildEthPktIPv6
 (
- U8   *ipPkt, 
+ U8   *ipPkt,
  U32   len
 )
 {
-   U16 idx = 0;
-   U16 idx1 = 0;
-   U32 dstIPAddr;
-   U8 dstIP6Addr[NB_IPV6_ADDRESS_LEN] = {0};
-   U8 isFound = FALSE;
-   UeDataCb *ueDatCb = NULLP;
+  U16 idx = 0;
+  U16 idx1 = 0;
+  U32 dstIPAddr;
+  U8 dstIP6Addr[NB_IPV6_ADDRESS_LEN] = {0};
+  U8 isFound = FALSE;
+  UeDataCb *ueDatCb = NULLP;
 
-   U8 *dstMACAddr = NULLP;
+  U8 *dstMACAddr = NULLP;
 
-   TRC2(nbAppBuildEthPkt)
-   
-   /*NB_LOG_DEBUG(&nbCb,"nbAppBuildEthPkt: Encapsulating IP packet in a Eth packet");*/
-   /* Copy IP packet into Ethernet payload */
+  TRC2(nbAppBuildEthPkt)
+
+  NB_LOG_DEBUG(&nbCb,"nbAppBuildEthPktIPv6: Encapsulating IP packet in an Eth packet");
+  // Copy IP packet into Ethernet payload
    cmMemcpy(ethPkt + 14, ipPkt, len);
 
-   /* Find out the destination MAC address using destination IP address */
-   cmMemcpy(dstIP6Addr, &ethPkt[38], 16);
+  // Find out the destination MAC address using destination IP address
+  cmMemcpy(dstIP6Addr, &ethPkt[38], 16);
 
-   /* Search the MAC map for destination MAC address */
-   for(idx = 0; idx < ueCnt; idx++)
-   {
-      if(ueDataCbLst[idx] != NULLP)
-      {
-         ueDatCb = ueDataCbLst[idx];
-         for( idx1 = 0 ; idx1 < ueDatCb->noOfIpsAssigned ; idx1++)
-      {
-            if((ueDatCb->ipInfo[idx1] != NULLP) && (!cmMemcmp(dstIP6Addr, ueDatCb->ipInfo[idx1]->ip6AddrStr, 16)/*dstIPAddr == ueDatCb->ipInfo[idx1]->ipAddr*/ ))
-            {
-               dstMACAddr = ueDatCb->ipInfo[idx1]->macAddr;
-               isFound = TRUE;
-               break;
-            }
-         }
-         if(isFound == TRUE)
-            break;
-      }
-   }
-   if(dstMACAddr == NULLP)
-   {
-      NB_LOG_ERROR(&nbCb,"nbAppBuildEthPkt: Could not find MAC address");
-      RETVOID;
-   }
+  // Search the MAC map for destination MAC address
+  for(idx = 0; idx < ueCnt; idx++) {
+    if(ueDataCbLst[idx] != NULLP) {
+       ueDatCb = ueDataCbLst[idx];
+       for( idx1 = 0 ; idx1 < ueDatCb->noOfIpsAssigned ; idx1++) {
+         if((ueDatCb->ipInfo[idx1] != NULLP) && (!cmMemcmp(dstIP6Addr, ueDatCb->ipInfo[idx1]->ip6AddrStr, 16))) {
+           dstMACAddr = ueDatCb->ipInfo[idx1]->macAddr;
+           isFound = TRUE;
+           break;
+          }
+       }
+       if(isFound == TRUE)
+         break;
+    }
+  }
+  if(dstMACAddr == NULLP) {
+    NB_LOG_ERROR(&nbCb,"nbAppBuildEthPkt: Could not find MAC address");
+    RETVOID;
+  }
 
-   /* Copy the destination MAC address */
-   cmMemcpy(ethPkt, dstMACAddr, NB_APP_MAC_ADDR_LEN);
+  // Copy the destination MAC address
+  cmMemcpy(ethPkt, dstMACAddr, NB_APP_MAC_ADDR_LEN);
 
-   RETVOID;
-}/* nbAppBuildEthPkt */
+  RETVOID;
+}/* nbAppBuildEthPktIPv6 */
 
 PUBLIC U16 nbAppCalcIPChecksum
 (
@@ -1053,10 +1042,6 @@ PUBLIC S16 nbAppFrwdIpPkt
         nbAppBuildEthPktIPv6(ipPkt, len);
         nbAppSendEthPktIpv6(ethPkt, len + 14);
       }
-
-      /*NB_LOG_DEBUG(&nbCb,"nbAppFrwdIpPkt: Received IP packet from eNodeB: SRC from "\
-           "%d.%d.%d.%d to %d.%d.%d.%d\n", ipPkt[12], ipPkt[13], ipPkt[14],
-           ipPkt[15],ipPkt[16], ipPkt[17], ipPkt[18], ipPkt[19]);*/
    }
    else
    {

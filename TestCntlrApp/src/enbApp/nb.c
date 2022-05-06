@@ -813,7 +813,6 @@ NbConfigReq   *cfg
      }
    }
    ueEthIf[cnt] = '\0';
-   //printf("In nb.c ueEthIf = %s\n", ueEthIf);
    if(nbAppRouteInit(smCfgCb.enbIpAddr, ueEthIf, cfg->ip_version) != ROK)
    {
       NB_LOG_ERROR(&nbCb,"Failed to initialize Pcap");
