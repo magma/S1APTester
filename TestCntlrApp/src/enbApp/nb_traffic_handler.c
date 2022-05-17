@@ -380,6 +380,7 @@ PRIVATE Void nbAppRcvdPktHndlr
 
    bytesRcvd = hdr->caplen;
 
+   U8 version = (U8*) &args;
    /* Find out the type of Ethernet packet (bytes 12-13 in Ethernet header),
       handle IP and ARP packets */
    pktType = (pktData[13] << 8) + pktData[12];
@@ -388,7 +389,7 @@ PRIVATE Void nbAppRcvdPktHndlr
       /* Handle the IP packet */
       nbAppDlvrIpPkt(pktData, bytesRcvd);
    }
-   else if(pktType == NB_APP_ETH_TYPE_ARP)
+   else if((version == 4) && (pktType == NB_APP_ETH_TYPE_ARP))
    {
       if(((U16)pktData[21] << 8 | pktData[20]) == NB_APP_ARP_RSP)
       {
@@ -415,7 +416,7 @@ PUBLIC Void *nbAppPktReceiver
    /* Read packets from Ethernet interface and invoke nbAppRcvdPktHndlr
       callback function for every packet read */
    NB_LOG_DEBUG(&nbCb,"nbAppPktReceiver: Processing the received  Ethernet Packet");
-   pcap_loop(dataHdlr, -1, nbAppRcvdPktHndlr, NULLP);
+   pcap_loop(dataHdlr, -1, nbAppRcvdPktHndlr, arg);
 
    RETVALUE(NULLP);
 }/* nbAppPktReceiver */
@@ -1129,7 +1130,7 @@ PUBLIC S16 nbAppRouteInit
    }
 
    /* Create the thread for capturing the packets */
-   if(pthread_create(&pcapTid, NULLP, nbAppPktReceiver, NULLP))
+   if(pthread_create(&pcapTid, NULLP, nbAppPktReceiver, &version))
    {
       NB_LOG_ERROR(&nbCb,"nbAppPktReceiver thread creation failed"); 
       RETVALUE(RFAILED);
