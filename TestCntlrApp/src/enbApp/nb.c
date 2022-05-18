@@ -724,9 +724,7 @@ NbConfigReq   *cfg
    smCfgCb.maxExpires          = cfg->maxExpires;
    smCfgCb.s1SetupTmrVal       = cfg->s1SetupTmr;
    /* get the plmn-id */
-   plmnLen = strlen((S8*)cfg->plmnId);
-   /* limit strlen as struct doesnt guarantee a null char after the str */
-   plmnLen = plmnLen > 6 ? 6 : plmnLen;
+   plmnLen = strnlen((S8*)cfg->plmnId, NBT_MAX_PLMN_ID);
    plmnVal = atoi((S8*)cfg->plmnId);
 
    NB_GET_PLMN(tmpPlmn,plmnLen,plmnVal)
