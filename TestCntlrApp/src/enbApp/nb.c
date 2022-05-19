@@ -713,18 +713,20 @@ NbConfigReq   *cfg
    smCfgCb.cellId              = cfg->cellId;
    smCfgCb.trackAreaCode       = cfg->tac;
    smCfgCb.enbIpAddr           = cfg->enbIpAddr;
-   cmMemset(smCfgCb.enbName,0,NB_ENB_NAME);
-   if(strlen((S8*)cfg->enbName) < NB_ENB_NAME)
-   {
-      cmMemcpy(smCfgCb.enbName,cfg->enbName,strlen((S8*)cfg->enbName));
-      smCfgCb.enbNameLen            = strlen((S8*)cfg->enbName);
-   }
+
+   /* initialize entire enbName buffer to zero */
+   cmMemset(smCfgCb.enbName, 0, NB_ENB_NAME);
+
+   /* fetch length of enbName and copy to smCfgCb */
+   smCfgCb.enbNameLen = strnlen((S8*)cfg->enbName, NB_ENB_NAME);
+   cmMemcpy(smCfgCb.enbName, cfg->enbName, smCfgCb.enbNameLen);
+
    smCfgCb.sctpIpAddr          = cfg->sctpIpAddr;
    smCfgCb.inactvTmrVal        = cfg->inactvTmrVal;
    smCfgCb.maxExpires          = cfg->maxExpires;
    smCfgCb.s1SetupTmrVal       = cfg->s1SetupTmr;
    /* get the plmn-id */
-   plmnLen = strlen((S8*)cfg->plmnId);
+   plmnLen = strnlen((S8*)cfg->plmnId, NBT_MAX_PLMN_ID);
    plmnVal = atoi((S8*)cfg->plmnId);
 
    NB_GET_PLMN(tmpPlmn,plmnLen,plmnVal)
