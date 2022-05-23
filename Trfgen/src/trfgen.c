@@ -16,6 +16,9 @@
 #include <sys/types.h>          
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <netdb.h>
+#include <ifaddrs.h>
+#include <stdbool.h>
 
 #include <iperf_api.h>
 #include <iperf_util.h>
@@ -307,6 +310,44 @@ void trfgen_iperf_reporter_callback(struct iperf_test *test)
 }
 #endif
 
+// Checks if UE ip address is configured on eth3 interface
+bool check_ipv6_intf_config (char *bind_ip_str) {
+  char ip_arr_temp[INET6_ADDRSTRLEN] = "";
+  struct in6_addr bind_ip;
+  // Convert bind_ip_str to standard ipv6 address format
+  inet_pton(AF_INET6, bind_ip_str, &bind_ip);
+  inet_ntop(AF_INET6, &bind_ip, ip_arr_temp, INET6_ADDRSTRLEN);
+
+  struct ifaddrs *ifaddr;
+  int itr=0;
+  int found = 0;
+  char host[NI_MAXHOST];
+  while((!found) && (itr<3)) {
+    /* Delay to make sure ipv6 address is configured on eth3 i/f
+     * to avoid multiple iterations
+     */
+    sleep(5);
+    itr++;
+    if (getifaddrs(&ifaddr) == -1) {
+       perror("getifaddrs");
+       return 0;
+     }
+
+     for (struct ifaddrs *ifa = ifaddr; ifa != NULL;
+       ifa = ifa->ifa_next) {
+       if (ifa->ifa_addr == NULL) {
+         continue;
+       }
+       getnameinfo(ifa->ifa_addr,sizeof(struct sockaddr_in6),host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+       if ((!strcmp(host, ip_arr_temp)) && (!(strcmp(ifa->ifa_name, "eth3")))) {
+         found = 1;
+         break;
+       }
+    }
+  }
+  return found;
+}
+
 void trfgen_start_test(int test_id, char *host_ip, char *bind_ip, char *host_port)
 {
    int port;
@@ -377,10 +418,12 @@ void trfgen_start_test(int test_id, char *host_ip, char *bind_ip, char *host_por
          iperf_set_test_bind_address(test, bind_ip);
          iperf_set_test_server_port( test, port );
          iperf_set_test_duration( test, tstcfg[test_id].duration);
-         // Add delay to make sure that ipv6 addr is configured on eth2 i/f
+         // Checks if UE ip address is configured before starting server
          if (ip_version == 6) {
-           printf("Sleeping for 5 secs\n");
-           sleep(5);
+           if (!check_ipv6_intf_config(bind_ip)) {
+             printf("Not able to start iperf server as IPv6 interface is not configured");
+             return;
+           }
          }
          start_server((void*)test);
          exit(0);
@@ -428,11 +471,12 @@ void trfgen_start_test(int test_id, char *host_ip, char *bind_ip, char *host_por
       procIds.pids[procIds.noOfPids++] = pid;
       if(pid == 0)
       {
-         printf("Starting client with bind ip=%s, port=%d\n", bind_ip, port);
-         // Add delay to make sure that ipv6 addr is configured on eth2 i/f
+         // Checks if UE ip address is configured before starting client
          if (ip_version == 6) {
-           printf("Sleeping for 5 secs\n");
-           sleep(5);
+           if (!check_ipv6_intf_config(bind_ip)) {
+             printf("Not able to start iperf server as IPv6 interface is not configured");
+             return;
+           }
          }
          start_client((void*)test);
          exit(0);
