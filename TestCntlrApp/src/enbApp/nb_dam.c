@@ -60,7 +60,7 @@ PRIVATE S16 nbUpdateIpInfo(U8 ueId, U8 *ipv6Addr, U32 lnkEpsBearId,
 /* Default Interface type while adding the tunnel at GTP*/
 #define NB_DAM_MAX_DRB_TNLS  3
 /* Incoming packet size to be read 20 bytes IP hdr + src port + dest port */
-#define NB_PACKET_SIZE 16
+#define NB_PACKET_SIZE 4
 
 PUBLIC NbDamCb   nbDamCb;
 /** @brief This function is responsible for starting the inactivity timer.
@@ -1895,9 +1895,8 @@ PUBLIC S16 nbDamEgtpDatInd(Pst *pst, EgtUEvnt *eguMsg) {
     }
     RETVALUE(RFAILED);
   }
-  U8 version = (flatBuf[0] >> 4) == NB_IPV6_VERSION ? 6 :4;
   /* send the downlink packet to pcap */
-  nbAppFrwdIpPkt(flatBuf, cnt, version);
+  nbAppFrwdIpPkt(flatBuf, cnt);
   NB_FREE(flatBuf, len);
 
   cmFreeMem(eguMsg->u.egMsg);
