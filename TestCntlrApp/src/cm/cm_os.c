@@ -72,7 +72,6 @@
 /* cm_os_c_001.main_12: Excluding header files for 4GMX */
 #ifndef SS_4GMX_LCORE
 #include <termios.h>
-#include <stropts.h>
 #include <poll.h>
 #endif
 #endif /* DEF_NTSSLIB */
