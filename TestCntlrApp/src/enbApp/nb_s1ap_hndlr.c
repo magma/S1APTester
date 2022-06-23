@@ -818,6 +818,28 @@ PRIVATE S16 nbBldResetReq
    nbFillTknU8(&(ie->pres), PRSNT_NODEF);
    nbFillTknU32(&(ie->id), Sztid_ResetTyp);
    nbFillTknU32(&(ie->criticality), SztCriticalityrejectEnum);
+
+   if(resetMsgInfo->type != NB_COMPLETE_RESET && resetMsgInfo->type != NB_PARTIAL_RESET)
+   {
+      NB_LOG_ERROR(&nbCb, "Invalid Reset Type");
+      NB_FREE_EVNT(resetReqPdu);
+      RETVALUE(RFAILED);
+   }
+
+   // Allocate memory for storing UE Id pair to be reset
+   ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem,
+         (Ptr *)&resetReqPdu1);
+   if((cmGetMem(resetReqPdu1, resetMsgInfo->s1apIdCnt * \
+               sizeof(SztProtIE_SingleCont_UE_assocLogS1_ConItemRes),
+               (Ptr*)&ie->value.u.sztResetTyp.val.partOfS1_Intf.\
+               member)) != ROK)
+   {
+      NB_LOG_ERROR(&nbCb, "cmGetMem failed");
+      NB_FREE_EVNT(resetReqPdu);
+      NB_FREE_EVNT(resetReqPdu1);
+      RETVALUE(RFAILED);
+   }
+
    /* TODO: Conditional assignments requirements */
    if(resetMsgInfo->type == NB_COMPLETE_RESET)
    {
@@ -827,56 +849,42 @@ PRIVATE S16 nbBldResetReq
    }
    else if(resetMsgInfo->type == NB_PARTIAL_RESET)
    {
-      ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem,
-            (Ptr *)&resetReqPdu1);
-      if((cmGetMem(resetReqPdu1, resetMsgInfo->s1apIdCnt * \
-                  sizeof(SztProtIE_SingleCont_UE_assocLogS1_ConItemRes),
-                  (Ptr*)&ie->value.u.sztResetTyp.val.partOfS1_Intf.\
-                  member)) != ROK)
-      {
-         NB_LOG_ERROR(&nbCb, "cmGetMem failed");
-         NB_FREE_EVNT(resetReqPdu);
-         NB_FREE_EVNT(resetReqPdu1);
-         RETVALUE(RFAILED);
-      }
       nbFillTknU8(&(ie->value.u.sztResetTyp.choice), RESETTYP_PARTOFS1_INTF);
 
-      for(cnt = 0; cnt < resetMsgInfo->s1apIdCnt; cnt++)
-      {
-         resetIe = &ie->value.u.sztResetTyp.val.partOfS1_Intf.member[ieIdx1];
-         nbFillTknU8(&(resetIe->pres), PRSNT_NODEF);
-         nbFillTknU32(&(resetIe->id), Sztid_UE_assocLogS1_ConItem);
-         nbFillTknU32(&(resetIe->criticality), SztCriticalityrejectEnum);
-         nbFillTknU8(&(resetIe->value.u.sztUE_assocLogS1_ConItem.pres),
-               PRSNT_NODEF);
-	 /* send mme ue s1ap id, if received from MME */
-	 if(resetMsgInfo->mmeUeS1apIdLst[cnt])
-	 {
-            nbFillTknU32(&(resetIe->value.u.sztUE_assocLogS1_ConItem.\
-                  mME_UE_S1AP_ID), resetMsgInfo->mmeUeS1apIdLst[cnt]);
-	 }
-	 else
-         {
-            resetIe->value.u.sztUE_assocLogS1_ConItem.mME_UE_S1AP_ID.pres =
-	           NOTPRSNT;
-	 }
-         nbFillTknU32(
-             &(resetIe->value.u.sztUE_assocLogS1_ConItem.eNB_UE_S1AP_ID),
-             resetMsgInfo->enbUeS1apIdLst[cnt] & 0xFF);
+   }
 
-         resetIe->value.u.sztUE_assocLogS1_ConItem.iE_Extns.\
-            noComp.pres = NOTPRSNT;
-         ieIdx1++;
-      }
-      nbFillTknU16(&(ie->value.u.sztResetTyp.val.partOfS1_Intf.noComp),
-            resetMsgInfo->s1apIdCnt);
-   }
-   else
+   // This UE Id pair will be sent as it is to MME in the reset message for ENB
+   // Partial Reset message. However, it will be dropped in the S1AP layer
+   // after extracting the connection details for complete reset message
+   for(cnt = 0; cnt < resetMsgInfo->s1apIdCnt; cnt++)
    {
-      NB_LOG_ERROR(&nbCb, "Invalid Reset Type");
-      NB_FREE_EVNT(resetReqPdu);
-      RETVALUE(RFAILED);
+      resetIe = &ie->value.u.sztResetTyp.val.partOfS1_Intf.member[ieIdx1];
+      nbFillTknU8(&(resetIe->pres), PRSNT_NODEF);
+      nbFillTknU32(&(resetIe->id), Sztid_UE_assocLogS1_ConItem);
+      nbFillTknU32(&(resetIe->criticality), SztCriticalityrejectEnum);
+      nbFillTknU8(&(resetIe->value.u.sztUE_assocLogS1_ConItem.pres),
+            PRSNT_NODEF);
+      /* send mme ue s1ap id, if received from MME */
+      if(resetMsgInfo->mmeUeS1apIdLst[cnt])
+      {
+         nbFillTknU32(&(resetIe->value.u.sztUE_assocLogS1_ConItem.\
+               mME_UE_S1AP_ID), resetMsgInfo->mmeUeS1apIdLst[cnt]);
+      }
+      else
+      {
+         resetIe->value.u.sztUE_assocLogS1_ConItem.mME_UE_S1AP_ID.pres =
+                NOTPRSNT;
+      }
+      nbFillTknU32(
+          &(resetIe->value.u.sztUE_assocLogS1_ConItem.eNB_UE_S1AP_ID),
+          resetMsgInfo->enbUeS1apIdLst[cnt] & 0xFF);
+
+      resetIe->value.u.sztUE_assocLogS1_ConItem.iE_Extns.\
+         noComp.pres = NOTPRSNT;
+      ieIdx1++;
    }
+   nbFillTknU16(&(ie->value.u.sztResetTyp.val.partOfS1_Intf.noComp),
+         resetMsgInfo->s1apIdCnt);
    ieIdx++;
 
    nbFillTknU16(&(initMsg->value.u.sztReset.protocolIEs.noComp), ieIdx);

@@ -341,7 +341,7 @@ PUBLIC S16 NbUiNbtMsgReq
       }
 
       case NB_CLEANUP: {
-        NB_LOG_ERROR(&nbCb, "Closing EGTP servers for ENB Application");
+        NB_LOG_DEBUG(&nbCb, "Closing EGTP servers for ENB Application");
         smBuildEgShutDownCntrl();
         break;
       }

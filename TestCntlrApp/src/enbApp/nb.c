@@ -938,6 +938,26 @@ PUBLIC S16 NbEnbResetReqHdl
       while (cmHashListGetNext(&(nbCb.ueCbLst), (PTR)prev, (PTR *)&ueCb) == ROK)
       {
 	  if (ueCb->enbId ==  resetReq->u.completeRst.enbId) {
+             resetMsgInfo.s1apIdCnt++;
+	  }
+          prev = ueCb;
+      }
+      NB_ALLOC(&resetMsgInfo.enbUeS1apIdLst, sizeof(U32) * resetMsgInfo.s1apIdCnt);
+      NB_ALLOC(&resetMsgInfo.mmeUeS1apIdLst, sizeof(U32) * resetMsgInfo.s1apIdCnt);
+
+      ueCb = NULLP;
+      prev = NULLP;
+      while (cmHashListGetNext(&(nbCb.ueCbLst), (PTR)prev, (PTR *)&ueCb) == ROK)
+      {
+	  if (ueCb->enbId ==  resetReq->u.completeRst.enbId) {
+
+	// This is needed for getting connection list to be deleted in S1AP
+	// layer because enb and ue mapping is not present in S1AP applicaation
+        resetMsgInfo.mmeUeS1apIdLst[idx] = ueCb->s1ConCb->mme_ue_s1ap_id;
+        resetMsgInfo.enbUeS1apIdLst[idx] = ueCb->s1ConCb->enb_ue_s1ap_id;
+	idx++;
+
+
          NB_LOG_DEBUG(&nbCb, "Found ueCb->ueId=%d in HashList", ueCb->ueId);
 	 spConnId = ueCb->s1ConCb->spConnId;
          /* Inform the UeApp about UE context release */
@@ -959,7 +979,6 @@ PUBLIC S16 NbEnbResetReqHdl
          prev = NULLP;
          /* Delete hash list entry for ueCb */
          cmHashListDelete(&(nbCb.ueCbLst), (PTR)ueCb);
-	 break;
 	  } else {
          prev = ueCb;
 	  }
