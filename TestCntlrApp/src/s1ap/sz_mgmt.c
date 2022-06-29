@@ -742,18 +742,19 @@ UConnId lclRefNum;
          as per the choice in the reset */
       if (((SztResetTyp *)tknIE)->choice.val == SZ_FULL_RESET)
       {
-	 // Getting the connection details from partial reset IE that contains UE Id
-	 // pair. This information is not needed in the enb complete reset message to
-	 // be sent to MME and hence will be dropped while building the final reset
-	 // message in function szDbFillResetFrmPdu
+	 /* Getting the connection details from partial reset IE that contains UE Id
+	  * pair. This information is not needed in the Enb Complete Reset message to
+	  * be sent to MME and hence will be dropped while building the final reset
+	  * message in function szDbFillResetFrmPdu
+	  */
          nmbConns = ((SztResetTyp *)tknIE)->val.partOfS1_Intf.noComp.val;
          for (idx = 0; idx < nmbConns; idx++)
          {
-            /* Deallocate ConCb */
+            // Deallocate ConCb for all required connections
             if (((SztResetTyp *)tknIE)->val.partOfS1_Intf.member[idx].value.u.\
                   sztUE_assocLogS1_ConItem.pres.pres != NOTPRSNT)
             {
-               /* Assigne the connection reference type */
+               // Assign the connection reference number and type
                {
                   if (((SztResetTyp *)tknIE)->val.partOfS1_Intf.member[idx].\
                         value.u.sztUE_assocLogS1_ConItem.eNB_UE_S1AP_ID.pres != NOTPRSNT)
@@ -773,7 +774,9 @@ UConnId lclRefNum;
                   }
                }
 
-               /* Mention the connection reference type */
+               /* Release connections for the peer mentioning the connection
+	        * reference number and type
+		*/
                ret = szNdbDeallocConCb(conRefNo, peerCb, conRefType);
             }
          }

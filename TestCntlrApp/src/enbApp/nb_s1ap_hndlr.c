@@ -757,12 +757,7 @@ PRIVATE S16 nbBldS1SetupReq
    RETVALUE(ROK);
 } /* nbBldS1SetupReq */
 
-PRIVATE S16 nbBldResetReq
-(
- S1apPdu **pdu,
- NbResetMsgInfo *resetMsgInfo
-)
-{
+PRIVATE S16 nbBldResetReq(S1apPdu **pdu, NbResetMsgInfo *resetMsgInfo) {
    S1apPdu                        *resetReqPdu = NULLP;
    S1apPdu                        *resetReqPdu1 = NULLP;
    U16                            numComp;
@@ -827,8 +822,12 @@ PRIVATE S16 nbBldResetReq
    }
 
    // Allocate memory for storing UE Id pair to be reset
-   ret = cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem,
-         (Ptr *)&resetReqPdu1);
+   if(cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem,
+         (Ptr *)&resetReqPdu1) != ROK)
+   {
+      NB_LOG_ERROR(&nbCb, "cmAllocEvnt failed");
+      RETVALUE(RFAILED);
+   }
    if((cmGetMem(resetReqPdu1, resetMsgInfo->s1apIdCnt * \
                sizeof(SztProtIE_SingleCont_UE_assocLogS1_ConItemRes),
                (Ptr*)&ie->value.u.sztResetTyp.val.partOfS1_Intf.\
@@ -850,12 +849,12 @@ PRIVATE S16 nbBldResetReq
    else if(resetMsgInfo->type == NB_PARTIAL_RESET)
    {
       nbFillTknU8(&(ie->value.u.sztResetTyp.choice), RESETTYP_PARTOFS1_INTF);
-
    }
 
-   // This UE Id pair will be sent as it is to MME in the reset message for ENB
-   // Partial Reset message. However, it will be dropped in the S1AP layer
-   // after extracting the connection details for complete reset message
+   /* This UE Id pair will be sent as it is to the MME in the reset message for
+    * ENB Partial Reset message. However, it will be dropped in the S1AP layer
+    * after extracting the connection details for ENB Complete Reset message
+    */
    for(cnt = 0; cnt < resetMsgInfo->s1apIdCnt; cnt++)
    {
       resetIe = &ie->value.u.sztResetTyp.val.partOfS1_Intf.member[ieIdx1];
@@ -864,7 +863,7 @@ PRIVATE S16 nbBldResetReq
       nbFillTknU32(&(resetIe->criticality), SztCriticalityrejectEnum);
       nbFillTknU8(&(resetIe->value.u.sztUE_assocLogS1_ConItem.pres),
             PRSNT_NODEF);
-      /* send mme ue s1ap id, if received from MME */
+      // Send mme ue s1ap id, if received from MME
       if(resetMsgInfo->mmeUeS1apIdLst[cnt])
       {
          nbFillTknU32(&(resetIe->value.u.sztUE_assocLogS1_ConItem.\

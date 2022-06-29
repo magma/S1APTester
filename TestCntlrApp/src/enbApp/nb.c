@@ -898,11 +898,7 @@ PRIVATE S16 getS1apInfoFrmUeId(NbUeS1apIdPair *ueS1apIdPairList, U32 numOfUes,
   RETVALUE(ROK);
 } /* getS1apInfoFrmUeId */
 
-PUBLIC S16 NbEnbResetReqHdl
-(
- NbResetRequest *resetReq
-)
-{
+PUBLIC S16 NbEnbResetReqHdl (NbResetRequest *resetReq) {
    U32 idx = 0;
    S16 ret = ROK;
    UConnId spConnId = 0;
@@ -948,53 +944,58 @@ PUBLIC S16 NbEnbResetReqHdl
    }
    else
    {
+      /* Getting the UE count associated with the ENB for which complete reset
+       * request is received, in order to allocate memory for enbUeS1apIdLst
+       * and mmeUeS1apIdLst
+       */
       while (cmHashListGetNext(&(nbCb.ueCbLst), (PTR)prev, (PTR *)&ueCb) == ROK)
       {
-	  if (ueCb->enbId ==  resetReq->u.completeRst.enbId) {
+         if (ueCb->enbId ==  resetReq->u.completeRst.enbId) {
              resetMsgInfo.s1apIdCnt++;
-	  }
-          prev = ueCb;
+         }
+         prev = ueCb;
       }
-      NB_ALLOC(&resetMsgInfo.enbUeS1apIdLst, sizeof(U32) * resetMsgInfo.s1apIdCnt);
-      NB_ALLOC(&resetMsgInfo.mmeUeS1apIdLst, sizeof(U32) * resetMsgInfo.s1apIdCnt);
+      NB_ALLOC(&resetMsgInfo.enbUeS1apIdLst,
+               sizeof(U32) * resetMsgInfo.s1apIdCnt);
+      NB_ALLOC(&resetMsgInfo.mmeUeS1apIdLst,
+               sizeof(U32) * resetMsgInfo.s1apIdCnt);
 
       ueCb = NULLP;
       prev = NULLP;
       while (cmHashListGetNext(&(nbCb.ueCbLst), (PTR)prev, (PTR *)&ueCb) == ROK)
       {
-	  if (ueCb->enbId ==  resetReq->u.completeRst.enbId) {
+        if (ueCb->enbId ==  resetReq->u.completeRst.enbId) {
+          /* This is needed for getting connection list to be deleted in S1AP
+           * layer because enb and ue mapping is not present in S1AP applicaation
+           */
+          resetMsgInfo.mmeUeS1apIdLst[idx] = ueCb->s1ConCb->mme_ue_s1ap_id;
+          resetMsgInfo.enbUeS1apIdLst[idx] = ueCb->s1ConCb->enb_ue_s1ap_id;
+          idx++;
 
-	// This is needed for getting connection list to be deleted in S1AP
-	// layer because enb and ue mapping is not present in S1AP applicaation
-        resetMsgInfo.mmeUeS1apIdLst[idx] = ueCb->s1ConCb->mme_ue_s1ap_id;
-        resetMsgInfo.enbUeS1apIdLst[idx] = ueCb->s1ConCb->enb_ue_s1ap_id;
-	idx++;
+          NB_LOG_DEBUG(&nbCb, "Found ueCb->ueId=%d in HashList", ueCb->ueId);
+          spConnId = ueCb->s1ConCb->spConnId;
+          /* Inform the UeApp about UE context release */
+          NB_LOG_DEBUG(&nbCb, "Inform UE to release context");
+          ret = nbSendS1RelIndToUeApp(ueCb->ueId);
+          if (ret != ROK)
+          {
+             NB_LOG_ERROR(&nbCb, "Failed to send Release Indication to UeApp");
+          }
 
+          /* Trigger ueCb deletion in DAM */
+          NB_LOG_DEBUG(&nbCb, "Passing UE Delete Indication to DAM");
+          ret = nbIfmDamUeDelReq(ueCb->ueId);
+          if (ret != ROK)
+          {
+             NB_LOG_ERROR(&nbCb, "Failed to send UE Delete Indication to DAM");
+          }
 
-         NB_LOG_DEBUG(&nbCb, "Found ueCb->ueId=%d in HashList", ueCb->ueId);
-	 spConnId = ueCb->s1ConCb->spConnId;
-         /* Inform the UeApp about UE context release */
-         NB_LOG_DEBUG(&nbCb, "Inform UE to release context");
-         ret = nbSendS1RelIndToUeApp(ueCb->ueId);
-         if (ret != ROK)
-         {
-            NB_LOG_ERROR(&nbCb, "Failed to send Release Indication to UeApp");
-         }
-
-         /* Trigger ueCb deletion in DAM */
-         NB_LOG_DEBUG(&nbCb, "Passing UE Delete Indication to DAM");
-         ret = nbIfmDamUeDelReq(ueCb->ueId);
-         if (ret != ROK)
-         {
-            NB_LOG_ERROR(&nbCb, "Failed to send UE Delete Indication to DAM");
-         }
-
-         prev = NULLP;
-         /* Delete hash list entry for ueCb */
-         cmHashListDelete(&(nbCb.ueCbLst), (PTR)ueCb);
-	  } else {
-         prev = ueCb;
-	  }
+          prev = NULLP;
+          /* Delete hash list entry for ueCb */
+          cmHashListDelete(&(nbCb.ueCbLst), (PTR)ueCb);
+        } else {
+          prev = ueCb;
+        }
       }
 #ifdef MULTI_ENB_SUPPORT
    resetMsgInfo.enbId = resetReq->u.completeRst.enbId;
