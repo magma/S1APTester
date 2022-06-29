@@ -95,6 +95,7 @@ PUBLIC S8 *nbAppCfgTagLst[MAX_NB_CFG_PARAM] = {
    "NO_OF_SCTP_IN_STREAMS",
    "NO_OF_SCTP_OUT_STREAMS",
    "UE_ETH_INTF",
+   "UE_ETH_INTF_IPV6",
    "VS_IP_ADDR"
 };
 
@@ -846,6 +847,20 @@ PRIVATE S16 nbAppReadConfigParams(Void)
                fwCb->nbAppCfgCb.ueEthIntf[cnt] = '\0';
             }
             break;
+         // Read interface for ipv6
+         case UE_ETH_INTF_IPV6:
+            {
+               FW_LOG_DEBUG(fwCb, "UE_ETH_INTF_IPV6: %s", tagVal);
+               cnt = 0;
+               while(tagVal[cnt])
+               {
+                  fwCb->nbAppCfgCb.ueEthIntfIpv6[cnt] = tagVal[cnt];
+                  cnt++;
+               }
+               fwCb->nbAppCfgCb.ueEthIntfIpv6[cnt] = '\0';
+            }
+            break;
+
          case VS_IP_ADDR:
             {
                FW_LOG_DEBUG(fwCb, "VS_IP_ADDR", tagVal);
