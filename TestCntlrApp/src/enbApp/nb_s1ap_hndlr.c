@@ -63,7 +63,7 @@ PRIVATE S16 nbPrcUnsuccPdu(U32, S1apPdu*);
 PRIVATE S16 nbRabSetupSndS1apRsp(NbUeCb *ueCb, NbErabLst *erabInfo,
                                  NbFailedErabLst *failedErabInfo);
 PUBLIC S16 nbS1apFillCtxtRelCmpl(NbS1ConCb *, S1apPdu **);
-S16 nbIfmDamUeDelReq(U8);
+S16 nbIfmDamUeDelReq(U32);
 PUBLIC S16 nbS1apFillCause(SztCause *ie, NbUeMsgCause *cause);
 PUBLIC S16 nbGetErabInfoFrmErabSetup(NbUeCb *, SztE_RABToBeSetupLstBrSUReq *,
                                      NbErabLst **, NbFailedErabLst **);

@@ -37,7 +37,7 @@
 #include "tft.h"
 #include "nb_icmpv6.h"
 
-EXTERN S16 cmPkUeDelCfm(Pst*, U8);
+EXTERN S16 cmPkUeDelCfm(Pst*, U32);
 PRIVATE S16 nbDamLSapCfg(LnbMngmt *cfg, CmStatus *status);
 PRIVATE S16 nbDamLSapCntrl(LnbCntrl *sapCntrl,CmStatus *status,Elmnt elmnt);
 PRIVATE S16 nbDamBndLSap (NbLiSapCb *sapCb,CmStatus  *status,Elmnt elmnt);
