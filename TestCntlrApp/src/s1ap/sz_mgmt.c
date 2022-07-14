@@ -742,7 +742,44 @@ UConnId lclRefNum;
          as per the choice in the reset */
       if (((SztResetTyp *)tknIE)->choice.val == SZ_FULL_RESET)
       {
-         ret = szNdbDeallocConCb(lclRefNum, peerCb, SZ_CONN_REF_LCL);
+	 /* Getting the connection details from partial reset IE that contains UE Id
+	  * pair. This information is not needed in the Enb Complete Reset message to
+	  * be sent to MME and hence will be dropped while building the final reset
+	  * message in function szDbFillResetFrmPdu
+	  */
+         nmbConns = ((SztResetTyp *)tknIE)->val.partOfS1_Intf.noComp.val;
+         for (idx = 0; idx < nmbConns; idx++)
+         {
+            // Deallocate ConCb for all required connections
+            if (((SztResetTyp *)tknIE)->val.partOfS1_Intf.member[idx].value.u.\
+                  sztUE_assocLogS1_ConItem.pres.pres != NOTPRSNT)
+            {
+               // Assign the connection reference number and type
+               {
+                  if (((SztResetTyp *)tknIE)->val.partOfS1_Intf.member[idx].\
+                        value.u.sztUE_assocLogS1_ConItem.eNB_UE_S1AP_ID.pres != NOTPRSNT)
+                  {
+                     conRefNo = ((SztResetTyp *)tknIE)->val.partOfS1_Intf.member[idx].\
+                                value.u.sztUE_assocLogS1_ConItem.eNB_UE_S1AP_ID.val;
+
+                     conRefType = SZ_CONN_REF_LCL;
+                  }
+                  else if (((SztResetTyp *)tknIE)->val.partOfS1_Intf.member[idx].\
+                        value.u.sztUE_assocLogS1_ConItem.mME_UE_S1AP_ID.pres != NOTPRSNT)
+                  {
+                     conRefNo = ((SztResetTyp *)tknIE)->val.partOfS1_Intf.member[idx].\
+                                value.u.sztUE_assocLogS1_ConItem.mME_UE_S1AP_ID.val;
+
+                     conRefType = SZ_CONN_REF_RMT;
+                  }
+               }
+
+               /* Release connections for the peer mentioning the connection
+	        * reference number and type
+		*/
+               ret = szNdbDeallocConCb(conRefNo, peerCb, conRefType);
+            }
+         }
       }
       else
       {
