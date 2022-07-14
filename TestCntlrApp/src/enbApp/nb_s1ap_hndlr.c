@@ -821,11 +821,17 @@ PRIVATE S16 nbBldResetReq(S1apPdu **pdu, NbResetMsgInfo *resetMsgInfo) {
       RETVALUE(RFAILED);
    }
 
+   /* TODO: Allocation of memory from same structure (resetReqPdu) or freeing
+    * the new structure (resetReqPdu1) leads to memory corruption for multi ENB
+    * scenario. This needs to be fixed for all other similar memory allocations
+    * in this file
+    */
    // Allocate memory for storing UE Id pair to be reset
    if(cmAllocEvnt(sizeof(S1apPdu), NB_SZ_MEM_SDU_SIZE, &nbCb.mem,
          (Ptr *)&resetReqPdu1) != ROK)
    {
       NB_LOG_ERROR(&nbCb, "cmAllocEvnt failed");
+      NB_FREE_EVNT(resetReqPdu);
       RETVALUE(RFAILED);
    }
    if((cmGetMem(resetReqPdu1, resetMsgInfo->s1apIdCnt * \
