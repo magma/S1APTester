@@ -97,6 +97,10 @@ For the mask value of 17, maximum number of allowed UE IP addresses = ((2^(32-17
 Decreasing the mask value will provide more number of UE IP addresses in the
 free IP address pool.
 
+Note: The testcase `s1aptests/test_scalability_attach_detach_multi_ue.py` can
+be considered as a reference testcase for handling IP pool configuration and UE
+inactivity timer configuration to support large number of UEs
+
 ## License
 
 S1APTester is BSD License licensed, as found in the LICENSE file.
