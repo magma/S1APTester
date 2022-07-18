@@ -418,7 +418,7 @@ PUBLIC S16 nbPrcDamUeDelCfm(U32 ueId)
 
    NB_LOG_ENTERFN(&nbCb);
 
-   NB_LOG_DEBUG(&nbCb,"all the bearer deleted related to ueId:[%u], deleting the uecb...\n",ueId);
+   NB_LOG_DEBUG(&nbCb,"All the bearers deleted related to ueId:[%u], deleting the uecb...\n",ueId);
    ret = nbDelUeCb(ueId);
    RETVALUE(ret);
 }
