@@ -71,7 +71,7 @@
 #define cmPkDamEgtpTeid SPkU32
 
 EXTERN S16 nbUeTnlCreatCfm(U8, U32);
-EXTERN S16 nbPrcDamUeDelCfm(U8);
+EXTERN S16 nbPrcDamUeDelCfm(U32);
 /*
   Defines for the packing and unpacking
 */
