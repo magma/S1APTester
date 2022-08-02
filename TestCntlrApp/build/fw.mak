@@ -69,7 +69,12 @@ BIN_DIR=../bin
 LIB_DIR=../lib
 
 # pcap archive name
-PCAP_ARC=libpcap-64bit.a
+UNAME_M := $(shell uname -m)
+        ifeq ($(UNAME_M),aarch64)
+		PCAP_ARC=libpcap-64bit_arm64.a
+	else
+		PCAP_ARC=libpcap-64bit.a
+        endif
 
 # object file suffix
 OBJ=o
@@ -189,8 +194,13 @@ ENV=-DSUNOS -DSS -DSS_MT -DANSI -D_GNU_SOURCE -DSS_LINUX -D_REENTRANT \
     -D__EXTENSIONS__
 
 # compiler:
-	CC=gcc -g3 -fPIC -m64 -DALIGN_64BIT -DBIT_64
-	LL=gcc -g3 -m64
+ifeq ($(UNAME_M),aarch64)
+     CC=gcc -g3 -fPIC -march=armv8-a -DALIGN_64BIT -DBIT_64
+     LL=gcc -g3 -march=armv8-a
+else
+     CC=gcc -g3 -fPIC -m64 -DALIGN_64BIT -DBIT_64
+     LL=gcc -g3 -m64
+endif
 
 #Archive library command
 AR=ar
