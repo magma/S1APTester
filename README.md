@@ -103,4 +103,4 @@ inactivity timer configuration to support large number of UEs
 
 ## License
 
-S1APTester is BSD License licensed, as found in the LICENSE file.
+S1APTester is licensed under the BSD License, as found in the [LICENSE](./LICENSE) file.
