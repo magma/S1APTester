@@ -66,6 +66,28 @@ $ make
 On successful compilation, the “libtrfgen.so” library gets generated under
 Trfgen/lib folder.
 
+## Compiling the Test Controller Stub Binary
+
+Once the necessary lib files i.e. `libtrfgen.so` and `libtfw.so` are built.
+Copy the files to `/usr/lib` and run `sudo ldconfig` if necessary. This is 
+necessary to execute the `testCntrlr` binary which can be built as follows:
+
+```
+$ cd TestCntlrStub/build
+$ make clean
+$ make
+```
+
+On successful build, the binary `testCntrlr` would be available at `TestCntlrStub/bin/`
+
+If you choose to not copy the generated `lib` files to `/usr/lib`, export the paths
+into the `LD_LIBRARY_PATH` as follows by replacing the `/path/to/` with the full path
+as necessary.
+
+```
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/to/S1APTester/TestCntlrApp/lib/:/path/to/S1APTester/Trfgen/lib
+```
+
 # Testing with Magma
 Following points should be considered when using S1APTester with
 [Magma](https://github.com/facebookincubator/magma)

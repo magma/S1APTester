@@ -1495,6 +1495,7 @@ typedef struct _PartialReset
 {
    U32 numOfConn;
    UeS1apIdPair *ueS1apIdPairList;
+   U32 *ueIdLst;
 }PartialReset;
 
 typedef struct _cause
