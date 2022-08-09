@@ -1765,11 +1765,11 @@ int tsSendResetReq(unsigned int resetType, int numOfUes, unsigned char *ueLst)
       ((ResetReq*)msgptr)->cause.causeVal = 1;
 
       ((ResetReq*)msgptr)->r.partialRst.numOfConn = numOfUes;
-      ((ResetReq*)msgptr)->r.partialRst.ueIdLst = malloc(numOfUes);
-      memcpy(((ResetReq*)msgptr)->r.partialRst.ueIdLst, ueLst, numOfUes);
+      ((ResetReq*)msgptr)->r.partialRst.ueS1apIdPairList = malloc(numOfUes);
+      memcpy(((ResetReq*)msgptr)->r.partialRst.ueS1apIdPairList, ueLst, numOfUes);
 
       tfwApi(RESET_REQ, msgptr);
-      free(((ResetReq*)msgptr)->r.partialRst.ueIdLst);
+      free(((ResetReq*)msgptr)->r.partialRst.ueS1apIdPairList);
       free(msgptr);
    }
 
