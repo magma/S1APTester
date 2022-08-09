@@ -51,9 +51,16 @@ OBJ=o
 # macros for compile and link options
 
 # compiler:
-	CC=gcc -g3 -fPIC -m64 -DALIGN_64BIT -DBIT_64
-	LL=gcc -g3 -m64
-	IPERF_ARC=libiperf.so
+UNAME_M := $(shell uname -m)
+	ifeq ($(UNAME_M),aarch64)
+		CC=gcc -g3 -fPIC -march=armv8-a -DALIGN_64BIT -DBIT_64
+		LL=gcc -g3 -march=armv8-a
+		IPERF_ARC=libiperf_arm64.so
+	else
+		CC=gcc -g3 -fPIC -m64 -DALIGN_64BIT -DBIT_64
+		LL=gcc -g3 -m64
+		IPERF_ARC=libiperf.so
+	endif
 
 #Archive library command
 AR=ar
