@@ -800,8 +800,8 @@ struct bpf_program {
 #define DLT_RAIF1		198
 
 /*
- * IPMB packet for IPMI, beginning with the I2C slave address, followed
- * by the netFn and LUN, etc..  Requested by Chanthy Toeung
+ * IPMB packet for IPMI, beginning with the I2C passive/secondary address,
+ * followed by the netFn and LUN, etc..  Requested by Chanthy Toeung
  * <chanthy.toeung@ca.kontron.com>.
  */
 #define DLT_IPMB		199
