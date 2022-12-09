@@ -126,25 +126,15 @@
 /* Flags that apply for the entire product are defined here */
 /* The legacy and the system services defintions are here   */
 #define USE_LINUX
-#define CMINET_BSDCOMPAT
 /* #define SS_TICKS_SEC        100 */
-#define CMFILE_REORG_1
-#define CMFILE_REORG_2
-#define CM_INET2
-#define SSINT2
 #undef HI_MULTI_THREADED 
-#define SS_PERF
 #define SS_WL_REGION        1
-#define SS_FLOAT
-#define SS_MT_TMR
 #define SS_M_PROTO_REGION
-#define SLES9_PLUS
 #undef SS_TSKLOG_ENABLE
 #define SS_MULTICORE_SUPPORT
 #undef  SS_USE_ICC_MEMORY
 #define SS_LOCKLESS_MEMORY
 #define SS_USE_ZBC_MEMORY
-#define SS_THR_REG_MAP
 #undef  SS_RBUF
 #undef  SS_LICENSE_CHECK
 #undef  SS_ROUTE_MSG_CORE1
@@ -152,14 +142,12 @@
 
 #undef  SSI_MEM_CORR_PREVENTION
 #undef  MS_MBUF_CORRUPTION
-//CHINNA
+
 #define TENB_MULT_CELL_SUPPRT
 
 /* LTE product specific definitions are here */
 #define TUCL_TTI_RCV
 #define LTE_PAL_ENB
-#define LTE_ENB_PAL
-#define TENB_RTLIN_CHANGES
 #define TENB_SPLIT_ARCH_SUPPORT
 #define TENB_SPLIT_ARCH
 #undef TENB_T2K3K_SPECIFIC_CHANGES
@@ -177,8 +165,6 @@
 
 #undef DAM_PDCP_OPT
 
-#define REL_850
-#define TA_NEW
 #undef TENB_FP
 #if defined(MODE) && (MODE==TDD)
 #define LTE_TDD 1
@@ -266,16 +252,9 @@
 /* SZT interface (App<->S1AP) flags */
 #define SZTV1
 #define SZTV2
-#define SZTV3
-
-/* CZT interface (App<->X2AP) flags */
-#define CZTV1
 
 /* LSZ interface (SM<->S1AP) flags */
 #define LSZV1
-
-/* LEG interface (SM<->EGTP) flags */
-#define LEGV2
 
 /* CTF interface (App<->CL) flags */
 #define CTF_VER3
@@ -298,15 +277,12 @@
 #define RGR_V1
 #define RGR_V2
 #define RGR_CQI_REPT
-#define RGR_SI_SCH
 #define RGR_RRM_TICK
 
 /* RRM related interface flags */
 #define RM_INTF
 
 /* LSB interface flags */
-#define LSB4
-#define LSB8
 #define SB_CHECKSUM   /* Define to include trillium supplied function */
 #define SB_CHECKSUM_CRC 
 
@@ -437,7 +413,6 @@
 #endif
 
 /* product options */
-#define SZ_ENB
 #define CM_PASN_CRIT_HANDL
 #undef  M_PASN_DBG
 #undef S1AP_REL851
@@ -445,8 +420,6 @@
 #define SZ_USTA
 
 /* interface options */
-#define LCSZUISZT     /* loosely coupled, SZ upper layer SZT interface */
-#define LCSZMILSZ     /* loosely coupled, SZ manegement  LSZ interface */
 #define LCSZLISCT     /* loosely coupled, SZ lower layer SCT interface */
 
 /* Based on the selection of coupling above the section below  */
@@ -514,10 +487,7 @@
 /* not talk to TUCL on HIT in the latest TeNB. However if it were  */
 /* to use TUCL, it would be loosely coupled as TUCL is multi-      */
 /* threaded.                                                       */
-/* TODO - LCEGUIEGT should not be needed.                          */
 #define LCSMEGMILEG
-#define LCEGLIHIT
-#define LCEGUIEGT
 #define LCEGMILEG
 
 /* Managing the loose coupling definitions on the interface based   */
@@ -1399,8 +1369,6 @@
 
 /* We need to define LCHIUIHIT if there is at least one layer talking */
 /* to TUCL in a loosely coupled fashion.                              */
-#define LCHIUIHIT
-#define LCHIMILHI
 
 /* The section below should not be edited normally.                   */
 #ifdef LCHIUIHIT
